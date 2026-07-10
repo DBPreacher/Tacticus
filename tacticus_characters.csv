@@ -6,7 +6,7 @@ Adamatar,Emperor's Children,Chaos,N,N,3,,3,Chain,,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,
 Aesoth,Adeptus Custodes,Imperial,N,N,1,,1,Power,,,,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N
 Aethana,Aeldari,Xenos,N,N,3,,3,Energy,,,,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N
 Ahriman,Thousand Sons,Chaos,N,Y,1,1,1,,Psychic,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,Y,N,N
-Aleph-Null,Necrons,Xenos,N,N,5,,5,Physical,,,,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,Y,N,N,N,N,N,N,N,Y,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,Y,N,Y,N,N,N,N,N,N
+Aleph-Null,Necrons,Xenos,N,N,5,,5,Physical,,Y,,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,Y,N,N,N,N,N,N,N,Y,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,Y,N,Y,N,N,N,N,N,N
 Ammuk,Leagues of Votann,Xenos,N,N,1,,1,Molecular,,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N
 Ancient Thoread,Black Templars,Imperial,N,N,2,,2,Physical,,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N
 Angrax,Black Legion,Chaos,N,N,4,,4,Physical,,,,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N
@@ -62,7 +62,7 @@ Macer,World Eaters,Chaos,N,N,3,,3,Physical,,,,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,
 Makhotep,Necrons,Xenos,N,Y,1,2,2,,Molecular,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,Y,N,N,N,N,N,N,N
 Maladus,Death Guard,Chaos,N,N,3,,3,Physical,,,,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,Y
 Marneus Calgar,Ultramarines,Imperial,N,N,2,,2,Bolter,,,,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N
-Marshal Dreir,Astra Militarum,Imperial,N,N,3,,3,Physical,,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N
+Marshal Dreir,Astra Militarum,Imperial,N,N,3,,3,Physical,,Y,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N
 Mataneo,Blood Angels,Imperial,N,N,1,,1,Physical,,,,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,Y,Y,N,N,N,N
 Maugan Ra,Aeldari,Xenos,N,Y,5,6,6,,Piercing,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,Y,N,N,N,N
 Mephiston,Blood Angels,Imperial,N,Y,3,2,2,,Psychic,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,Y,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N
@@ -94,7 +94,7 @@ Thothmek,Necrons,Xenos,N,Y,1,2,2,,Molecular,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,
 Thutmose,Necrons,Xenos,N,Y,1,2,2,,Molecular,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N
 Titus,Ultramarines,Imperial,N,N,4,,4,Bolter,,,,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N
 Tjark,Space Wolves,Imperial,N,N,4,,4,Physical,,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N
-Toth,Thousand Sons,Chaos,N,Y,4,5,5,Physical,Psychic,,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,Y,N,N,N,N,Y,N,N,N,N,N,N,N,Y,Y,N,N,N,N,N,N,N,Y,N,N,N,N
+Toth,Thousand Sons,Chaos,N,Y,4,5,5,Physical,Psychic,Y,,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,Y,N,N,N,N,Y,N,N,N,N,N,N,N,Y,Y,N,N,N,N,N,N,N,Y,N,N,N,N
 Trajann,Adeptus Custodes,Imperial,N,N,3,,3,Piercing,,,,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N
 Typhus,Death Guard,Chaos,N,Y,1,1,1,Toxic,Psychic,,,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,Y,N,Y,N,N
 Tyrant Guard,Tyranids,Xenos,N,N,2,,2,Physical,,,,N,N,N,N,Y,N,N,N,Y,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,N,Y,Y,N,N,N,N,N,N
