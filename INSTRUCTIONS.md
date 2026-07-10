@@ -146,28 +146,61 @@ Update the column header and all affected rows. Document in git commit message w
 
 ## Running a New LE Analysis
 
-When a new LE is announced, provide Claude with:
+### Step 1 — Parse the patch notes
 
-1. The raw CSV (or the GitHub raw URL)
-2. The three tracks and their conditions, in this format:
+Patch notes use plain English descriptions that must be translated into CSV column conditions. The raw patch note format looks like this:
 
 ```
-LE 15 - [Character Name]
-Alliance restrictions: Alpha=No Xenos, Beta=No Imperials, Gamma=No Chaos
-
-Alpha battles: [CONDITION] ([pts]), [CONDITION] ([pts]), ...
-Beta battles: [CONDITION] ([pts]), [CONDITION] ([pts]), ...
-Gamma battles: [CONDITION] ([pts]), [CONDITION] ([pts]), ...
+Alpha battles Enemies: Necrons Eligible factions: Imperial & Chaos Objectives
+Defeat all enemies (30p) Full Ultramarine lineup (75p) Full Resilient lineup (95p)
+Max 2 hits lineup (50p) Full Melee lineup (65p) Full Piercing Damage lineup (90p)
 ```
 
-Claude will then:
-1. Filter eligible characters per track (applying alliance restriction)
-2. Find characters eligible for each battle condition
-3. Calculate the most token-efficient starting team (4-man intersection)
-4. Find the minimum 5-man teams covering all battle conditions
-5. Flag character overlaps between teams
-6. Note which battle conditions have limited character pools (high risk)
-7. Flag healers, self-healers, and tanky characters in each team
+**Translation rules:**
+
+| Patch note wording | CSV condition |
+|-------------------|---------------|
+| `Eligible factions: Imperial & Chaos` | `Alliance != "Xenos"` (No Xenos track) |
+| `Eligible factions: Chaos & Xenos` | `Alliance != "Imperial"` (No Imperials track) |
+| `Eligible factions: Imperial & Xenos` | `Alliance != "Chaos"` (No Chaos track) |
+| `Full [Faction] lineup` | `Faction = "[Faction]"` |
+| `Full Resilient lineup` | `Resilient = Y` |
+| `Full Mechanical lineup` | `Mechanical = Y` |
+| `Full Terminator Armour lineup` | `Terminator_Armour = Y` |
+| `Full Big Target lineup` | `Big_Target = Y` |
+| `Full Melee lineup` | `Has_Ranged = N` |
+| `Full Ranged lineup` | `Has_Ranged = Y` |
+| `Max 2 hits lineup` | `X_Hits_Restriction <= 2` |
+| `Max 1 hits lineup` | `X_Hits_Restriction <= 1` |
+| `Min 5 hits lineup` | `X_Hits_Restriction >= 5` |
+| `Full [DamageType] Damage lineup` | `Has_[DamageType] = Y` |
+| `No [DamageType] Damage lineup` | `Has_[DamageType] = N` |
+| `No Psyker lineup` | `Psyker = N` |
+| `Defeat all enemies` | **Ignore** — base objective, not a team composition condition |
+
+Always ignore the "Defeat all enemies" objective line — it applies to all stages regardless of team and is not a trait condition.
+
+### Step 2 — Provide Claude with the analysis input
+
+Share the raw CSV (or the GitHub raw URL: `https://raw.githubusercontent.com/DBPreacher/Tacticus/main/tacticus_characters.csv`) and the parsed track data in this format:
+
+```
+LE [number] - [Character Name]
+Alpha (No Xenos): [CONDITION] ([pts]), [CONDITION] ([pts]), ...
+Beta (No Imperials): [CONDITION] ([pts]), [CONDITION] ([pts]), ...
+Gamma (No Chaos): [CONDITION] ([pts]), [CONDITION] ([pts]), ...
+```
+
+### Step 3 — What Claude will output
+
+Claude will:
+1. Filter eligible characters per track (alliance restriction applied first)
+2. Find characters eligible for each battle condition, flagging any pool with fewer than 6 chars (⚠️ limited pool)
+3. Calculate the most token-efficient 4-man starting team (best intersection score)
+4. Find the minimum number of 5-man teams needed to cover all battle conditions
+5. Resolve any character overlaps between teams
+6. Flag healers, self-healers, tanky characters, and mechanics in each team
+7. Apply the meta composition priority (see Meta Notes below)
 
 ### Key scoring rules (important context for Claude)
 
@@ -183,22 +216,50 @@ Claude will then:
 
 ## Meta Notes
 
-### Tanky characters (good for pushing harder stages)
+### Recommended team composition (priority order)
 
-Characters with these traits survive longer in high-difficulty stages:
-- `Terminator_Armour = Y` — first hit each turn deals -75% damage
-- `Mk_X_Gravis = Y` — all incoming damage goes through armour twice
-- `Resilient = Y` — survives lethal hits at 1 HP (unless overkilled)
+When selecting the 5 characters for a team, the trait intersection score determines point eligibility — but composition determines how far into the 18 stages you can push. The current recommended meta for deep-stage runs is:
+
+**2 Healers + 2 Tanks + 1 Self-Healer**
+
+Apply this as a tiebreaker when multiple characters are eligible for a team slot: always prefer the composition above over raw damage output.
+
+**If the team is predominantly Mechanical characters** (Mechanical = Y), substitute Mechanics for Healers — Mechanical characters cannot be healed, only repaired:
+
+→ **2 Mechanics + 2 Tanks + 1 Self-Healer** for Mechanical-heavy teams
+
+When flagging team compositions after the analysis, Claude should identify which slots in each recommended team are filled by Healers, Tanks, Self-Healers, and Mechanics, and note any gaps (e.g. "no healer available in this pool").
+
+### Tanks
+
+Characters with these traits survive longest in high-difficulty stages:
+
+| Trait | Effect | Priority |
+|-------|--------|----------|
+| `Terminator_Armour = Y` | First hit each turn deals -75% damage | High |
+| `Mk_X_Gravis = Y` | All incoming damage goes through armour twice | High |
+| `Resilient = Y` | Survives a lethal hit at 1 HP (unless overkilled) | Medium |
+
+**Special tanks — ability-based, not trait-based:**
+
+Two characters are among the best tanks in the game due to their abilities rather than their trait flags. Their `Terminator_Armour`, `Mk_X_Gravis`, and `Resilient` columns may all be N, but they should always be treated as high-priority tank options when eligible:
+
+- **Tyrant Guard** — exceptional damage mitigation through abilities; treat as a top-tier tank regardless of trait flags
+- **Thothmek** — exceptional survivability through abilities; treat as a top-tier tank regardless of trait flags
+
+When building teams, if Tyrant Guard or Thothmek are eligible for the track and battle conditions, prioritise them in tank slots before other non-trait-tanky characters.
 
 ### Healers
 
-- `Healer = Y` — can heal a friendly unit as their action (replaces attack)
-- `Self_Heal = Y` — heals themselves via ability (does not sacrifice action)
-- `Mechanic = Y` — can repair Mechanical characters (functionally equivalent to Healer for Necron/AdMech teams)
+- `Healer = Y` — heals a friendly unit as their action (sacrifices that turn's attack)
+- `Self_Heal = Y` — heals themselves via ability (does not sacrifice the attack action — most efficient)
+- `Mechanic = Y` — repairs Mechanical characters (functionally equivalent to Healer for Mechanical teams)
+
+Prefer Self-Healers in the dedicated self-heal slot since they contribute offensively on the same turn. Healers and Mechanics occupy the remaining two support slots.
 
 ### Mechanical characters note
 
-Mechanical characters (`Mechanical = Y`) **cannot be healed** — only repaired by a Mechanic. When building teams for Necron or Adeptus Mechanicus characters, check for a Mechanic in the team rather than a Healer.
+Mechanical characters (`Mechanical = Y`) **cannot be healed** — only repaired by a Mechanic. When building teams where most members are Mechanical, prioritise Mechanics over Healers. If a team has a mix, include at least one Mechanic if any Mechanical character is in the team.
 
 ---
 
