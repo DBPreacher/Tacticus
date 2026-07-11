@@ -252,6 +252,8 @@ Two characters are among the best tanks in the game due to their abilities rathe
 
 When building teams, if Tyrant Guard or Thothmek are eligible for the track and battle conditions, prioritise them in tank slots before other non-trait-tanky characters.
 
+Trait assumptions: Do not assume any trait is faction-exclusive without verifying the CSV. For example, Unstoppable is an individual trait shared across multiple factions (Space Wolves, World Eaters, Adeptus Mechanicus, Orks, Genestealer Cults etc.) — not a Space Wolves faction trait. Always derive trait eligibility from the CSV columns, never from faction lore assumptions.
+
 ### Healers
 
 - `Healer = Y` — heals a friendly unit as their action (sacrifices that turn's attack)
