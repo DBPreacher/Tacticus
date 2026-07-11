@@ -1,0 +1,129 @@
+# ============================================================
+# Tacticus LE Conditions File — Template
+# ============================================================
+# Copy this file, rename it (e.g. le15_newchar.yaml),
+# fill in from the patch notes, then run:
+#   python3 le_analysis.py le15_newchar.yaml
+#
+# The script auto-ignores "Defeat all enemies" — do not include it.
+# ============================================================
+
+le_name: "LE XX - Character Name"
+
+tracks:
+  - name: Alpha
+    # Alliances allowed on this track (from "Eligible factions" in patch notes)
+    allowed_alliances: [Imperial, Chaos]   # No Xenos
+    excluded_factions: []                  # e.g. [Tyranids] or [Orks] if excluded
+
+    battles:
+      # col: the CSV column to check
+      # val: the value to match (Y/N, faction name, <=2, >=5 etc.)
+      # pts: point value from patch notes
+      - name: "Full Ultramarine lineup"
+        col: Faction
+        val: "Ultramarines"
+        pts: 75
+
+      - name: "Full Resilient lineup"
+        col: Resilient
+        val: "Y"
+        pts: 95
+
+      - name: "Max 2 hits lineup"
+        col: X_Hits
+        val: "<=2"
+        pts: 50
+
+      - name: "Full Melee lineup"
+        col: Has_Ranged
+        val: "N"
+        pts: 65
+
+      - name: "Full Piercing Damage lineup"
+        col: Has_Piercing
+        val: "Y"
+        pts: 90
+
+  - name: Beta
+    allowed_alliances: [Chaos, Xenos]     # No Imperials
+    excluded_factions: []
+
+    battles:
+      - name: "Full Ranged lineup"
+        col: Has_Ranged
+        val: "Y"
+        pts: 60
+
+      - name: "No Psyker lineup"
+        col: Psyker
+        val: "N"
+        pts: 55
+
+      - name: "Full Terminator Armour lineup"
+        col: Terminator_Armour
+        val: "Y"
+        pts: 85
+
+      - name: "Full Psychic Damage lineup"
+        col: Has_Psychic
+        val: "Y"
+        pts: 100
+
+      - name: "Min 5 hits lineup"
+        col: X_Hits
+        val: ">=5"
+        pts: 75
+
+  - name: Gamma
+    allowed_alliances: [Imperial, Xenos]  # No Chaos
+    excluded_factions: []
+
+    battles:
+      - name: "No Power Damage lineup"
+        col: Has_Power
+        val: "N"
+        pts: 50
+
+      - name: "Full Bolter Damage lineup"
+        col: Has_Bolter
+        val: "Y"
+        pts: 85
+
+      - name: "Full Mechanical lineup"
+        col: Mechanical
+        val: "Y"
+        pts: 100
+
+      - name: "Max 1 hits lineup"
+        col: X_Hits
+        val: "<=1"
+        pts: 75
+
+      - name: "Full Big Target lineup"
+        col: Big_Target
+        val: "Y"
+        pts: 65
+
+# ============================================================
+# QUICK REFERENCE — col values for common conditions:
+# ============================================================
+# Faction name:        col: Faction,            val: "Black Legion"
+# Trait Y/N:          col: <TraitName>,        val: "Y" or "N"
+# Has damage type:    col: Has_<DamageType>,   val: "Y" or "N"
+# Melee only:         col: Has_Ranged,         val: "N"
+# Ranged:             col: Has_Ranged,         val: "Y"
+# Hit restrictions:   col: X_Hits,             val: "<=2" / ">=5" / ">=4"
+#
+# Common trait cols: Resilient, Mechanical, Living_Metal,
+#   Terminator_Armour, Big_Target, Psyker, Healer, Mechanic,
+#   Mk_X_Gravis, Flying, Unstoppable, Ranged_Specialist,
+#   Rapid_Assault, Parry, Act_of_Faith, Weaver_of_Fates,
+#   Blessings_of_Khorne, Thrill_Seekers, Contagions_of_Nurgle,
+#   Get_Stuck_In, Shadow_in_the_Warp, Let_the_Galaxy_Burn,
+#   Prioritised_Efficiency, Ambush, Dakka, Heavy_Weapon
+#
+# Common damage type cols: Has_Piercing, Has_Bolter, Has_Psychic,
+#   Has_Power, Has_Flame, Has_Eviscerating, Has_Physical,
+#   Has_Blast, Has_Energy, Has_Las, Has_Chain, Has_Melta,
+#   Has_Toxic, Has_Bio, Has_Molecular, Has_Pulse, Has_Particle

@@ -1,0 +1,31 @@
+le_name: "LE 14 - Uthar the Destined"
+tracks:
+  - name: Alpha
+    allowed_alliances: [Imperial, Chaos]
+    excluded_factions: []
+    battles:
+      - {name: "Full Ultramarine lineup", col: Faction, val: "Ultramarines", pts: 75}
+      - {name: "Full Resilient lineup", col: Resilient, val: "Y", pts: 95}
+      - {name: "Max 2 hits lineup", col: X_Hits, val: "<=2", pts: 50}
+      - {name: "Full Melee lineup", col: Has_Ranged, val: "N", pts: 65}
+      - {name: "Full Piercing Damage lineup", col: Has_Piercing, val: "Y", pts: 90}
+
+  - name: Beta
+    allowed_alliances: [Chaos, Xenos]
+    excluded_factions: []
+    battles:
+      - {name: "Full Ranged lineup", col: Has_Ranged, val: "Y", pts: 60}
+      - {name: "No Psyker lineup", col: Psyker, val: "N", pts: 55}
+      - {name: "Full Terminator Armour lineup", col: Terminator_Armour, val: "Y", pts: 85}
+      - {name: "Full Psychic Damage lineup", col: Has_Psychic, val: "Y", pts: 100}
+      - {name: "Min 5 hits lineup", col: X_Hits, val: ">=5", pts: 75}
+
+  - name: Gamma
+    allowed_alliances: [Imperial, Xenos]
+    excluded_factions: []
+    battles:
+      - {name: "No Power Damage lineup", col: Has_Power, val: "N", pts: 50}
+      - {name: "Full Bolter Damage lineup", col: Has_Bolter, val: "Y", pts: 85}
+      - {name: "Full Mechanical lineup", col: Mechanical, val: "Y", pts: 100}
+      - {name: "Max 1 hits lineup", col: X_Hits, val: "<=1", pts: 75}
+      - {name: "Full Big Target lineup", col: Big_Target, val: "Y", pts: 65}
