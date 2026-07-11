@@ -196,28 +196,24 @@ Gamma (No Chaos): [CONDITION] ([pts]), [CONDITION] ([pts]), ...
 Claude will:
 1. Filter eligible characters per track (alliance restriction applied first)
 2. Find characters eligible for each battle condition, flagging any pool with fewer than 6 chars (⚠️ limited pool)
-3. Calculate the most token-efficient **3-man starting team** — the smallest group covering the most high-value conditions per character invested. Use actual point values to find the team with the highest intersection score per character slot used.
-4. Build 5-man teams for full condition coverage, **prioritising high point value conditions first**. Point values must be provided — do not proceed with equal weighting, as this produces wrong prioritisation.
-5. **Character overlap between teams is allowed and encouraged.** A character appearing in two teams means the player only needs to invest in one character to unlock two team slots. The goal is to minimise the number of unique characters needed across all teams, not to avoid overlap. Never refuse a valid recommendation solely because a character appears in more than one team.
-6. Show the full eligible pool for each team's conditions alongside the recommended 5, so players can make substitutions based on their own roster and character ranks.
+3. Calculate the **most token-efficient starting team** — the team (3, 4, or 5 characters) that earns the highest total intersection score per token deployed. Do not default to any fixed team size. Evaluate all sizes and recommend whichever scores highest. A 5-man covering three high-value conditions in one deployment will beat a 3-man covering one low-value condition.
+4. Build 5-man teams for full condition coverage using actual point values to prioritise high-value conditions first. **Point values must be provided before analysis begins** — do not substitute equal weighting, as this produces wrong prioritisation.
+5. **Character overlap between teams is allowed and encouraged.** A character appearing in two teams allows the player to invest in one character and unlock two team slots. Always prefer solutions that reuse characters across teams, keeping the total number of unique characters required as low as possible. Never reject a recommendation solely because a character appears in more than one team.
+6. Show the full eligible pool for each team's conditions alongside the recommended 5, so players can make substitutions based on their own roster.
 7. Flag healers, self-healers, tanky characters, and mechanics in each team, noting any meta composition gaps (see Meta Notes below).
 
 ### Key scoring rules (important context for Claude)
 
-- **All team members must share a trait** for the team to earn those bonus points
-- Score = sum of point values for traits ALL members share (intersection, not union)
+- **All team members must share a condition** for the team to earn those bonus points
+- Score = sum of point values for conditions ALL members satisfy (intersection, not union)
 - Teams: minimum 3 characters, maximum 5
 - 3-man teams typically reach stage 8-10 before difficulty peaks; 5-man teams push further
 - 1 token = 1 team deployment for 1 stage attempt
 - Points accumulate across all Alpha, Beta, and Gamma stages cleared
-
-**Point values must always be provided.** Without actual point values the analysis cannot correctly prioritise which conditions to combine or which teams give best value. Do not substitute equal weighting — this produces wrong results.
-
-**On the most efficient starting team:** The starting team is the smallest group (minimum 3 characters) that covers the highest total point value through their shared intersection. This is the team a player with limited investment should run first to maximise early points. Calculate this by finding all 3-man combinations and ranking by intersection score using actual point values. The starting team often contains characters who also appear in the full 5-man coverage teams — this is intentional and good.
-
-**On combining conditions within a team:** When a condition has already been covered by a previous team (e.g. Resilient is earned in Team 1), a subsequent team that also earns Resilient is not wasted — it adds to the total points accumulated. Each team earns points independently per stage cleared. However when choosing how to combine conditions within a 5-man team, prioritise pairing conditions that share a large character pool so the team can field a strong roster. Use actual point values to decide whether a lower-scoring combined team is better value than two separate single-condition teams.
-
-**On character overlap between teams:** Overlap is desirable, not a problem. A character who appears in two recommended teams allows the player to unlock both teams by investing in a single character. Always prefer solutions that reuse characters across teams where possible, keeping the total number of unique characters required as low as possible. Show all overlapping characters clearly in the output so the player knows which ones are the highest priority to develop.
+- **Point values are mandatory.** Do not begin analysis without them.
+- **The most token-efficient team is whichever size (3, 4, or 5) earns the most points per token.** Always evaluate all sizes rather than assuming smaller is more efficient.
+- **Overlap between teams is a feature, not a flaw.** Shared characters reduce the number of unique characters a player must develop. Always highlight which characters appear in multiple teams as high-priority investments.
+- **Each team earns its intersection points independently per stage cleared.** A condition covered by two different teams earns points twice across deployments — this is not wasteful, it accumulates.
 
 ---
 
@@ -300,7 +296,7 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
-| July 2026 | Analysis methodology corrections: starting team changed from 4-man to 3-man; character overlap between teams confirmed as desirable (minimises unique characters needed); point values now required before analysis; team optimisation goal updated to minimise unique characters rather than avoid overlap; scoring rules and output steps updated accordingly | 1.36 |
-| July 2026 | Added meta composition priority (2 Healers + 2 Tanks + 1 Self-Heal), Tyrant Guard and Thothmek noted as ability-based tanks, patch notes translation table added, Mechanics substitution rule for Mechanical teams added | 1.36 |
+| July 2026 | Analysis methodology corrections: most efficient starting team is now evaluated across all sizes (3/4/5) not defaulted to a fixed size — whichever scores most points per token is recommended; character overlap between teams confirmed as desirable (minimises unique characters needed); point values now required before any analysis begins; overlap highlighted in output as high-priority investment signal | 1.36 |
+| July 2026 | Added meta composition priority (2 Healers + 2 Tanks + 1 Self-Heal); Tyrant Guard and Thothmek noted as ability-based tanks; patch notes translation table added; Mechanics substitution rule for Mechanical teams added | 1.36 |
 | July 2026 | Full wiki pass: re-verified all 44 trait columns for all 112 characters against wiki infoboxes (fixing known errors); added 21 new `Has_[DamageType]` columns capturing damage types from any source (primary attack or ability); added 10 Machines of War rows (`Is_MoW=Y`); regenerated `tacticus_characters.xlsx` with Y-cell highlighting, frozen panes, and auto-fit columns | 1.36 |
 | July 2026 | Initial database built from wiki (Hits, Factions, Melee, Ranged, Trait pages) | 1.36 |
