@@ -43,7 +43,8 @@ def intersect_score(team, battles, chars):
             earned[battle] = cond['pts']
     return sum(earned.values()), earned
 
-ABILITY_TANKS = {'Tyrant Guard', 'Thothmek'}
+ABILITY_TANKS = set()  # Future ability-based tanks go here
+DAMAGE_REDUCTION = {'Tyrant Guard', 'Thothmek'}  # DR for all; Thothmek best in Mechanical teams
 
 def meta_flags(name, char):
     flags = []
@@ -52,7 +53,8 @@ def meta_flags(name, char):
     if char.get('Mechanic')=='Y':    flags.append('MECHANIC')
     if char.get('Terminator_Armour')=='Y' or char.get('Mk_X_Gravis')=='Y':
         flags.append('TANK(trait)')
-    if name in ABILITY_TANKS:        flags.append('TANK(ability)')
+    if name in DAMAGE_REDUCTION:     flags.append('DMG-REDUCTION')
+    elif name in ABILITY_TANKS:      flags.append('TANK(ability)')
     if char.get('Resilient')=='Y':   flags.append('RESILIENT')
     return flags
 
@@ -62,20 +64,57 @@ def char_line(name, chars, prefix='    '):
     return prefix + name + ' (' + chars[name].get('Faction','') + ')' + tag
 
 def meta_score(team_names, chars):
-    """Score a team against the meta target: 2 Healers + 2 Tanks + 1 Self-Heal."""
-    n_h  = sum(1 for n in team_names if chars[n].get('Healer','N')=='Y')
-    n_sh = sum(1 for n in team_names if chars[n].get('Self_Heal','N')=='Y')
-    n_t  = sum(1 for n in team_names if (
-        chars[n].get('Terminator_Armour','N')=='Y' or
-        chars[n].get('Mk_X_Gravis','N')=='Y' or
-        n in ABILITY_TANKS
-    ))
-    # Resilient bonus (survivability even without Terminator)
-    n_r = sum(1 for n in team_names if chars[n].get('Resilient','N')=='Y')
-    return (min(n_h, 2)*30 +   # up to 2 healers
-            min(n_sh, 1)*28 +  # 1 self-heal
-            min(n_t, 2)*20 +   # up to 2 tanks
-            min(n_r, 3)*3)     # resilient chars (minor bonus)
+    """Score a team against the meta target.
+
+    Priority order:
+    1. Damage Reduction (Tyrant Guard = any team; Thothmek = Mechanical teams)
+    2. Support: Mechanics (2) if Mechanical team, Healers (2) otherwise
+    3. Self-Heal (1)
+    4. Tanks — Terminator Armour / Mk X Gravis (2)
+    5. Resilient — minor bonus
+
+    A team is considered Mechanical if 3+ members have Mechanical=Y.
+    Good Mechanical pairings: Re'vas + Aleph-Null, Tan Gi'da + Actus.
+    """
+    n_h          = sum(1 for n in team_names if chars[n].get('Healer','N')=='Y')
+    n_sh         = sum(1 for n in team_names if chars[n].get('Self_Heal','N')=='Y')
+    n_t          = sum(1 for n in team_names if (
+                       chars[n].get('Terminator_Armour','N')=='Y' or
+                       chars[n].get('Mk_X_Gravis','N')=='Y'))
+    n_mech_chars = sum(1 for n in team_names if chars[n].get('Mechanical','N')=='Y' or chars[n].get('Living_Metal','N')=='Y')  # Living Metal counts as Mechanical
+    n_mechanic   = sum(1 for n in team_names if chars[n].get('Mechanic','N')=='Y')
+    n_r          = sum(1 for n in team_names if chars[n].get('Resilient','N')=='Y')
+
+    # Damage Reduction
+    n_dr_guard   = sum(1 for n in team_names if n == 'Tyrant Guard')
+    n_dr_thotmek = sum(1 for n in team_names if n == 'Thothmek')
+
+    score = 0
+
+    # 1. Damage Reduction — highest priority
+    score += min(n_dr_guard, 1) * 50       # Tyrant Guard: full value any team
+    mech_threshold = n_mech_chars >= 2
+    score += min(n_dr_thotmek, 1) * (50 if mech_threshold else 25)
+
+    # 2. Support — Mechanics for Mechanical teams, Healers for standard teams
+    is_mech_team = n_mech_chars >= 3
+    if is_mech_team:
+        score += min(n_mechanic, 2) * 30   # Mechanics are the healers here
+        score += min(n_h, 1) * 8           # Healers less useful (can't heal Mechanical)
+    else:
+        score += min(n_h, 2) * 30          # Standard healing
+        score += min(n_mechanic, 1) * 8    # Mechanics not primary support
+
+    # 3. Self-Heal — always valuable (Aleph-Null especially in Mechanical teams)
+    score += min(n_sh, 1) * 28
+
+    # 4. Tanks (trait-based)
+    score += min(n_t, 2) * 20
+
+    # 5. Resilient — minor bonus
+    score += min(n_r, 3) * 3
+
+    return score
 
 def best_team_from_pool(pool, battles, chars, size=5):
     """
@@ -97,8 +136,10 @@ def best_team_from_pool(pool, battles, chars, size=5):
     else:
         def priority(n):
             c = chars[n]
-            return (int(c.get('Healer','N')=='Y')*30 +
+            return (int(n in DAMAGE_REDUCTION)*50 +
+                    int(c.get('Healer','N')=='Y')*30 +
                     int(c.get('Self_Heal','N')=='Y')*28 +
+                    int(c.get('Mechanic','N')=='Y')*25 +
                     int(c.get('Terminator_Armour','N')=='Y' or c.get('Mk_X_Gravis','N')=='Y')*20 +
                     int(n in ABILITY_TANKS)*20 +
                     int(c.get('Resilient','N')=='Y')*3)
@@ -148,7 +189,11 @@ def greedy_coverage(battles, battle_pools, all_eligible, chars):
                 limited = len(intersection) < 5
                 search_pool = intersection if not limited else all_eligible
 
-                team, score, earned = best_team_from_pool(search_pool, battles, chars, 5)
+                # Score only against conditions not yet claimed by an earlier team —
+                # a team shouldn't get credit (or be penalised) for conditions another
+                # team has already banked, since each stage's points are earned once.
+                remaining_battles = {b: battles[b] for b in remaining}
+                team, score, earned = best_team_from_pool(search_pool, remaining_battles, chars, 5)
                 newly = set(earned.keys()) & remaining
                 val = sum(battles[b]['pts'] for b in newly)
 

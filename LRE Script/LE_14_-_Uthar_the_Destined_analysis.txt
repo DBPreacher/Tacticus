@@ -32,7 +32,7 @@
   --------------------------------------------------
   FULL COVERAGE TEAMS (5-man)
   --------------------------------------------------
-  Tokens: 4 | Total pts/cycle: 440
+  Tokens: 4 | Total pts/cycle: 375
 
   TEAM 1 | Newly covers: Full Resilient lineup + Full Melee lineup | Pts/deployment: 160
   Full eligible pool (11):
@@ -53,9 +53,8 @@
     * Maladus (Death Guard)  [TANK(trait) | RESILIENT]
     * Marshal Dreir (Astra Militarum)  [SELF-HEAL | RESILIENT]
     * Nauseous Rotbone (Death Guard)  [HEALER | RESILIENT]
-  ★ High-priority investment (multi-team): Aesoth
 
-  TEAM 2 | Newly covers: Full Piercing Damage lineup | Pts/deployment: 155
+  TEAM 2 | Newly covers: Full Piercing Damage lineup | Pts/deployment: 90
   Full eligible pool (10):
     Abaddon The Despoiler (Black Legion)  [TANK(trait) | RESILIENT]
     Dante (Blood Angels)
@@ -68,8 +67,8 @@
     Trajann (Adeptus Custodes)  [RESILIENT]
     Ulf (Space Wolves)
   Recommended 5:
-    * Dante (Blood Angels)
-    * Haarken Worldclaimer (Black Legion)
+    * Abaddon The Despoiler (Black Legion)  [TANK(trait) | RESILIENT]
+    * Kharn (World Eaters)
     * Incisus (Ultramarines)  [HEALER]
     * Kariyan (Adeptus Custodes)  [RESILIENT]
     * Trajann (Adeptus Custodes)  [RESILIENT]
@@ -81,14 +80,14 @@
     Certus (Ultramarines)
     Incisus (Ultramarines)  [HEALER]
     Marneus Calgar (Ultramarines)  [TANK(trait)]
-    Titus (Ultramarines)
+    Titus (Ultramarines)  [SELF-HEAL]
     Varro Tigurius (Ultramarines)
   Recommended 5:
     * Bellator (Ultramarines)  [TANK(trait)]
-    * Certus (Ultramarines)
+    * Varro Tigurius (Ultramarines)
     * Incisus (Ultramarines)  [HEALER]
     * Marneus Calgar (Ultramarines)  [TANK(trait)]
-    * Titus (Ultramarines)
+    * Titus (Ultramarines)  [SELF-HEAL]
   ★ High-priority investment (multi-team): Incisus, Marneus Calgar
 
   TEAM 4 | Newly covers: Max 2 hits lineup | Pts/deployment: 50
@@ -127,11 +126,11 @@
     Yazaghor (Thousand Sons)
   Recommended 5:
     * Incisus (Ultramarines)  [HEALER]
+    * Actus (Adeptus Mechanicus)  [MECHANIC]
+    * Vitruvius (Adeptus Mechanicus)  [MECHANIC]
     * Typhus (Death Guard)  [TANK(trait) | RESILIENT]
     * Marneus Calgar (Ultramarines)  [TANK(trait)]
-    * Njal (Space Wolves)  [TANK(trait)]
-    * Aesoth (Adeptus Custodes)  [RESILIENT]
-  ★ High-priority investment (multi-team): Incisus, Marneus Calgar, Aesoth
+  ★ High-priority investment (multi-team): Incisus, Marneus Calgar
 
 
 =================================================================
@@ -164,7 +163,7 @@
   --------------------------------------------------
   FULL COVERAGE TEAMS (5-man)
   --------------------------------------------------
-  Tokens: 3 | Total pts/cycle: 490
+  Tokens: 3 | Total pts/cycle: 375
 
   TEAM 1 | Newly covers: Full Psychic Damage lineup + Full Ranged lineup | Pts/deployment: 160
   Full eligible pool (9):
@@ -179,7 +178,7 @@
     Yazaghor (Thousand Sons)
   Recommended 5:
     * Abraxas (Thousand Sons)
-    * Ahriman (Thousand Sons)
+    * Thaumachus (Thousand Sons)
     * Archimatos (Black Legion)
     * Eldryon (Aeldari)
     * Typhus (Death Guard)  [TANK(trait) | RESILIENT]
@@ -199,7 +198,7 @@
     * Wrask (World Eaters)  [TANK(trait)]
   ★ High-priority investment (multi-team): Toth
 
-  TEAM 3 | Newly covers: Min 5 hits lineup | Pts/deployment: 190
+  TEAM 3 | Newly covers: Min 5 hits lineup | Pts/deployment: 75
   Full eligible pool (11):
     Aleph-Null (Necrons)  [SELF-HEAL | MECHANIC]
     Aun'Shi (Tau Empire)
@@ -213,10 +212,10 @@
     Volk (Black Legion)
     Winged Prime (Tyranids)
   Recommended 5:
+    * Aleph-Null (Necrons)  [SELF-HEAL | MECHANIC]
+    * Aun'Shi (Tau Empire)
     * Imospekh (Necrons)
-    * Maugan Ra (Aeldari)
     * Re'vas (Tau Empire)
-    * Shiron (Emperor's Children)
     * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
   ★ High-priority investment (multi-team): Toth
 
@@ -248,7 +247,7 @@
   --------------------------------------------------
   FULL COVERAGE TEAMS (5-man)
   --------------------------------------------------
-  Tokens: 3 | Total pts/cycle: 425
+  Tokens: 3 | Total pts/cycle: 375
 
   TEAM 1 | Newly covers: Full Mechanical lineup + Full Big Target lineup | Pts/deployment: 165
   Full eligible pool (5):
@@ -272,16 +271,16 @@
     Isabella (Adepta Sororitas)  [HEALER]
     Lucien (Blood Angels)  [RESILIENT]
     Roswitha (Adepta Sororitas)
-    Titus (Ultramarines)
+    Titus (Ultramarines)  [SELF-HEAL]
     Trajann (Adeptus Custodes)  [RESILIENT]
   Recommended 5:
     * Bellator (Ultramarines)  [TANK(trait)]
-    * Certus (Ultramarines)
     * Isabella (Adepta Sororitas)  [HEALER]
     * Lucien (Blood Angels)  [RESILIENT]
+    * Titus (Ultramarines)  [SELF-HEAL]
     * Trajann (Adeptus Custodes)  [RESILIENT]
 
-  TEAM 3 | Newly covers: Max 1 hits lineup | Pts/deployment: 125
+  TEAM 3 | Newly covers: Max 1 hits lineup | Pts/deployment: 75
   Full eligible pool (18):
     Aesoth (Adeptus Custodes)  [RESILIENT]
     Ammuk (Leagues of Votann)
@@ -303,10 +302,10 @@
     Vitruvius (Adeptus Mechanicus)  [MECHANIC]
   Recommended 5:
     * Aesoth (Adeptus Custodes)  [RESILIENT]
-    * Ammuk (Leagues of Votann)
-    * Calandis (Aeldari)
+    * Sho'syl (Tau Empire)
     * Hollan (Genestealer Cults)  [HEALER]
     * Incisus (Ultramarines)  [HEALER]
+    * Vitruvius (Adeptus Mechanicus)  [MECHANIC]
 
 
 =================================================================
