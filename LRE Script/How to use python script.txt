@@ -1,0 +1,8 @@
+Copy conditions_template.yaml and rename it. 
+Fill in with LRE data. 
+
+Tell CC: 
+Run le_analysis.py with [conditions_template.yaml copy] against tacticus_characters.csv and show me the output
+
+E.G
+Run Tacticus\LRE Script\le_analysis.py with le14_uthar.yaml against Tacticus\tacticus_characters.csv and show me the output

@@ -196,24 +196,21 @@ Gamma (No Chaos): [CONDITION] ([pts]), [CONDITION] ([pts]), ...
 Claude will:
 1. Filter eligible characters per track (alliance restriction applied first)
 2. Find characters eligible for each battle condition, flagging any pool with fewer than 6 chars (⚠️ limited pool)
-3. Calculate the **most token-efficient starting team** — the team (3, 4, or 5 characters) that earns the highest total intersection score per token deployed. Do not default to any fixed team size. Evaluate all sizes and recommend whichever scores highest. A 5-man covering three high-value conditions in one deployment will beat a 3-man covering one low-value condition.
-4. Build 5-man teams for full condition coverage using actual point values to prioritise high-value conditions first. **Point values must be provided before analysis begins** — do not substitute equal weighting, as this produces wrong prioritisation.
-5. **Character overlap between teams is allowed and encouraged.** A character appearing in two teams allows the player to invest in one character and unlock two team slots. Always prefer solutions that reuse characters across teams, keeping the total number of unique characters required as low as possible. Never reject a recommendation solely because a character appears in more than one team.
-6. Show the full eligible pool for each team's conditions alongside the recommended 5, so players can make substitutions based on their own roster.
-7. Flag healers, self-healers, tanky characters, and mechanics in each team, noting any meta composition gaps (see Meta Notes below).
+3. Calculate the most token-efficient 4-man starting team (best intersection score)
+4. Find the minimum number of 5-man teams needed to cover all battle conditions
+5. Resolve any character overlaps between teams
+6. Flag healers, self-healers, tanky characters, and mechanics in each team
+7. Apply the meta composition priority (see Meta Notes below)
 
 ### Key scoring rules (important context for Claude)
 
-- **All team members must share a condition** for the team to earn those bonus points
-- Score = sum of point values for conditions ALL members satisfy (intersection, not union)
+- **All team members must share a trait** for the team to earn those bonus points
+- Score = sum of point values for traits ALL members share (intersection, not union)
 - Teams: minimum 3 characters, maximum 5
-- 3-man teams typically reach stage 8-10 before difficulty peaks; 5-man teams push further
+- 3-man teams typically reach stage 8-10 before difficulty peaks
+- 5-man teams push further but intersection score is usually lower
 - 1 token = 1 team deployment for 1 stage attempt
 - Points accumulate across all Alpha, Beta, and Gamma stages cleared
-- **Point values are mandatory.** Do not begin analysis without them.
-- **The most token-efficient team is whichever size (3, 4, or 5) earns the most points per token.** Always evaluate all sizes rather than assuming smaller is more efficient.
-- **Overlap between teams is a feature, not a flaw.** Shared characters reduce the number of unique characters a player must develop. Always highlight which characters appear in multiple teams as high-priority investments.
-- **Each team earns its intersection points independently per stage cleared.** A condition covered by two different teams earns points twice across deployments — this is not wasteful, it accumulates.
 
 ---
 
@@ -227,9 +224,11 @@ When selecting the 5 characters for a team, the trait intersection score determi
 
 Apply this as a tiebreaker when multiple characters are eligible for a team slot: always prefer the composition above over raw damage output.
 
-**If the team is predominantly Mechanical characters** (Mechanical = Y), substitute Mechanics for Healers — Mechanical characters cannot be healed, only repaired:
+**If the team is predominantly Mechanical characters**, substitute Mechanics for Healers — Mechanical characters cannot be healed, only repaired:
 
 → **2 Mechanics + 2 Tanks + 1 Self-Healer** for Mechanical-heavy teams
+
+A team is considered Mechanical when 3+ members have `Mechanical=Y` **or** `Living_Metal=Y`. Living Metal is a Necron faction trait that confers Mechanical status — Imospekh, Aleph-Null, Anuphet, Thutmose, Makhotep and other Necrons with Living Metal all count toward this threshold. This is handled automatically by `le_analysis.py`. Good Mechanical team pairings: Re'vas + Aleph-Null, Tan Gi'da + Actus.
 
 When flagging team compositions after the analysis, Claude should identify which slots in each recommended team are filled by Healers, Tanks, Self-Healers, and Mechanics, and note any gaps (e.g. "no healer available in this pool").
 
@@ -251,8 +250,6 @@ Two characters are among the best tanks in the game due to their abilities rathe
 - **Thothmek** — exceptional survivability through abilities; treat as a top-tier tank regardless of trait flags
 
 When building teams, if Tyrant Guard or Thothmek are eligible for the track and battle conditions, prioritise them in tank slots before other non-trait-tanky characters.
-
-Trait assumptions: Do not assume any trait is faction-exclusive without verifying the CSV. For example, Unstoppable is an individual trait shared across multiple factions (Space Wolves, World Eaters, Adeptus Mechanicus, Orks, Genestealer Cults etc.) — not a Space Wolves faction trait. Always derive trait eligibility from the CSV columns, never from faction lore assumptions.
 
 ### Healers
 
@@ -298,7 +295,6 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
-| July 2026 | Analysis methodology corrections: most efficient starting team is now evaluated across all sizes (3/4/5) not defaulted to a fixed size — whichever scores most points per token is recommended; character overlap between teams confirmed as desirable (minimises unique characters needed); point values now required before any analysis begins; overlap highlighted in output as high-priority investment signal | 1.36 |
-| July 2026 | Added meta composition priority (2 Healers + 2 Tanks + 1 Self-Heal); Tyrant Guard and Thothmek noted as ability-based tanks; patch notes translation table added; Mechanics substitution rule for Mechanical teams added | 1.36 |
+| July 2026 | Living Metal now counts as Mechanical for team detection — Necrons with `Living_Metal=Y` (Imospekh, Aleph-Null, etc.) correctly trigger the Mechanic-over-Healer pathway when 3+ appear in a team | 1.36 |
 | July 2026 | Full wiki pass: re-verified all 44 trait columns for all 112 characters against wiki infoboxes (fixing known errors); added 21 new `Has_[DamageType]` columns capturing damage types from any source (primary attack or ability); added 10 Machines of War rows (`Is_MoW=Y`); regenerated `tacticus_characters.xlsx` with Y-cell highlighting, frozen panes, and auto-fit columns | 1.36 |
 | July 2026 | Initial database built from wiki (Hits, Factions, Melee, Ranged, Trait pages) | 1.36 |

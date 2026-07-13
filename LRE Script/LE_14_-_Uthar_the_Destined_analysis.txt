@@ -1,0 +1,314 @@
+█████████████████████████████████████████████████████████████████
+  LE ANALYSIS: LE 14 - Uthar the Destined
+█████████████████████████████████████████████████████████████████
+  Characters loaded: 122
+  NOTE: Defeat all enemies objectives ignored (base rewards).
+
+=================================================================
+  ALPHA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 76
+  ✅Full Ultramarine lineup (75pts): 6 chars
+  ✅Full Resilient lineup (95pts): 16 chars
+  ✅Max 2 hits lineup (50pts): 32 chars
+  ✅Full Melee lineup (65pts): 45 chars
+  ✅Full Piercing Damage lineup (90pts): 10 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 210pts | Covers: Full Resilient lineup + Full Melee lineup + Max 2 hits lineup
+  Full eligible pool (4):
+    Aesoth (Adeptus Custodes)  [RESILIENT]
+    Azkor (World Eaters)  [RESILIENT]
+    Corrodius (Death Guard)  [RESILIENT]
+    Pestillian (Death Guard)  [RESILIENT]
+  Recommended:
+    * Aesoth (Adeptus Custodes)  [RESILIENT]
+    * Azkor (World Eaters)  [RESILIENT]
+    * Corrodius (Death Guard)  [RESILIENT]
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 4 | Total pts/cycle: 440
+
+  TEAM 1 | Newly covers: Full Resilient lineup + Full Melee lineup | Pts/deployment: 160
+  Full eligible pool (11):
+    Aesoth (Adeptus Custodes)  [RESILIENT]
+    Arjac (Space Wolves)  [TANK(trait) | RESILIENT]
+    Azkor (World Eaters)  [RESILIENT]
+    Corrodius (Death Guard)  [RESILIENT]
+    Kariyan (Adeptus Custodes)  [RESILIENT]
+    Macer (World Eaters)  [RESILIENT]
+    Maladus (Death Guard)  [TANK(trait) | RESILIENT]
+    Marshal Dreir (Astra Militarum)  [SELF-HEAL | RESILIENT]
+    Nauseous Rotbone (Death Guard)  [HEALER | RESILIENT]
+    Pestillian (Death Guard)  [RESILIENT]
+    Trajann (Adeptus Custodes)  [RESILIENT]
+  Recommended 5:
+    * Aesoth (Adeptus Custodes)  [RESILIENT]
+    * Arjac (Space Wolves)  [TANK(trait) | RESILIENT]
+    * Maladus (Death Guard)  [TANK(trait) | RESILIENT]
+    * Marshal Dreir (Astra Militarum)  [SELF-HEAL | RESILIENT]
+    * Nauseous Rotbone (Death Guard)  [HEALER | RESILIENT]
+  ★ High-priority investment (multi-team): Aesoth
+
+  TEAM 2 | Newly covers: Full Piercing Damage lineup | Pts/deployment: 155
+  Full eligible pool (10):
+    Abaddon The Despoiler (Black Legion)  [TANK(trait) | RESILIENT]
+    Dante (Blood Angels)
+    Haarken Worldclaimer (Black Legion)
+    Hascule (Emperor's Children)
+    Incisus (Ultramarines)  [HEALER]
+    Kariyan (Adeptus Custodes)  [RESILIENT]
+    Kharn (World Eaters)
+    Tarvakh (World Eaters)
+    Trajann (Adeptus Custodes)  [RESILIENT]
+    Ulf (Space Wolves)
+  Recommended 5:
+    * Dante (Blood Angels)
+    * Haarken Worldclaimer (Black Legion)
+    * Incisus (Ultramarines)  [HEALER]
+    * Kariyan (Adeptus Custodes)  [RESILIENT]
+    * Trajann (Adeptus Custodes)  [RESILIENT]
+  ★ High-priority investment (multi-team): Incisus
+
+  TEAM 3 | Newly covers: Full Ultramarine lineup | Pts/deployment: 75
+  Full eligible pool (6):
+    Bellator (Ultramarines)  [TANK(trait)]
+    Certus (Ultramarines)
+    Incisus (Ultramarines)  [HEALER]
+    Marneus Calgar (Ultramarines)  [TANK(trait)]
+    Titus (Ultramarines)
+    Varro Tigurius (Ultramarines)
+  Recommended 5:
+    * Bellator (Ultramarines)  [TANK(trait)]
+    * Certus (Ultramarines)
+    * Incisus (Ultramarines)  [HEALER]
+    * Marneus Calgar (Ultramarines)  [TANK(trait)]
+    * Titus (Ultramarines)
+  ★ High-priority investment (multi-team): Incisus, Marneus Calgar
+
+  TEAM 4 | Newly covers: Max 2 hits lineup | Pts/deployment: 50
+  Full eligible pool (32):
+    Abraxas (Thousand Sons)
+    Actus (Adeptus Mechanicus)  [MECHANIC]
+    Aesoth (Adeptus Custodes)  [RESILIENT]
+    Ahriman (Thousand Sons)
+    Ancient Thoread (Black Templars)
+    Archimatos (Black Legion)
+    Azkor (World Eaters)  [RESILIENT]
+    Azrael (Dark Angels)
+    Castellan Creed (Astra Militarum)
+    Certus (Ultramarines)
+    Commissar Yarrick (Astra Militarum)  [RESILIENT]
+    Corrodius (Death Guard)  [RESILIENT]
+    Exitor-Rho (Adeptus Mechanicus)
+    Incisus (Ultramarines)  [HEALER]
+    Laviscus (Emperor's Children)
+    Marneus Calgar (Ultramarines)  [TANK(trait)]
+    Mataneo (Blood Angels)
+    Mephiston (Blood Angels)
+    Njal (Space Wolves)  [TANK(trait)]
+    Pestillian (Death Guard)  [RESILIENT]
+    Roswitha (Adepta Sororitas)
+    Sarquael (Dark Angels)
+    Sibyll Devine (Astra Militarum)
+    Sword Brother Godswyl (Black Templars)
+    Tan Gi'da (Adeptus Mechanicus)
+    Tarvakh (World Eaters)
+    Thaumachus (Thousand Sons)
+    Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    Tyrith (Adeptus Custodes)  [RESILIENT]
+    Varro Tigurius (Ultramarines)
+    Vitruvius (Adeptus Mechanicus)  [MECHANIC]
+    Yazaghor (Thousand Sons)
+  Recommended 5:
+    * Incisus (Ultramarines)  [HEALER]
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    * Marneus Calgar (Ultramarines)  [TANK(trait)]
+    * Njal (Space Wolves)  [TANK(trait)]
+    * Aesoth (Adeptus Custodes)  [RESILIENT]
+  ★ High-priority investment (multi-team): Incisus, Marneus Calgar, Aesoth
+
+
+=================================================================
+  BETA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 62
+  ✅Full Ranged lineup (60pts): 30 chars
+  ✅No Psyker lineup (55pts): 53 chars
+  ✅Full Terminator Armour lineup (85pts): 6 chars
+  ✅Full Psychic Damage lineup (100pts): 11 chars
+  ✅Min 5 hits lineup (75pts): 11 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 190pts | Covers: Min 5 hits lineup + Full Ranged lineup + No Psyker lineup
+  Full eligible pool (6):
+    Imospekh (Necrons)
+    Maugan Ra (Aeldari)
+    Re'vas (Tau Empire)
+    Shiron (Emperor's Children)
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Volk (Black Legion)
+  Recommended:
+    * Imospekh (Necrons)
+    * Maugan Ra (Aeldari)
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 3 | Total pts/cycle: 490
+
+  TEAM 1 | Newly covers: Full Psychic Damage lineup + Full Ranged lineup | Pts/deployment: 160
+  Full eligible pool (9):
+    Abraxas (Thousand Sons)
+    Ahriman (Thousand Sons)
+    Archimatos (Black Legion)
+    Eldryon (Aeldari)
+    Neurothrope (Tyranids)
+    Thaumachus (Thousand Sons)
+    Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    Xybia (Genestealer Cults)
+    Yazaghor (Thousand Sons)
+  Recommended 5:
+    * Abraxas (Thousand Sons)
+    * Ahriman (Thousand Sons)
+    * Archimatos (Black Legion)
+    * Eldryon (Aeldari)
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+
+  TEAM 2 | Newly covers: Full Terminator Armour lineup + No Psyker lineup | Pts/deployment: 140
+  Full eligible pool (5):
+    Abaddon The Despoiler (Black Legion)  [TANK(trait) | RESILIENT]
+    Angrax (Black Legion)  [TANK(trait)]
+    Maladus (Death Guard)  [TANK(trait) | RESILIENT]
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Wrask (World Eaters)  [TANK(trait)]
+  Recommended 5:
+    * Abaddon The Despoiler (Black Legion)  [TANK(trait) | RESILIENT]
+    * Angrax (Black Legion)  [TANK(trait)]
+    * Maladus (Death Guard)  [TANK(trait) | RESILIENT]
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    * Wrask (World Eaters)  [TANK(trait)]
+  ★ High-priority investment (multi-team): Toth
+
+  TEAM 3 | Newly covers: Min 5 hits lineup | Pts/deployment: 190
+  Full eligible pool (11):
+    Aleph-Null (Necrons)  [SELF-HEAL | MECHANIC]
+    Aun'Shi (Tau Empire)
+    Imospekh (Necrons)
+    Lucius (Emperor's Children)
+    Maugan Ra (Aeldari)
+    Re'vas (Tau Empire)
+    Shiron (Emperor's Children)
+    The Patermine (Genestealer Cults)
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Volk (Black Legion)
+    Winged Prime (Tyranids)
+  Recommended 5:
+    * Imospekh (Necrons)
+    * Maugan Ra (Aeldari)
+    * Re'vas (Tau Empire)
+    * Shiron (Emperor's Children)
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+  ★ High-priority investment (multi-team): Toth
+
+
+=================================================================
+  GAMMA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 86
+  ✅No Power Damage lineup (50pts): 59 chars
+  ✅Full Bolter Damage lineup (85pts): 15 chars
+  ✅Full Mechanical lineup (100pts): 10 chars
+  ✅Max 1 hits lineup (75pts): 18 chars
+  ✅Full Big Target lineup (65pts): 8 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 215pts | Covers: Full Mechanical lineup + Full Big Target lineup + No Power Damage lineup
+  Full eligible pool (3):
+    Boss Gulgortz (Orks)
+    Re'vas (Tau Empire)
+    Snappawrecka (Orks)
+  Recommended:
+    * Boss Gulgortz (Orks)
+    * Re'vas (Tau Empire)
+    * Snappawrecka (Orks)
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 3 | Total pts/cycle: 425
+
+  TEAM 1 | Newly covers: Full Mechanical lineup + Full Big Target lineup | Pts/deployment: 165
+  Full eligible pool (5):
+    Boss Gulgortz (Orks)
+    Commander Farsight (Tau Empire)
+    Morvenn Vahl (Adepta Sororitas)
+    Re'vas (Tau Empire)
+    Snappawrecka (Orks)
+  Recommended 5:
+    * Boss Gulgortz (Orks)
+    * Commander Farsight (Tau Empire)
+    * Morvenn Vahl (Adepta Sororitas)
+    * Re'vas (Tau Empire)
+    * Snappawrecka (Orks)
+
+  TEAM 2 | Newly covers: Full Bolter Damage lineup + No Power Damage lineup | Pts/deployment: 135
+  Full eligible pool (8):
+    Bellator (Ultramarines)  [TANK(trait)]
+    Certus (Ultramarines)
+    Cyrus (Adeptus Astartes)
+    Isabella (Adepta Sororitas)  [HEALER]
+    Lucien (Blood Angels)  [RESILIENT]
+    Roswitha (Adepta Sororitas)
+    Titus (Ultramarines)
+    Trajann (Adeptus Custodes)  [RESILIENT]
+  Recommended 5:
+    * Bellator (Ultramarines)  [TANK(trait)]
+    * Certus (Ultramarines)
+    * Isabella (Adepta Sororitas)  [HEALER]
+    * Lucien (Blood Angels)  [RESILIENT]
+    * Trajann (Adeptus Custodes)  [RESILIENT]
+
+  TEAM 3 | Newly covers: Max 1 hits lineup | Pts/deployment: 125
+  Full eligible pool (18):
+    Aesoth (Adeptus Custodes)  [RESILIENT]
+    Ammuk (Leagues of Votann)
+    Azrael (Dark Angels)
+    Calandis (Aeldari)
+    Certus (Ultramarines)
+    Hollan (Genestealer Cults)  [HEALER]
+    Incisus (Ultramarines)  [HEALER]
+    Isaak (Genestealer Cults)
+    Mataneo (Blood Angels)
+    Neurothrope (Tyranids)
+    Parasite of Mortrex (Tyranids)
+    Sarquael (Dark Angels)
+    Sho'syl (Tau Empire)
+    Sibyll Devine (Astra Militarum)
+    Sword Brother Godswyl (Black Templars)
+    Tan Gi'da (Adeptus Mechanicus)
+    Varro Tigurius (Ultramarines)
+    Vitruvius (Adeptus Mechanicus)  [MECHANIC]
+  Recommended 5:
+    * Aesoth (Adeptus Custodes)  [RESILIENT]
+    * Ammuk (Leagues of Votann)
+    * Calandis (Aeldari)
+    * Hollan (Genestealer Cults)  [HEALER]
+    * Incisus (Ultramarines)  [HEALER]
+
+
+=================================================================
+  ANALYSIS COMPLETE
+=================================================================
