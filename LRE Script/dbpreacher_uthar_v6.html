@@ -84,7 +84,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .chars-pool,.chars-hi{position:absolute;inset:0;display:flex;flex-direction:column;gap:0;transition:opacity .4s ease;}
 .pnote{font-family:Rajdhani;font-size:17px;letter-spacing:1px;color:#7a8494;margin-bottom:12px;}
 .pnote.lock{color:#e05252;}
-.pnote.dim{color:#3a4050;}
+.pnote.priority{color:#f07028;font-size:23px;font-weight:700;letter-spacing:.5px;margin-top:26px;padding-top:18px;border-top:1px solid rgba(240,112,40,.3);}
 .charlist{list-style:none;display:flex;flex-direction:column;gap:14px;}
 .charlist.cols-2{display:block;columns:2;column-gap:50px;}
 .charlist.cols-3{display:block;columns:3;column-gap:36px;}
@@ -92,7 +92,6 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .charlist li{font-family:'Cinzel',serif;font-size:34px;font-weight:700;color:#e8eaf0;letter-spacing:.5px;transition:all .4s ease;}
 .charlist li::before{content:'— ';color:#f07028;}
 .charlist li.chosen{color:#fff;}
-.charlist li.unchosen{color:#252830;text-decoration:line-through;}
 .charlist li.healer{color:#3dbb7e;}
 .charlist li.healer::before{content:'♥  ';color:#3dbb7e;}
 .charlist li.tank{color:#4a9eff;}
@@ -255,7 +254,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
     
-    <ul class="charlist"><li class="chosen">Aesoth</li><li class="chosen">Arjac</li><li class="unchosen">Azkor</li><li class="unchosen">Corrodius</li><li class="unchosen">Kariyan</li><li class="unchosen">Macer</li><li class="chosen">Maladus</li><li class="chosen">Marshal Dreir</li><li class="chosen">Nauseous Rotbone</li><li class="unchosen">Pestillian</li><li class="unchosen">Trajann</li></ul>
+    <ul class="charlist"><li class="chosen">Aesoth</li><li class="chosen">Arjac</li><li class="chosen">Maladus</li><li class="chosen">Marshal Dreir</li><li class="chosen">Nauseous Rotbone</li></ul>
   </div>
 </div>
 </div>
@@ -268,12 +267,12 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   
 <div class="chars-wrap">
   <div class="chars-pool">
-    <p class="pnote">10 eligible characters</p><p class="pnote dim">★ High-priority investment: Incisus</p>
+    <p class="pnote">10 eligible characters</p>
     <ul class="charlist"><li>Abaddon</li><li>Dante</li><li>Haarken Worldclaimer</li><li>Hascule</li><li>Incisus</li><li>Kariyan</li><li>Kharn</li><li>Tarvakh</li><li>Trajann</li><li>Ulf</li></ul>
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
-    <p class="pnote dim">★ High-priority investment: Incisus</p>
-    <ul class="charlist"><li class="chosen">Abaddon</li><li class="unchosen">Dante</li><li class="unchosen">Haarken Worldclaimer</li><li class="unchosen">Hascule</li><li class="chosen">Incisus</li><li class="chosen">Kariyan</li><li class="chosen">Kharn</li><li class="unchosen">Tarvakh</li><li class="chosen">Trajann</li><li class="unchosen">Ulf</li></ul>
+    <ul class="charlist"><li class="chosen">Abaddon</li><li class="chosen">Incisus</li><li class="chosen">Kariyan</li><li class="chosen">Kharn</li><li class="chosen">Trajann</li></ul>
+    <p class="pnote priority">★ High-priority investment: Incisus</p>
   </div>
 </div>
 </div>
@@ -286,12 +285,12 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   
 <div class="chars-wrap">
   <div class="chars-pool">
-    <p class="pnote">6 eligible characters</p><p class="pnote dim">★ High-priority investment: Incisus, Marneus Calgar</p>
+    <p class="pnote">6 eligible characters</p>
     <ul class="charlist"><li>Bellator</li><li>Certus</li><li>Incisus</li><li>Marneus Calgar</li><li>Titus</li><li>Varro Tigurius</li></ul>
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
-    <p class="pnote dim">★ High-priority investment: Incisus, Marneus Calgar</p>
-    <ul class="charlist"><li class="chosen">Bellator</li><li class="unchosen">Certus</li><li class="chosen">Incisus</li><li class="chosen">Marneus Calgar</li><li class="chosen">Titus</li><li class="chosen">Varro Tigurius</li></ul>
+    <ul class="charlist"><li class="chosen">Bellator</li><li class="chosen">Incisus</li><li class="chosen">Marneus Calgar</li><li class="chosen">Titus</li><li class="chosen">Varro Tigurius</li></ul>
+    <p class="pnote priority">★ High-priority investment: Incisus, Marneus Calgar</p>
   </div>
 </div>
 </div>
@@ -304,12 +303,12 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   
 <div class="chars-wrap">
   <div class="chars-pool">
-    <p class="pnote">32 eligible characters</p><p class="pnote dim">★ High-priority investment: Incisus, Marneus Calgar</p>
+    <p class="pnote">32 eligible characters</p>
     <ul class="charlist cols-3"><li>Abraxas</li><li>Actus</li><li>Aesoth</li><li>Ahriman</li><li>Ancient Thoread</li><li>Archimatos</li><li>Azkor</li><li>Azrael</li><li>Castellan Creed</li><li>Certus</li><li>Commissar Yarrick</li><li>Corrodius</li><li>Exitor-Rho</li><li>Incisus</li><li>Laviscus</li><li>Marneus Calgar</li><li>Mataneo</li><li>Mephiston</li><li>Njal</li><li>Pestillian</li><li>Roswitha</li><li>Sarquael</li><li>Sibyll Devine</li><li>Sword Brother Godswyl</li><li>Tan Gi'da</li><li>Tarvakh</li><li>Thaumachus</li><li>Typhus</li><li>Tyrith</li><li>Varro Tigurius</li><li>Vitruvius</li><li>Yazaghor</li></ul>
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
-    <p class="pnote dim">★ High-priority investment: Incisus, Marneus Calgar</p>
-    <ul class="charlist cols-3"><li class="unchosen">Abraxas</li><li class="chosen">Actus</li><li class="unchosen">Aesoth</li><li class="unchosen">Ahriman</li><li class="unchosen">Ancient Thoread</li><li class="unchosen">Archimatos</li><li class="unchosen">Azkor</li><li class="unchosen">Azrael</li><li class="unchosen">Castellan Creed</li><li class="unchosen">Certus</li><li class="unchosen">Commissar Yarrick</li><li class="unchosen">Corrodius</li><li class="unchosen">Exitor-Rho</li><li class="chosen">Incisus</li><li class="unchosen">Laviscus</li><li class="chosen">Marneus Calgar</li><li class="unchosen">Mataneo</li><li class="unchosen">Mephiston</li><li class="unchosen">Njal</li><li class="unchosen">Pestillian</li><li class="unchosen">Roswitha</li><li class="unchosen">Sarquael</li><li class="unchosen">Sibyll Devine</li><li class="unchosen">Sword Brother Godswyl</li><li class="unchosen">Tan Gi'da</li><li class="unchosen">Tarvakh</li><li class="unchosen">Thaumachus</li><li class="chosen">Typhus</li><li class="unchosen">Tyrith</li><li class="unchosen">Varro Tigurius</li><li class="chosen">Vitruvius</li><li class="unchosen">Yazaghor</li></ul>
+    <ul class="charlist"><li class="chosen">Actus</li><li class="chosen">Incisus</li><li class="chosen">Marneus Calgar</li><li class="chosen">Typhus</li><li class="chosen">Vitruvius</li></ul>
+    <p class="pnote priority">★ High-priority investment: Incisus, Marneus Calgar</p>
   </div>
 </div>
 </div>
@@ -436,7 +435,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
     
-    <ul class="charlist"><li class="chosen">Abraxas</li><li class="unchosen">Ahriman</li><li class="chosen">Archimatos</li><li class="chosen">Eldryon</li><li class="unchosen">Neurothrope</li><li class="chosen">Thaumachus</li><li class="chosen">Typhus</li><li class="unchosen">Xybia</li><li class="unchosen">Yazaghor</li></ul>
+    <ul class="charlist"><li class="chosen">Abraxas</li><li class="chosen">Archimatos</li><li class="chosen">Eldryon</li><li class="chosen">Thaumachus</li><li class="chosen">Typhus</li></ul>
   </div>
 </div>
 </div>
@@ -449,8 +448,9 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   
 <div class="chars-wrap">
   <div class="chars-pool chars-hi" style="opacity:1;visibility:visible">
-    <p class="pnote lock">⚠ Only 5 eligible — all required</p><p class="pnote dim">★ High-priority investment: Toth</p>
+    <p class="pnote lock">⚠ Only 5 eligible — all required</p>
     <ul class="charlist"><li class="chosen">Abaddon</li><li class="chosen">Angrax</li><li class="chosen">Maladus</li><li class="chosen">Toth</li><li class="chosen">Wrask</li></ul>
+    <p class="pnote priority">★ High-priority investment: Toth</p>
   </div>
   <div style="display:none"></div>
 </div>
@@ -464,12 +464,12 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   
 <div class="chars-wrap">
   <div class="chars-pool">
-    <p class="pnote">11 eligible characters</p><p class="pnote dim">★ High-priority investment: Toth</p>
+    <p class="pnote">11 eligible characters</p>
     <ul class="charlist"><li>Aleph-Null</li><li>Aun'Shi</li><li>Imospekh</li><li>Lucius</li><li>Maugan Ra</li><li>Re'vas</li><li>Shiron</li><li>The Patermine</li><li>Toth</li><li>Volk</li><li>Winged Prime</li></ul>
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
-    <p class="pnote dim">★ High-priority investment: Toth</p>
-    <ul class="charlist"><li class="chosen">Aleph-Null</li><li class="chosen">Aun'Shi</li><li class="chosen">Imospekh</li><li class="unchosen">Lucius</li><li class="unchosen">Maugan Ra</li><li class="chosen">Re'vas</li><li class="unchosen">Shiron</li><li class="unchosen">The Patermine</li><li class="chosen">Toth</li><li class="unchosen">Volk</li><li class="unchosen">Winged Prime</li></ul>
+    <ul class="charlist"><li class="chosen">Aleph-Null</li><li class="chosen">Aun'Shi</li><li class="chosen">Imospekh</li><li class="chosen">Re'vas</li><li class="chosen">Toth</li></ul>
+    <p class="pnote priority">★ High-priority investment: Toth</p>
   </div>
 </div>
 </div>
@@ -603,7 +603,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
     
-    <ul class="charlist"><li class="chosen">Bellator</li><li class="unchosen">Certus</li><li class="unchosen">Cyrus</li><li class="chosen">Isabella</li><li class="chosen">Lucien</li><li class="unchosen">Roswitha</li><li class="chosen">Titus</li><li class="chosen">Trajann</li></ul>
+    <ul class="charlist"><li class="chosen">Bellator</li><li class="chosen">Isabella</li><li class="chosen">Lucien</li><li class="chosen">Titus</li><li class="chosen">Trajann</li></ul>
   </div>
 </div>
 </div>
@@ -621,7 +621,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
     
-    <ul class="charlist cols-2"><li class="chosen">Aesoth</li><li class="unchosen">Ammuk</li><li class="unchosen">Azrael</li><li class="unchosen">Calandis</li><li class="unchosen">Certus</li><li class="chosen">Hollan</li><li class="chosen">Incisus</li><li class="unchosen">Isaak</li><li class="unchosen">Mataneo</li><li class="unchosen">Neurothrope</li><li class="unchosen">Parasite of Mortrex</li><li class="unchosen">Sarquael</li><li class="chosen">Sho'syl</li><li class="unchosen">Sibyll Devine</li><li class="unchosen">Sword Brother Godswyl</li><li class="unchosen">Tan Gi'da</li><li class="unchosen">Varro Tigurius</li><li class="chosen">Vitruvius</li></ul>
+    <ul class="charlist"><li class="chosen">Aesoth</li><li class="chosen">Hollan</li><li class="chosen">Incisus</li><li class="chosen">Sho'syl</li><li class="chosen">Vitruvius</li></ul>
   </div>
 </div>
 </div>
