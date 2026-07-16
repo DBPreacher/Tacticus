@@ -766,6 +766,72 @@ function staggerPlay(items,step=70,dur=420){
   });
 }
 
+// FLIP-style pool -> picked-5 transition: characters that make the team
+// visually fly from their eligible-list position to their team-slot
+// position, instead of the whole list just crossfading in place.
+// Everyone left behind simply fades out along with the rest of the pool.
+let flyLayerEl=null;
+function getFlyLayer(){
+  if(!flyLayerEl){
+    flyLayerEl=document.createElement('div');
+    flyLayerEl.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:900;';
+    document.body.appendChild(flyLayerEl);
+  }
+  return flyLayerEl;
+}
+function flySubTransition(poolEl,hiEl){
+  if(!poolEl||!hiEl)return;
+  const poolItems=[...poolEl.querySelectorAll('.charlist li')];
+  const hiItems=[...hiEl.querySelectorAll('.charlist li')];
+  const layer=getFlyLayer();
+  const flights=[];
+  hiItems.forEach(hiLi=>{
+    const name=hiLi.textContent.trim();
+    const poolLi=poolItems.find(li=>li.textContent.trim()===name);
+    if(!poolLi)return; // shouldn't happen, but fall back gracefully below if it does
+    const fromRect=poolLi.getBoundingClientRect();
+    const toRect=hiLi.getBoundingClientRect(); // hi is visibility:hidden but still laid out, so this is valid
+    const clone=document.createElement('div');
+    clone.innerHTML='<span style="color:#f07028">— </span>'+name;
+    clone.style.cssText='position:fixed;left:0;top:0;margin:0;white-space:nowrap;'
+      +'font-family:Cinzel,serif;font-weight:700;letter-spacing:.5px;color:#fff;'
+      +'font-size:'+getComputedStyle(poolLi).fontSize+';'
+      +'transform:translate('+fromRect.left+'px,'+fromRect.top+'px);'
+      +'transition:transform .55s cubic-bezier(.22,.9,.32,1),font-size .55s cubic-bezier(.22,.9,.32,1);';
+    layer.appendChild(clone);
+    flights.push({clone,toRect,toFs:getComputedStyle(hiLi).fontSize});
+  });
+  if(!flights.length){ xf(poolEl,hiEl); return; } // safety net if nothing matched by name
+
+  fo(poolEl); // everyone left behind fades out as before — the flying clones read on top
+
+  hiEl.style.transition='none';
+  hiEl.style.opacity='0';
+  hiEl.style.visibility='hidden';
+  void hiEl.offsetHeight; // flush before the flight starts
+
+  flights.forEach(({clone})=>{ void clone.offsetHeight; }); // flush each clone's FROM position
+  flights.forEach(({clone,toRect,toFs},i)=>{
+    setTimeout(()=>{
+      clone.style.transform='translate('+toRect.left+'px,'+toRect.top+'px)';
+      clone.style.fontSize=toFs;
+    },i*70);
+  });
+
+  const landTime=550+(flights.length-1)*70+40;
+  setTimeout(()=>{
+    // reveal the real 5-man list instantly right as the clones land, so
+    // it reads as one continuous motion rather than a fly + a fade-in
+    hiEl.style.transition='none';
+    hiEl.style.opacity='1';
+    hiEl.style.visibility='visible';
+    hiEl.style.transform='translateY(0)';
+    void hiEl.offsetHeight;
+    hiEl.style.transition=''; // restore the normal transition for any later toggle (e.g. back-navigation)
+    flights.forEach(({clone})=>clone.remove());
+  },landTime);
+}
+
 // state history for back navigation
 const hist=[];
 
@@ -779,23 +845,23 @@ const SLIDES=[
     {t:'swap',f:'al-info',to:'al-obj',stagger:'.objlist li'},
     {t:'swap',f:'al-obj',to:'al-ov',stagger:'.ov-card'},
     {t:'swap',f:'al-ov',to:'alpha-t1'},
-    {t:'sub',p:'alpha-t1',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'sub',p:'alpha-t1',f:'.chars-pool',to:'.chars-hi'},
     {t:'swap',f:'alpha-t1',to:'alpha-t2'},
-    {t:'sub',p:'alpha-t2',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'sub',p:'alpha-t2',f:'.chars-pool',to:'.chars-hi'},
     {t:'swap',f:'alpha-t2',to:'alpha-t3'},
-    {t:'sub',p:'alpha-t3',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'sub',p:'alpha-t3',f:'.chars-pool',to:'.chars-hi'},
     {t:'swap',f:'alpha-t3',to:'alpha-t4'},
-    {t:'sub',p:'alpha-t4',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'sub',p:'alpha-t4',f:'.chars-pool',to:'.chars-hi'},
     {t:'swap',f:'alpha-t4',to:'alpha-end',stagger:'.ov-card'},
   ]},
   {id:'beta',sp:'bt-info',steps:[
     {t:'swap',f:'bt-info',to:'bt-obj',stagger:'.objlist li'},
     {t:'swap',f:'bt-obj',to:'bt-ov',stagger:'.ov-card'},
     {t:'swap',f:'bt-ov',to:'beta-t1'},
-    {t:'sub',p:'beta-t1',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'sub',p:'beta-t1',f:'.chars-pool',to:'.chars-hi'},
     {t:'swap',f:'beta-t1',to:'beta-t2'},
     {t:'swap',f:'beta-t2',to:'beta-t3'},
-    {t:'sub',p:'beta-t3',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'sub',p:'beta-t3',f:'.chars-pool',to:'.chars-hi'},
     {t:'swap',f:'beta-t3',to:'beta-end',stagger:'.ov-card'},
   ]},
   {id:'gamma',sp:'gm-info',steps:[
@@ -803,9 +869,9 @@ const SLIDES=[
     {t:'swap',f:'gm-obj',to:'gm-ov',stagger:'.ov-card'},
     {t:'swap',f:'gm-ov',to:'gamma-t1'},
     {t:'swap',f:'gamma-t1',to:'gamma-t2'},
-    {t:'sub',p:'gamma-t2',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'sub',p:'gamma-t2',f:'.chars-pool',to:'.chars-hi'},
     {t:'swap',f:'gamma-t2',to:'gamma-t3'},
-    {t:'sub',p:'gamma-t3',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'sub',p:'gamma-t3',f:'.chars-pool',to:'.chars-hi'},
     {t:'swap',f:'gamma-t3',to:'gamma-end',stagger:'.ov-card'},
   ]},
   {id:'plan',sp:null,steps:[
@@ -827,7 +893,12 @@ function exec(step){
     fi(el);
     if(prepped)staggerPlay(prepped);
   }
-  else if(step.t==='sub'){const ph=qi(step.p);xf(ph.querySelector(step.f),ph.querySelector(step.to),step.stagger);}
+  else if(step.t==='sub'){
+    const ph=qi(step.p);
+    const poolEl=ph.querySelector(step.f), hiEl=ph.querySelector(step.to);
+    if(step.f==='.chars-pool'&&step.to==='.chars-hi') flySubTransition(poolEl,hiEl);
+    else xf(poolEl,hiEl,step.stagger);
+  }
 }
 function undo(step){
   if(step.t==='swap') xf(qi(step.to),qi(step.f));
