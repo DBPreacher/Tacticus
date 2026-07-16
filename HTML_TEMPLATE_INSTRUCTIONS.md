@@ -163,23 +163,22 @@ pool) for each track: track name, conditions/chips, pts/stage, character list.
 
 ## Character Role Colour Coding
 
-CSS supports four role classes on `.charlist li` / `.ov-chars li`:
+CSS still defines four role classes (`"healer"` green, `"tank"` blue,
+`"self-heal"`/`"resilient"` purple, `"chosen"` white) that can be applied to
+`.charlist li` / `.ov-chars li`, but **none of them are actually used
+anywhere in practice as of the v6 Uthar rebuild.** Every chosen/picked
+character — in the team pool/highlight lists (`.chars-pool`, `.chars-hi`)
+and in the Summary (`*-end`) `.ov-chars` lists — renders as plain white
+`chosen` text, no role colouring, no icons. This was a deliberate
+simplification: Summary cards used to colour+heart-icon healers green,
+but with nothing else in that list getting any special treatment, the
+lone healer highlight looked out of place rather than informative, so it
+was removed for visual consistency.
 
-| Role key | Colour | When to use |
-|----------|--------|-------------|
-| `"healer"` | Green | Character has `Healer = Y` in CSV |
-| `"tank"` | Blue | `Terminator_Armour = Y` or `Mk_X_Gravis = Y` |
-| `"self-heal"` / `"resilient"` | Purple | `Self_Heal = Y` or `Resilient = Y` (CSS only defines a `.resilient` class — reuse it for self-heal characters too, since they share the same purple/✦ styling) |
-| `"chosen"` | White | Default for chosen characters |
-
-**Observed convention in practice:** team pool/highlight lists (`.chars-pool`,
-`.chars-hi`) stay plain `chosen`/`unchosen` even when a character is a
-tank/healer/self-heal/resilient — role colouring is NOT applied there, to
-keep the reveal clean. The **only** place role colour is actually applied
-is the `healer` class on Summary (`*-end`) `.ov-chars` lists, so the
-recap cards show at a glance which teams have healer coverage. Keep this
-convention unless you deliberately want to expand it — if you do, apply
-tank/resilient consistently across ALL team phases at once, not just some.
+If you want to bring role colouring back, apply it consistently across
+ALL team phases and ALL roles at once (not just healers, not just
+Summary) so it reads as an intentional system rather than an
+inconsistency.
 
 Tyrant Guard and Thothmek are ability-based tanks — flag them manually in
 the roles dict when they appear in a recommended team, since the CSV won't
@@ -310,3 +309,4 @@ The project knowledge in Claude.ai should contain:
 | July 2026 | Initial HTML template built for LE 14 Uthar (v4) |
 | July 2026 | Meta-aware team selection added to `le_analysis.py` — uses meta composition (2H+2T+1SH) as tiebreaker when multiple combinations score equally |
 | July 2026 | Rebuilt LE 14 Uthar HTML (v6) from a re-run analysis with updated roster data. Documented that team count per track is variable (matches `Tokens:`, not fixed at 3) and added the `.ov-row.cols-4` CSS pattern for tracks with 4+ teams. Clarified that obj-chips must reflect only "newly covers" conditions per team (found and fixed a stale redundant chip from the old file). Documented the actual role-colouring convention (healer-only, applied in Summary cards). Added the `★ High-priority investment` note convention. Replaced "judgment call" Monthly Plan guidance with an explicit usage-frequency tally method. Renamed "Self-Heal / DR" to "Self-Heal / Damage Reduction" everywhere. |
+| July 2026 | Polish pass on v6: unified slide/frame insets, fixed pool-list auto-fit to actually trigger and scale to ~100 characters, replaced flat crossfades with eased motion + staggered reveals, added a FLIP-style "fly" animation for the pool→5-man-team transition, moved the "N eligible characters" note into the team-bar to free up list space, and removed the healer green/heart styling from Summary `.ov-chars` (see updated Character Role Colour Coding section — no role colouring is used anywhere now). |
