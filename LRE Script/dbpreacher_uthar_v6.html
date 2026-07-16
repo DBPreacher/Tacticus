@@ -101,7 +101,7 @@ body{position:relative;width:1920px;height:1080px;overflow:hidden;background:#0a
 .chars-pool.chars-hi{transform:translateY(0);}
 .pnote{font-family:Rajdhani;font-size:17px;letter-spacing:1px;color:#7a8494;margin-bottom:12px;}
 .pnote.lock{display:inline-flex;align-items:center;gap:8px;color:#e05252;background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);padding:8px 16px;border-radius:6px;font-weight:600;font-size:16px;}
-.pnote.priority{color:#f07028;font-size:23px;font-weight:700;letter-spacing:.5px;margin-top:26px;padding-top:18px;border-top:1px solid rgba(240,112,40,.3);}
+.pnote.priority{color:#f07028;font-size:23px;font-weight:700;letter-spacing:.5px;margin-top:26px;padding-top:18px;border-top:1px solid rgba(240,112,40,.3);transition:opacity .4s cubic-bezier(.22,.9,.32,1),transform .4s cubic-bezier(.22,.9,.32,1);}
 .charlist{list-style:none;display:flex;flex-direction:column;gap:var(--gap,14px);font-size:34px;}
 .charlist.cols-2{display:block;columns:2;column-gap:50px;}
 .charlist.cols-3{display:block;columns:3;column-gap:36px;}
@@ -776,8 +776,32 @@ function flySubTransition(poolEl,hiEl){
   if(!poolEl||!hiEl)return;
   const poolItems=[...poolEl.querySelectorAll('.charlist li')];
   const hiItems=[...hiEl.querySelectorAll('.charlist li')];
+  const priorityNote=hiEl.querySelector('.pnote.priority');
   const layer=getFlyLayer();
   const flights=[];
+
+  // hi is still visibility:hidden (real layout, just not painted) at this
+  // point, but its default CSS resting transform is translateY(14px) —
+  // normalize it to its true final position (0) BEFORE measuring where
+  // each character lands, otherwise every destination rect is captured
+  // 14px too low, and the real list visibly snaps upward the instant it's
+  // revealed at the end of the flight. transition:none + forced reflow
+  // makes this instant — without it, the transform change just starts an
+  // animated .4s transition, so a same-tick measurement still sees the
+  // old, un-settled position.
+  hiEl.style.transition='none';
+  hiEl.style.transform='translateY(0)';
+  void hiEl.offsetHeight;
+  if(priorityNote){
+    // fades in separately, after the characters land — priming it hidden
+    // now so it doesn't flash visible the instant the container reveals
+    priorityNote.style.transition='none';
+    priorityNote.style.opacity='0';
+    priorityNote.style.transform='translateY(10px)';
+    void priorityNote.offsetHeight; // commit the hidden state instantly
+    priorityNote.style.transition=''; // restore its CSS transition so the later fi() call actually animates
+  }
+
   hiItems.forEach(hiLi=>{
     const name=hiLi.textContent.trim();
     const poolLi=poolItems.find(li=>li.textContent.trim()===name);
@@ -822,6 +846,9 @@ function flySubTransition(poolEl,hiEl){
     void hiEl.offsetHeight;
     hiEl.style.transition=''; // restore the normal transition for any later toggle (e.g. back-navigation)
     flights.forEach(({clone})=>clone.remove());
+    // let the last character land and settle before the priority note
+    // makes its own entrance, rather than popping in with everything else
+    if(priorityNote) setTimeout(()=>fi(priorityNote),260);
   },landTime);
 }
 
