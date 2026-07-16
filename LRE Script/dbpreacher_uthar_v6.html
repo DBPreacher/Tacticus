@@ -90,12 +90,14 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .pnote{font-family:Rajdhani;font-size:17px;letter-spacing:1px;color:#7a8494;margin-bottom:12px;}
 .pnote.lock{display:inline-flex;align-items:center;gap:8px;color:#e05252;background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);padding:8px 16px;border-radius:6px;font-weight:600;font-size:16px;}
 .pnote.priority{color:#f07028;font-size:23px;font-weight:700;letter-spacing:.5px;margin-top:26px;padding-top:18px;border-top:1px solid rgba(240,112,40,.3);}
-.charlist{list-style:none;display:flex;flex-direction:column;gap:var(--gap,14px);--fs:34px;}
+.charlist{list-style:none;display:flex;flex-direction:column;gap:var(--gap,14px);font-size:34px;}
 .charlist.cols-2{display:block;columns:2;column-gap:50px;}
 .charlist.cols-3{display:block;columns:3;column-gap:36px;}
 .charlist.cols-4{display:block;columns:4;column-gap:28px;}
-.charlist.cols-2 li,.charlist.cols-3 li,.charlist.cols-4 li{break-inside:avoid;margin-bottom:var(--gap,14px);}
-.charlist li{font-family:'Cinzel',serif;font-size:var(--fs);font-weight:700;color:#e8eaf0;letter-spacing:.5px;transition:all .4s ease;}
+.charlist.cols-5{display:block;columns:5;column-gap:22px;}
+.charlist.cols-6{display:block;columns:6;column-gap:18px;}
+.charlist.cols-2 li,.charlist.cols-3 li,.charlist.cols-4 li,.charlist.cols-5 li,.charlist.cols-6 li{break-inside:avoid;margin-bottom:inherit;}
+.charlist li{font-family:'Cinzel',serif;font-size:inherit;font-weight:700;color:#e8eaf0;letter-spacing:.5px;transition:all .4s ease;}
 .charlist li::before{content:'— ';color:#f07028;}
 .charlist li.chosen{color:#fff;}
 .charlist li.healer{color:#3dbb7e;}
@@ -873,37 +875,58 @@ upd();
 // auto-fit large pool lists: try 2/3/4 columns, then shrink font, then
 // truncate to first 30 as a last resort — keeps every pool readable at 1920x1080
 function fitPoolLists(){
+  const COLS=['cols-2','cols-3','cols-4','cols-5','cols-6'];
   document.querySelectorAll('.chars-pool').forEach(pool=>{
     const ul=pool.querySelector('.charlist');
     const wrap=pool.closest('.chars-wrap');
     if(!ul||!wrap||ul.querySelectorAll('li').length<=12)return;
-    ul.classList.remove('cols-2','cols-3','cols-4');
-    ul.style.removeProperty('--fs');
-    ul.style.removeProperty('--gap');
+    ul.classList.remove(...COLS);
+    ul.style.removeProperty('font-size');
+    ul.style.removeProperty('margin-bottom');
     const noteH=[...pool.querySelectorAll('.pnote')].reduce((s,p)=>s+p.offsetHeight,0);
     const avail=wrap.clientHeight-noteH;
     const fits=()=>ul.scrollHeight<=avail;
     if(fits())return;
-    for(const cols of ['cols-2','cols-3','cols-4']){
+    for(const cols of COLS){
+      ul.classList.remove(...COLS);
       ul.classList.add(cols);
       if(fits())return;
     }
-    let fs=34,gap=14;
-    while(!fits()&&fs>18){
-      fs-=2;gap=Math.max(6,gap-1);
-      ul.style.setProperty('--fs',fs+'px');
-      ul.style.setProperty('--gap',gap+'px');
-    }
-    if(!fits()){
-      const items=[...ul.querySelectorAll('li')];
-      const hidden=items.length-30;
-      items.slice(30).forEach(li=>li.remove());
-      const more=document.createElement('li');
-      more.style.cssText='color:#5a6070;font-style:italic;';
-      more.textContent='+ '+hidden+' more not shown';
-      ul.appendChild(more);
-    }
+    // still doesn't fit even at max columns — shrink font/line-gap in fine
+    // steps (down to a still-legible floor) before ever hiding names.
+    // Each step waits a frame before re-measuring: multi-column layouts
+    // can report stale scrollHeight/computed-style if font-size is
+    // mutated many times in a single synchronous pass.
+    shrinkToFit(ul,avail,34,14);
   });
+}
+function shrinkToFit(ul,avail,fs,gap){
+  const fits=()=>ul.scrollHeight<=avail;
+  if(fits()||fs<=13){
+    if(!fits())truncatePool(ul);
+    return;
+  }
+  requestAnimationFrame(()=>{
+    fs-=1;gap=Math.max(3,gap-1);
+    ul.style.fontSize=fs+'px';
+    ul.style.marginBottom=gap+'px';
+    shrinkToFit(ul,avail,fs,gap);
+  });
+}
+function truncatePool(ul){
+  // last-resort safety net only — full rosters top out around 100
+  // eligible characters, so columns+font scaling above should already
+  // cover that; this only fires on a genuinely pathological list
+  const cap=100;
+  const items=[...ul.querySelectorAll('li')];
+  if(items.length>cap){
+    const hidden=items.length-cap;
+    items.slice(cap).forEach(li=>li.remove());
+    const more=document.createElement('li');
+    more.style.cssText='color:#5a6070;font-style:italic;';
+    more.textContent='+ '+hidden+' more not shown';
+    ul.appendChild(more);
+  }
 }
 document.fonts.ready.then(fitPoolLists);
 </script>
