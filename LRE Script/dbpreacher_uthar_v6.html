@@ -981,6 +981,107 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('click',()=>advance());
 
+// ---- idle ambient flourishes ----
+// After a stretch with no clicks, play one small, tasteful flourish — a
+// glint travelling once around the frame border, or a soft pulse along
+// the current header's divider line — so a long pause while talking
+// doesn't read as a frozen slide. Deliberately rare: a long cooldown
+// (with jitter, so it doesn't fall into a noticeable rhythm) between
+// each one, and any click resets the idle clock immediately.
+let lastInteraction=Date.now();
+let lastAmbient=0;
+const IDLE_MIN=9000;
+const AMBIENT_COOLDOWN=17000;
+document.addEventListener('click',()=>{lastInteraction=Date.now();},true);
+document.addEventListener('keydown',()=>{lastInteraction=Date.now();},true);
+
+function currentHeaderLineRect(){
+  const activeSlide=document.querySelector('.slide.active');
+  if(!activeSlide)return null;
+  const persistLine=activeSlide.querySelector('.persist-line');
+  if(persistLine){
+    const r=persistLine.getBoundingClientRect();
+    if(r.width>10)return r;
+  }
+  const title=activeSlide.querySelector('.slide-title');
+  if(title){
+    const r=title.getBoundingClientRect();
+    if(r.width>10)return {left:r.left,right:r.right,top:r.bottom-2,width:r.width};
+  }
+  return null;
+}
+function pulseLine(){
+  const rect=currentHeaderLineRect();
+  if(!rect)return;
+  const bar=document.createElement('div');
+  bar.style.cssText='position:fixed;top:0;left:0;width:120px;height:6px;'
+    +'background:linear-gradient(90deg,transparent,rgba(255,214,150,.85),transparent);'
+    +'filter:blur(1px);pointer-events:none;z-index:850;opacity:0;'
+    +'transform:translate('+(rect.left-120)+'px,'+(rect.top-2)+'px);'
+    +'transition:transform 1.3s cubic-bezier(.4,.05,.3,1),opacity .35s ease;';
+  document.body.appendChild(bar);
+  void bar.offsetHeight;
+  bar.style.opacity='1';
+  bar.style.transform='translate('+rect.right+'px,'+(rect.top-2)+'px)';
+  setTimeout(()=>{bar.style.opacity='0';},1150);
+  setTimeout(()=>bar.remove(),1550);
+}
+
+let idleSparkleSvg=null;
+function getIdleSparkleSvg(){
+  if(idleSparkleSvg)return idleSparkleSvg;
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 0 1920 1080');
+  svg.style.cssText='position:absolute;inset:0;width:1920px;height:1080px;pointer-events:none;z-index:550;opacity:0;transition:opacity .4s ease;';
+  const defs=document.createElementNS(ns,'defs');
+  const grad=document.createElementNS(ns,'linearGradient');
+  grad.setAttribute('id','idleSparkleGrad');
+  [[0,'#f07028',0],[50,'#ffe3b8',1],[100,'#f07028',0]].forEach(([off,c,op])=>{
+    const stop=document.createElementNS(ns,'stop');
+    stop.setAttribute('offset',off+'%');
+    stop.setAttribute('stop-color',c);
+    stop.setAttribute('stop-opacity',op);
+    grad.appendChild(stop);
+  });
+  defs.appendChild(grad);
+  svg.appendChild(defs);
+  const rect=document.createElementNS(ns,'rect');
+  rect.setAttribute('x','20');rect.setAttribute('y','20');
+  rect.setAttribute('width','1880');rect.setAttribute('height','1040');
+  rect.setAttribute('rx','10');
+  rect.setAttribute('fill','none');
+  rect.setAttribute('stroke','url(#idleSparkleGrad)');
+  rect.setAttribute('stroke-width','8');
+  rect.setAttribute('stroke-linecap','round');
+  rect.setAttribute('stroke-dasharray','170 5700');
+  svg.appendChild(rect);
+  document.body.appendChild(svg);
+  idleSparkleSvg=svg;
+  return svg;
+}
+function sparkleBorder(){
+  const svg=getIdleSparkleSvg();
+  const rect=svg.querySelector('rect');
+  rect.style.transition='none';
+  rect.style.strokeDashoffset='0';
+  void rect.offsetHeight;
+  svg.style.opacity='1';
+  rect.style.transition='stroke-dashoffset 2.6s cubic-bezier(.4,.1,.3,1)';
+  void rect.offsetHeight;
+  rect.style.strokeDashoffset='-5820';
+  setTimeout(()=>{svg.style.opacity='0';},2500);
+}
+
+function maybeFireAmbient(){
+  const now=Date.now();
+  if(now-lastInteraction<IDLE_MIN)return;
+  if(now-lastAmbient<AMBIENT_COOLDOWN)return;
+  lastAmbient=now;
+  if(Math.random()<0.5)pulseLine();else sparkleBorder();
+}
+setInterval(maybeFireAmbient,1000);
+
 els.forEach((el,i)=>{if(i!==0)el.classList.remove('active');});
 els[0].classList.add('active');
 upd();
