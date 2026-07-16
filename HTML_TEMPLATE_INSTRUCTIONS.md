@@ -99,6 +99,56 @@ No other UI is visible on screen — no counters, no hints.
 
 ---
 
+## Template Mechanics — Preserve These When Building a New LE
+
+The v6 Uthar file went through a substantial polish/bug-fix pass (see
+Changelog). None of this needs touching for a normal new-LE content update —
+it's all driven by generic selectors, not per-LE data — but if you're editing
+the CSS/JS structure itself (not just swapping in new team data), these are
+non-obvious and easy to accidentally break or "clean up" back in:
+
+- **`#fm-main,#plan-main{padding:...}` is not redundant with `.slide`'s own
+  padding.** Both phases sit directly inside `.slide` with no `.phases-wrap`
+  in between (unlike the track slides). A `position:absolute;inset:0` child's
+  inset is relative to the ancestor's *padding box*, which bypasses the
+  ancestor's own padding entirely — so these two phases need their own copy
+  of the same padding value, or their content renders flush against the
+  frame border with no inset at all. This looks like duplicate/dead CSS; it
+  isn't.
+- **`.frame`/`.logo-corner` must stay `position:absolute`, not `fixed`, and
+  `body` must stay `position:relative`.** This is a fixed-size 1920×1080
+  recording canvas, not a scrolling page — a viewport-anchored (`fixed`)
+  overlay drifts away from the body's own content if the actual browser
+  window/zoom/OBS scale doesn't exactly match that native size.
+- **`fitPoolLists()` and `equalizeChipRows()` must keep being called from
+  inside `goTo()`**, not just once at page load. A track's pools/cards only
+  get a real (non `display:none`) layout box once their slide is actually
+  active — calling these only at load time means every slide after the
+  first one never gets fitted/aligned at all. If you add a 6th slide or
+  restructure navigation, keep this hook.
+- **Team reveal steps must stay `{t:'sub',p:'<phase-id>',f:'.chars-pool',
+  to:'.chars-hi'}`** with no `stagger` property — this exact shape is what
+  triggers `flySubTransition()`, the FLIP-style animation that flies picked
+  characters from their pool position to their team-slot position. A
+  `stagger` property on a `sub` step is inert (silently ignored).
+- **No `requestAnimationFrame` in the animation code** — `fi()`/`fo()`/
+  `staggerPlay()`/`flySubTransition()` all use a forced synchronous reflow
+  (`void el.offsetHeight`) or `setTimeout` instead. `requestAnimationFrame`
+  callbacks simply don't fire on a page that isn't receiving paint frames,
+  which can happen with some OBS Browser Source configurations or an
+  occluded/backgrounded window — reveals built on rAF can get permanently
+  stuck invisible. Follow the same pattern for any new animation you add.
+- **Pool auto-fit scales up to ~100 eligible characters automatically**
+  (tries 2–6 columns, then shrinks font/gap down to a 13px/3px floor, and
+  only truncates past 100 as a last resort) — you don't need to manually
+  adjust anything for a track with an unusually large eligible pool.
+- **Idle ambient flourishes** (a border glint / header-line pulse that fires
+  rarely during a long pause with no click) are fully generic — they query
+  `.slide.active`, `.persist-line`, and `.slide-title` directly, so they
+  carry over to a new LE with no changes needed.
+
+---
+
 ## Updating for a New LE
 
 ### Step 1 — Run the analysis
@@ -139,19 +189,29 @@ For each track, update every team phase (`<track>-t1` … `<track>-tN`,
 where N = Tokens for that track):
 
 - Team Overview card (pts, "Team N · Token N" label, obj-chips)
-- Team-bar (same pts/chips, repeated in the per-team phase)
+- Team-bar (same pts/chips, repeated in the per-team phase). The team-bar-top
+  row also carries the eligible-character count as
+  `<span class="tn-note">N eligible characters</span>` right next to the
+  `<span class="tn">Team N</span>` label — **not** a separate `<p class="pnote">`
+  above the pool list. Putting it above the list costs ~34px of vertical
+  space the 5-man list doesn't pay, which visibly misaligns the pool/5-man
+  list start positions during the reveal — keep it in the team-bar.
 - Pool list (`.chars-pool`) — every eligible character, in the order the
-  analysis lists them
+  analysis lists them. No `<p class="pnote">` note before the `<ul>` (see
+  above — that count lives in the team-bar now).
 - Highlight list (`.chars-hi`) — same characters, marked `chosen`/`unchosen`
-  (or `healer` for HEALER-tagged chosen characters — see coloring notes below)
+  (plain, no role colour — see Character Role Colour Coding below)
 - If pool size == 5 (team size), it's a **locked** team: use
-  `<p class="pnote lock">⚠ Only 5 eligible — all required</p>`, collapse
-  `.chars-pool` and `.chars-hi` into a single always-visible block (see
-  Beta Team 2 / Gamma Team 1 in the Uthar template for the exact pattern),
-  and skip the `sub` reveal step for that phase in the JS.
-- Summary card (`.ov-chars`) — the Recommended 5 only, with `healer` class
-  applied to any HEALER-tagged character (this is the only role color
-  actually used in ov-chars/team lists in practice — see below)
+  `<p class="pnote lock">⚠ Only 5 eligible — all required</p>` inside the
+  merged `.chars-pool.chars-hi` block, **and** add
+  `<span class="lock-badge">⚠ Locked</span>` next to the `<span class="tn">`
+  label in that team's team-bar-top (see Beta Team 2 / Gamma Team 1 in the
+  Uthar template for the exact pattern). Collapse `.chars-pool` and
+  `.chars-hi` into a single always-visible block, and skip the `sub` reveal
+  step for that phase in the JS (see Template Mechanics below for the exact
+  step shape).
+- Summary card (`.ov-chars`) — the Recommended 5 only, plain `chosen`
+  styling, no role colour (see Character Role Colour Coding below)
 
 **Fastest Method** — update the 3 starting team sections using the
 analysis's "MOST EFFICIENT STARTING TEAM → Recommended" list (not the full
@@ -310,3 +370,4 @@ The project knowledge in Claude.ai should contain:
 | July 2026 | Meta-aware team selection added to `le_analysis.py` — uses meta composition (2H+2T+1SH) as tiebreaker when multiple combinations score equally |
 | July 2026 | Rebuilt LE 14 Uthar HTML (v6) from a re-run analysis with updated roster data. Documented that team count per track is variable (matches `Tokens:`, not fixed at 3) and added the `.ov-row.cols-4` CSS pattern for tracks with 4+ teams. Clarified that obj-chips must reflect only "newly covers" conditions per team (found and fixed a stale redundant chip from the old file). Documented the actual role-colouring convention (healer-only, applied in Summary cards). Added the `★ High-priority investment` note convention. Replaced "judgment call" Monthly Plan guidance with an explicit usage-frequency tally method. Renamed "Self-Heal / DR" to "Self-Heal / Damage Reduction" everywhere. |
 | July 2026 | Polish pass on v6: unified slide/frame insets, fixed pool-list auto-fit to actually trigger and scale to ~100 characters, replaced flat crossfades with eased motion + staggered reveals, added a FLIP-style "fly" animation for the pool→5-man-team transition, moved the "N eligible characters" note into the team-bar to free up list space, and removed the healer green/heart styling from Summary `.ov-chars` (see updated Character Role Colour Coding section — no role colouring is used anywhere now). |
+| July 2026 | Follow-up fixes on v6: anchored `.frame`/`.logo-corner` to the body canvas (`position:absolute`, not `fixed`) instead of the viewport; restored `#fm-main`/`#plan-main`'s own padding rule after discovering it wasn't redundant (see Template Mechanics); replaced all `requestAnimationFrame` usage in the animation code with forced-reflow/`setTimeout`, since rAF can simply never fire on a non-painting page (some OBS Browser Source configurations, occluded windows) and was leaving reveals stuck invisible; fixed the fly-transition's destination measurement so characters land exactly where the real list settles (was off by 14px, causing a visible snap); gave the high-priority-investment note its own delayed fade-in instead of popping in with everything else; added rare idle-time ambient flourishes (border glint / header-line pulse) for long pauses with no click. Added a new "Template Mechanics" section documenting all of the above as things to preserve, not clean up. |
