@@ -822,6 +822,9 @@ function goTo(newSi){
   els[si].classList.add('active');
   const def=SLIDES[si];
   if(def.sp) setTimeout(()=>fi(qi(def.sp)),50);
+  // pools inside this slide only get a real (non display:none) layout box
+  // now that it's active — re-run the fit pass against actual measurements
+  fitPoolLists();
   upd();
 }
 
@@ -872,14 +875,23 @@ els.forEach((el,i)=>{if(i!==0)el.classList.remove('active');});
 els[0].classList.add('active');
 upd();
 
-// auto-fit large pool lists: try 2/3/4 columns, then shrink font, then
-// truncate to first 30 as a last resort — keeps every pool readable at 1920x1080
+// auto-fit large pool lists: try 2-6 columns, then shrink font/gap, then
+// truncate to 100 as a last resort — keeps every pool readable at 1920x1080
+const fitTokens=new WeakMap();
 function fitPoolLists(){
   const COLS=['cols-2','cols-3','cols-4','cols-5','cols-6'];
   document.querySelectorAll('.chars-pool').forEach(pool=>{
     const ul=pool.querySelector('.charlist');
     const wrap=pool.closest('.chars-wrap');
     if(!ul||!wrap||ul.querySelectorAll('li').length<=12)return;
+    // wrap has no real layout box right now (its slide isn't the active
+    // one) — skip rather than reset, so a pool fitted on an earlier visit
+    // to this slide isn't clobbered by a sweep triggered from elsewhere
+    if(wrap.clientHeight===0)return;
+    // bump this pool's token so any still-running async shrink chain from
+    // a previous (possibly stale/redundant) call aborts instead of racing
+    const token=(fitTokens.get(ul)||0)+1;
+    fitTokens.set(ul,token);
     ul.classList.remove(...COLS);
     ul.style.removeProperty('font-size');
     ul.style.removeProperty('margin-bottom');
@@ -897,20 +909,22 @@ function fitPoolLists(){
     // Each step waits a frame before re-measuring: multi-column layouts
     // can report stale scrollHeight/computed-style if font-size is
     // mutated many times in a single synchronous pass.
-    shrinkToFit(ul,avail,34,14);
+    shrinkToFit(ul,avail,34,14,token);
   });
 }
-function shrinkToFit(ul,avail,fs,gap){
+function shrinkToFit(ul,avail,fs,gap,token){
+  if(fitTokens.get(ul)!==token)return; // superseded by a newer fitPoolLists() run
   const fits=()=>ul.scrollHeight<=avail;
   if(fits()||fs<=13){
     if(!fits())truncatePool(ul);
     return;
   }
   requestAnimationFrame(()=>{
+    if(fitTokens.get(ul)!==token)return;
     fs-=1;gap=Math.max(3,gap-1);
     ul.style.fontSize=fs+'px';
     ul.style.marginBottom=gap+'px';
-    shrinkToFit(ul,avail,fs,gap);
+    shrinkToFit(ul,avail,fs,gap,token);
   });
 }
 function truncatePool(ul){
@@ -928,7 +942,14 @@ function truncatePool(ul){
     ul.appendChild(more);
   }
 }
-document.fonts.ready.then(fitPoolLists);
+// The real trigger is inside goTo() — a track's pools only get a genuine
+// (non display:none) layout box once its slide is actually active, so
+// fitting has to happen at that point, not just once at page load.
+// Still run it once up front (harmless, fastest-method slide has no
+// pools) and again once the real font swaps in, since Cinzel's metrics
+// can differ from the fallback font used for the very first measurement.
+fitPoolLists();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitPoolLists).catch(()=>{});
 </script>
 </body>
 </html>
