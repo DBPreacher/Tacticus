@@ -63,10 +63,11 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .ov-row.cols-4 .ov-chars li{font-size:17px;}
 .ov-card{background:#0f1318;border:1px solid rgba(240,112,40,.2);border-top:3px solid #f07028;border-radius:8px;padding:22px 26px;display:flex;flex-direction:column;gap:12px;}
 .ov-top{display:flex;align-items:baseline;gap:16px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07);}
+.ov-card .obj-chips{min-height:116px;align-content:flex-start;}
 .ov-pts{font-family:Rajdhani;font-size:44px;font-weight:700;color:#c8a84b;line-height:1;}
 .ov-pts small{font-size:16px;color:#5a6070;margin-left:4px;}
 .ov-t{font-family:Rajdhani;font-size:16px;color:#5a6070;letter-spacing:1px;text-transform:uppercase;}
-.ov-chars{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+.ov-chars{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:6px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);}
 .ov-chars li{font-family:Cinzel;font-size:20px;font-weight:700;color:#e8eaf0;}
 .ov-chars li::before{content:'— ';color:#f07028;}
 .ov-chars li.healer{color:#3dbb7e;}
@@ -85,11 +86,12 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .pnote{font-family:Rajdhani;font-size:17px;letter-spacing:1px;color:#7a8494;margin-bottom:12px;}
 .pnote.lock{color:#e05252;}
 .pnote.priority{color:#f07028;font-size:23px;font-weight:700;letter-spacing:.5px;margin-top:26px;padding-top:18px;border-top:1px solid rgba(240,112,40,.3);}
-.charlist{list-style:none;display:flex;flex-direction:column;gap:14px;}
+.charlist{list-style:none;display:flex;flex-direction:column;gap:var(--gap,14px);--fs:34px;}
 .charlist.cols-2{display:block;columns:2;column-gap:50px;}
 .charlist.cols-3{display:block;columns:3;column-gap:36px;}
-.charlist.cols-2 li,.charlist.cols-3 li{break-inside:avoid;margin-bottom:14px;}
-.charlist li{font-family:'Cinzel',serif;font-size:34px;font-weight:700;color:#e8eaf0;letter-spacing:.5px;transition:all .4s ease;}
+.charlist.cols-4{display:block;columns:4;column-gap:28px;}
+.charlist.cols-2 li,.charlist.cols-3 li,.charlist.cols-4 li{break-inside:avoid;margin-bottom:var(--gap,14px);}
+.charlist li{font-family:'Cinzel',serif;font-size:var(--fs);font-weight:700;color:#e8eaf0;letter-spacing:.5px;transition:all .4s ease;}
 .charlist li::before{content:'— ';color:#f07028;}
 .charlist li.chosen{color:#fff;}
 .charlist li.healer{color:#3dbb7e;}
@@ -304,7 +306,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 <div class="chars-wrap">
   <div class="chars-pool">
     <p class="pnote">32 eligible characters</p>
-    <ul class="charlist cols-3"><li>Abraxas</li><li>Actus</li><li>Aesoth</li><li>Ahriman</li><li>Ancient Thoread</li><li>Archimatos</li><li>Azkor</li><li>Azrael</li><li>Castellan Creed</li><li>Certus</li><li>Commissar Yarrick</li><li>Corrodius</li><li>Exitor-Rho</li><li>Incisus</li><li>Laviscus</li><li>Marneus Calgar</li><li>Mataneo</li><li>Mephiston</li><li>Njal</li><li>Pestillian</li><li>Roswitha</li><li>Sarquael</li><li>Sibyll Devine</li><li>Sword Brother Godswyl</li><li>Tan Gi'da</li><li>Tarvakh</li><li>Thaumachus</li><li>Typhus</li><li>Tyrith</li><li>Varro Tigurius</li><li>Vitruvius</li><li>Yazaghor</li></ul>
+    <ul class="charlist"><li>Abraxas</li><li>Actus</li><li>Aesoth</li><li>Ahriman</li><li>Ancient Thoread</li><li>Archimatos</li><li>Azkor</li><li>Azrael</li><li>Castellan Creed</li><li>Certus</li><li>Commissar Yarrick</li><li>Corrodius</li><li>Exitor-Rho</li><li>Incisus</li><li>Laviscus</li><li>Marneus Calgar</li><li>Mataneo</li><li>Mephiston</li><li>Njal</li><li>Pestillian</li><li>Roswitha</li><li>Sarquael</li><li>Sibyll Devine</li><li>Sword Brother Godswyl</li><li>Tan Gi'da</li><li>Tarvakh</li><li>Thaumachus</li><li>Typhus</li><li>Tyrith</li><li>Varro Tigurius</li><li>Vitruvius</li><li>Yazaghor</li></ul>
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
     <ul class="charlist"><li class="chosen">Actus</li><li class="chosen">Incisus</li><li class="chosen">Marneus Calgar</li><li class="chosen">Typhus</li><li class="chosen">Vitruvius</li></ul>
@@ -617,7 +619,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 <div class="chars-wrap">
   <div class="chars-pool">
     <p class="pnote">18 eligible characters</p>
-    <ul class="charlist cols-2"><li>Aesoth</li><li>Ammuk</li><li>Azrael</li><li>Calandis</li><li>Certus</li><li>Hollan</li><li>Incisus</li><li>Isaak</li><li>Mataneo</li><li>Neurothrope</li><li>Parasite of Mortrex</li><li>Sarquael</li><li>Sho'syl</li><li>Sibyll Devine</li><li>Sword Brother Godswyl</li><li>Tan Gi'da</li><li>Varro Tigurius</li><li>Vitruvius</li></ul>
+    <ul class="charlist"><li>Aesoth</li><li>Ammuk</li><li>Azrael</li><li>Calandis</li><li>Certus</li><li>Hollan</li><li>Incisus</li><li>Isaak</li><li>Mataneo</li><li>Neurothrope</li><li>Parasite of Mortrex</li><li>Sarquael</li><li>Sho'syl</li><li>Sibyll Devine</li><li>Sword Brother Godswyl</li><li>Tan Gi'da</li><li>Varro Tigurius</li><li>Vitruvius</li></ul>
   </div>
   <div class="chars-hi" style="opacity:0;visibility:hidden">
     
@@ -828,6 +830,43 @@ document.addEventListener('click',()=>advance());
 els.forEach((el,i)=>{if(i!==0)el.classList.remove('active');});
 els[0].classList.add('active');
 upd();
+
+// auto-fit large pool lists: try 2/3/4 columns, then shrink font, then
+// truncate to first 30 as a last resort — keeps every pool readable at 1920x1080
+function fitPoolLists(){
+  document.querySelectorAll('.chars-pool').forEach(pool=>{
+    const ul=pool.querySelector('.charlist');
+    const wrap=pool.closest('.chars-wrap');
+    if(!ul||!wrap||ul.querySelectorAll('li').length<=12)return;
+    ul.classList.remove('cols-2','cols-3','cols-4');
+    ul.style.removeProperty('--fs');
+    ul.style.removeProperty('--gap');
+    const noteH=[...pool.querySelectorAll('.pnote')].reduce((s,p)=>s+p.offsetHeight,0);
+    const avail=wrap.clientHeight-noteH;
+    const fits=()=>ul.scrollHeight<=avail;
+    if(fits())return;
+    for(const cols of ['cols-2','cols-3','cols-4']){
+      ul.classList.add(cols);
+      if(fits())return;
+    }
+    let fs=34,gap=14;
+    while(!fits()&&fs>18){
+      fs-=2;gap=Math.max(6,gap-1);
+      ul.style.setProperty('--fs',fs+'px');
+      ul.style.setProperty('--gap',gap+'px');
+    }
+    if(!fits()){
+      const items=[...ul.querySelectorAll('li')];
+      const hidden=items.length-30;
+      items.slice(30).forEach(li=>li.remove());
+      const more=document.createElement('li');
+      more.style.cssText='color:#5a6070;font-style:italic;';
+      more.textContent='+ '+hidden+' more not shown';
+      ul.appendChild(more);
+    }
+  });
+}
+document.fonts.ready.then(fitPoolLists);
 </script>
 </body>
 </html>
