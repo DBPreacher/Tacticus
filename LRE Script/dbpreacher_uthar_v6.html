@@ -955,14 +955,16 @@ function truncatePool(ul){
     ul.appendChild(more);
   }
 }
-// keeps every Overview/Summary card's obj-chips box the same height across
-// a row, regardless of whether a team has 1 or several chips — otherwise
-// the character list under a 1-chip card sits higher than under a
-// 2-chip card, visibly misaligning the row
+// keeps every Overview/Summary/Fastest-Method card's obj-chips box the
+// same height across a row, regardless of whether a team has 1 or several
+// chips (or whether they wrap to 2 lines) — otherwise the character list
+// under a 1-row-of-chips card sits higher than under a 2-row card,
+// visibly misaligning the row (e.g. Fastest Method's Gamma Track, whose
+// 3rd chip wraps to its own line, unlike Alpha/Beta's single-row chips)
 function equalizeChipRows(){
-  document.querySelectorAll('.ov-row').forEach(row=>{
+  document.querySelectorAll('.ov-row, .ft-grid').forEach(row=>{
     if(row.getBoundingClientRect().height===0)return; // not laid out (inactive slide) — leave alone
-    const boxes=[...row.querySelectorAll(':scope > .ov-card .obj-chips')];
+    const boxes=[...row.querySelectorAll(':scope > .ov-card .obj-chips, :scope > .ft-card .obj-chips')];
     if(!boxes.length)return;
     boxes.forEach(b=>b.style.removeProperty('min-height'));
     const maxH=Math.max(...boxes.map(b=>b.getBoundingClientRect().height));
