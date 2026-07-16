@@ -18,6 +18,13 @@ body{position:relative;width:1920px;height:1080px;overflow:hidden;background:#0a
 .logo-corner img{width:100%;display:block;}
 .nav-hint{display:none;}
 .nav-counter{display:none;}
+/* fm-main/plan-main are .phase elements sitting directly inside .slide
+   (no .phases-wrap in between, unlike the track slides). A .phase's
+   inset:0 is relative to the nearest positioned ancestor's PADDING BOX,
+   which means it aligns flush with .slide's border, bypassing .slide's
+   own padding entirely — so these two need their own copy of the same
+   padding value, or their content renders with no inset at all. */
+#fm-main,#plan-main{padding:44px 56px 42px;}
 
 /* Slides */
 .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:44px 56px 42px;}
