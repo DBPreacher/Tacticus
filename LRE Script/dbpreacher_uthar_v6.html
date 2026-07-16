@@ -8,9 +8,13 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--fs-heading:50px;--fs-points:44px;}
 html{background:#000;}
-body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'Inter',sans-serif;color:#e8eaf0;}
-.frame{position:fixed;inset:16px;border:8px solid #f07028;border-radius:14px;pointer-events:none;z-index:500;}
-.logo-corner{position:fixed;top:0;right:0;width:195px;z-index:600;}
+body{position:relative;width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'Inter',sans-serif;color:#e8eaf0;}
+/* absolute (anchored to the 1920x1080 body), not fixed (anchored to the
+   browser viewport) — this is a fixed-size recording canvas, not a
+   scrolling page, so the frame/logo must track the body's own edges
+   regardless of the actual window/zoom/OBS scale being used to view it */
+.frame{position:absolute;inset:16px;border:8px solid #f07028;border-radius:14px;pointer-events:none;z-index:500;}
+.logo-corner{position:absolute;top:0;right:0;width:195px;z-index:600;}
 .logo-corner img{width:100%;display:block;}
 .nav-hint{display:none;}
 .nav-counter{display:none;}
