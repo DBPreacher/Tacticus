@@ -705,7 +705,16 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 function fi(el){
   if(!el)return;
   el.style.visibility='visible';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.opacity='1';el.style.transform='translateY(0)';}));
+  // force a layout flush of the hidden state before flipping to visible,
+  // so the transition actually plays instead of being coalesced into one
+  // frame. Uses a synchronous reflow rather than requestAnimationFrame —
+  // rAF callbacks simply never fire on a page that isn't receiving paint
+  // frames (e.g. an occluded/backgrounded OBS browser source), which
+  // left reveals permanently stuck at opacity:0 despite visibility
+  // flipping to visible.
+  void el.offsetHeight;
+  el.style.opacity='1';
+  el.style.transform='translateY(0)';
 }
 function fo(el,cb){
   if(!el)return;
@@ -737,13 +746,13 @@ function staggerPrep(container,selector){
   return items;
 }
 function staggerPlay(items,step=70,dur=420){
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    items.forEach((it,i)=>{
-      it.style.transition='opacity '+dur+'ms cubic-bezier(.22,.9,.32,1) '+(i*step)+'ms,transform '+dur+'ms cubic-bezier(.22,.9,.32,1) '+(i*step)+'ms';
-      it.style.opacity='1';
-      it.style.transform='translateY(0)';
-    });
-  }));
+  if(!items.length)return;
+  void items[0].offsetHeight; // flush the prepped (hidden) state — see fi() note above
+  items.forEach((it,i)=>{
+    it.style.transition='opacity '+dur+'ms cubic-bezier(.22,.9,.32,1) '+(i*step)+'ms,transform '+dur+'ms cubic-bezier(.22,.9,.32,1) '+(i*step)+'ms';
+    it.style.opacity='1';
+    it.style.transform='translateY(0)';
+  });
 }
 
 // state history for back navigation
@@ -920,13 +929,16 @@ function shrinkToFit(ul,avail,fs,gap,token){
     if(!fits())truncatePool(ul);
     return;
   }
-  requestAnimationFrame(()=>{
+  // setTimeout, not requestAnimationFrame — rAF never fires on a page
+  // that isn't receiving paint frames, which would leave an oversized
+  // pool stuck mid-shrink forever instead of settling at a size that fits
+  setTimeout(()=>{
     if(fitTokens.get(ul)!==token)return;
     fs-=1;gap=Math.max(3,gap-1);
     ul.style.fontSize=fs+'px';
     ul.style.marginBottom=gap+'px';
     shrinkToFit(ul,avail,fs,gap,token);
-  });
+  },0);
 }
 function truncatePool(ul){
   // last-resort safety net only — full rosters top out around 100
