@@ -61,15 +61,15 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .ov-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;flex:1;}
 .ov-row.cols-4{grid-template-columns:repeat(4,1fr);}
 .ov-row.cols-4 .ov-pts{font-size:36px;}
-.ov-row.cols-4 .ov-chars li{font-size:17px;}
+.ov-row.cols-4 .ov-chars li{font-size:23px;}
 .ov-card{background:#0f1318;border:1px solid rgba(240,112,40,.2);border-top:3px solid #f07028;border-radius:8px;padding:22px 26px;display:flex;flex-direction:column;gap:12px;}
 .ov-top{display:flex;align-items:baseline;gap:16px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07);}
-.ov-card .obj-chips{min-height:116px;align-content:flex-start;}
+.ov-card .obj-chips{align-content:flex-start;}
 .ov-pts{font-family:Rajdhani;font-size:var(--fs-points);font-weight:700;color:#c8a84b;line-height:1;}
 .ov-pts small{font-size:16px;color:#5a6070;margin-left:4px;}
 .ov-t{font-family:Rajdhani;font-size:16px;color:#5a6070;letter-spacing:1px;text-transform:uppercase;}
 .ov-chars{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:6px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);}
-.ov-chars li{font-family:Cinzel;font-size:20px;font-weight:700;color:#e8eaf0;}
+.ov-chars li{font-family:Cinzel;font-size:28px;font-weight:700;color:#e8eaf0;}
 .ov-chars li::before{content:'— ';color:#f07028;}
 .ov-chars li.healer{color:#3dbb7e;}
 .ov-chars li.healer::before{content:'♥ ';color:#3dbb7e;}
@@ -822,9 +822,10 @@ function goTo(newSi){
   els[si].classList.add('active');
   const def=SLIDES[si];
   if(def.sp) setTimeout(()=>fi(qi(def.sp)),50);
-  // pools inside this slide only get a real (non display:none) layout box
-  // now that it's active — re-run the fit pass against actual measurements
+  // pools/cards inside this slide only get a real (non display:none) layout
+  // box now that it's active — re-run the fit passes against real measurements
   fitPoolLists();
+  equalizeChipRows();
   upd();
 }
 
@@ -942,14 +943,31 @@ function truncatePool(ul){
     ul.appendChild(more);
   }
 }
-// The real trigger is inside goTo() — a track's pools only get a genuine
-// (non display:none) layout box once its slide is actually active, so
-// fitting has to happen at that point, not just once at page load.
-// Still run it once up front (harmless, fastest-method slide has no
-// pools) and again once the real font swaps in, since Cinzel's metrics
+// keeps every Overview/Summary card's obj-chips box the same height across
+// a row, regardless of whether a team has 1 or several chips — otherwise
+// the character list under a 1-chip card sits higher than under a
+// 2-chip card, visibly misaligning the row
+function equalizeChipRows(){
+  document.querySelectorAll('.ov-row').forEach(row=>{
+    if(row.getBoundingClientRect().height===0)return; // not laid out (inactive slide) — leave alone
+    const boxes=[...row.querySelectorAll(':scope > .ov-card .obj-chips')];
+    if(!boxes.length)return;
+    boxes.forEach(b=>b.style.removeProperty('min-height'));
+    const maxH=Math.max(...boxes.map(b=>b.getBoundingClientRect().height));
+    boxes.forEach(b=>b.style.minHeight=maxH+'px');
+  });
+}
+// The real trigger for both is inside goTo() — a track's pools/cards only
+// get a genuine (non display:none) layout box once its slide is actually
+// active, so fitting has to happen at that point, not just once at page
+// load. Still run once up front (harmless, fastest-method slide has
+// neither) and again once the real font swaps in, since Cinzel's metrics
 // can differ from the fallback font used for the very first measurement.
 fitPoolLists();
-if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitPoolLists).catch(()=>{});
+equalizeChipRows();
+if(document.fonts&&document.fonts.ready){
+  document.fonts.ready.then(()=>{fitPoolLists();equalizeChipRows();}).catch(()=>{});
+}
 </script>
 </body>
 </html>
