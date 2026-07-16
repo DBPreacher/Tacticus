@@ -6,16 +6,17 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Cinzel+Decorative:wght@400;700;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
+:root{--fs-heading:50px;--fs-points:44px;}
 html{background:#000;}
 body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'Inter',sans-serif;color:#e8eaf0;}
 .frame{position:fixed;inset:16px;border:8px solid #f07028;border-radius:14px;pointer-events:none;z-index:500;}
 .logo-corner{position:fixed;top:0;right:0;width:195px;z-index:600;}
 .logo-corner img{width:100%;display:block;}
 .nav-hint{display:none;}
-.nav-counter{display:none;}#fm-main,#plan-main{padding:44px 60px 44px;}
+.nav-counter{display:none;}
 
 /* Slides */
-.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:42px 52px 40px;}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;padding:44px 56px 42px;}
 .slide.active{display:flex;}
 
 /* Persistent header (track slides) */
@@ -26,14 +27,14 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 
 /* Phases container */
 .phases-wrap{position:relative;flex:1;margin-top:18px;}
-.phase{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .45s ease;}
-.phase.vis{opacity:1;visibility:visible;}
+.phase{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .48s cubic-bezier(.22,.9,.32,1),transform .48s cubic-bezier(.22,.9,.32,1);}
+.phase.vis{opacity:1;visibility:visible;transform:translateY(0);}
 
 /* Phase label */
 .phase-lbl{font-family:Rajdhani;font-size:19px;letter-spacing:3px;text-transform:uppercase;color:#f07028;margin-bottom:20px;flex-shrink:0;}
 
 /* Full-slide title (for fastest/monthly) */
-.slide-title{font-family:'Cinzel Decorative',serif;font-size:52px;font-weight:700;font-style:italic;color:#fff;text-align:center;padding-bottom:14px;margin-bottom:24px;border-bottom:2px solid #f07028;flex-shrink:0;}
+.slide-title{font-family:'Cinzel Decorative',serif;font-size:var(--fs-heading);font-weight:700;font-style:italic;color:#fff;text-align:center;padding-bottom:14px;margin-bottom:24px;border-bottom:2px solid #f07028;flex-shrink:0;}
 .slide-title small{display:block;font-size:17px;font-weight:400;font-style:normal;color:#f07028;font-family:Rajdhani;letter-spacing:4px;text-transform:uppercase;margin-bottom:4px;}
 
 /* INFO phase — full width 3 columns */
@@ -41,7 +42,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .ib{display:flex;flex-direction:column;justify-content:flex-start;padding:32px 56px 32px;border-right:1px solid rgba(240,112,40,.15);}
 .ib:last-child{border-right:none;}
 .il{font-family:Rajdhani;font-size:18px;letter-spacing:3px;text-transform:uppercase;color:#f07028;margin-bottom:16px;font-weight:600;}
-.iv{font-family:'Cinzel',serif;font-size:50px;font-weight:700;line-height:1.2;color:#fff;}
+.iv{font-family:'Cinzel',serif;font-size:var(--fs-heading);font-weight:700;line-height:1.2;color:#fff;}
 .iv.restr{color:#e05252;}
 
 /* OBJECTIVES phase */
@@ -64,7 +65,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .ov-card{background:#0f1318;border:1px solid rgba(240,112,40,.2);border-top:3px solid #f07028;border-radius:8px;padding:22px 26px;display:flex;flex-direction:column;gap:12px;}
 .ov-top{display:flex;align-items:baseline;gap:16px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.07);}
 .ov-card .obj-chips{min-height:116px;align-content:flex-start;}
-.ov-pts{font-family:Rajdhani;font-size:44px;font-weight:700;color:#c8a84b;line-height:1;}
+.ov-pts{font-family:Rajdhani;font-size:var(--fs-points);font-weight:700;color:#c8a84b;line-height:1;}
 .ov-pts small{font-size:16px;color:#5a6070;margin-left:4px;}
 .ov-t{font-family:Rajdhani;font-size:16px;color:#5a6070;letter-spacing:1px;text-transform:uppercase;}
 .ov-chars{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:6px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);}
@@ -78,13 +79,16 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .team-bar-top{grid-column:1;grid-row:1;display:flex;align-items:baseline;gap:16px;}.tn{font-family:Rajdhani;font-size:17px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#5a6070;}
 .tpts{font-family:Rajdhani;font-size:34px;font-weight:700;color:#c8a84b;grid-column:2;grid-row:1;align-self:baseline;}
 .tpts small{font-size:15px;color:#5a6070;margin-left:4px;}
-.lock-badge{font-size:13px;font-weight:600;letter-spacing:1px;background:rgba(224,82,82,.12);border:1px solid rgba(224,82,82,.35);color:#e05252;padding:4px 12px;border-radius:4px;}
+.lock-badge{align-self:center;display:inline-flex;align-items:center;gap:7px;font-family:Rajdhani;font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:rgba(224,82,82,.12);border:1px solid rgba(224,82,82,.4);color:#e05252;padding:5px 14px;border-radius:5px;}
 
 /* CHARS */
 .chars-wrap{position:relative;flex:1;}
-.chars-pool,.chars-hi{position:absolute;inset:0;display:flex;flex-direction:column;gap:0;transition:opacity .4s ease;}
+.chars-pool,.chars-hi{position:absolute;inset:0;display:flex;flex-direction:column;gap:0;transition:opacity .4s cubic-bezier(.22,.9,.32,1),transform .4s cubic-bezier(.22,.9,.32,1);}
+.chars-pool{transform:translateY(0);}
+.chars-hi{transform:translateY(14px);}
+.chars-pool.chars-hi{transform:translateY(0);}
 .pnote{font-family:Rajdhani;font-size:17px;letter-spacing:1px;color:#7a8494;margin-bottom:12px;}
-.pnote.lock{color:#e05252;}
+.pnote.lock{display:inline-flex;align-items:center;gap:8px;color:#e05252;background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.3);padding:8px 16px;border-radius:6px;font-weight:600;font-size:16px;}
 .pnote.priority{color:#f07028;font-size:23px;font-weight:700;letter-spacing:.5px;margin-top:26px;padding-top:18px;border-top:1px solid rgba(240,112,40,.3);}
 .charlist{list-style:none;display:flex;flex-direction:column;gap:var(--gap,14px);--fs:34px;}
 .charlist.cols-2{display:block;columns:2;column-gap:50px;}
@@ -105,8 +109,8 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .ft-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;flex:1;}
 .ft-card{background:#0f1318;border:1px solid rgba(240,112,40,.2);border-top:3px solid #f07028;border-radius:8px;padding:24px 28px;display:flex;flex-direction:column;gap:14px;}
 .ft-name{font-family:Rajdhani;font-size:26px;font-weight:700;color:#f07028;letter-spacing:2px;text-transform:uppercase;}
-.ft-body{display:flex;flex-direction:column;gap:14px;transition:opacity .45s ease;}
-.ft-pts{font-family:Rajdhani;font-size:46px;font-weight:700;color:#c8a84b;line-height:1;}
+.ft-body{display:flex;flex-direction:column;gap:14px;transform:translateY(14px);transition:opacity .45s cubic-bezier(.22,.9,.32,1),transform .45s cubic-bezier(.22,.9,.32,1);}
+.ft-pts{font-family:Rajdhani;font-size:var(--fs-points);font-weight:700;color:#c8a84b;line-height:1;}
 .ft-pts small{font-size:16px;color:#5a6070;}
 .ftchars{list-style:none;display:flex;flex-direction:column;gap:9px;}
 .ftchars li{font-family:Cinzel;font-size:22px;font-weight:700;color:#e8eaf0;}
@@ -120,7 +124,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 .plan-ttl.tanks{color:#4a9eff;}
 .plan-ttl.self{color:#a67cff;}
 .plan-ttl.relevant{color:#c8a84b;}
-.plan-body{display:flex;flex-direction:column;gap:8px;transition:opacity .45s ease;}
+.plan-body{display:flex;flex-direction:column;gap:8px;transform:translateY(14px);transition:opacity .45s cubic-bezier(.22,.9,.32,1),transform .45s cubic-bezier(.22,.9,.32,1);}
 .plan-chars{list-style:none;display:flex;flex-direction:column;gap:8px;}
 .plan-chars li{font-family:Cinzel;font-size:24px;font-weight:700;color:#e8eaf0;}
 .plan-chars li::before{content:'— ';color:#f07028;}
@@ -443,7 +447,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 </div>
 <div class="phase" id="beta-t2" style="opacity:0;visibility:hidden">
   <div class="team-bar">
-    <div class="team-bar-top"><span class="tn">Team 2</span></div>
+    <div class="team-bar-top"><span class="tn">Team 2</span><span class="lock-badge">⚠ Locked</span></div>
     <div class="obj-chips"><span class="oc" style="border-color:#8a603040;color:#8a6030">No Psyker <em style="color:#c8a84b">55</em></span><span class="oc" style="border-color:#f0702840;color:#f07028">Terminator Armour <em style="color:#c8a84b">85</em></span></div>
     <span class="tpts">140<small>pts/stage</small></span>
   </div>
@@ -578,7 +582,7 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 </div>
 <div class="phase" id="gamma-t1" style="opacity:0;visibility:hidden">
   <div class="team-bar">
-    <div class="team-bar-top"><span class="tn">Team 1</span></div>
+    <div class="team-bar-top"><span class="tn">Team 1</span><span class="lock-badge">⚠ Locked</span></div>
     <div class="obj-chips"><span class="oc" style="border-color:#c8a84b40;color:#c8a84b">Mechanical <em style="color:#c8a84b">100</em></span><span class="oc" style="border-color:#d4803a40;color:#d4803a">Big Target <em style="color:#c8a84b">65</em></span></div>
     <span class="tpts">165<small>pts/stage</small></span>
   </div>
@@ -699,64 +703,94 @@ body{width:1920px;height:1080px;overflow:hidden;background:#0a0a0a;font-family:'
 function fi(el){
   if(!el)return;
   el.style.visibility='visible';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.opacity='1';}));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.opacity='1';el.style.transform='translateY(0)';}));
 }
 function fo(el,cb){
   if(!el)return;
   el.style.opacity='0';
-  setTimeout(()=>{el.style.visibility='hidden';if(cb)cb();},450);
+  el.style.transform='translateY(-14px)';
+  setTimeout(()=>{el.style.visibility='hidden';if(cb)cb();},500);
 }
-function xf(a,b){fo(a);setTimeout(()=>fi(b),250);}
+function xf(a,b,staggerSel){
+  fo(a);
+  const prepped=staggerSel?staggerPrep(b,staggerSel):null;
+  setTimeout(()=>{
+    fi(b);
+    if(prepped)staggerPlay(prepped);
+  },260);
+}
 function qs(sel){return document.querySelector(sel);}
 function qi(id){return document.getElementById(id);}
+
+// stagger helpers — cascade a group of children in one-by-one instead of
+// all popping in at once with their parent
+function staggerPrep(container,selector){
+  if(!container)return [];
+  const items=[...container.querySelectorAll(selector)];
+  items.forEach(it=>{
+    it.style.transition='none';
+    it.style.opacity='0';
+    it.style.transform='translateY(10px)';
+  });
+  return items;
+}
+function staggerPlay(items,step=70,dur=420){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    items.forEach((it,i)=>{
+      it.style.transition='opacity '+dur+'ms cubic-bezier(.22,.9,.32,1) '+(i*step)+'ms,transform '+dur+'ms cubic-bezier(.22,.9,.32,1) '+(i*step)+'ms';
+      it.style.opacity='1';
+      it.style.transform='translateY(0)';
+    });
+  }));
+}
 
 // state history for back navigation
 const hist=[];
 
 const SLIDES=[
   {id:'fastest',sp:null,steps:[
-    {t:'show-sub',s:'#fc-alpha'},
-    {t:'show-sub',s:'#fc-beta'},
-    {t:'show-sub',s:'#fc-gamma'},
+    {t:'show-sub',s:'#fc-alpha',stagger:'.ftchars li'},
+    {t:'show-sub',s:'#fc-beta',stagger:'.ftchars li'},
+    {t:'show-sub',s:'#fc-gamma',stagger:'.ftchars li'},
   ]},
   {id:'alpha',sp:'al-info',steps:[
-    {t:'swap',f:'al-info',to:'al-obj'},
-    {t:'swap',f:'al-obj',to:'al-ov'},
+    {t:'swap',f:'al-info',to:'al-obj',stagger:'.objlist li'},
+    {t:'swap',f:'al-obj',to:'al-ov',stagger:'.ov-card'},
     {t:'swap',f:'al-ov',to:'alpha-t1'},
-    {t:'sub',p:'alpha-t1',f:'.chars-pool',to:'.chars-hi'},
+    {t:'sub',p:'alpha-t1',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
     {t:'swap',f:'alpha-t1',to:'alpha-t2'},
-    {t:'sub',p:'alpha-t2',f:'.chars-pool',to:'.chars-hi'},
+    {t:'sub',p:'alpha-t2',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
     {t:'swap',f:'alpha-t2',to:'alpha-t3'},
-    {t:'sub',p:'alpha-t3',f:'.chars-pool',to:'.chars-hi'},
+    {t:'sub',p:'alpha-t3',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
     {t:'swap',f:'alpha-t3',to:'alpha-t4'},
-    {t:'sub',p:'alpha-t4',f:'.chars-pool',to:'.chars-hi'},
-    {t:'swap',f:'alpha-t4',to:'alpha-end'},
+    {t:'sub',p:'alpha-t4',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'swap',f:'alpha-t4',to:'alpha-end',stagger:'.ov-card'},
   ]},
   {id:'beta',sp:'bt-info',steps:[
-    {t:'swap',f:'bt-info',to:'bt-obj'},
-    {t:'swap',f:'bt-obj',to:'bt-ov'},
+    {t:'swap',f:'bt-info',to:'bt-obj',stagger:'.objlist li'},
+    {t:'swap',f:'bt-obj',to:'bt-ov',stagger:'.ov-card'},
     {t:'swap',f:'bt-ov',to:'beta-t1'},
-    {t:'sub',p:'beta-t1',f:'.chars-pool',to:'.chars-hi'},
+    {t:'sub',p:'beta-t1',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
     {t:'swap',f:'beta-t1',to:'beta-t2'},
     {t:'swap',f:'beta-t2',to:'beta-t3'},
-    {t:'sub',p:'beta-t3',f:'.chars-pool',to:'.chars-hi'},
-    {t:'swap',f:'beta-t3',to:'beta-end'},
+    {t:'sub',p:'beta-t3',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'swap',f:'beta-t3',to:'beta-end',stagger:'.ov-card'},
   ]},
   {id:'gamma',sp:'gm-info',steps:[
-    {t:'swap',f:'gm-info',to:'gm-obj'},
-    {t:'swap',f:'gm-obj',to:'gm-ov'},
+    {t:'swap',f:'gm-info',to:'gm-obj',stagger:'.objlist li'},
+    {t:'swap',f:'gm-obj',to:'gm-ov',stagger:'.ov-card'},
     {t:'swap',f:'gm-ov',to:'gamma-t1'},
     {t:'swap',f:'gamma-t1',to:'gamma-t2'},
-    {t:'sub',p:'gamma-t2',f:'.chars-pool',to:'.chars-hi'},
+    {t:'sub',p:'gamma-t2',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
     {t:'swap',f:'gamma-t2',to:'gamma-t3'},
-    {t:'sub',p:'gamma-t3',f:'.chars-pool',to:'.chars-hi'},
-    {t:'swap',f:'gamma-t3',to:'gamma-end'},
+    {t:'sub',p:'gamma-t3',f:'.chars-pool',to:'.chars-hi',stagger:'.charlist li'},
+    {t:'swap',f:'gamma-t3',to:'gamma-end',stagger:'.ov-card'},
   ]},
   {id:'plan',sp:null,steps:[
-    {t:'show-sub',s:'#pc-healers'},
-    {t:'show-sub',s:'#pc-tanks'},
-    {t:'show-sub',s:'#pc-self'},
-    {t:'show-sub',s:'#pc-relevant'},
+    {t:'show-sub',s:'#pc-healers',stagger:'.plan-chars li'},
+    {t:'show-sub',s:'#pc-tanks',stagger:'.plan-chars li'},
+    {t:'show-sub',s:'#pc-self',stagger:'.plan-chars li'},
+    {t:'show-sub',s:'#pc-relevant',stagger:'.plan-chars li'},
   ]},
 ];
 
@@ -764,9 +798,14 @@ let si=0,pi=0;
 const els=SLIDES.map(s=>qi(s.id));
 
 function exec(step){
-  if(step.t==='swap') xf(qi(step.f),qi(step.to));
-  else if(step.t==='show-sub') fi(qs(step.s));
-  else if(step.t==='sub'){const ph=qi(step.p);xf(ph.querySelector(step.f),ph.querySelector(step.to));}
+  if(step.t==='swap') xf(qi(step.f),qi(step.to),step.stagger);
+  else if(step.t==='show-sub'){
+    const el=qs(step.s);
+    const prepped=step.stagger?staggerPrep(el,step.stagger):null;
+    fi(el);
+    if(prepped)staggerPlay(prepped);
+  }
+  else if(step.t==='sub'){const ph=qi(step.p);xf(ph.querySelector(step.f),ph.querySelector(step.to),step.stagger);}
 }
 function undo(step){
   if(step.t==='swap') xf(qi(step.to),qi(step.f));
