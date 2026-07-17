@@ -145,7 +145,41 @@ non-obvious and easy to accidentally break or "clean up" back in:
 - **Idle ambient flourishes** (a border glint / header-line pulse that fires
   rarely during a long pause with no click) are fully generic — they query
   `.slide.active`, `.persist-line`, and `.slide-title` directly, so they
-  carry over to a new LE with no changes needed.
+  carry over to a new LE with no changes needed. Both effects share one
+  `pulseAlongRect()` helper that clips the moving highlight inside an
+  `overflow:hidden` wrapper sized exactly to the target rect — if you add a
+  third flourish, reuse this rather than letting a bar/glint travel freely,
+  or it can overshoot past the line/edge it's meant to highlight (this
+  happened once already — see Changelog). The border glint's wrapper is
+  deliberately `z-index:520` — above `.frame` (500) so it's visible on the
+  border, but below `.logo-corner` (600) so it slides behind the logo and
+  disappears there instead of sliding over the top of it.
+- **`flySubTransition()`'s pool→5-man handoff is an atomic instant swap, on
+  purpose — don't "smooth" it with a fade or a delayed clone removal.**
+  Both were tried and made it worse: revealing the real list instantly and
+  removing the clones ~60ms later avoided a one-frame "wipe" but caused a
+  brief double-strength "pulse" (clone + real text both at full opacity in
+  the same spot); crossfading the handoff avoided the pulse but read as its
+  own flicker. The real list and every clone must change in the same
+  synchronous step with no transition in between. Related to this: `.chars-hi`
+  flips to `visibility:visible` the moment the flight *starts* (staying
+  invisible via `opacity:0` for the ~830ms flight), not at the landing
+  moment — toggling `visibility` right at the handoff instant is a heavier
+  operation for the browser (can force a compositing-layer rebuild) than a
+  plain opacity change, and was a plausible source of the flicker
+  independent of any JS timing.
+- **Each chosen character's real pool `<li>` is hidden instantly (`opacity:0`,
+  no transition) the moment its clone spawns** — otherwise the pool's own
+  container-level fade-out (`fo(poolEl)`, opacity + a 14px drift) animates
+  the original name too, so you'd see both the moving clone *and* the real
+  name ghosting/drifting behind it (most visible when a character is
+  already near the top of a short pool, since then the clone barely has to
+  travel and the stray drift becomes the only visible motion). This hiding
+  is undone by `resetPoolItemVisibility()`, called both at the start of
+  every `flySubTransition()` (so a repeat visit starts clean) and inside
+  `undo()`'s handling of `sub` steps (so pressing back always shows the
+  full pool again). If you touch this flow, keep both call sites — dropping
+  either one leaves a chosen character's name stuck invisible in the pool.
 
 ---
 
@@ -371,3 +405,4 @@ The project knowledge in Claude.ai should contain:
 | July 2026 | Rebuilt LE 14 Uthar HTML (v6) from a re-run analysis with updated roster data. Documented that team count per track is variable (matches `Tokens:`, not fixed at 3) and added the `.ov-row.cols-4` CSS pattern for tracks with 4+ teams. Clarified that obj-chips must reflect only "newly covers" conditions per team (found and fixed a stale redundant chip from the old file). Documented the actual role-colouring convention (healer-only, applied in Summary cards). Added the `★ High-priority investment` note convention. Replaced "judgment call" Monthly Plan guidance with an explicit usage-frequency tally method. Renamed "Self-Heal / DR" to "Self-Heal / Damage Reduction" everywhere. |
 | July 2026 | Polish pass on v6: unified slide/frame insets, fixed pool-list auto-fit to actually trigger and scale to ~100 characters, replaced flat crossfades with eased motion + staggered reveals, added a FLIP-style "fly" animation for the pool→5-man-team transition, moved the "N eligible characters" note into the team-bar to free up list space, and removed the healer green/heart styling from Summary `.ov-chars` (see updated Character Role Colour Coding section — no role colouring is used anywhere now). |
 | July 2026 | Follow-up fixes on v6: anchored `.frame`/`.logo-corner` to the body canvas (`position:absolute`, not `fixed`) instead of the viewport; restored `#fm-main`/`#plan-main`'s own padding rule after discovering it wasn't redundant (see Template Mechanics); replaced all `requestAnimationFrame` usage in the animation code with forced-reflow/`setTimeout`, since rAF can simply never fire on a non-painting page (some OBS Browser Source configurations, occluded windows) and was leaving reveals stuck invisible; fixed the fly-transition's destination measurement so characters land exactly where the real list settles (was off by 14px, causing a visible snap); gave the high-priority-investment note its own delayed fade-in instead of popping in with everything else; added rare idle-time ambient flourishes (border glint / header-line pulse) for long pauses with no click. Added a new "Template Mechanics" section documenting all of the above as things to preserve, not clean up. |
+| July 2026 | Second follow-up pass: fixed both idle ambient flourishes overshooting past their target line/edge (replaced with a shared `pulseAlongRect()` helper clipped to the exact target rect) and put the border glint behind the logo (`z-index:520`, between the frame and the logo) instead of sliding over it. Fixed real graphical bugs in the pool→5-man fly transition reported after actually watching it record: chosen pool names were ghosting/drifting behind their own flying clone (fixed by hiding the real `<li>` the instant its clone spawns, with `resetPoolItemVisibility()` undoing that on back-navigation/repeat visits); and a one-frame flicker on landing, which took three attempts to get right — a delayed clone-removal fixed an initial "wipe" but caused a brightness "pulse" (both clone and real text at full opacity at once), a crossfade to smooth that itself read as flicker, and the fix that actually stuck was an atomic instant swap combined with settling `.chars-hi`'s `visibility:visible` at flight-start rather than at the landing instant (see Template Mechanics for why toggling `visibility` at the handoff moment mattered). Also fixed a corrupted class attribute on the Monthly Plan Healers title (a stray pasted timestamp had silently broken its green styling) and trimmed the Tanks card to the top 4 champions. |
