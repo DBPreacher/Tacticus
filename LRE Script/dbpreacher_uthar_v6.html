@@ -855,19 +855,34 @@ function flySubTransition(poolEl,hiEl){
 
   const landTime=550+(flights.length-1)*70+40;
   setTimeout(()=>{
-    // reveal the real 5-man list instantly right as the clones land, so
-    // it reads as one continuous motion rather than a fly + a fade-in
+    // Crossfade the handoff: real list fades in while the clones fade out,
+    // over the same window. An earlier version snapped the real list to
+    // full opacity instantly and removed the clones ~60ms later — that
+    // guaranteed some overlap to avoid a "wipe" (both hidden for a frame),
+    // but for that whole window both the clone AND the real text sat at
+    // full opacity in the same spot, which visually stacked into a
+    // brief brighter/bolder "pulse". A synchronised crossfade keeps the
+    // combined visual weight roughly constant the whole time — never
+    // empty, never doubled.
     hiEl.style.transition='none';
-    hiEl.style.opacity='1';
+    hiEl.style.opacity='0';
     hiEl.style.visibility='visible';
     hiEl.style.transform='translateY(0)';
     void hiEl.offsetHeight;
-    hiEl.style.transition=''; // restore the normal transition for any later toggle (e.g. back-navigation)
-    // remove the clones a beat AFTER the real list is already visible,
-    // not in the same tick — guarantees a brief overlap (same text, same
-    // spot, imperceptible) instead of risking a gap where neither is
-    // shown, which read as a one-frame wipe
-    setTimeout(()=>{flights.forEach(({clone})=>clone.remove());},60);
+    hiEl.style.transition='opacity .2s ease';
+    void hiEl.offsetHeight;
+    hiEl.style.opacity='1';
+
+    flights.forEach(({clone})=>{
+      clone.style.transition='opacity .2s ease';
+      void clone.offsetHeight;
+      clone.style.opacity='0';
+    });
+
+    setTimeout(()=>{
+      hiEl.style.transition=''; // restore the normal transition for any later toggle (e.g. back-navigation)
+      flights.forEach(({clone})=>clone.remove());
+    },220);
     // let the last character land and settle before the priority note
     // makes its own entrance, rather than popping in with everything else
     if(priorityNote) setTimeout(()=>fi(priorityNote),260);
