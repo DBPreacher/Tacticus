@@ -1015,10 +1015,10 @@ function currentHeaderLineRect(){
 // overflow:hidden does the clipping — the bar itself starts/ends fully
 // outside the wrapper, at -barWidth / rect.width, so only the portion
 // inside [0, rect.width] is ever visible).
-function pulseAlongRect(rect,barWidth,duration){
+function pulseAlongRect(rect,barWidth,duration,z){
   if(!rect||rect.width<10)return;
   const wrap=document.createElement('div');
-  wrap.style.cssText='position:fixed;overflow:hidden;pointer-events:none;z-index:850;'
+  wrap.style.cssText='position:fixed;overflow:hidden;pointer-events:none;z-index:'+(z||850)+';'
     +'left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;height:'+rect.height+'px;';
   const bar=document.createElement('div');
   bar.style.cssText='position:absolute;top:0;left:0;width:'+barWidth+'px;height:100%;'
@@ -1041,11 +1041,13 @@ function pulseLine(){
 }
 function sparkleBorder(){
   // sweeps just the frame's top edge — a short, contained glint rather
-  // than a full lap around all four sides
+  // than a full lap around all four sides. z-index sits above the frame
+  // (500) but below the logo (600), so the glint visually slides behind
+  // the logo and disappears there instead of sliding over the top of it.
   const frame=document.querySelector('.frame');
   if(!frame)return;
   const r=frame.getBoundingClientRect();
-  pulseAlongRect({left:r.left,top:r.top-3,width:r.width,height:8},150,1300);
+  pulseAlongRect({left:r.left,top:r.top-3,width:r.width,height:8},150,1300,520);
 }
 
 function maybeFireAmbient(){
