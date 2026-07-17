@@ -840,9 +840,17 @@ function flySubTransition(poolEl,hiEl){
 
   fo(poolEl); // everyone left behind fades out as before — the flying clones read on top
 
+  // Set visibility:visible now, for the whole flight (opacity:0 keeps it
+  // invisible in the meantime) — NOT just at the landing moment. Toggling
+  // visibility:hidden->visible is a heavier operation for the browser than
+  // a plain opacity change (it can force a compositing-layer rebuild for
+  // the whole subtree), so doing that flip at the exact instant the real
+  // list needs to appear risked a render hiccup independent of any JS
+  // timing. With visibility already settled well before landing, the
+  // landing step below only ever has to flip opacity.
   hiEl.style.transition='none';
   hiEl.style.opacity='0';
-  hiEl.style.visibility='hidden';
+  hiEl.style.visibility='visible';
   void hiEl.offsetHeight; // flush before the flight starts
 
   flights.forEach(({clone})=>{ void clone.offsetHeight; }); // flush each clone's FROM position
@@ -859,10 +867,11 @@ function flySubTransition(poolEl,hiEl){
     // the same synchronous step, with no delay and no fade in between —
     // the browser paints straight from "clones visible" to "real list
     // visible" in one frame, with nothing rendered in the gap between the
-    // two DOM changes for it to show a partial/mixed state of.
+    // two DOM changes for it to show a partial/mixed state of. visibility
+    // is already 'visible' (set when the flight started, above) — only
+    // opacity/transform need to change here.
     hiEl.style.transition='none';
     hiEl.style.opacity='1';
-    hiEl.style.visibility='visible';
     hiEl.style.transform='translateY(0)';
     void hiEl.offsetHeight;
     hiEl.style.transition=''; // restore the normal transition for any later toggle (e.g. back-navigation)
