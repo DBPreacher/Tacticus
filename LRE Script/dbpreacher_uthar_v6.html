@@ -770,8 +770,19 @@ function getFlyLayer(){
   }
   return flyLayerEl;
 }
+// clears any instant-hide left on pool <li>s from a previous flight, so
+// the pool always shows fully intact when it's shown again (repeat visit,
+// or the user pressing back)
+function resetPoolItemVisibility(poolEl){
+  if(!poolEl)return;
+  poolEl.querySelectorAll('.charlist li').forEach(li=>{
+    li.style.transition='';
+    li.style.opacity='';
+  });
+}
 function flySubTransition(poolEl,hiEl){
   if(!poolEl||!hiEl)return;
+  resetPoolItemVisibility(poolEl); // clean slate in case this is a repeat visit
   const poolItems=[...poolEl.querySelectorAll('.charlist li')];
   const hiItems=[...hiEl.querySelectorAll('.charlist li')];
   const priorityNote=hiEl.querySelector('.pnote.priority');
@@ -806,6 +817,15 @@ function flySubTransition(poolEl,hiEl){
     if(!poolLi)return; // shouldn't happen, but fall back gracefully below if it does
     const fromRect=poolLi.getBoundingClientRect();
     const toRect=hiLi.getBoundingClientRect(); // hi is visibility:hidden but still laid out, so this is valid
+    // hide the real pool item instantly — it's about to be represented by
+    // the clone below. Without this, the pool's own container-level fade
+    // (fo(poolEl) further down) drifts+fades this item too, so you'd see
+    // both the moving clone AND the original ghosting/drifting behind it —
+    // most noticeable exactly when the clone's own travel distance is
+    // small (e.g. a character already near the top of a short pool),
+    // since then the stray drift is the only visible motion.
+    poolLi.style.transition='none';
+    poolLi.style.opacity='0';
     const clone=document.createElement('div');
     clone.innerHTML='<span style="color:#f07028">— </span>'+name;
     clone.style.cssText='position:fixed;left:0;top:0;margin:0;white-space:nowrap;'
@@ -843,7 +863,11 @@ function flySubTransition(poolEl,hiEl){
     hiEl.style.transform='translateY(0)';
     void hiEl.offsetHeight;
     hiEl.style.transition=''; // restore the normal transition for any later toggle (e.g. back-navigation)
-    flights.forEach(({clone})=>clone.remove());
+    // remove the clones a beat AFTER the real list is already visible,
+    // not in the same tick — guarantees a brief overlap (same text, same
+    // spot, imperceptible) instead of risking a gap where neither is
+    // shown, which read as a one-frame wipe
+    setTimeout(()=>{flights.forEach(({clone})=>clone.remove());},60);
     // let the last character land and settle before the priority note
     // makes its own entrance, rather than popping in with everything else
     if(priorityNote) setTimeout(()=>fi(priorityNote),260);
@@ -921,7 +945,12 @@ function exec(step){
 function undo(step){
   if(step.t==='swap') xf(qi(step.to),qi(step.f));
   else if(step.t==='show-sub') fo(qs(step.s));
-  else if(step.t==='sub'){const ph=qi(step.p);xf(ph.querySelector(step.to),ph.querySelector(step.f));}
+  else if(step.t==='sub'){
+    const ph=qi(step.p);
+    const poolEl=ph.querySelector(step.f);
+    resetPoolItemVisibility(poolEl); // undo any instant-hide left on chosen pool items by the fly transition
+    xf(ph.querySelector(step.to),poolEl);
+  }
 }
 
 function goTo(newSi){
