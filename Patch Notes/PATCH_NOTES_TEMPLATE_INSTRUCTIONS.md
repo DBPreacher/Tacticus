@@ -61,15 +61,13 @@ block the whole video on waiting for it. When it's missing:
 - Bug Fixes
 - Requisitions
 - Economy Changes
-- Calendar (visual system agreed; automation/generation not yet built)
+- Calendar (visual system, colorblind-safe palette, exact cadence formulas, and auto-scaling all done; automated generation script not yet built)
+- Character reveal cards (single static layout — see below)
 
 ### Not yet built
-- Character reveal cards (new units)
-- Machine of War reveal cards
-These are the most complex remaining piece — most fields (traits, damage,
-passive, active, relic / primary, secondary, mythic), and the most
-reveal-sequence potential, similar in spirit to the LE deck's team-reveal
-animation.
+- Machine of War reveal cards — same shell/approach as Character cards should
+  largely apply (Primary/Secondary/Mythic instead of Passive/Active/Relic),
+  but not yet tested against a real MoW's actual field shape.
 
 ### Deliberately not dedicated slides
 Per the house script structure, these stay pure narration with no slide:
@@ -105,7 +103,7 @@ possible:
 | Bug Fixes | Red/rust | Matches in-game defeat/negative-state red |
 | Requisitions | Fire-orange | Matches in-game event/featured-character promo art |
 | Economy Changes | Purple | **Not** sourced from an actual game screen — the one invented accent so far, open to revisiting if a better on-brand color turns up |
-| Character/MoW reveals (planned) | Teal | Matches the in-game legendary/mythic glow (seen clearly on the Thothmek legendary character screen) |
+| Character/MoW reveals | Teal | Matches the in-game legendary/mythic glow (seen clearly on the Thothmek legendary character screen). Confirmed working in the built Cezare card. |
 
 ### Typography
 - **Display headers** (big italic titles like "Monthly Bug Fixes"): Cinzel
@@ -115,11 +113,12 @@ possible:
 - **Body/bullet text**: Public Sans. Chosen over Inter for being more
   condensed and slightly easier to scan at a glance; over Rajdhani because
   Rajdhani's technical/display letterforms slow down full-sentence reading.
-- **Planned split for Character/MoW cards**: reserve **Spectral** (serif)
-  specifically for the in-game lore paragraph, and keep everything else
-  (traits/damage/passive/active/relic breakdown) in sans. This follows a
-  "narrative voice vs. data/UI" convention rather than picking one font for
-  the whole card — not yet built, agreed in principle.
+- **Character/MoW cards, confirmed split**: **Spectral** (serif, italic)
+  reserved specifically for the in-game lore paragraph; everything else
+  (traits/damage/passive/active/relic breakdown) stays in Public Sans. Built
+  and tested on the Cezare card — narrative voice vs. data/UI convention,
+  worth judging on a few more characters to confirm it holds up rather than
+  just looking right once.
 - Rationale: sans survives YouTube's re-encode better at small sizes than thin
   serif strokes; serif was deliberately kept for the one place (lore text)
   where a different reading register actually helps.
@@ -248,25 +247,75 @@ have always been written. Where Snowprint's internal label and the
 community-facing event name differ, merge them, e.g.:
 `Character Release Event — Cezare ("Insanguination")`.
 
-**Layout**: vertical month label on the left edge, week rows, each week's
-events rendered into independent stacked "lanes" (not fixed row slots) so a
-light week and a heavily-stacked week both render cleanly without wasted or
-cramped space.
+**Layout**: vertical month label on the left edge of each month's block —
+implemented as `position:absolute` over the month's weeks rather than as a
+spanning grid item (a spanning grid item can inflate the shortest auto-sized
+rows in its span, which caused real layout bugs — see Changelog). Each week's
+events render into independent stacked "lanes" (not fixed row slots) so a
+light week and a heavily-stacked week both render cleanly.
 
 **Not yet built**: the actual automated extraction/generation script. The
 current calendar is still hand-authored from a reasoned-through data table —
 same "author the markup directly, no build step" approach the LE deck
 instructions describe.
 
+### Character reveal cards
+Single static layout (not a click-through reveal sequence — Andy narrates
+over one fully-visible card rather than advancing through beats), built and
+tested against Cezare's real wiki data.
+
+**Structure, top to bottom:**
+1. Header bar: "New Character" tag + patch version (same convention as every
+   other slide)
+2. Name (large, Cinzel Decorative) + title, with a teal-glow title-line
+3. Badge row: Faction, Alliance, Rarity, Damage type — quick-glance chips
+4. Trait pills (Terminator Armour, Rapid Assault, Deep Strike, etc.) — a
+   compact row, not prose
+5. Lore quote — Spectral serif italic, left-accent border, deliberately
+   distinct texture from everything below it
+6. Active ability — name + description, left-accent block
+7. Passive ability — same treatment
+8. Relic — same treatment, gold-accented instead of teal (ties to the same
+   gold used for Special/Important elsewhere) since it's a distinct
+   "equipment" category rather than a character mechanic
+9. Portrait zone, right side, same guide-border convention as every slide
+
+**Content-sourcing workflow, specific to this slide type.** Andy no longer
+has pre-patch build access (previously had creator access, now doesn't), so
+new-character content requires a different sourcing plan than everything
+else in the deck:
+1. **Official Discord patch notes reveal text** — usually has the lore
+   blurb, sometimes a partial trait/ability teaser. Available immediately.
+2. **Tacticus wiki** (fan-maintained, tacticus.wiki.gg) — has a genuinely
+   good structured format that maps almost directly onto this card's fields
+   (stats, traits, damage type, active/passive text, relic). Best structured
+   source, but since it's community-maintained rather than official, it can
+   lag hours-to-days behind a brand-new character's release.
+3. **Other creators' early videos/screenshots** — fallback for anything
+   still missing once actually recording, especially "how it plays in
+   practice" observations for a verdict/notable-mentions angle.
+- **Never fabricate a missing field.** If a value (e.g. a Relic name) isn't
+  confirmed from any source yet, mark it visibly as TBD on the card itself
+  (dashed border + explicit "unconfirmed" tag was the treatment used on the
+  Cezare mockup) rather than guessing or omitting silently.
+- Ability numeric values (damage multipliers, thresholds) scale per character
+  level — don't quote a specific number unless the source gives one plainly;
+  paraphrase mechanically ("bonus Damage," "regenerates Health") rather than
+  inventing a figure.
+
 ---
 
 ## Open Items / Known Gaps
 
-- Auto-shrink/overflow handling not yet implemented anywhere (Bug Fixes,
-  Requisitions currently hardcoded to one month's example content).
+- Auto-shrink/overflow handling not yet implemented for Bug Fixes or
+  Requisitions (currently hardcoded to one month's example content) — the
+  Calendar has this solved and could serve as the reference implementation.
 - Economy Changes' purple accent isn't sourced from an actual game screen —
   worth revisiting if something more on-brand turns up.
-- Character/MoW reveal cards not yet started.
+- Machine of War reveal cards not yet built — same shell/approach as
+  Character cards should largely transfer (Primary/Secondary/Mythic instead
+  of Passive/Active/Relic), but untested against a real MoW's actual field
+  shape.
 - TA Power-Ups date conflict (July 13 vs. ~July 15–17 on the dev calendar)
   unresolved as of the last Calendar build — confirm before finalizing that
   patch's video.
@@ -286,3 +335,4 @@ instructions describe.
 | July 2026 | Rebuilt the Calendar's color palette from scratch after Andy identified he's colorblind (deuteranomaly-type, red-green, with knock-on difficulty on desaturated/dark tones). Replaced translucent pastel fills with a solid, high-saturation Okabe-Ito-based palette — confirmed working well by Andy. Corrected the calendar's proportions (it had incorrectly gone full-width; fixed to ~55% width with portrait space alongside, matching every other slide). Added and then fixed real auto-scaling logic (measure natural height, compress proportionally with a legibility floor, matching the Bug Fixes overflow philosophy). |
 | July 2026 | Fixed two structural bugs in the vertical month-label system: (1) each week had been its own isolated CSS grid, so a label couldn't actually span multiple weeks — caused a duplicated "Feb" label and a missing "Mar" label; (2) after restructuring to a shared grid, a CSS Grid quirk where a row-spanning item inflates the shortest auto-sized rows in its span caused large blank gaps under every week's day-numbers and pushed the auto-fit script to its overflow floor. Fixed by making the month label `position:absolute` (removed from grid-sizing calculations entirely) rather than a spanning grid item. Also moved the Calendar's corner "stamp" text to bottom-right (was colliding with the legend at bottom-left once the calendar's height grew). |
 | July 2026 | Finalized the full recurring-event color system with Andy: every named recurring category (Battle Pass, Incursion, TA, Quests, HRE, LRE, Campaign Event, Guild War, Guild Raid) now gets its own dedicated color instead of defaulting to gray. Gray is now reserved specifically for Home Screen Events (renamed from "Default/recurring"). Added a new reserved gold color for rare Special/Important events (Armageddon-style celebrations, Mythic events). Captured Andy's exact cadence formulas (start day + duration relative to season week number) for every recurring category — precise enough to place these on the calendar without patch notes text at all, contrasted with Home Screen Events which still need fresh sourcing every month. Initially mislabeled the "Character vs Faction" bars (e.g. "Baldr vs Thousand Sons") as a Guild War sub-element — Andy corrected this: they're actually Quests, which are always formatted as one character leading against a faction. Reassigned those bars from the Guild War color to Quests/vermillion. |
+| July 2026 | Built the first Character reveal card (Cezare), confirming the teal accent and the Spectral/Public-Sans typography split in a real layout for the first time. Decided against a click-through reveal sequence — Andy narrates over one fully-visible static card instead. Documented the content-sourcing workflow specific to this slide type: Andy no longer has pre-patch build access, so new-character content now depends on the Discord reveal text, the fan-maintained Tacticus wiki (which has a genuinely well-matched field structure but can lag on brand-new characters), and other creators' footage as a last resort. Established the convention of marking any unconfirmed field (e.g. an unknown Relic) visibly as TBD rather than fabricating or silently omitting it. |
