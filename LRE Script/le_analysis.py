@@ -46,8 +46,21 @@ def intersect_score(team, battles, chars):
 ABILITY_TANKS = set()  # Future ability-based tanks go here
 DAMAGE_REDUCTION = {'Tyrant Guard', 'Thothmek'}  # DR for all; Thothmek best in Mechanical teams
 
+# Named priority picks — characters/pairs the player has specifically invested in.
+# PRIORITY_SOLO members count whenever present. PRIORITY_PAIRS only count when
+# BOTH members of a pair are in the same team — one without the other earns nothing.
+# This is a tiebreaker bonus only (see meta_score) — it never outweighs raw battle
+# points, same tier as the existing Damage Reduction / Healer / Tank scoring.
+PRIORITY_SOLO = {'Tyrant Guard'}
+PRIORITY_PAIRS = [
+    {'Nauseous Rotbone', 'Maladus'},
+    {'Aleph-Null', "Re'vas"},
+    {"Tan Gi'da", 'Actus'},
+]
+
 def meta_flags(name, char):
     flags = []
+    if name in PRIORITY_SOLO:        flags.append('PRIORITY')
     if char.get('Healer')=='Y':      flags.append('HEALER')
     if char.get('Self_Heal')=='Y':   flags.append('SELF-HEAL')
     if char.get('Mechanic')=='Y':    flags.append('MECHANIC')
@@ -67,6 +80,7 @@ def meta_score(team_names, chars):
     """Score a team against the meta target.
 
     Priority order:
+    0. Named priority picks (solo, or pairs where BOTH members are present)
     1. Damage Reduction (Tyrant Guard = any team; Thothmek = Mechanical teams)
     2. Support: Mechanics (2) if Mechanical team, Healers (2) otherwise
     3. Self-Heal (1)
@@ -76,6 +90,10 @@ def meta_score(team_names, chars):
     A team is considered Mechanical if 3+ members have Mechanical=Y.
     Good Mechanical pairings: Re'vas + Aleph-Null, Tan Gi'da + Actus.
     """
+    team_set = set(team_names)
+    n_priority = (len(team_set & PRIORITY_SOLO) +
+                  sum(1 for pair in PRIORITY_PAIRS if pair <= team_set))
+
     n_h          = sum(1 for n in team_names if chars[n].get('Healer','N')=='Y')
     n_sh         = sum(1 for n in team_names if chars[n].get('Self_Heal','N')=='Y')
     n_t          = sum(1 for n in team_names if (
@@ -90,6 +108,10 @@ def meta_score(team_names, chars):
     n_dr_thotmek = sum(1 for n in team_names if n == 'Thothmek')
 
     score = 0
+
+    # 0. Named priority picks — highest tier. Solo picks count on their own;
+    #    paired picks only count when both members are present in the team.
+    score += n_priority * 60
 
     # 1. Damage Reduction — highest priority
     score += min(n_dr_guard, 1) * 50       # Tyrant Guard: full value any team
@@ -136,6 +158,14 @@ def best_team_from_pool(pool, battles, chars, size=5):
     else:
         def priority(n):
             c = chars[n]
+            # Named priority picks are intentionally NOT weighted here. This fallback
+            # (used when a candidate pool exceeds 25 characters) sorts individuals by
+            # generic composition value only, with no visibility into which battle
+            # conditions the team ends up covering — weighting it toward priority
+            # picks pulled in characters that satisfied the target condition but broke
+            # bundling with other still-open conditions, costing an extra token in
+            # testing. The priority tiebreaker only applies in the exhaustive combo
+            # search above (pools <=25), where it's proven not to affect coverage.
             return (int(n in DAMAGE_REDUCTION)*50 +
                     int(c.get('Healer','N')=='Y')*30 +
                     int(c.get('Self_Heal','N')=='Y')*28 +
