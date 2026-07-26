@@ -193,15 +193,25 @@ python3 le_analysis.py le15_newchar.yaml --csv data/tacticus_characters.csv
 
 Open the output `.txt` file. You need these values for the HTML:
 
-- Track names, enemies, eligible factions, restriction (from patch notes —
-  these don't come from the analysis output, carry them over from the
-  previous HTML or patch notes if the LE hasn't changed)
+- Track names, enemies, eligible factions, restriction — **now printed directly in
+  the analysis output**, right above each track's objective list, as long as
+  the yaml's track entries include an `enemies:` field (added alongside
+  `allowed_alliances`/`excluded_factions`). If an older yaml doesn't have
+  `enemies:` set, the line falls back to `Unknown` — add it to the yaml and
+  re-run rather than sourcing it from patch notes separately.
 - All objectives with their point values
-- Most efficient starting team (pool + **Recommended**, usually 3 characters)
+- Most efficient starting team (pool + **Recommended**, 3–5 characters —
+  whichever size scored highest, not always 3)
 - Every Full Coverage team (`Tokens: N` of them) — pool + Recommended 5 +
   "Newly covers" conditions + pts/deployment
 - Any `★ High-priority investment (multi-team)` lines
-- Monthly plan characters (built from usage frequency — see below)
+- Any `📝` (within-track reuse) or `🔗 Cross-track win` (cross-track reuse)
+  notes under a team
+- The **Cross-Track Investment Summary** (characters used in 2+ tracks) and
+  the **Champion Usage Leaderboard** (Most used healers + mechanics / tanks +
+  damage reduction / other champions / overall) at the very end of the
+  output — these now come pre-tallied by the script; see the updated
+  Monthly Plan section below for how this changes that workflow
 
 ### Step 2 — Copy and update the HTML
 
@@ -298,36 +308,70 @@ because they show up across multiple full-coverage teams (and often the
 Fastest Method team too) — reuse the exact character names/grouping from
 the analysis's `★ High-priority investment` line.
 
+**Fold cross-track wins into this same note — don't give them a separate
+line.** The analysis also prints a `🔗 Cross-track win` note when a
+character was already committed in a *different* track. On screen, add
+that name into the **same** `★ High-priority investment` line rather than
+a second note block, e.g.:
+
+```html
+<p class="pnote dim">★ High-priority investment: Incisus, Marneus Calgar, Gibbascrapz (also used in Beta)</p>
+```
+
+If a character is flagged both within-track (`★`) and cross-track (`🔗`) on
+the same team, they only need to appear once in the combined line — add the
+`(also used in [Track])` qualifier only for the cross-track ones so the
+distinction is still visible, just not visually separated into its own note.
+
 ---
 
-## Monthly Plan — Build From Usage Frequency
+## Monthly Plan — Build From the Analysis's Champion Usage Leaderboard
 
-Don't use "your judgment call" here — build the Monthly Plan directly from
-how often each character is actually recommended across the whole LE:
+`le_analysis.py` prints its own **Champion Usage Leaderboard** at the end
+of the output, tallied automatically across every team in every track (the
+Fastest Method team for each track, plus every Full Coverage team's
+Recommended 5) — no manual counting needed. The analysis output shows the
+**full list** of every character used more than once in each category
+(sorted by usage count) — trimming to the top 4 for the card layout is the
+HTML template's job, not the script's:
 
-1. Collect every **Recommended** list from the analysis: the 3-man Fastest
-   Method team for each track, plus the Recommended 5 for every Full
-   Coverage team on every track.
-2. Tally how many times each character name appears across all of those
-   lists.
-3. Populate the four cards:
-   - **Healers** — HEALER-tagged characters that appear in any recommended
-     list, most-used first.
-   - **Tanks** — TANK(trait)-tagged characters that appear in any
-     recommended list, most-used first. Group single-use tanks together on
-     one line with `·` separators to keep the card to ~5 lines (e.g.
-     `Arjac · Angrax · Wrask`).
-   - **Self-Heal / Damage Reduction** — SELF-HEAL-tagged characters that
-     appear in any recommended list, most-used first. (Card title was
-     previously "Self-Heal / DR" — always render it as **"Self-Heal /
-     Damage Reduction"** now.)
-   - **Most Relevant** — the top 3–4 characters by raw usage count across
-     ALL recommended lists (regardless of role), with a `<small>` note
-     showing count + which teams, e.g.
-     `Incisus <small>4 teams — Alpha T2/T3/T4 + Gamma T3</small>`. This
-     card should overlap heavily with the `★ High-priority investment`
-     flags from the analysis — if a character has that flag, they almost
-     certainly belong here.
+- **Healers (Healers + Mechanics)**
+- **Tanks**
+- **Self-Heal / Damage Reduction**
+- **Most used overall**
+
+When building the HTML, take only the **top 4** from each of these lists —
+use the analysis's full list as source material, don't dump every entry
+onto the card:
+
+- **Healers** card ← top 4 from the leaderboard's "Healers (Healers +
+  Mechanics)" list.
+- **Tanks** card ← top 4 from the leaderboard's "Tanks" list. Note this is
+  trait-based only (`Terminator_Armour`/`Mk_X_Gravis`) — Tyrant Guard and
+  Thothmek do **not** appear here, they're in Self-Heal / Damage Reduction
+  instead (see below).
+- **Self-Heal / Damage Reduction** card ← top 4 from the leaderboard's
+  "Self-Heal / Damage Reduction" list. This is `Self_Heal=Y` characters
+  **plus** Tyrant Guard and Thothmek (the two ability-based DR picks) — so
+  this card is where those two show up, not Tanks. (Card title was
+  previously "Self-Heal / DR" — always render it as **"Self-Heal / Damage
+  Reduction"**.)
+- **Most Relevant** card ← top 4 from the leaderboard's "Most used overall"
+  list. Still add the `<small>` team-attribution detail (e.g. `Incisus
+  <small>4 teams — Alpha T2/T3/T4 + Gamma T3</small>`) by cross-referencing
+  the per-team `★`/`📝`/`🔗` notes manually — the script's overall list
+  doesn't carry that detail, just the name and count. This card should
+  overlap heavily with the `★ High-priority investment` flags from the
+  analysis — if a character has that flag, they almost certainly belong
+  here.
+
+If a category's full list has fewer than 4 entries (or none at all — "None
+used more than once this event"), just use however many are there; don't
+pad the card with single-use characters to force it to 4.
+
+The four categories intentionally overlap (e.g. Toth can appear in both
+Tanks and Self-Heal / Damage Reduction) — that's expected, they're
+independent tallies, not a partition.
 
 Only include characters that actually appear in this LE's recommended
 teams — don't carry over holdover picks from a previous LE's Monthly Plan
@@ -369,10 +413,14 @@ Special tanks (ability-based, not trait-based):
 - **Tyrant Guard** — always treat as high-priority tank when eligible
 - **Thothmek** — always treat as high-priority tank when eligible
 
-The analysis script now uses meta composition as a tiebreaker when multiple
+The analysis script uses meta composition as a tiebreaker when multiple
 5-man combinations score equally — so its recommended teams will prefer
-Healers, Tanks, and Self-Healers automatically. You can still override any
-pick by specifying it directly in the HTML data.
+Healers, Tanks, and Self-Healers automatically. Below that, it also
+tiebreaks on reuse (preferring a character already committed to another
+team, first within the track, then across tracks — see INSTRUCTIONS.md's
+"Full tiebreak hierarchy" for the exact order), and finally on Parrying /
+Shielding / Spawner as a last resort. You can still override any pick by
+specifying it directly in the HTML data.
 
 ---
 
@@ -406,3 +454,5 @@ The project knowledge in Claude.ai should contain:
 | July 2026 | Polish pass on v6: unified slide/frame insets, fixed pool-list auto-fit to actually trigger and scale to ~100 characters, replaced flat crossfades with eased motion + staggered reveals, added a FLIP-style "fly" animation for the pool→5-man-team transition, moved the "N eligible characters" note into the team-bar to free up list space, and removed the healer green/heart styling from Summary `.ov-chars` (see updated Character Role Colour Coding section — no role colouring is used anywhere now). |
 | July 2026 | Follow-up fixes on v6: anchored `.frame`/`.logo-corner` to the body canvas (`position:absolute`, not `fixed`) instead of the viewport; restored `#fm-main`/`#plan-main`'s own padding rule after discovering it wasn't redundant (see Template Mechanics); replaced all `requestAnimationFrame` usage in the animation code with forced-reflow/`setTimeout`, since rAF can simply never fire on a non-painting page (some OBS Browser Source configurations, occluded windows) and was leaving reveals stuck invisible; fixed the fly-transition's destination measurement so characters land exactly where the real list settles (was off by 14px, causing a visible snap); gave the high-priority-investment note its own delayed fade-in instead of popping in with everything else; added rare idle-time ambient flourishes (border glint / header-line pulse) for long pauses with no click. Added a new "Template Mechanics" section documenting all of the above as things to preserve, not clean up. |
 | July 2026 | Second follow-up pass: fixed both idle ambient flourishes overshooting past their target line/edge (replaced with a shared `pulseAlongRect()` helper clipped to the exact target rect) and put the border glint behind the logo (`z-index:520`, between the frame and the logo) instead of sliding over it. Fixed real graphical bugs in the pool→5-man fly transition reported after actually watching it record: chosen pool names were ghosting/drifting behind their own flying clone (fixed by hiding the real `<li>` the instant its clone spawns, with `resetPoolItemVisibility()` undoing that on back-navigation/repeat visits); and a one-frame flicker on landing, which took three attempts to get right — a delayed clone-removal fixed an initial "wipe" but caused a brightness "pulse" (both clone and real text at full opacity at once), a crossfade to smooth that itself read as flicker, and the fix that actually stuck was an atomic instant swap combined with settling `.chars-hi`'s `visibility:visible` at flight-start rather than at the landing instant (see Template Mechanics for why toggling `visibility` at the handoff moment mattered). Also fixed a corrupted class attribute on the Monthly Plan Healers title (a stray pasted timestamp had silently broken its green styling) and trimmed the Tanks card to the top 4 champions. |
+| July 2026 | Major `le_analysis.py` rewrite: replaced the anchor-based Full Coverage search (which could lock in a low-value team before ever trying a higher-value one, and could dilute a too-small pool with non-qualifying filler) with an exact optimizer that only ever considers genuinely achievable 5+ character combinations and solves exactly for the point-maximizing set of teams. Added a within-track and cross-track reuse tiebreak (`📝`/`🔗 Cross-track win` notes), a per-track Enemies/Eligible factions line sourced directly from the yaml, and a new end-of-report Cross-Track Investment Summary + Champion Usage Leaderboard — see INSTRUCTIONS.md Changelog for the full technical breakdown |
+| July 2026 | Reworked the Champion Usage Leaderboard's categories to match the Monthly Plan's four video cards exactly: Healers (Healers + Mechanics) / Tanks (trait-based only) / Self-Heal + Damage Reduction (now where Tyrant Guard/Thothmek show up, not Tanks) / Most used overall. The analysis prints the full list of every character used more than once per category (no cap) — trimming to the top 4 for the card layout is now this template's job, not the script's. Monthly Plan section rewritten to use the script's leaderboard output as source material instead of manually tallying. On screen, `🔗 Cross-track win` is no longer a separate note — fold it into the same `★ High-priority investment` line with a `(also used in [Track])` qualifier |

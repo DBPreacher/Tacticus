@@ -1,8 +1,33 @@
 Copy conditions_template.yaml and rename it. 
 Fill in with LRE data. 
 
-Tell CC: 
+----
+Preparing for Python: 
+
+1. Make sure Python is installed
+Open a terminal (Terminal on Mac, or PowerShell/Command Prompt on Windows) and type:
+python3 --version
+If you get a version number (3.x), you're set. If not, install Python from python.org — grab the latest 3.x release, and on Windows check the box that says "Add Python to PATH" during install.
+
+2. Install the one dependency
+The script needs PyYAML to read the .yaml event files:
+pip install pyyaml
+(On some systems it's pip3 install pyyaml instead of pip.)
+
+---
+Running Python
+3. le_analysis.py, tacticus_characters.csv, and whichever event YAML file (e.g. le14_uthar.yaml) in the same folder 
+
+4. Navigate there in the terminal
+cd C:\Video Prod\Github\Tacticus\LRE Script
+
+5. Run it
+python -X utf8 le_analysis.py le15_.yaml --csv tacticus_characters.csv > output.txt
+---
+
+If doing it in Claude
 Run le_analysis.py with [conditions_template.yaml copy] against tacticus_characters.csv and show me the output
 
 E.G
 Run Tacticus\LRE Script\le_analysis.py with le14_uthar.yaml against Tacticus\tacticus_characters.csv and show me the output
+---

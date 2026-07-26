@@ -69,6 +69,9 @@ def meta_flags(name, char):
     if name in DAMAGE_REDUCTION:     flags.append('DMG-REDUCTION')
     elif name in ABILITY_TANKS:      flags.append('TANK(ability)')
     if char.get('Resilient')=='Y':   flags.append('RESILIENT')
+    if char.get('Parrying')=='Y':    flags.append('PARRYING')
+    if char.get('Shielding')=='Y':   flags.append('SHIELDING')
+    if char.get('Spawner')=='Y':     flags.append('SPAWNER')
     return flags
 
 def char_line(name, chars, prefix='    '):
@@ -76,7 +79,9 @@ def char_line(name, chars, prefix='    '):
     tag = '  [' + ' | '.join(mf) + ']' if mf else ''
     return prefix + name + ' (' + chars[name].get('Faction','') + ')' + tag
 
-def meta_score(team_names, chars):
+REUSE_BONUS = 15  # per-character tiebreak bonus for reusing an already-invested pick
+
+def meta_score(team_names, chars, usage=None):
     """Score a team against the meta target.
 
     Priority order:
@@ -86,10 +91,24 @@ def meta_score(team_names, chars):
     3. Self-Heal (1)
     4. Tanks — Terminator Armour / Mk X Gravis (2)
     5. Resilient — minor bonus
+    6. Reuse — already-invested-in-this-track tiebreak (see REUSE_BONUS)
+    7. Parrying / Shielding / Spawner — last-resort differentiators, weighted
+       below everything else above (including Resilient). No preference
+       between the three — they're equally weak tiebreaks used only to
+       separate otherwise-identical candidates.
 
     A team is considered Mechanical if 3+ members have Mechanical=Y.
     Good Mechanical pairings: Re'vas + Aleph-Null, Tan Gi'da + Actus.
+
+    `usage` (optional): {name: count} of characters already placed on
+    earlier teams within the same track. This is a TIEBREAKER ONLY — it
+    never outweighs raw battle points (score `s` in best_team_from_pool),
+    same tier as the existing named-priority/DR/Healer/Tank bonuses. It
+    exists so that, among equally-scoring teams, we prefer reusing a
+    character already committed to elsewhere in the track over spreading
+    investment across an extra unique roster slot.
     """
+    usage = usage or {}
     team_set = set(team_names)
     n_priority = (len(team_set & PRIORITY_SOLO) +
                   sum(1 for pair in PRIORITY_PAIRS if pair <= team_set))
@@ -102,6 +121,9 @@ def meta_score(team_names, chars):
     n_mech_chars = sum(1 for n in team_names if chars[n].get('Mechanical','N')=='Y' or chars[n].get('Living_Metal','N')=='Y')  # Living Metal counts as Mechanical
     n_mechanic   = sum(1 for n in team_names if chars[n].get('Mechanic','N')=='Y')
     n_r          = sum(1 for n in team_names if chars[n].get('Resilient','N')=='Y')
+    n_parry      = sum(1 for n in team_names if chars[n].get('Parrying','N')=='Y')
+    n_shield     = sum(1 for n in team_names if chars[n].get('Shielding','N')=='Y')
+    n_spawn      = sum(1 for n in team_names if chars[n].get('Spawner','N')=='Y')
 
     # Damage Reduction
     n_dr_guard   = sum(1 for n in team_names if n == 'Tyrant Guard')
@@ -136,46 +158,76 @@ def meta_score(team_names, chars):
     # 5. Resilient — minor bonus
     score += min(n_r, 3) * 3
 
+    # 6. Reuse — prefer characters already committed to this track over new picks
+    n_reused = sum(1 for n in team_names if usage.get(n, 0) > 0)
+    score += n_reused * REUSE_BONUS
+
+    # 7. Last-resort differentiators — weighted below Resilient (weight 1 each,
+    #    no cap, no preference between them). Only ever matters once every
+    #    stronger tier above is fully tied.
+    score += n_parry * 1
+    score += n_shield * 1
+    score += n_spawn * 1
+
     return score
 
-def best_team_from_pool(pool, battles, chars, size=5):
+def best_team_from_pool(pool, battles, chars, size=5, usage=None):
     """
     Best team of exactly `size` from pool.
     Primary sort: intersection score (pts earned).
-    Tiebreaker: meta composition score (2H + 2T + 1SH target).
-    Falls back to meta-priority sort for pools > 25.
+    Tiebreaker: meta composition score (2H + 2T + 1SH target, plus reuse — see meta_score).
+
+    For pools > 25, a full exhaustive combo search is too expensive, so we
+    pre-filter to a shortlist first. That shortlist ALWAYS force-includes
+    any PRIORITY_SOLO member and both halves of any PRIORITY_PAIRS pair
+    present in the pool — a per-character priority score can't express "this
+    character is only worth a lot if a specific partner is also picked", so
+    without forcing them in, a pairing like Aleph-Null + Re'vas could lose
+    to a stronger-looking individual (e.g. a Mechanic with a reuse bonus)
+    even though the pair together would have scored much higher as a team.
+    The shortlist is then run through the same exhaustive scorer as the
+    <=25 case, so pairing/meta bonuses are evaluated correctly either way.
     """
     if not pool: return [], 0, {}
     actual = min(size, len(pool))
-    if len(pool) <= 25:
-        best = (0, 0, {}, [])  # (score, meta, earned, team)
-        for combo in combinations(pool, actual):
-            s, e = intersect_score(list(combo), battles, chars)
-            m = meta_score(combo, chars)
-            if s > best[0] or (s == best[0] and m > best[1]):
-                best = (s, m, e, list(combo))
-        return best[3], best[0], best[2]
-    else:
+    if len(pool) > 25:
+        usage = usage or {}
+        pool_set = set(pool)
+        forced = set(PRIORITY_SOLO) & pool_set
+        for pair in PRIORITY_PAIRS:
+            if pair <= pool_set:
+                forced |= pair
+
         def priority(n):
             c = chars[n]
-            # Named priority picks are intentionally NOT weighted here. This fallback
-            # (used when a candidate pool exceeds 25 characters) sorts individuals by
-            # generic composition value only, with no visibility into which battle
-            # conditions the team ends up covering — weighting it toward priority
-            # picks pulled in characters that satisfied the target condition but broke
-            # bundling with other still-open conditions, costing an extra token in
-            # testing. The priority tiebreaker only applies in the exhaustive combo
-            # search above (pools <=25), where it's proven not to affect coverage.
+            # Named priority PAIRS are intentionally not weighted here (a
+            # per-character score can't express joint-only value) — they're
+            # guaranteed a seat via `forced` above instead. DR/solo picks
+            # still get weighted below since they're valuable individually
+            # too, not just as part of a pair.
             return (int(n in DAMAGE_REDUCTION)*50 +
                     int(c.get('Healer','N')=='Y')*30 +
                     int(c.get('Self_Heal','N')=='Y')*28 +
                     int(c.get('Mechanic','N')=='Y')*25 +
                     int(c.get('Terminator_Armour','N')=='Y' or c.get('Mk_X_Gravis','N')=='Y')*20 +
                     int(n in ABILITY_TANKS)*20 +
-                    int(c.get('Resilient','N')=='Y')*3)
-        team = sorted(pool, key=priority, reverse=True)[:actual]
-        s, e = intersect_score(team, battles, chars)
-        return team, s, e
+                    int(c.get('Resilient','N')=='Y')*3 +
+                    int(usage.get(n, 0) > 0)*REUSE_BONUS +
+                    int(c.get('Parrying','N')=='Y')*1 +
+                    int(c.get('Shielding','N')=='Y')*1 +
+                    int(c.get('Spawner','N')=='Y')*1)
+
+        ranked = sorted(pool_set - forced, key=priority, reverse=True)
+        shortlist = list(forced) + ranked
+        pool = shortlist[:25] if len(shortlist) > 25 else shortlist
+
+    best = (0, 0, {}, [])  # (score, meta, earned, team)
+    for combo in combinations(pool, actual):
+        s, e = intersect_score(list(combo), battles, chars)
+        m = meta_score(combo, chars, usage)
+        if s > best[0] or (s == best[0] and m > best[1]):
+            best = (s, m, e, list(combo))
+    return best[3], best[0], best[2]
 
 def most_efficient_starting_team(battle_pools, battles, chars):
     """Best team of size 3-5 covering most pts in a single deployment."""
@@ -193,53 +245,97 @@ def most_efficient_starting_team(battle_pools, battles, chars):
                 if score > best[0]: best = (score, earned, team, size)
     return best
 
-def greedy_coverage(battles, battle_pools, all_eligible, chars):
+def enumerate_achievable_bundles(battles, battle_pools):
     """
-    Greedy coverage — always produces 5-man teams.
-    If the intersection pool for target conditions has < 5 chars,
-    falls back to the full eligible pool for the best 5-man available.
+    Every non-empty subset of a track's objectives where at least 5 characters
+    individually satisfy ALL objectives in that subset simultaneously — i.e. a
+    real, undiluted 5-man team could exist for it. No fallback pool, no filler:
+    if fewer than 5 characters qualify for a combination, that combination is
+    simply not achievable by any team, full stop.
     """
-    remaining = set(battles.keys())
+    names = list(battles.keys())
+    n = len(names)
+    bundles = []
+    for mask in range(1, 1 << n):
+        E = frozenset(names[i] for i in range(n) if mask & (1 << i))
+        pool = sorted(set.intersection(*[set(battle_pools[c]) for c in E]))
+        if len(pool) >= 5:
+            bundles.append({'earned': E, 'score': sum(battles[c]['pts'] for c in E), 'pool': pool})
+    return bundles
+
+def solve_optimal_coverage(bundles, battles):
+    """
+    Exact search (not greedy/anchored) over which achievable bundles to combine
+    across a track, maximizing total points earned — with fewest tokens only as
+    a tiebreak between equal-point options, never trading points for tokens.
+
+    With at most 5 objectives per track this is a tiny state space (<=32), so
+    we solve it exactly via memoized recursion rather than approximating.
+    """
+    memo = {}
+    def rec(state):
+        if state in memo: return memo[state]
+        best = (0, 0, [])  # (points, tokens, [bundle indices])
+        for idx, b in enumerate(bundles):
+            newly = b['earned'] - state
+            if not newly: continue  # would earn nothing new — never worth a token
+            gain = sum(battles[c]['pts'] for c in newly)
+            sub_pts, sub_tok, sub_path = rec(state | b['earned'])
+            cand = (gain + sub_pts, 1 + sub_tok, [idx] + sub_path)
+            if cand[0] > best[0] or (cand[0] == best[0] and cand[1] < best[1]):
+                best = cand
+        memo[state] = best
+        return best
+    return rec(frozenset())
+
+def optimal_coverage(battles, battle_pools, chars, usage, char_tracks, track_name):
+    """
+    Finds the true point-maximizing set of 5-man teams for a track (ties broken
+    by fewest tokens), then presents them in descending point order, applying
+    the reuse tiebreak (REUSE_BONUS) sequentially so later teams prefer
+    characters already committed earlier.
+
+    `usage` and `char_tracks` are shared, mutated-in-place dicts passed in from
+    main() so that reuse credit — and the resulting notes — carry ACROSS
+    tracks, not just within one. `usage`: name -> total times used so far
+    (any track). `char_tracks`: name -> set of track names they've appeared in
+    so far. Each team's reuse is split into two flavors for reporting:
+      - within-track reuse (already on an earlier team in *this* track)
+      - cross-track reuse (already committed in a *different* track entirely)
+    Cross-track reuse is the bigger win — it means one less character to level
+    for the whole event, not just this track — so it's flagged distinctly.
+    """
+    all_conditions = set(battles.keys())
+    bundles = enumerate_achievable_bundles(battles, battle_pools)
+    _, _, path = solve_optimal_coverage(bundles, battles)
+    chosen = [bundles[i] for i in path]
+    chosen.sort(key=lambda b: b['score'], reverse=True)
+
+    claimed = set()
     teams = []
+    for b in chosen:
+        remaining_conds = all_conditions - claimed
+        if not remaining_conds: break
+        remaining_battles = {c: battles[c] for c in remaining_conds}
+        team, score, earned = best_team_from_pool(b['pool'], remaining_battles, chars, 5, usage)
+        newly = set(earned.keys()) & remaining_conds
+        if not newly: continue  # fully subsumed by higher-priority teams already listed
 
-    while remaining:
-        sorted_rem = sorted(remaining, key=lambda b: battles[b]['pts'], reverse=True)
-        best_info = None
+        within_reused = sorted(n for n in team if usage.get(n, 0) > 0 and track_name in char_tracks.get(n, set()))
+        cross_reused_tracks = {n: sorted(char_tracks.get(n, set()))
+                                for n in team
+                                if usage.get(n, 0) > 0 and track_name not in char_tracks.get(n, set())}
 
-        for r in range(min(3, len(sorted_rem)-1), -1, -1):
-            found = False
-            others = sorted_rem[1:] if r > 0 else []
-            for other in (list(combinations(others, r)) if r > 0 else [()]):
-                conds = [sorted_rem[0]] + list(other)
-                intersection = sorted(set.intersection(*[set(battle_pools[b]) for b in conds]))
+        teams.append((score, {c: battles[c]['pts'] for c in newly}, team, earned, b['pool'],
+                      within_reused, cross_reused_tracks))
+        claimed |= newly
+        for n in team:
+            usage[n] = usage.get(n, 0) + 1
+            char_tracks.setdefault(n, set()).add(track_name)
 
-                if len(intersection) < 3: continue  # too small even for minimum team
+    return teams, all_conditions - claimed
 
-                # Use intersection pool if >=5 chars; else fall back to full eligible
-                limited = len(intersection) < 5
-                search_pool = intersection if not limited else all_eligible
-
-                # Score only against conditions not yet claimed by an earlier team —
-                # a team shouldn't get credit (or be penalised) for conditions another
-                # team has already banked, since each stage's points are earned once.
-                remaining_battles = {b: battles[b] for b in remaining}
-                team, score, earned = best_team_from_pool(search_pool, remaining_battles, chars, 5)
-                newly = set(earned.keys()) & remaining
-                val = sum(battles[b]['pts'] for b in newly)
-
-                if val > 0 and (best_info is None or val > best_info[0]):
-                    best_info = (val, score, team, earned, newly, intersection, limited)
-                    found = True
-            if found: break
-
-        if best_info is None: break
-        _, score, team, earned, newly, intersection, limited = best_info
-        teams.append((score, {b: battles[b]['pts'] for b in newly}, team, earned, intersection, limited))
-        remaining -= newly
-
-    return teams, remaining
-
-def analyse_track(track_name, track_cfg, chars):
+def analyse_track(track_name, track_cfg, chars, global_usage, global_char_tracks):
     print('\n' + '='*65)
     print('  ' + track_name.upper() + ' TRACK')
     print('='*65)
@@ -254,11 +350,12 @@ def analyse_track(track_name, track_cfg, chars):
                 if (not allowed or c.get('Alliance','') in allowed)
                 and c.get('Faction','') not in excluded
                 and c.get('Is_MoW','N') != 'Y'}
-    all_elig = list(eligible.keys())
 
     total_pts = sum(v['pts'] for v in battles.values())
     print('\n  Available pts: ' + str(total_pts) +
           ' | Eligible characters: ' + str(len(eligible)))
+    print('  Enemies: ' + track_cfg.get('enemies', 'Unknown'))
+    print('  Eligible factions: ' + (' & '.join(allowed) if allowed else 'Any'))
 
     # Per-battle summary (count only — no character listing)
     battle_pools = {}
@@ -290,39 +387,45 @@ def analyse_track(track_name, track_cfg, chars):
     print('\n  ' + '-'*50)
     print('  FULL COVERAGE TEAMS (5-man)')
     print('  ' + '-'*50)
-    teams, uncovered = greedy_coverage(battles, battle_pools, all_elig, chars)
-    total_cycle = sum(s for s,_,_,_,_,_ in teams)
+    teams, uncovered = optimal_coverage(battles, battle_pools, chars, global_usage, global_char_tracks, track_name)
+    total_cycle = sum(s for s,_,_,_,_,_,_ in teams)
     print('  Tokens: ' + str(len(teams)) + ' | Total pts/cycle: ' + str(total_cycle))
     if uncovered:
-        print('  ⚠️  Conditions not covered: ' + ', '.join(uncovered))
+        print('  ⚠️  Conditions not covered by any achievable 5-man team: ' + ', '.join(uncovered))
 
-    usage = {}
-    for _,_,combo,_,_,_ in teams:
-        for n in combo: usage[n] = usage.get(n,0) + 1
-    high_priority = {n for n,c in usage.items() if c > 1}
+    track_usage = {}
+    for _,_,combo,_,_,_,_ in teams:
+        for n in combo: track_usage[n] = track_usage.get(n,0) + 1
+    high_priority = {n for n,c in track_usage.items() if c > 1}
 
     print()
-    for tidx, (sc, newly_dict, combo, full_earned, intersection, limited) in enumerate(teams, 1):
+    for tidx, (sc, newly_dict, combo, full_earned, pool, within_reused, cross_reused_tracks) in enumerate(teams, 1):
         conds = ' + '.join(sorted(newly_dict.keys(), key=lambda x: newly_dict[x], reverse=True))
         full_pts = sum(full_earned.values())
 
         print('  TEAM ' + str(tidx) + ' | Newly covers: ' + conds +
               ' | Pts/deployment: ' + str(full_pts))
 
-        if limited:
-            print('  ⚠️  Pure intersection pool only ' + str(len(intersection)) +
-                  ' chars (< 5) — team sourced from wider eligible pool')
-            print('  Pure intersection pool (' + str(len(intersection)) + '):')
-            for n in intersection: print(char_line(n, chars, '    '))
-        else:
-            print('  Full eligible pool (' + str(len(intersection)) + '):')
-            for n in intersection: print(char_line(n, chars, '    '))
+        print('  Full eligible pool (' + str(len(pool)) + '):')
+        for n in pool: print(char_line(n, chars, '    '))
 
         print('  Recommended 5:')
         for n in combo: print(char_line(n, chars, '    * '))
         shared = [n for n in combo if n in high_priority]
         if shared:
             print('  ★ High-priority investment (multi-team): ' + ', '.join(shared))
+        if within_reused:
+            saved = len(within_reused)
+            print('  📝 Note: ' + ', '.join(within_reused) +
+                  (' is' if saved == 1 else ' are') +
+                  ' already committed to an earlier team in this track — reused here instead of ' +
+                  ('a new roster slot' if saved == 1 else str(saved) + ' new roster slots') +
+                  ' to keep leveling investment down.')
+        if cross_reused_tracks:
+            for n, other_tracks in sorted(cross_reused_tracks.items()):
+                print('  🔗 Cross-track win: ' + n + ' is already committed in the ' +
+                      ' & '.join(other_tracks) + ' track' + ('' if len(other_tracks) == 1 else 's') +
+                      ' — reusing here means no extra roster slot for the whole event.')
         print()
 
 def main():
@@ -359,8 +462,64 @@ def main():
     print('  Characters loaded: ' + str(len(chars)))
     print('  NOTE: Defeat all enemies objectives ignored (base rewards).')
 
-    for track in config.get('tracks', []):
-        analyse_track(track['name'], track, chars)
+    # Shared across tracks, in the order tracks are processed below, so later
+    # tracks get reuse credit (and cross-track notes) for characters already
+    # committed in an earlier track — see optimal_coverage / analyse_track.
+    global_usage = {}
+    global_char_tracks = {}
+
+    tracks = config.get('tracks', [])
+    for track in tracks:
+        analyse_track(track['name'], track, chars, global_usage, global_char_tracks)
+
+    multi_track = {n: sorted(tset) for n, tset in global_char_tracks.items() if len(tset) > 1}
+    if multi_track:
+        print('\n' + '='*65)
+        print('  CROSS-TRACK INVESTMENT SUMMARY')
+        print('='*65)
+        print('  These characters cover objectives in more than one track —')
+        print('  leveling them is worth more than a single-track pick:')
+        print()
+        for n in sorted(multi_track, key=lambda n: (-len(multi_track[n]), n)):
+            print('  ' + char_line(n, chars, '  * ') + '  — used in: ' + ' & '.join(multi_track[n]))
+
+    def is_healer(name):
+        c = chars[name]
+        return c.get('Healer', 'N') == 'Y' or c.get('Mechanic', 'N') == 'Y'
+
+    def is_tank(name):
+        c = chars[name]
+        return c.get('Terminator_Armour', 'N') == 'Y' or c.get('Mk_X_Gravis', 'N') == 'Y'
+
+    def is_selfheal_or_dr(name):
+        return (chars[name].get('Self_Heal', 'N') == 'Y'
+                or name in DAMAGE_REDUCTION or name in ABILITY_TANKS)
+
+    def print_leaderboard(title, usage_subset):
+        print('\n  ' + title + ':')
+        repeats = {n: c for n, c in usage_subset.items() if c > 1}
+        if not repeats:
+            print('    None used more than once this event.')
+            return
+        for n in sorted(repeats, key=lambda n: (-repeats[n], n)):
+            times = repeats[n]
+            print('  ' + char_line(n, chars, '  * ') + '  — used ' + str(times) + ' times')
+
+    # These four categories intentionally overlap (e.g. Toth is both a Tank
+    # and a Self-Heal/DR pick) — they mirror the four Monthly Plan video
+    # cards, which are independent tallies rather than a mutually exclusive
+    # partition. Each is capped to its top 4 by usage count.
+    healer_usage = {n: c for n, c in global_usage.items() if is_healer(n)}
+    tank_usage   = {n: c for n, c in global_usage.items() if is_tank(n)}
+    sh_dr_usage  = {n: c for n, c in global_usage.items() if is_selfheal_or_dr(n)}
+
+    print('\n' + '='*65)
+    print('  CHAMPION USAGE LEADERBOARD (whole event, used more than once)')
+    print('='*65)
+    print_leaderboard('Healers (Healers + Mechanics)', healer_usage)
+    print_leaderboard('Tanks', tank_usage)
+    print_leaderboard('Self-Heal / Damage Reduction', sh_dr_usage)
+    print_leaderboard('Most used overall', global_usage)
 
     print('\n' + '='*65)
     print('  ANALYSIS COMPLETE')

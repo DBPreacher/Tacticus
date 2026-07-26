@@ -17,6 +17,8 @@ The workflow is:
 tacticus-le-planner/
 ├── data/
 │   └── tacticus_characters.csv   ← master character database
+├── le_analysis.py                ← analysis script (see Running a New LE Analysis)
+├── le[N]_[character].yaml        ← one conditions file per LE
 ├── README.md                     ← brief description for GitHub
 └── INSTRUCTIONS.md               ← this file
 ```
@@ -68,6 +70,9 @@ All 44 character-applicable traits from the wiki are tracked as Y/N columns. Key
 | `Psyker` | Used for NO PSYKER condition (invert) |
 | `Healer` | Meta — important for deep stage pushes |
 | `Mechanic` | Can repair Mechanical units |
+| `Parrying` | Last-resort tiebreak only (see Meta Notes) |
+| `Shielding` | Last-resort tiebreak only (see Meta Notes) |
+| `Spawner` | Last-resort tiebreak only (see Meta Notes) |
 
 **Damage Type Columns (Y/N) — `Has_[DamageType]`**
 
@@ -195,26 +200,46 @@ Gamma (No Chaos): [CONDITION] ([pts]), [CONDITION] ([pts]), ...
 
 Claude will:
 1. Filter eligible characters per track (alliance restriction applied first)
-2. Find characters eligible for each battle condition, flagging any pool with fewer than 6 chars (⚠️ limited pool)
-3. Calculate the most token-efficient 4-man starting team (best intersection score)
-4. Find the minimum number of 5-man teams needed to cover all battle conditions
-5. Resolve any character overlaps between teams
-6. Flag healers, self-healers, tanky characters, and mechanics in each team
-7. Apply the meta composition priority (see Meta Notes below)
+2. Print the track's Enemies and Eligible factions (if provided in the yaml), followed by each battle condition's own qualifying pool size, flagging any pool with fewer than 6 chars (⚠️)
+3. Calculate the most efficient starting team (3–5 characters — whichever size scores highest; **not** a fixed 3- or 4-man team)
+4. Solve for the true points-maximizing set of 5-man Full Coverage teams (see "Full Coverage algorithm" below) — token count only ever matters as a tiebreak between options that score identically on points
+5. Apply the reuse tiebreak within a track, and carry it across tracks (Alpha → Beta → Gamma) so later tracks get credit for reusing a character already committed earlier in the event
+6. Flag healers, self-healers, mechanics, and tanks in each team, plus a `★ High-priority investment` note when a character appears on 2+ teams within a track
+7. Print a `📝` note when a team reuses a character from an earlier team in the same track, and a `🔗 Cross-track win` note when it reuses a character already committed in a *different* track
+8. Print a final **Cross-Track Investment Summary** (every character used in 2+ tracks) and a **Champion Usage Leaderboard** — every character used more than once this event, grouped into Healers (Healers + Mechanics) / Tanks / Self-Heal + Damage Reduction / Most used overall — for the whole event. The analysis prints the full list per category; trimming to a top-N for video display is a presentation choice, not something the script does
+
+### Full Coverage algorithm — no dilution, exact optimization
+
+The Full Coverage search is an **exact optimizer**, not a greedy/anchored search:
+
+1. Enumerate every non-empty subset of a track's battle conditions (≤31 subsets for 5 conditions) and check whether at least **5** characters individually satisfy **every** condition in that subset at once. If fewer than 5 do, that combination is simply unachievable — there is no fallback to a wider pool, no diluted team padded out with characters who don't actually qualify. A trait only counts toward a condition if **every** member of the team has it (intersection, never union).
+2. Among all achievable combinations, solve exactly (via small memoized recursion — at most 32 states) for the combination of teams that **maximizes total points**. Token count is only used as a tiebreak between options that score identically on points — the analysis never trades points away to save a token.
+3. Present the winning teams in descending point order, then build each team's actual roster sequentially, applying the reuse tiebreak (see Meta Notes) as it goes.
 
 ### Key scoring rules (important context for Claude)
 
-- **All team members must share a trait** for the team to earn those bonus points
-- Score = sum of point values for traits ALL members share (intersection, not union)
-- Teams: minimum 3 characters, maximum 5
-- 3-man teams typically reach stage 8-10 before difficulty peaks
-- 5-man teams push further but intersection score is usually lower
+- **All team members must share a trait** for the team to earn those bonus points — score = sum of point values for traits ALL members share (intersection, not union), with no exceptions
+- Full Coverage teams are always exactly 5 characters; the Fastest-Method starting team can be 3, 4, or 5 (whichever scores highest)
 - 1 token = 1 team deployment for 1 stage attempt
 - Points accumulate across all Alpha, Beta, and Gamma stages cleared
+- "Defeat all enemies" objectives are always ignored — they're a base reward, not a team-composition condition
 
 ---
 
 ## Meta Notes
+
+### Full tiebreak hierarchy (in priority order)
+
+Raw battle points always come first and are never traded away. Below that, `le_analysis.py` breaks ties between equally-scoring teams in this order:
+
+1. **Named priority picks** — Tyrant Guard, Thothmek, and any configured priority pairs (see Special tanks below)
+2. **Meta composition** — Healers/Mechanics (support), Self-Heal, Tanks (trait-based)
+3. **Reuse** — prefer a character already committed to an earlier team, **within the current track**
+4. **Reuse — cross-track** — the same reuse preference, but carried forward across tracks in Alpha → Beta → Gamma order, so Beta/Gamma teams get credit for reusing a character Alpha already committed to. This only ever sets a *pattern* for later tracks to follow — Alpha itself never benefits from what Beta/Gamma will need, since it's processed first
+5. **Resilient** — minor bonus
+6. **Parrying / Shielding / Spawner** — last-resort differentiators, weighted below everything above including Resilient. No preference between the three; they only ever matter once every stronger tier is fully tied
+
+This hierarchy is why the analysis's reuse notes come in two flavors: a plain `📝` note for reuse within the same track, and a `🔗 Cross-track win` note when the reused character was actually committed in a *different* track — the latter is the bigger deal for leveling investment, since it means one fewer character to invest in for the whole event, not just one track.
 
 ### Recommended team composition (priority order)
 
@@ -271,6 +296,8 @@ Mechanical characters (`Mechanical = Y`) **cannot be healed** — only repaired 
 
 `Self_Heal` is **not** derived from the wiki pass and must be populated by hand: read the character's individual ability descriptions and mark `Y` only if an ability restores the character's **own** HP (as opposed to healing/repairing an ally, or a generic team buff). This column is intentionally left untouched by any automated wiki update — when a new character is added, check their abilities and set `Self_Heal` manually before relying on it for team analysis.
 
+**July 2026 correction:** Makhotep was missing `Self_Heal=Y` — he has a passive that heals himself (as well as others) and was fixed after review flagged him as an unexplained gap in an otherwise-consistent character-usage check. If a "characters with zero tiebreak traits" sanity check ever flags a well-known character with strong abilities, treat that as a signal to double-check their `Self_Heal` (and trait columns generally) rather than assuming the check is wrong.
+
 Traits and the 44+21 Y/N columns for all 112 base characters plus the 10 Machines of War were re-verified against wiki pages directly (infobox traits + all ability text for damage types) as of the July 2026 full wiki pass — see Changelog. Newly added characters going forward should have their traits/damage types checked the same way (infobox for traits, full ability text for damage types) rather than assumed from game knowledge.
 
 ---
@@ -295,6 +322,15 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
+| July 2026 | Added `Parrying`, `Shielding`, `Spawner` as new Y/N trait columns (populated across the roster) and wired them into `le_analysis.py` as the lowest-priority tiebreak tier — see Meta Notes | 1.37 |
+| July 2026 | Fixed Makhotep missing `Self_Heal=Y` (he has a self-healing passive) — caught via a "characters with zero tiebreak traits" sanity check | 1.37 |
+| July 2026 | Rewrote `le_analysis.py`'s Full Coverage team search from an anchor-based greedy bundler (which could pick a low-value combo before ever trying the highest-value one, and could dilute a too-small pool with non-qualifying filler characters) to an exact optimizer: enumerate every achievable objective-subset with a genuine 5+ character pool, then solve exactly for the point-maximizing combination of teams, tiebreaking on fewest tokens only when points are exactly equal. No more diluted "pure intersection pool" teams — a combination is only ever presented if 5+ characters can genuinely satisfy every condition in it | 1.37 |
+| July 2026 | Added a reuse tiebreak (`REUSE_BONUS`) to `meta_score` — among equally-scoring teams, prefers reusing a character already committed to an earlier team, to reduce total unique characters needed. Weighted below meta composition (support/self-heal/tanks) but above Resilient, per confirmed priority: points > named priority/DR > meta composition > reuse > Resilient > Parrying/Shielding/Spawner | 1.37 |
+| July 2026 | Extended the reuse tiebreak across tracks (Alpha → Beta → Gamma) via a shared usage/track-history dict, so Beta and Gamma teams get credit for reusing a character Alpha already committed to. Reuse notes now come in two flavors: `📝` for within-track reuse, `🔗 Cross-track win` for reuse across tracks (the bigger investment saving) | 1.37 |
+| July 2026 | Added a per-track "Enemies" / "Eligible factions" line to the analysis output, printed directly above that track's objective list, sourced from the yaml's `enemies` and `allowed_alliances` fields | 1.37 |
+| July 2026 | Added a **Cross-Track Investment Summary** (every character used in 2+ tracks, for the whole event) and a **Champion Usage Leaderboard** to the end of the analysis output, tallied automatically across every team in every track — built to be usable directly for video content without further manual tallying | 1.37 |
+| July 2026 | Reworked the Champion Usage Leaderboard to match the Monthly Plan's four video cards exactly: **Healers (Healers + Mechanics)**, **Tanks** (trait-based only — `Terminator_Armour`/`Mk_X_Gravis`), **Self-Heal / Damage Reduction** (`Self_Heal=Y` plus Tyrant Guard/Thothmek — the two ability-based DR picks now live here, not in Tanks), **Most used overall**. The script prints the full list of every character used more than once per category (no cap) — trimming to the top 4 for the video card layout is done in the HTML template, not the script. Categories intentionally overlap (e.g. Toth appears in both Tanks and Self-Heal/DR) — they're independent tallies, not a partition | 1.37 |
+| July 2026 | Fixed a real bug in `best_team_from_pool`'s >25-character fallback path: named `PRIORITY_PAIRS` (e.g. Aleph-Null + Re'vas) were invisible to it, since it sorted individuals by their own trait score with no way to express "only valuable if a specific partner is also picked" — so a pairing worth +60 as a team could lose to a stronger-looking individual pick (e.g. a Mechanic with a reuse bonus) even when both pair members were sitting right there in the pool. Fixed by force-including any complete pair (or `PRIORITY_SOLO` member) present in the pool into a shortlist, then running the same exact combo scorer used for pools ≤25 on that shortlist, instead of a blind per-character top-5 cut | 1.37 |
 | July 2026 | Living Metal now counts as Mechanical for team detection — Necrons with `Living_Metal=Y` (Imospekh, Aleph-Null, etc.) correctly trigger the Mechanic-over-Healer pathway when 3+ appear in a team | 1.36 |
 | July 2026 | Full wiki pass: re-verified all 44 trait columns for all 112 characters against wiki infoboxes (fixing known errors); added 21 new `Has_[DamageType]` columns capturing damage types from any source (primary attack or ability); added 10 Machines of War rows (`Is_MoW=Y`); regenerated `tacticus_characters.xlsx` with Y-cell highlighting, frozen panes, and auto-fit columns | 1.36 |
 | July 2026 | Initial database built from wiki (Hits, Factions, Melee, Ranged, Trait pages) | 1.36 |

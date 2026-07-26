@@ -1,0 +1,34 @@
+le_name: "LE 15 - TBD"
+tracks:
+  - name: Alpha
+    enemies: Orks
+    allowed_alliances: [Imperial, Chaos]
+    excluded_factions: []
+    battles:
+      - {name: "Full Eviscerate Damage lineup", col: Has_Eviscerating, val: "Y", pts: 75}
+      - {name: "Full Suppressive Fire lineup", col: Suppressive_Fire, val: "Y", pts: 95}
+      - {name: "Full Flying lineup", col: Flying, val: "Y", pts: 80}
+      - {name: "Min 5 hits lineup", col: X_Hits, val: ">=5", pts: 85}
+      - {name: "No Resilient lineup", col: Resilient, val: "N", pts: 40}
+
+  - name: Beta
+    enemies: Black Templars
+    allowed_alliances: [Chaos, Xenos]
+    excluded_factions: []
+    battles:
+      - {name: "Full Physical Damage lineup", col: Has_Physical, val: "Y", pts: 85}
+      - {name: "Full Melee lineup", col: Has_Ranged, val: "N", pts: 60}
+      - {name: "Full Orks lineup", col: Faction, val: "Orks", pts: 100}
+      - {name: "Full Psyker lineup", col: Psyker, val: "Y", pts: 90}
+      - {name: "No Mechanical lineup", col: Mechanical, val: "N", pts: 40}
+
+  - name: Gamma
+    enemies: Black Legion
+    allowed_alliances: [Imperial, Xenos]
+    excluded_factions: []
+    battles:
+      - {name: "No Bolter Damage lineup", col: Has_Bolter, val: "N", pts: 40}
+      - {name: "Full Healer lineup", col: Healer, val: "Y", pts: 100}
+      - {name: "Min 3 Hits lineup", col: X_Hits, val: ">=3", pts: 60}
+      - {name: "Full Plasma Damage lineup", col: Has_Plasma, val: "Y", pts: 95}
+      - {name: "Full Rapid Assault lineup", col: Rapid_Assault, val: "Y", pts: 80}

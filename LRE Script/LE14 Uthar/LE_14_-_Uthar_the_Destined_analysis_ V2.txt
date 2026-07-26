@@ -1,0 +1,333 @@
+
+█████████████████████████████████████████████████████████████████
+  LE ANALYSIS: LE 14 - Uthar the Destined
+█████████████████████████████████████████████████████████████████
+  Characters loaded: 123
+  NOTE: Defeat all enemies objectives ignored (base rewards).
+
+=================================================================
+  ALPHA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 77
+  Enemies: Unknown
+  Eligible factions: Imperial & Chaos
+  ✅Full Ultramarine lineup (75pts): 6 chars
+  ✅Full Resilient lineup (95pts): 16 chars
+  ✅Max 2 hits lineup (50pts): 33 chars
+  ✅Full Melee lineup (65pts): 45 chars
+  ✅Full Piercing Damage lineup (90pts): 10 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 210pts | Covers: Full Resilient lineup + Full Melee lineup + Max 2 hits lineup
+  Full eligible pool (4):
+    Aesoth (Adeptus Custodes)  [RESILIENT | SHIELDING]
+    Azkor (World Eaters)  [RESILIENT]
+    Corrodius (Death Guard)  [RESILIENT | SPAWNER]
+    Pestillian (Death Guard)  [RESILIENT]
+  Recommended:
+    * Aesoth (Adeptus Custodes)  [RESILIENT | SHIELDING]
+    * Azkor (World Eaters)  [RESILIENT]
+    * Corrodius (Death Guard)  [RESILIENT | SPAWNER]
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 3 | Total pts/cycle: 375
+
+  TEAM 1 | Newly covers: Full Piercing Damage lineup + Full Melee lineup | Pts/deployment: 155
+  Full eligible pool (9):
+    Dante (Blood Angels)
+    Haarken Worldclaimer (Black Legion)
+    Hascule (Emperor's Children)
+    Incisus (Ultramarines)  [HEALER]
+    Kariyan (Adeptus Custodes)  [RESILIENT]
+    Kharn (World Eaters)
+    Tarvakh (World Eaters)
+    Trajann (Adeptus Custodes)  [RESILIENT]
+    Ulf (Space Wolves)
+  Recommended 5:
+    * Dante (Blood Angels)
+    * Haarken Worldclaimer (Black Legion)
+    * Incisus (Ultramarines)  [HEALER]
+    * Kariyan (Adeptus Custodes)  [RESILIENT]
+    * Trajann (Adeptus Custodes)  [RESILIENT]
+  ★ High-priority investment (multi-team): Incisus
+
+  TEAM 2 | Newly covers: Full Resilient lineup + Max 2 hits lineup | Pts/deployment: 145
+  Full eligible pool (7):
+    Aesoth (Adeptus Custodes)  [RESILIENT | SHIELDING]
+    Azkor (World Eaters)  [RESILIENT]
+    Commissar Yarrick (Astra Militarum)  [RESILIENT | SPAWNER]
+    Corrodius (Death Guard)  [RESILIENT | SPAWNER]
+    Pestillian (Death Guard)  [RESILIENT]
+    Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    Tyrith (Adeptus Custodes)  [RESILIENT | PARRYING]
+  Recommended 5:
+    * Aesoth (Adeptus Custodes)  [RESILIENT | SHIELDING]
+    * Commissar Yarrick (Astra Militarum)  [RESILIENT | SPAWNER]
+    * Corrodius (Death Guard)  [RESILIENT | SPAWNER]
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    * Tyrith (Adeptus Custodes)  [RESILIENT | PARRYING]
+
+  TEAM 3 | Newly covers: Full Ultramarine lineup | Pts/deployment: 75
+  Full eligible pool (6):
+    Bellator (Ultramarines)  [TANK(trait) | SPAWNER]
+    Certus (Ultramarines)
+    Incisus (Ultramarines)  [HEALER]
+    Marneus Calgar (Ultramarines)  [TANK(trait)]
+    Titus (Ultramarines)  [SELF-HEAL]
+    Varro Tigurius (Ultramarines)  [SHIELDING]
+  Recommended 5:
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]
+    * Incisus (Ultramarines)  [HEALER]
+    * Marneus Calgar (Ultramarines)  [TANK(trait)]
+    * Titus (Ultramarines)  [SELF-HEAL]
+    * Varro Tigurius (Ultramarines)  [SHIELDING]
+  ★ High-priority investment (multi-team): Incisus
+  📝 Note: Incisus is already committed to an earlier team in this track — reused here instead of a new roster slot to keep leveling investment down.
+
+
+=================================================================
+  BETA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 62
+  Enemies: Unknown
+  Eligible factions: Chaos & Xenos
+  ✅Full Ranged lineup (60pts): 30 chars
+  ✅No Psyker lineup (55pts): 53 chars
+  ✅Full Terminator Armour lineup (85pts): 6 chars
+  ✅Full Psychic Damage lineup (100pts): 11 chars
+  ✅Min 5 hits lineup (75pts): 11 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 190pts | Covers: Min 5 hits lineup + Full Ranged lineup + No Psyker lineup
+  Full eligible pool (6):
+    Imospekh (Necrons)
+    Maugan Ra (Aeldari)
+    Re'vas (Tau Empire)  [SPAWNER]
+    Shiron (Emperor's Children)
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Volk (Black Legion)
+  Recommended:
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    * Re'vas (Tau Empire)  [SPAWNER]
+    * Imospekh (Necrons)
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 3 | Total pts/cycle: 375
+
+  TEAM 1 | Newly covers: Min 5 hits lineup + Full Ranged lineup + No Psyker lineup | Pts/deployment: 190
+  Full eligible pool (6):
+    Imospekh (Necrons)
+    Maugan Ra (Aeldari)
+    Re'vas (Tau Empire)  [SPAWNER]
+    Shiron (Emperor's Children)
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Volk (Black Legion)
+  Recommended 5:
+    * Imospekh (Necrons)
+    * Maugan Ra (Aeldari)
+    * Re'vas (Tau Empire)  [SPAWNER]
+    * Shiron (Emperor's Children)
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+  ★ High-priority investment (multi-team): Toth
+
+  TEAM 2 | Newly covers: Full Psychic Damage lineup | Pts/deployment: 100
+  Full eligible pool (11):
+    Abraxas (Thousand Sons)  [SPAWNER]
+    Ahriman (Thousand Sons)
+    Archimatos (Black Legion)  [SPAWNER]
+    Eldryon (Aeldari)
+    Neurothrope (Tyranids)
+    Thaumachus (Thousand Sons)  [SHIELDING]
+    The Patermine (Genestealer Cults)  [SPAWNER]
+    Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    Xybia (Genestealer Cults)  [SPAWNER]
+    Yazaghor (Thousand Sons)
+    Z'kar (Thousand Sons)
+  Recommended 5:
+    * Abraxas (Thousand Sons)  [SPAWNER]
+    * Archimatos (Black Legion)  [SPAWNER]
+    * Thaumachus (Thousand Sons)  [SHIELDING]
+    * The Patermine (Genestealer Cults)  [SPAWNER]
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+  ★ High-priority investment (multi-team): Typhus
+  🔗 Cross-track win: Typhus is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+
+  TEAM 3 | Newly covers: Full Terminator Armour lineup | Pts/deployment: 85
+  Full eligible pool (6):
+    Abaddon The Despoiler (Black Legion)  [TANK(trait) | RESILIENT]
+    Angrax (Black Legion)  [TANK(trait)]
+    Maladus (Death Guard)  [TANK(trait) | RESILIENT]
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    Wrask (World Eaters)  [TANK(trait) | SHIELDING]
+  Recommended 5:
+    * Abaddon The Despoiler (Black Legion)  [TANK(trait) | RESILIENT]
+    * Maladus (Death Guard)  [TANK(trait) | RESILIENT]
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    * Wrask (World Eaters)  [TANK(trait) | SHIELDING]
+  ★ High-priority investment (multi-team): Toth, Typhus
+  📝 Note: Toth, Typhus are already committed to an earlier team in this track — reused here instead of 2 new roster slots to keep leveling investment down.
+
+
+=================================================================
+  GAMMA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 87
+  Enemies: Unknown
+  Eligible factions: Imperial & Xenos
+  ✅No Power Damage lineup (50pts): 60 chars
+  ✅Full Bolter Damage lineup (85pts): 16 chars
+  ✅Full Mechanical lineup (100pts): 10 chars
+  ✅Max 1 hits lineup (75pts): 19 chars
+  ✅Full Big Target lineup (65pts): 8 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 215pts | Covers: Full Mechanical lineup + Full Big Target lineup + No Power Damage lineup
+  Full eligible pool (3):
+    Boss Gulgortz (Orks)  [SPAWNER]
+    Re'vas (Tau Empire)  [SPAWNER]
+    Snappawrecka (Orks)
+  Recommended:
+    * Boss Gulgortz (Orks)  [SPAWNER]
+    * Re'vas (Tau Empire)  [SPAWNER]
+    * Snappawrecka (Orks)
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 3 | Total pts/cycle: 375
+
+  TEAM 1 | Newly covers: Full Mechanical lineup + Full Big Target lineup | Pts/deployment: 165
+  Full eligible pool (5):
+    Boss Gulgortz (Orks)  [SPAWNER]
+    Commander Farsight (Tau Empire)
+    Morvenn Vahl (Adepta Sororitas)
+    Re'vas (Tau Empire)  [SPAWNER]
+    Snappawrecka (Orks)
+  Recommended 5:
+    * Boss Gulgortz (Orks)  [SPAWNER]
+    * Commander Farsight (Tau Empire)
+    * Morvenn Vahl (Adepta Sororitas)
+    * Re'vas (Tau Empire)  [SPAWNER]
+    * Snappawrecka (Orks)
+  🔗 Cross-track win: Re'vas is already committed in the Beta track — reusing here means no extra roster slot for the whole event.
+
+  TEAM 2 | Newly covers: Max 1 hits lineup + No Power Damage lineup | Pts/deployment: 125
+  Full eligible pool (15):
+    Aesoth (Adeptus Custodes)  [RESILIENT | SHIELDING]
+    Ammuk (Leagues of Votann)  [SPAWNER]
+    Calandis (Aeldari)
+    Certus (Ultramarines)
+    Hollan (Genestealer Cults)  [HEALER | SPAWNER]
+    Incisus (Ultramarines)  [HEALER]
+    Isaak (Genestealer Cults)  [SPAWNER]
+    Neurothrope (Tyranids)
+    Parasite of Mortrex (Tyranids)  [SPAWNER]
+    Ramus (Dark Angels)
+    Sarquael (Dark Angels)
+    Sho'syl (Tau Empire)  [SPAWNER]
+    Sibyll Devine (Astra Militarum)  [SHIELDING]
+    Tan Gi'da (Adeptus Mechanicus)  [SHIELDING | SPAWNER]
+    Varro Tigurius (Ultramarines)  [SHIELDING]
+  Recommended 5:
+    * Aesoth (Adeptus Custodes)  [RESILIENT | SHIELDING]
+    * Hollan (Genestealer Cults)  [HEALER | SPAWNER]
+    * Incisus (Ultramarines)  [HEALER]
+    * Tan Gi'da (Adeptus Mechanicus)  [SHIELDING | SPAWNER]
+    * Varro Tigurius (Ultramarines)  [SHIELDING]
+  🔗 Cross-track win: Aesoth is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+  🔗 Cross-track win: Incisus is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+  🔗 Cross-track win: Varro Tigurius is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+
+  TEAM 3 | Newly covers: Full Bolter Damage lineup | Pts/deployment: 85
+  Full eligible pool (16):
+    Azrael (Dark Angels)  [SHIELDING]
+    Bellator (Ultramarines)  [TANK(trait) | SPAWNER]
+    Brother Burchard (Black Templars)  [TANK(trait)]
+    Certus (Ultramarines)
+    Commissar Yarrick (Astra Militarum)  [RESILIENT | SPAWNER]
+    Cyrus (Adeptus Astartes)
+    High Marshal Helbrecht (Black Templars)
+    Isabella (Adepta Sororitas)  [HEALER]
+    Lucien (Blood Angels)  [RESILIENT]
+    Marneus Calgar (Ultramarines)  [TANK(trait)]
+    Morvenn Vahl (Adepta Sororitas)
+    Ramus (Dark Angels)
+    Roswitha (Adepta Sororitas)
+    Titus (Ultramarines)  [SELF-HEAL]
+    Trajann (Adeptus Custodes)  [RESILIENT]
+    Tyrith (Adeptus Custodes)  [RESILIENT | PARRYING]
+  Recommended 5:
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]
+    * Commissar Yarrick (Astra Militarum)  [RESILIENT | SPAWNER]
+    * Isabella (Adepta Sororitas)  [HEALER]
+    * Marneus Calgar (Ultramarines)  [TANK(trait)]
+    * Titus (Ultramarines)  [SELF-HEAL]
+  🔗 Cross-track win: Bellator is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+  🔗 Cross-track win: Commissar Yarrick is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+  🔗 Cross-track win: Marneus Calgar is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+  🔗 Cross-track win: Titus is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+
+
+=================================================================
+  CROSS-TRACK INVESTMENT SUMMARY
+=================================================================
+  These characters cover objectives in more than one track —
+  leveling them is worth more than a single-track pick:
+
+    * Aesoth (Adeptus Custodes)  [RESILIENT | SHIELDING]  — used in: Alpha & Gamma
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]  — used in: Alpha & Gamma
+    * Commissar Yarrick (Astra Militarum)  [RESILIENT | SPAWNER]  — used in: Alpha & Gamma
+    * Incisus (Ultramarines)  [HEALER]  — used in: Alpha & Gamma
+    * Marneus Calgar (Ultramarines)  [TANK(trait)]  — used in: Alpha & Gamma
+    * Re'vas (Tau Empire)  [SPAWNER]  — used in: Beta & Gamma
+    * Titus (Ultramarines)  [SELF-HEAL]  — used in: Alpha & Gamma
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]  — used in: Alpha & Beta
+    * Varro Tigurius (Ultramarines)  [SHIELDING]  — used in: Alpha & Gamma
+
+=================================================================
+  CHAMPION USAGE LEADERBOARD (whole event, used more than once)
+=================================================================
+
+  Healers (Healers + Mechanics):
+    * Incisus (Ultramarines)  [HEALER]  — used 3 times
+
+  Tanks:
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]  — used 3 times
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]  — used 2 times
+    * Marneus Calgar (Ultramarines)  [TANK(trait)]  — used 2 times
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]  — used 2 times
+
+  Self-Heal / Damage Reduction:
+    * Titus (Ultramarines)  [SELF-HEAL]  — used 2 times
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]  — used 2 times
+
+  Most used overall:
+    * Incisus (Ultramarines)  [HEALER]  — used 3 times
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]  — used 3 times
+    * Aesoth (Adeptus Custodes)  [RESILIENT | SHIELDING]  — used 2 times
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]  — used 2 times
+    * Commissar Yarrick (Astra Militarum)  [RESILIENT | SPAWNER]  — used 2 times
+    * Marneus Calgar (Ultramarines)  [TANK(trait)]  — used 2 times
+    * Re'vas (Tau Empire)  [SPAWNER]  — used 2 times
+    * Titus (Ultramarines)  [SELF-HEAL]  — used 2 times
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]  — used 2 times
+    * Varro Tigurius (Ultramarines)  [SHIELDING]  — used 2 times
+
+=================================================================
+  ANALYSIS COMPLETE
+=================================================================
