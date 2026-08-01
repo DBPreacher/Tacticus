@@ -964,15 +964,19 @@ document.addEventListener('click',()=>advance());
 
 // ---- idle ambient flourishes ----
 // After a stretch with no clicks, play one small, tasteful flourish — a
-// glint travelling once around the frame border, or a soft pulse along
-// the current header's divider line — so a long pause while talking
-// doesn't read as a frozen slide. Deliberately rare: a long cooldown
-// (with jitter, so it doesn't fall into a noticeable rhythm) between
-// each one, and any click resets the idle clock immediately.
+// glint sweeping along the frame's top edge, or a soft pulse along the
+// current header's divider line — so a long pause while talking doesn't
+// read as a frozen slide. The gap between flourishes is randomized and
+// re-rolled after every firing (not a fixed interval), so they never
+// settle into a rhythm a viewer could start unconsciously anticipating;
+// each flourish's own speed/width/tint/direction is also randomized (see
+// randomAmbientLook()) so repeat firings don't look like a copy-paste of
+// the last one. Any click/keypress resets the idle clock immediately.
 let lastInteraction=Date.now();
 let lastAmbient=0;
 const IDLE_MIN=9000;
-const AMBIENT_COOLDOWN=17000;
+const AMBIENT_GAP_MIN=12000,AMBIENT_GAP_MAX=24000;
+let ambientGap=AMBIENT_GAP_MIN+Math.random()*(AMBIENT_GAP_MAX-AMBIENT_GAP_MIN);
 document.addEventListener('click',()=>{lastInteraction=Date.now();},true);
 document.addEventListener('keydown',()=>{lastInteraction=Date.now();},true);
 
@@ -991,34 +995,50 @@ function currentHeaderLineRect(){
   }
   return null;
 }
+// Rolls a fresh look for one flourish firing — width, speed, sweep
+// direction, and tint all vary independently, so back-to-back firings
+// never play identically. Colors stay within the existing warm
+// orange/gold accent family (two close variants) rather than introducing
+// a new hue, so every look still reads as the same design system.
+function randomAmbientLook(){
+  return {
+    barWidth:80+Math.random()*120,   // 80-200px
+    duration:900+Math.random()*800,  // 900-1700ms
+    reverse:Math.random()<0.5,
+    color:Math.random()<0.5?'255,214,150':'255,224,120',
+  };
+}
 // Sweeps a soft gradient bar across exactly the given rect, clipped so it
 // can never travel past the rect's own bounds (the wrapper's
 // overflow:hidden does the clipping — the bar itself starts/ends fully
 // outside the wrapper, at -barWidth / rect.width, so only the portion
-// inside [0, rect.width] is ever visible).
-function pulseAlongRect(rect,barWidth,duration,z){
+// inside [0, rect.width] is ever visible). `reverse` flips the start/end
+// points so the sweep runs right-to-left instead of left-to-right.
+function pulseAlongRect(rect,{barWidth,duration,z,color,reverse}){
   if(!rect||rect.width<10)return;
   const wrap=document.createElement('div');
   wrap.style.cssText='position:fixed;overflow:hidden;pointer-events:none;z-index:'+(z||850)+';'
     +'left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;height:'+rect.height+'px;';
   const bar=document.createElement('div');
+  const startX=reverse?rect.width:-barWidth;
+  const endX=reverse?-barWidth:rect.width;
   bar.style.cssText='position:absolute;top:0;left:0;width:'+barWidth+'px;height:100%;'
-    +'background:linear-gradient(90deg,transparent,rgba(255,214,150,.9),transparent);'
+    +'background:linear-gradient(90deg,transparent,rgba('+color+',.9),transparent);'
     +'filter:blur(1px);opacity:0;'
-    +'transform:translateX('+(-barWidth)+'px);'
+    +'transform:translateX('+startX+'px);'
     +'transition:transform '+duration+'ms cubic-bezier(.4,.05,.3,1),opacity .35s ease;';
   wrap.appendChild(bar);
   document.body.appendChild(wrap);
   void bar.offsetHeight;
   bar.style.opacity='1';
-  bar.style.transform='translateX('+rect.width+'px)';
+  bar.style.transform='translateX('+endX+'px)';
   setTimeout(()=>{bar.style.opacity='0';},duration-150);
   setTimeout(()=>wrap.remove(),duration+400);
 }
 function pulseLine(){
   const rect=currentHeaderLineRect();
   if(!rect)return;
-  pulseAlongRect({left:rect.left,top:rect.top-2,width:rect.width,height:6},120,1300);
+  pulseAlongRect({left:rect.left,top:rect.top-2,width:rect.width,height:6},randomAmbientLook());
 }
 function sparkleBorder(){
   // sweeps just the frame's top edge — a short, contained glint rather
@@ -1028,17 +1048,32 @@ function sparkleBorder(){
   const frame=document.querySelector('.frame');
   if(!frame)return;
   const r=frame.getBoundingClientRect();
-  pulseAlongRect({left:r.left,top:r.top-3,width:r.width,height:8},150,1300,520);
+  pulseAlongRect({left:r.left,top:r.top-3,width:r.width,height:8},{...randomAmbientLook(),z:520});
 }
 
+function fireAmbient(){
+  if(Math.random()<0.5)pulseLine();else sparkleBorder();
+}
 function maybeFireAmbient(){
   const now=Date.now();
   if(now-lastInteraction<IDLE_MIN)return;
-  if(now-lastAmbient<AMBIENT_COOLDOWN)return;
+  if(now-lastAmbient<ambientGap)return;
   lastAmbient=now;
-  if(Math.random()<0.5)pulseLine();else sparkleBorder();
+  ambientGap=AMBIENT_GAP_MIN+Math.random()*(AMBIENT_GAP_MAX-AMBIENT_GAP_MIN); // reroll for next firing
+  fireAmbient();
 }
 setInterval(maybeFireAmbient,1000);
+
+// Testing hotkeys — fire a flourish on demand instead of waiting out the
+// idle timer. Harmless to leave in for real recording: 1/2/3 aren't used
+// by anything else, and nothing on screen hints they exist.
+// 1 = header-line pulse, 2 = top-border glint, 3 = the same random pick
+// the idle timer itself uses, so you can see the natural 50/50 mix too.
+document.addEventListener('keydown',e=>{
+  if(e.key==='1')pulseLine();
+  else if(e.key==='2')sparkleBorder();
+  else if(e.key==='3')fireAmbient();
+});
 
 els.forEach((el,i)=>{if(i!==0)el.classList.remove('active');});
 els[0].classList.add('active');
