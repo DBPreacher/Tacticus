@@ -1,6 +1,6 @@
 
 █████████████████████████████████████████████████████████████████
-  LE ANALYSIS: LE 15 - TBD
+  LE ANALYSIS: LE 15 - Lysander
 █████████████████████████████████████████████████████████████████
   Characters loaded: 123
   NOTE: Defeat all enemies objectives ignored (base rewards).
