@@ -357,21 +357,47 @@ onto the card:
   previously "Self-Heal / DR" — always render it as **"Self-Heal / Damage
   Reduction"**.)
 - **Most Relevant** card ← top 4 from the leaderboard's "Most used overall"
-  list. Still add the `<small>` team-attribution detail (e.g. `Incisus
+  list, **skipping anyone already placed on the Healers, Tanks, or
+  Self-Heal / Damage Reduction cards** (see the no-duplicates rule below) —
+  take the next-highest-usage character(s) instead to fill out the top 4.
+  Still add the `<small>` team-attribution detail (e.g. `Incisus
   <small>4 teams — Alpha T2/T3/T4 + Gamma T3</small>`) by cross-referencing
   the per-team `★`/`📝`/`🔗` notes manually — the script's overall list
   doesn't carry that detail, just the name and count. This card should
   overlap heavily with the `★ High-priority investment` flags from the
-  analysis — if a character has that flag, they almost certainly belong
-  here.
+  analysis — if a character has that flag and isn't already shown on
+  another card, they almost certainly belong here.
 
 If a category's full list has fewer than 4 entries (or none at all — "None
 used more than once this event"), just use however many are there; don't
 pad the card with single-use characters to force it to 4.
 
-The four categories intentionally overlap (e.g. Toth can appear in both
-Tanks and Self-Heal / Damage Reduction) — that's expected, they're
-independent tallies, not a partition.
+**No character appears on more than one card — the four categories are a
+partition for display purposes, even though the underlying leaderboard
+tallies them independently and will happily list the same name under two
+or three headings** (e.g. Toth being both `TANK(trait)` and `SELF-HEAL`).
+When a character qualifies for more than one card:
+
+- **Self-Heal / Damage Reduction takes priority over Tanks.** This card's
+  candidate pool is almost always the smallest (few characters have
+  `Self_Heal=Y`, and only Tyrant Guard/Thothmek supplement it), so it's the
+  one most likely to end up empty if a shared name gets claimed by Tanks
+  first. If a character appears on both lists, put them in Self-Heal /
+  Damage Reduction and drop them from Tanks — but only do this if Tanks
+  still has other qualifying names left over; never empty one card just to
+  fill another (first hit: LE 15 Lysander, where Toth was the only
+  Self-Heal/DR entry but also tanked Team 1/Team 2 in Alpha — Toth now
+  shows only under Self-Heal / Damage Reduction, and Tanks still reads
+  Bellator, Cezare).
+- **Most Relevant is the most flexible card and yields to the other
+  three.** Since it's built from a much longer "Most used overall" list, it
+  has the most alternative candidates to fall back on — so it should always
+  be the one to skip a name already shown on Healers, Tanks, or Self-Heal /
+  Damage Reduction, and pull the next name down the list instead, rather
+  than the other cards making room for it.
+- Between Healers and Tanks (a character rarely qualifies for both, but if
+  one ever does), apply the same logic: give the character to whichever
+  card would otherwise have fewer entries.
 
 Only include characters that actually appear in this LE's recommended
 teams — don't carry over holdover picks from a previous LE's Monthly Plan
@@ -456,3 +482,4 @@ The project knowledge in Claude.ai should contain:
 | July 2026 | Second follow-up pass: fixed both idle ambient flourishes overshooting past their target line/edge (replaced with a shared `pulseAlongRect()` helper clipped to the exact target rect) and put the border glint behind the logo (`z-index:520`, between the frame and the logo) instead of sliding over it. Fixed real graphical bugs in the pool→5-man fly transition reported after actually watching it record: chosen pool names were ghosting/drifting behind their own flying clone (fixed by hiding the real `<li>` the instant its clone spawns, with `resetPoolItemVisibility()` undoing that on back-navigation/repeat visits); and a one-frame flicker on landing, which took three attempts to get right — a delayed clone-removal fixed an initial "wipe" but caused a brightness "pulse" (both clone and real text at full opacity at once), a crossfade to smooth that itself read as flicker, and the fix that actually stuck was an atomic instant swap combined with settling `.chars-hi`'s `visibility:visible` at flight-start rather than at the landing instant (see Template Mechanics for why toggling `visibility` at the handoff moment mattered). Also fixed a corrupted class attribute on the Monthly Plan Healers title (a stray pasted timestamp had silently broken its green styling) and trimmed the Tanks card to the top 4 champions. |
 | July 2026 | Major `le_analysis.py` rewrite: replaced the anchor-based Full Coverage search (which could lock in a low-value team before ever trying a higher-value one, and could dilute a too-small pool with non-qualifying filler) with an exact optimizer that only ever considers genuinely achievable 5+ character combinations and solves exactly for the point-maximizing set of teams. Added a within-track and cross-track reuse tiebreak (`📝`/`🔗 Cross-track win` notes), a per-track Enemies/Eligible factions line sourced directly from the yaml, and a new end-of-report Cross-Track Investment Summary + Champion Usage Leaderboard — see INSTRUCTIONS.md Changelog for the full technical breakdown |
 | July 2026 | Reworked the Champion Usage Leaderboard's categories to match the Monthly Plan's four video cards exactly: Healers (Healers + Mechanics) / Tanks (trait-based only) / Self-Heal + Damage Reduction (now where Tyrant Guard/Thothmek show up, not Tanks) / Most used overall. The analysis prints the full list of every character used more than once per category (no cap) — trimming to the top 4 for the card layout is now this template's job, not the script's. Monthly Plan section rewritten to use the script's leaderboard output as source material instead of manually tallying. On screen, `🔗 Cross-track win` is no longer a separate note — fold it into the same `★ High-priority investment` line with a `(also used in [Track])` qualifier |
+| July 2026 | Monthly Plan cards are now a display partition, not independent tallies — a character may only appear on one of the four cards even though the leaderboard still lists them under every category they qualify for. Self-Heal / Damage Reduction now outranks Tanks (it's usually the sparsest card, so a shared name goes there and is dropped from Tanks, as long as Tanks still has other names left); Most Relevant defers to all three other cards and pulls the next name down the "Most used overall" list instead of repeating one already shown elsewhere. First applied retroactively to LE 15 Lysander: Toth (Tank(trait) + Self-Heal) moved to Self-Heal / Damage Reduction only, and Most Relevant swapped out Bellator/Cezare/Gibbascrapz (already on Tanks/Healers) for Lucius/Mataneo/Ragnar |
