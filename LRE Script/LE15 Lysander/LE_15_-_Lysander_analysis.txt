@@ -1,0 +1,328 @@
+
+█████████████████████████████████████████████████████████████████
+  LE ANALYSIS: LE 15 - Lysander
+█████████████████████████████████████████████████████████████████
+  Characters loaded: 126
+  Excluded (Do_Not_Use — datamined, not yet officially announced): Kimm
+  NOTE: Defeat all enemies objectives ignored (base rewards).
+
+=================================================================
+  ALPHA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 79
+  Enemies: Orks
+  Eligible factions: Imperial & Chaos
+  ✅Full Eviscerate Damage lineup (75pts): 8 chars
+  ✅Full Suppressive Fire lineup (95pts): 6 chars
+  ✅Full Flying lineup (80pts): 9 chars
+  ✅Min 5 hits lineup (85pts): 7 chars
+  ✅No Resilient lineup (40pts): 62 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 220pts | Covers: Full Suppressive Fire lineup + Min 5 hits lineup + No Resilient lineup
+  Full eligible pool (3):
+    Shiron (Emperor's Children)
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Volk (Black Legion)
+  Recommended:
+    * Shiron (Emperor's Children)
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    * Volk (Black Legion)
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 4 | Total pts/cycle: 375
+
+  TEAM 1 | Newly covers: Min 5 hits lineup + No Resilient lineup | Pts/deployment: 125
+  Full eligible pool (7):
+    Bellator (Ultramarines)  [TANK(trait) | SPAWNER]
+    Forcas (Dark Angels)  [PARRYING]
+    Lucius (Emperor's Children)
+    Ragnar (Space Wolves)
+    Shiron (Emperor's Children)
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Volk (Black Legion)
+  Recommended 5:
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]
+    * Forcas (Dark Angels)  [PARRYING]
+    * Lucius (Emperor's Children)
+    * Ragnar (Space Wolves)
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+  ★ High-priority investment (multi-team): Bellator, Lucius, Toth
+
+  TEAM 2 | Newly covers: Full Suppressive Fire lineup | Pts/deployment: 95
+  Full eligible pool (6):
+    Brother Burchard (Black Templars)  [TANK(trait)]
+    Cyrus (Adeptus Astartes)
+    Shiron (Emperor's Children)
+    Thaddeus Noble (Astra Militarum)
+    Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+    Volk (Black Legion)
+  Recommended 5:
+    * Brother Burchard (Black Templars)  [TANK(trait)]
+    * Cyrus (Adeptus Astartes)
+    * Shiron (Emperor's Children)
+    * Thaddeus Noble (Astra Militarum)
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]
+  ★ High-priority investment (multi-team): Shiron, Toth
+  📝 Note: Toth is already committed to an earlier team in this track — reused here instead of a new roster slot to keep leveling investment down.
+
+  TEAM 3 | Newly covers: Full Flying lineup | Pts/deployment: 80
+  Full eligible pool (9):
+    Actus (Adeptus Mechanicus)  [MECHANIC]
+    Ahriman (Thousand Sons)
+    Bellator (Ultramarines)  [TANK(trait) | SPAWNER]
+    Celestine (Adepta Sororitas)  [SPAWNER]
+    Dante (Blood Angels)
+    Haarken Worldclaimer (Black Legion)
+    Mataneo (Blood Angels)  [SPAWNER]
+    Thaumachus (Thousand Sons)  [SHIELDING]
+    Yazaghor (Thousand Sons)
+  Recommended 5:
+    * Actus (Adeptus Mechanicus)  [MECHANIC]
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]
+    * Celestine (Adepta Sororitas)  [SPAWNER]
+    * Mataneo (Blood Angels)  [SPAWNER]
+    * Thaumachus (Thousand Sons)  [SHIELDING]
+  ★ High-priority investment (multi-team): Bellator
+  📝 Note: Bellator is already committed to an earlier team in this track — reused here instead of a new roster slot to keep leveling investment down.
+
+  TEAM 4 | Newly covers: Full Eviscerate Damage lineup | Pts/deployment: 75
+  Full eligible pool (8):
+    Adamatar (Emperor's Children)
+    Azkor (World Eaters)  [RESILIENT]
+    Cezare (Blood Angels)  [TANK(trait)]
+    Hascule (Emperor's Children)
+    Kariyan (Adeptus Custodes)  [RESILIENT]
+    Kharn (World Eaters)
+    Lucius (Emperor's Children)
+    Shiron (Emperor's Children)
+  Recommended 5:
+    * Azkor (World Eaters)  [RESILIENT]
+    * Cezare (Blood Angels)  [TANK(trait)]
+    * Kariyan (Adeptus Custodes)  [RESILIENT]
+    * Lucius (Emperor's Children)
+    * Shiron (Emperor's Children)
+  ★ High-priority investment (multi-team): Lucius, Shiron
+  📝 Note: Lucius, Shiron are already committed to an earlier team in this track — reused here instead of 2 new roster slots to keep leveling investment down.
+
+
+=================================================================
+  BETA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 64
+  Enemies: Black Templars
+  Eligible factions: Chaos & Xenos
+  ✅Full Physical Damage lineup (85pts): 12 chars
+  ✅Full Melee lineup (60pts): 32 chars
+  ⚠️ Full Orks lineup (100pts): 5 chars
+  ✅Full Psyker lineup (90pts): 9 chars
+  ✅No Mechanical lineup (40pts): 58 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 200pts | Covers: Full Orks lineup + Full Melee lineup + No Mechanical lineup
+  Full eligible pool (3):
+    Gibbascrapz (Orks)  [MECHANIC | SPAWNER]
+    Snotflogga (Orks)  [SPAWNER]
+    Tanksmasha (Orks)
+  Recommended:
+    * Gibbascrapz (Orks)  [MECHANIC | SPAWNER]
+    * Snotflogga (Orks)  [SPAWNER]
+    * Tanksmasha (Orks)
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 3 | Total pts/cycle: 375
+
+  TEAM 1 | Newly covers: Full Physical Damage lineup + Full Melee lineup + No Mechanical lineup | Pts/deployment: 185
+  Full eligible pool (6):
+    Ammuk (Leagues of Votann)  [SPAWNER]
+    Gibbascrapz (Orks)  [MECHANIC | SPAWNER]
+    Macer (World Eaters)  [RESILIENT]
+    Snotflogga (Orks)  [SPAWNER]
+    Tyrant Guard (Tyranids)  [PRIORITY | DMG-REDUCTION | SHIELDING]
+    Vynn (Leagues of Votann)  [MECHANIC | SPAWNER]
+  Recommended 5:
+    * Gibbascrapz (Orks)  [MECHANIC | SPAWNER]
+    * Macer (World Eaters)  [RESILIENT]
+    * Snotflogga (Orks)  [SPAWNER]
+    * Tyrant Guard (Tyranids)  [PRIORITY | DMG-REDUCTION | SHIELDING]
+    * Vynn (Leagues of Votann)  [MECHANIC | SPAWNER]
+  ★ High-priority investment (multi-team): Gibbascrapz, Snotflogga
+
+  TEAM 2 | Newly covers: Full Psyker lineup | Pts/deployment: 90
+  Full eligible pool (9):
+    Abraxas (Thousand Sons)  [SPAWNER]
+    Ahriman (Thousand Sons)
+    Archimatos (Black Legion)  [SPAWNER]
+    Eldryon (Aeldari)
+    Neurothrope (Tyranids)
+    Thaumachus (Thousand Sons)  [SHIELDING]
+    Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    Xybia (Genestealer Cults)  [SPAWNER]
+    Z'kar (Thousand Sons)
+  Recommended 5:
+    * Abraxas (Thousand Sons)  [SPAWNER]
+    * Archimatos (Black Legion)  [SPAWNER]
+    * Thaumachus (Thousand Sons)  [SHIELDING]
+    * Typhus (Death Guard)  [TANK(trait) | RESILIENT]
+    * Xybia (Genestealer Cults)  [SPAWNER]
+  🔗 Cross-track win: Thaumachus is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+
+  TEAM 3 | Newly covers: Full Orks lineup | Pts/deployment: 100
+  Full eligible pool (5):
+    Boss Gulgortz (Orks)  [SPAWNER]
+    Gibbascrapz (Orks)  [MECHANIC | SPAWNER]
+    Snappawrecka (Orks)
+    Snotflogga (Orks)  [SPAWNER]
+    Tanksmasha (Orks)
+  Recommended 5:
+    * Boss Gulgortz (Orks)  [SPAWNER]
+    * Gibbascrapz (Orks)  [MECHANIC | SPAWNER]
+    * Snappawrecka (Orks)
+    * Snotflogga (Orks)  [SPAWNER]
+    * Tanksmasha (Orks)
+  ★ High-priority investment (multi-team): Gibbascrapz, Snotflogga
+  📝 Note: Gibbascrapz, Snotflogga are already committed to an earlier team in this track — reused here instead of 2 new roster slots to keep leveling investment down.
+
+
+=================================================================
+  GAMMA TRACK
+=================================================================
+
+  Available pts: 375 | Eligible characters: 89
+  Enemies: Black Legion
+  Eligible factions: Imperial & Xenos
+  ✅No Bolter Damage lineup (40pts): 73 chars
+  ⚠️ Full Healer lineup (100pts): 5 chars
+  ✅Min 3 Hits lineup (60pts): 50 chars
+  ✅Full Plasma Damage lineup (95pts): 7 chars
+  ✅Full Rapid Assault lineup (80pts): 10 chars
+
+  --------------------------------------------------
+  MOST EFFICIENT STARTING TEAM
+  --------------------------------------------------
+  3-man | 180pts | Covers: Full Rapid Assault lineup + Min 3 Hits lineup + No Bolter Damage lineup
+  Full eligible pool (6):
+    Brother Jaeger (Black Templars)  [PARRYING]
+    Cezare (Blood Angels)  [TANK(trait)]
+    Dante (Blood Angels)
+    Kariyan (Adeptus Custodes)  [RESILIENT]
+    Nicodemus (Blood Angels)  [HEALER]
+    Ragnar (Space Wolves)
+  Recommended:
+    * Nicodemus (Blood Angels)  [HEALER]
+    * Cezare (Blood Angels)  [TANK(trait)]
+    * Kariyan (Adeptus Custodes)  [RESILIENT]
+
+  --------------------------------------------------
+  FULL COVERAGE TEAMS (5-man)
+  --------------------------------------------------
+  Tokens: 3 | Total pts/cycle: 375
+
+  TEAM 1 | Newly covers: Full Rapid Assault lineup + Min 3 Hits lineup + No Bolter Damage lineup | Pts/deployment: 180
+  Full eligible pool (6):
+    Brother Jaeger (Black Templars)  [PARRYING]
+    Cezare (Blood Angels)  [TANK(trait)]
+    Dante (Blood Angels)
+    Kariyan (Adeptus Custodes)  [RESILIENT]
+    Nicodemus (Blood Angels)  [HEALER]
+    Ragnar (Space Wolves)
+  Recommended 5:
+    * Brother Jaeger (Black Templars)  [PARRYING]
+    * Cezare (Blood Angels)  [TANK(trait)]
+    * Kariyan (Adeptus Custodes)  [RESILIENT]
+    * Nicodemus (Blood Angels)  [HEALER]
+    * Ragnar (Space Wolves)
+  ★ High-priority investment (multi-team): Nicodemus
+  🔗 Cross-track win: Cezare is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+  🔗 Cross-track win: Kariyan is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+  🔗 Cross-track win: Ragnar is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+
+  TEAM 2 | Newly covers: Full Healer lineup | Pts/deployment: 100
+  Full eligible pool (5):
+    Baldr (Space Wolves)  [HEALER]
+    Hollan (Genestealer Cults)  [HEALER | SPAWNER]
+    Incisus (Ultramarines)  [HEALER]
+    Isabella (Adepta Sororitas)  [HEALER]
+    Nicodemus (Blood Angels)  [HEALER]
+  Recommended 5:
+    * Baldr (Space Wolves)  [HEALER]
+    * Hollan (Genestealer Cults)  [HEALER | SPAWNER]
+    * Incisus (Ultramarines)  [HEALER]
+    * Isabella (Adepta Sororitas)  [HEALER]
+    * Nicodemus (Blood Angels)  [HEALER]
+  ★ High-priority investment (multi-team): Nicodemus
+  📝 Note: Nicodemus is already committed to an earlier team in this track — reused here instead of a new roster slot to keep leveling investment down.
+
+  TEAM 3 | Newly covers: Full Plasma Damage lineup | Pts/deployment: 95
+  Full eligible pool (7):
+    Azrael (Dark Angels)  [SHIELDING]
+    Baraqiel (Dark Angels)  [TANK(trait)]
+    Commander Farsight (Tau Empire)
+    Mataneo (Blood Angels)  [SPAWNER]
+    Sarquael (Dark Angels)
+    Thutmose (Necrons)
+    Uthar (Leagues of Votann)  [RESILIENT]
+  Recommended 5:
+    * Azrael (Dark Angels)  [SHIELDING]
+    * Baraqiel (Dark Angels)  [TANK(trait)]
+    * Commander Farsight (Tau Empire)
+    * Mataneo (Blood Angels)  [SPAWNER]
+    * Uthar (Leagues of Votann)  [RESILIENT]
+  🔗 Cross-track win: Mataneo is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
+
+
+=================================================================
+  CROSS-TRACK INVESTMENT SUMMARY
+=================================================================
+  These characters cover objectives in more than one track —
+  leveling them is worth more than a single-track pick:
+
+    * Cezare (Blood Angels)  [TANK(trait)]  — used in: Alpha & Gamma
+    * Kariyan (Adeptus Custodes)  [RESILIENT]  — used in: Alpha & Gamma
+    * Mataneo (Blood Angels)  [SPAWNER]  — used in: Alpha & Gamma
+    * Ragnar (Space Wolves)  — used in: Alpha & Gamma
+    * Thaumachus (Thousand Sons)  [SHIELDING]  — used in: Alpha & Beta
+
+=================================================================
+  CHAMPION USAGE LEADERBOARD (whole event, used more than once)
+=================================================================
+
+  Healers (Healers + Mechanics):
+    * Gibbascrapz (Orks)  [MECHANIC | SPAWNER]  — used 2 times
+    * Nicodemus (Blood Angels)  [HEALER]  — used 2 times
+
+  Tanks:
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]  — used 2 times
+    * Cezare (Blood Angels)  [TANK(trait)]  — used 2 times
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]  — used 2 times
+
+  Self-Heal / Damage Reduction:
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]  — used 2 times
+
+  Most used overall:
+    * Bellator (Ultramarines)  [TANK(trait) | SPAWNER]  — used 2 times
+    * Cezare (Blood Angels)  [TANK(trait)]  — used 2 times
+    * Gibbascrapz (Orks)  [MECHANIC | SPAWNER]  — used 2 times
+    * Kariyan (Adeptus Custodes)  [RESILIENT]  — used 2 times
+    * Lucius (Emperor's Children)  — used 2 times
+    * Mataneo (Blood Angels)  [SPAWNER]  — used 2 times
+    * Nicodemus (Blood Angels)  [HEALER]  — used 2 times
+    * Ragnar (Space Wolves)  — used 2 times
+    * Shiron (Emperor's Children)  — used 2 times
+    * Snotflogga (Orks)  [SPAWNER]  — used 2 times
+    * Thaumachus (Thousand Sons)  [SHIELDING]  — used 2 times
+    * Toth (Thousand Sons)  [SELF-HEAL | TANK(trait)]  — used 2 times
+
+=================================================================
+  ANALYSIS COMPLETE
+=================================================================

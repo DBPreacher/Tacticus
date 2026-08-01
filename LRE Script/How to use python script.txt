@@ -1,6 +1,18 @@
 Copy conditions_template.yaml and rename it. 
 Fill in with LRE data. 
 
+
+---
+Running Python
+1. le_analysis.py, tacticus_characters.csv, and whichever event YAML file (e.g. le14_uthar.yaml) in the same folder 
+
+2. Navigate there in command prompt terminal
+cd C:\Video Prod\Github\Tacticus\LRE Script
+
+3. Run it
+python -X utf8 le_analysis.py leXX_XXXX.yaml --csv tacticus_characters.csv > output.txt
+
+
 ----
 Preparing for Python: 
 
@@ -14,15 +26,6 @@ The script needs PyYAML to read the .yaml event files:
 pip install pyyaml
 (On some systems it's pip3 install pyyaml instead of pip.)
 
----
-Running Python
-3. le_analysis.py, tacticus_characters.csv, and whichever event YAML file (e.g. le14_uthar.yaml) in the same folder 
-
-4. Navigate there in the terminal
-cd C:\Video Prod\Github\Tacticus\LRE Script
-
-5. Run it
-python -X utf8 le_analysis.py le15_.yaml --csv tacticus_characters.csv > output.txt
 ---
 
 If doing it in Claude
