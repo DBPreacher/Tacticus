@@ -276,7 +276,7 @@
     * Baraqiel (Dark Angels)  [TANK(trait)]
     * Commander Farsight (Tau Empire)
     * Mataneo (Blood Angels)  [SPAWNER]
-    * Uthar (Leagues of Votann)  [RESILIENT]
+    * Sarquael (Dark Angels)
   🔗 Cross-track win: Mataneo is already committed in the Alpha track — reusing here means no extra roster slot for the whole event.
 
 
