@@ -19,11 +19,23 @@ except ImportError:
         with open(path) as f: return json.load(f)
 
 def load_characters(csv_path):
+    """Load the character CSV, skipping any row with Do_Not_Use=Y.
+
+    Do_Not_Use marks characters that are datamined/known but not yet
+    officially announced — their data stays in the CSV (so nothing needs
+    re-researching once they're announced) but they're invisible to the
+    analysis until the flag is flipped back to N. Returns (chars, excluded)
+    so callers can report what was skipped.
+    """
     chars = {}
+    excluded = []
     with open(csv_path, newline='', encoding='utf-8') as f:
         for row in csv.DictReader(f):
+            if row.get('Do_Not_Use', 'N') == 'Y':
+                excluded.append(row['Name'])
+                continue
             chars[row['Name']] = row
-    return chars
+    return chars, excluded
 
 def qualifies(char, col, val):
     if col == 'Faction': return char.get('Faction','') == val
@@ -442,7 +454,7 @@ def main():
     if not os.path.exists(csv_path):        sys.exit('Not found: ' + csv_path)
 
     config = load_conditions(conditions_path)
-    chars  = load_characters(csv_path)
+    chars, excluded = load_characters(csv_path)
 
     le_name   = config.get('le_name', 'Unknown')
     safe_name = ''.join(c if c.isalnum() or c in '-_' else '_' for c in le_name)
@@ -460,6 +472,9 @@ def main():
     print('  LE ANALYSIS: ' + le_name)
     print('█'*65)
     print('  Characters loaded: ' + str(len(chars)))
+    if excluded:
+        print('  Excluded (Do_Not_Use — datamined, not yet officially announced): ' +
+              ', '.join(sorted(excluded)))
     print('  NOTE: Defeat all enemies objectives ignored (base rewards).')
 
     # Shared across tracks, in the order tracks are processed below, so later

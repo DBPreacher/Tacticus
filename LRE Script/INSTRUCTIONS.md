@@ -36,8 +36,11 @@ tacticus-le-planner/
 | `Faction` | Faction name (e.g. Ultramarines, Death Guard) |
 | `Alliance` | Imperial / Xenos / Chaos |
 | `Is_MoW` | Y/N — is this a Machine of War? |
+| `Do_Not_Use` | Y/N — exclude this character from analysis entirely (see note below) |
 
 **Machines of War note:** Rows with `Is_MoW = Y` are Machines of War (Galatian, Reanimator, Tson'ji, Exorcist, Storm Speeder, Malleus Rocket Launcher, Rukkatrukk, Biovore, Forgefiend, Plagueburst Crawler). Most of these have no base on-battlefield stat block — they act purely through off-board abilities — so `Melee_Hits`, `Ranged_Hits`, `X_Hits_Restriction`, and sometimes the damage-type columns are left blank where the wiki gives no confirmed value. **MoW eligibility for a given Legendary Event depends on that event's specific rules** — always confirm whether MoW are permitted before including one in a recommended team.
+
+**`Do_Not_Use` note:** marks a character whose data is known (e.g. datamined from an upcoming patch) but who isn't officially released/announced yet, so they shouldn't show up in any team recommendation. The owner tracks this as a separate "Do Not Use" tab in their working spreadsheet — `Do_Not_Use=Y` is how that same exclusion is expressed in this single-table CSV. Unlike deleting the row outright, the character's full researched data (traits, damage types, abilities) stays intact, so nothing needs re-researching once they're actually announced — just flip the flag back to `N`. `le_analysis.py`'s `load_characters()` skips any row with `Do_Not_Use=Y` before building the character pool, and `main()` prints which characters were excluded this way so it's never silent. First used for **Kimm** (patch 1.41, datamined but not yet officially announced as of this writing).
 
 **Attack Profile**
 | Column | Description |
@@ -356,6 +359,7 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
+| July 2026 | Added `Do_Not_Use` Y/N column and wired it into `le_analysis.py`'s `load_characters()` to exclude flagged characters from analysis (data preserved, not deleted) — flagged Kimm `Y` since she's datamined but not yet officially announced | 1.41 |
 | July 2026 | Added Lysander, Kimm, Sekhetar, Lhykhis (Ramus already present, verified unchanged) via tacticustable.com since wiki.gg pages didn't exist yet for these; documented the tacticustable.com breakdown workflow and the Gauss→Molecular legacy damage-type mapping in this file | 1.41 |
 | July 2026 | Added `Parrying`, `Shielding`, `Spawner` as new Y/N trait columns (populated across the roster) and wired them into `le_analysis.py` as the lowest-priority tiebreak tier — see Meta Notes | 1.37 |
 | July 2026 | Fixed Makhotep missing `Self_Heal=Y` (he has a self-healing passive) — caught via a "characters with zero tiebreak traits" sanity check | 1.37 |
