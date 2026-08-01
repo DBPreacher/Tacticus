@@ -70,9 +70,19 @@ All 44 character-applicable traits from the wiki are tracked as Y/N columns. Key
 | `Psyker` | Used for NO PSYKER condition (invert) |
 | `Healer` | Meta — important for deep stage pushes |
 | `Mechanic` | Can repair Mechanical units |
-| `Parrying` | Last-resort tiebreak only (see Meta Notes) |
-| `Shielding` | Last-resort tiebreak only (see Meta Notes) |
-| `Spawner` | Last-resort tiebreak only (see Meta Notes) |
+| `Parrying` | Last-resort tiebreak only — see definitions below |
+| `Shielding` | Last-resort tiebreak only — see definitions below |
+| `Spawner` | Last-resort tiebreak only — see definitions below |
+
+**`Parrying` / `Shielding` / `Spawner` Columns (Y/N)**
+
+These three are separate meta-tag columns, not part of the 43 wiki traits — they exist purely as the lowest-priority tiebreak in `le_analysis.py` (see Meta Notes → Full tiebreak hierarchy). Confirmed definitions (owner-provided):
+
+- `Parrying` — `Y` if the character has the `Parry` trait. This always mirrors the `Parry` trait column exactly — if `Parry=Y` in the trait block, `Parrying=Y` too, and vice versa. Example: Forcas.
+- `Shielding` — `Y` if any of the character's abilities grant a shield / block-damage bonus to **another** friendly character (not just to themselves — check whether the effect extends to allies). Example: Wrask (his passive shields allies).
+- `Spawner` — `Y` if any of the character's abilities summon/create another unit onto the battlefield. Example: Tan Gi'da, Archimatos.
+
+When adding a new character: `Parrying` is read straight off the trait list (no separate lookup needed). For `Shielding` and `Spawner`, read every ability description the same way you would for `Has_[DamageType]` — look for shield-granting or summon language in the full ability text, not just the primary attack stats.
 
 **Damage Type Columns (Y/N) — `Has_[DamageType]`**
 
