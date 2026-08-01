@@ -10,14 +10,14 @@
   ALPHA TRACK
 =================================================================
 
-  Available pts: 375 | Eligible characters: 79
+  Available pts: 375 | Eligible characters: 78
   Enemies: Orks
   Eligible factions: Imperial & Chaos
   ✅Full Eviscerate Damage lineup (75pts): 8 chars
   ✅Full Suppressive Fire lineup (95pts): 6 chars
   ✅Full Flying lineup (80pts): 9 chars
   ✅Min 5 hits lineup (85pts): 7 chars
-  ✅No Resilient lineup (40pts): 62 chars
+  ✅No Resilient lineup (40pts): 61 chars
 
   --------------------------------------------------
   MOST EFFICIENT STARTING TEAM
@@ -115,14 +115,14 @@
   BETA TRACK
 =================================================================
 
-  Available pts: 375 | Eligible characters: 64
+  Available pts: 375 | Eligible characters: 63
   Enemies: Black Templars
   Eligible factions: Chaos & Xenos
   ✅Full Physical Damage lineup (85pts): 12 chars
-  ✅Full Melee lineup (60pts): 32 chars
+  ✅Full Melee lineup (60pts): 31 chars
   ⚠️ Full Orks lineup (100pts): 5 chars
-  ✅Full Psyker lineup (90pts): 9 chars
-  ✅No Mechanical lineup (40pts): 58 chars
+  ✅Full Psyker lineup (90pts): 8 chars
+  ✅No Mechanical lineup (40pts): 57 chars
 
   --------------------------------------------------
   MOST EFFICIENT STARTING TEAM
@@ -159,7 +159,7 @@
   ★ High-priority investment (multi-team): Gibbascrapz, Snotflogga
 
   TEAM 2 | Newly covers: Full Psyker lineup | Pts/deployment: 90
-  Full eligible pool (9):
+  Full eligible pool (8):
     Abraxas (Thousand Sons)  [SPAWNER]
     Ahriman (Thousand Sons)
     Archimatos (Black Legion)  [SPAWNER]
@@ -168,7 +168,6 @@
     Thaumachus (Thousand Sons)  [SHIELDING]
     Typhus (Death Guard)  [TANK(trait) | RESILIENT]
     Xybia (Genestealer Cults)  [SPAWNER]
-    Z'kar (Thousand Sons)
   Recommended 5:
     * Abraxas (Thousand Sons)  [SPAWNER]
     * Archimatos (Black Legion)  [SPAWNER]
