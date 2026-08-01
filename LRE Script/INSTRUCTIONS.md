@@ -98,6 +98,8 @@ Unlike `Melee_Damage_Type` and `Ranged_Damage_Type` (which only capture the char
 
 This rule is confirmed (owner-reviewed) as the correct approach — apply it consistently on future updates rather than re-litigating per character. In the July 2026 pass it changed the result for: Abraxas (Physical, Power excluded — from summoned Pink Horror / Screamer of Tzeentch), Ammuk (Energy excluded — from summoned Ironkin Steeljack), Anuphet (Physical, Molecular excluded — from summoned Necron Warriors), Archimatos (Piercing excluded — from summoned Bloodletter), Atlacoya (Psychic excluded — she only *takes/reduces* Psychic damage, doesn't deal it), Gibbascrapz (Blast excluded — from summoned Grot Tank), Hollan (Physical excluded — from summoned Aberrant Hypermorph), Commissar Yarrick (Physical, Las excluded — from summoned Cadian Guardsman), Corrodius (Physical excluded — from summoned Poxwalkers), Marshal Dreir (Physical excluded — from summoned Death Riders), Vynn (Plasma excluded — from summoned E-COG unit), Winged Prime (Physical excluded — from summoned Tyranid Warrior/Hormagaunt), Xybia (Physical, Projectile excluded — from summoned Neophyte Hybrid), and The Patermine (Bio excluded — from summoned Purestrain Genestealer).
 
+**Legacy damage type name — `Gauss` = `Molecular`.** Some sources (notably tacticustable.com, whose data appears to retain older internal labels) will show a weapon's damage type as "Gauss". This is not a current damage type — the wiki.gg `Damage_Types_and_Pierce_Ratio` page's changelog confirms *"July 2023: Gauss and Enmitic damage types combined and renamed Molecular."* Any weapon/ability labeled Gauss should be recorded as **Molecular** in `Melee_Damage_Type`/`Ranged_Damage_Type` and `Has_Molecular`, not as a new column. First encountered on Lhykhis (patch 1.41), confirmed by the owner. If a source ever shows an unrecognized damage-type label, check the wiki.gg changelog for a similar rename before creating a new `Has_[DamageType]` column for it.
+
 ---
 
 ## How LE Conditions Map to the Database
@@ -145,6 +147,28 @@ Key wiki pages for reference:
 - All factions: https://tacticus.wiki.gg/wiki/Factions
 - All traits: https://tacticus.wiki.gg/wiki/Trait
 - Damage types: https://tacticus.wiki.gg/wiki/Damage_Types_and_Pierce_Ratio
+
+### Using tacticustable.com for brand-new characters
+
+`tacticus.wiki.gg` community pages usually lag behind a patch by a few days — a character can be live in-game with no wiki.gg page yet (404). For characters that new, use **tacticustable.com** instead: `https://www.tacticustable.com/wiki/heroes/[slug]` (lowercase, e.g. `lysander`, `sekhetar`).
+
+**tacticustable.com is a JS-rendered React app — `WebFetch` only sees an empty shell** (`"Tacticus TableReact App"`, no actual content). It must be opened with the **Browser tool** (`preview_start` / `navigate` to the URL, then `get_page_text` with a high `max_chars`, e.g. 9000–10000, since the page is long) so the JS actually renders. This is the single most important gotcha in this workflow — a plain fetch will look successful but return nothing usable.
+
+Once rendered, pull the following from the page text and map it to CSV columns:
+
+| Page section | CSV column(s) |
+|---|---|
+| `FACTION` field (e.g. `AdeptusAstartes`, `LeaguesOfVotann`) | `Faction` — insert spaces to match existing convention: "Adeptus Astartes", "Leagues of Votann" |
+| `ALLIANCE` field | `Alliance` |
+| `MELEE WEAPON` row (`[Type] HITS: [n] PIERCING: [%]`) | `Melee_Hits`, `Melee_Damage_Type` (map legacy names — see Gauss/Molecular above; "Eviscerate" → "Eviscerating") |
+| `RANGE WEAPON` row, if present | `Has_Ranged=Y`, `Ranged_Hits`, `Ranged_Damage_Type`. If no `RANGE WEAPON` section appears at all, `Has_Ranged=N` |
+| `TRAITS` section (exact trait names listed) | the corresponding trait columns — `Y` only for traits actually listed, everything else `N` |
+| `ACTIVE ABILITY`, `PASSIVE ABILITY`, and `RELIC` text (relic only if one is shown equipped) | read the **full ability text** for: any damage type mentioned beyond the primary attack (→ `Has_[DamageType]`), whether it heals the character's own HP (→ `Self_Heal`), whether it grants a shield/block bonus to *another* friendly character (→ `Shielding`), whether it summons/creates a unit (→ `Spawner`) |
+| `TRAITS` section contains `Parry` | `Parrying=Y` (mirrors the trait exactly — see the Parrying/Shielding/Spawner section above) |
+
+Apply the same judgment rules used for the wiki.gg pass: a damage type or effect that's only a **trigger condition referencing damage other units dealt** (not the character's own) doesn't count (same as the Farsight/Shadowsun Psychic-exclusion precedent); a shield/heal/summon effect that only affects **the character itself**, not allies, doesn't count as `Shielding`/`Spawner` (though it can still count as `Self_Heal`, which is self-only by definition).
+
+If wiki.gg *does* have a page for the character already, prefer it as the primary source and use tacticustable.com only to cross-check — wiki.gg's community-written prose is easier to parse unambiguously than tacticustable.com's raw ability-chart text. If a value looks unusual or doesn't match any known damage type/trait, don't guess — flag it to the owner before adding it, the way the Gauss/Molecular case was caught.
 
 ### When a character is reworked
 
@@ -332,6 +356,7 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
+| July 2026 | Added Lysander, Kimm, Sekhetar, Lhykhis (Ramus already present, verified unchanged) via tacticustable.com since wiki.gg pages didn't exist yet for these; documented the tacticustable.com breakdown workflow and the Gauss→Molecular legacy damage-type mapping in this file | 1.41 |
 | July 2026 | Added `Parrying`, `Shielding`, `Spawner` as new Y/N trait columns (populated across the roster) and wired them into `le_analysis.py` as the lowest-priority tiebreak tier — see Meta Notes | 1.37 |
 | July 2026 | Fixed Makhotep missing `Self_Heal=Y` (he has a self-healing passive) — caught via a "characters with zero tiebreak traits" sanity check | 1.37 |
 | July 2026 | Rewrote `le_analysis.py`'s Full Coverage team search from an anchor-based greedy bundler (which could pick a low-value combo before ever trying the highest-value one, and could dilute a too-small pool with non-qualifying filler characters) to an exact optimizer: enumerate every achievable objective-subset with a genuine 5+ character pool, then solve exactly for the point-maximizing combination of teams, tiebreaking on fewest tokens only when points are exactly equal. No more diluted "pure intersection pool" teams — a combination is only ever presented if 5+ characters can genuinely satisfy every condition in it | 1.37 |
