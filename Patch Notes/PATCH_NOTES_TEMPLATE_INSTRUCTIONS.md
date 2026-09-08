@@ -103,6 +103,13 @@ section in the patch notes at all — first time this happened. Don't assume
 missing Bug Fixes content means the extraction failed; note it plainly in
 the extraction doc and confirm with Andy rather than guessing.
 
+### Continuing events and repeat content
+
+- **Campaign / Incursion: "No New Event" or "No New"** means no new character or Machine of War has been added. Existing campaigns and Incursions for previously available characters/Machines of War remain available. Keep the scheduled event; do not interpret the label as cancellation or flag the lack of a new featured unit as missing information.
+- **Second and third Legendary Release Events:** include the returning character, event name, occurrence number and dates. The character's event requirements do not change between occurrences, and the original video already covers the breakdown. Do not request or rebuild tracks, objectives or special coverage merely because this is a repeat event. Extract any explicitly announced changes if supplied.
+- **Existing-character ability rebalances:** place these in Monthly Improvements under Characters and traits. Source X/Y placeholders are acceptable; exact scaling values are not required and their absence does not belong in Unsure.
+- **Future events and continuations:** patch text may announce events extending beyond the developer calendar or into the next patch period. Retain explicit text-only continuation dates in Calendar and note the image cutoff. This is a carry-forward reminder for the next patch, not an unresolved conflict; do not silently drop the continuation.
+
 ### Reading the calendar image reliably
 
 Manually reading which day-column an event bar starts/ends under is
@@ -278,7 +285,7 @@ month's patch notes every time.
 | Event | Duration | Start rule |
 |---|---|---|
 | Battle Pass | Full season | Starts and ends with the season |
-| Incursion | 5 days | Recurs every 5 weeks, starting Monday of the 4th week |
+| Incursion | 6 days | Recurs every 5 weeks, starting Monday of the 4th week and ending Saturday |
 | Tournament Arena | 4 days | Twice per season — Wednesday of week 1, and Tuesday of week 3 |
 | Quests | 3 days | Twice per season — Wednesday of week 2, and Wednesday of week 5 |
 | Character Release Event (HRE) | 14 days | Starts Sunday of week 2 |
@@ -295,11 +302,7 @@ month's patch notes every time.
   single bar, Thursday of week 1 through the formula's 14-day end point —
   matched Andy's own read exactly (Thu Aug 6 → Wed Aug 19). Good confirming
   data point for this formula.
-- **Incursion duration may need revisiting**: the table says 5 days, but
-  Andy confirmed V1.41's Incursion (Tau Broadside Revamp) ran Monday of
-  week 4 through Saturday — 6 days, not 5. One data point isn't enough to
-  change the formula outright, but flag this and check duration again on
-  the next Incursion before updating the table.
+- **Incursion duration confirmed as 6 days (September 8, 2026)**: Monday of week 4 through Saturday. V1.41 ran August 24–29; the V1.42 developer calendar shows September 28–October 3. Andy approved updating the cadence from 5 to 6 days after these two observations.
 - **Crusade has no cadence entry yet**: brand-new permanent mode, only one
   data point so far (Season 1 start date, tied to a specific character
   debut). Treated as a single-day start marker for now, same visual
@@ -525,16 +528,9 @@ there's a choice.
 has pre-patch build access (previously had creator access, now doesn't), so
 new-character content requires a different sourcing plan than everything
 else in the deck:
-1. **Official Discord patch notes reveal text** — usually has the lore
-   blurb, sometimes a partial trait/ability teaser. Available immediately.
-2. **Tacticus wiki** (fan-maintained, tacticus.wiki.gg) — has a genuinely
-   good structured format that maps almost directly onto this card's fields
-   (stats, traits, damage type, active/passive text, relic). Best structured
-   source, but since it's community-maintained rather than official, it can
-   lag hours-to-days behind a brand-new character's release.
-3. **Other creators' early videos/screenshots** — fallback for anything
-   still missing once actually recording, especially "how it plays in
-   practice" observations for a verdict/notable-mentions angle.
+1. **Official Discord patch notes reveal text** remains the primary source for patch content; the developer calendar remains primary for dates/durations.
+2. **For every new character, check https://tacticus.wiki.gg first for detailed character information.** Open the actual character page and check Alliance, Faction, rarity, attack profiles, traits, lore, active/passive abilities and relic. Record the page URL and check date in the extraction. A page existing does not mean every field is complete; placeholders such as XXX are missing information.
+3. **If a character page is absent or required details are missing, tell Andy exactly what is missing; Andy will obtain another source.** Do not independently substitute other creators' videos/screenshots as the default fallback. If access is blocked, distinguish inability to verify from a missing page. Continue with verified fields and retain missing fields as TBD until Andy supplies them.
 - **Never fabricate a missing field.** If a value (e.g. a Relic name) isn't
   confirmed from any source yet, mark it visibly as TBD on the card itself
   (a plain "TBD" tag — see the updated Relic convention above) rather than
@@ -569,9 +565,6 @@ else in the deck:
   patch's video.
 - No automated generator script yet for the Calendar (or anything else) —
   everything is still hand-built HTML per patch.
-- Incursion's cadence-table duration (5 days) may be wrong — V1.41 measured
-  6 days (Monday of week 4 through Saturday). Needs a second data point
-  before changing the formula.
 - Crusade has no cadence formula yet — only one data point (Season 1 start,
   tied to Lhykis's debut). Currently treated as a single-day marker like
   Guild Raid; revisit once a second season's start date is known.
@@ -600,3 +593,6 @@ else in the deck:
 | July 2026 | Built the first Character reveal card (Cezare), confirming the teal accent and the Spectral/Public-Sans typography split in a real layout for the first time. Decided against a click-through reveal sequence — Andy narrates over one fully-visible static card instead. Documented the content-sourcing workflow specific to this slide type: Andy no longer has pre-patch build access, so new-character content now depends on the Discord reveal text, the fan-maintained Tacticus wiki (which has a genuinely well-matched field structure but can lag on brand-new characters), and other creators' footage as a last resort. Established the convention of marking any unconfirmed field (e.g. an unknown Relic) visibly as TBD rather than fabricating or silently omitting it. |
 | August 2026 | First full real-patch run-through, V1.41. Formalized the patch-notes extraction workflow as a mandatory first pass: raw Discord text + calendar screenshot → single structured `.md` sorted into fixed categories (Overview, Characters/MoW, Calendar, Economy, Blessed Requisitions, Bug Fixes, Unsure), with text-vs-calendar conflicts logged in a table rather than silently resolved. Learned the hard way that most flagged "conflicts" this round were Claude misreading calendar pixel-columns by one day, not real Snowprint inconsistencies — documented that recurring-cadence formulas should be treated as authoritative over a manual image read whenever a formula exists. Confirmed the Campaign Event formula (Thu week 1, 14 days) exactly against a real patch for the first time. Flagged a possible Incursion duration discrepancy (6 days observed vs. 5 in the table) to recheck next time rather than changing the formula on one data point. Built the first Special Events slide (gold accent, vertical block layout, no portrait zone) for content that doesn't fit Requisitions/Economy/Character-card shapes — new modes, anniversaries, LE teasers. Reverted Guild War's two-tint color scheme (Pre-Season lighter, Season full) back to one flat color for both phases, and fixed Guild War's row position to be pinned consistently at the top of its lane across every week it spans — Andy found the drifting position across weeks made it hard to track. Established that Raid Boss tags should always show both Legendary/Mythic call-outs explicitly, even when it's the same boss both times. Confirmed Bug Fixes can legitimately be empty in a given patch — V1.41 had none. |
 | August 2026 | Built all four V1.41 Character Cards (Ramus, Lhykis, Lysander, Sekhetar Robot) and finalized real production conventions from Andy's feedback across them: badge order is Alliance/Faction/Rarity (not Faction/Alliance/Rarity); damage-type badges get their own row below a new "Unlocks via [method] — begins [date]" line, both sitting above Traits; damage badges lead with Melee/Ranged category first, then hit/range specifics; Relic TBD tag simplified to just "TBD"; Active/Passive text gets a full conversational readability pass, not just mechanical paraphrasing; and the portrait zone must be completely invisible (no guide border, no placeholder text) in any real production file, though the reserved column itself stays since Andy composites his own renders in post. Fixed a layout bug where the new unlock line, added inside the fixed-height header block, pushed real header height past the hardcoded offset the body content assumed, causing a visual collision with the traits row — resolved by moving it into the normally-flowing left column instead. Handled a non-English source for the first time (Sekhetar Robot's ability was only found in Spanish) by translating directly and flagging the translation for later confirmation against the real EN text. Discovered a real gap in the extraction workflow after the fact: existing-character rebalances, new Relics for existing characters, and mode reworks had nowhere to go and were being folded into Characters/MoW or Economy by default — added "Monthly Improvements" as an eighth fixed extraction category (Characters/MoW is now new-character-debut content only), and built the corresponding slide (steel-blue accent, reusing the Economy Changes shell) to hold this content going forward — condensed from an initial 4-category draft down to 2 (New Relics, Mode & Feature Changes) after Andy found the extra headers weren't earning their space, with Guild War's reward changes folded in as a labeled sub-list. Verified the finished slide's actual fit using `wkhtmltoimage` plus an injected measurement script rather than eyeballing a screenshot — worth reusing this technique on other category-heavy slides once they get auto-shrink treatment. |
+| September 8, 2026 | Updated Incursion cadence from 5 to 6 days, Monday of week 4 through Saturday, with Andy's approval. V1.41 (August 24–29) and V1.42 (September 28–October 3) both support six days. Resolved the duration validation note and removed the obsolete open item; recurrence remains every 5 weeks. |
+| September 8, 2026 | Recorded Andy's conventions for No New campaign/Incursion labels, repeat Legendary Events, acceptable X/Y rebalance placeholders, and future-event continuations. |
+| September 8, 2026 | New-character sourcing: check actual tacticus.wiki.gg character pages first for detailed fields, record availability and gaps, and ask Andy to obtain missing material rather than automatically using other creator sources. |
