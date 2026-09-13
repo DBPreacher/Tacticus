@@ -85,7 +85,9 @@ Recording works like the LE template: 1920×1080, Space or click to
 advance, Left arrow to go back, the same fonts and frame, and it runs as an
 OBS browser source.
 
-### Reference characters (shortlist, owner to pick)
+### Reference characters (not used)
+
+The owner decided against labelled reference characters (September 2026): the charts work as they are. The shortlist below is kept only for the record.
 
 Positions are from the stat-line model (rank out of 117).
 
