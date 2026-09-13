@@ -154,6 +154,11 @@ is only a reference. They use the chosen ability level (36 or 50).
   - effects that build up, and target-health conditions
   - regeneration at the start of the character's own turn
   - crit bonuses (no gear)
+- **Bodyguards count** (owner): Kell takes the hits for Creed with his own
+  health and Armour. Geminae Superia takes Celestine's post-Armour damage, so
+  two of them count as extra health.
+- **Uthar** uses Hostile Acquisition (ignores Armour) for his attack and
+  Fortify Takeover (an extra Armour pass) for his defence (owner).
 - **Movement conditions:** passives that need charging or moving (Kut
   Skoden, Deathleaper, Ragnar, Tanksmasha) only count with **Traits: All
   triggered**.
@@ -275,6 +280,7 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | Owner answers on passives: bodyguards (Kell, Geminae), Uthar split stance, Varro not counted, Tyrant Guard always on |
 | September 2026 | Passives added, always on, with Attack/Defence tokens. Re'vas's Overwatch active counted. Scenarios are now traits × ability level × active on/off |
 | September 2026 | Cross-checked tacticustable against the wiki. Tacticustable is right on all 3 differences (owner-confirmed), so no model change |
 | September 2026 | Defensive actives now count for Toughness (Defence column: damage reduction, flat reduction, extra health, weakened enemies, self-costs). The six owner questions on actives were answered; the model already matched them |

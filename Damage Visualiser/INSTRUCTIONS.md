@@ -256,6 +256,8 @@ for the "Stat line" column and the shift arrows.
 | `hitsless:VAR[:scope]` | Attackers score −VAR hits (min 1) | Jain Zar `hitsless:hitsReduction:melee` |
 | `pctcap:PCT/CAP` | Takes −PCT% damage, at most −CAP per hit | Tyrant Guard `pctcap:dmgReductionPct/dmgReduction@trig` |
 | `cap_first:VAR` | The first attack each turn takes at most VAR% of health | Judh `cap_first:hpPct` |
+| `armourpass:VAR` | Attacks go through an extra Armour pass of VAR (like Mk X Gravis with a set value) | Uthar `armourpass:extraArmor` |
+| `guard:HP/ARMOUR` | A bodyguard takes the attacks first, with its own health and Armour | Creed (Kell) `guard:summonHp/summonArmor` |
 | scope `psychic` | Only against Psychic damage | Atlacoya `flat:dmgReduction:psychic` |
 
 **Review rules for passives:** the same as the actives' rules 1–3 and 7
@@ -275,10 +277,16 @@ Also:
   the start of the character's own turn**, **reactions** (counter-attacks,
   Overwatch shots) and **crit bonuses** (no gear) don't count.
 
-Owner questions still open (September 2026): Castellan Creed (count Kell as
-extra health?), Uthar (which stance?), Varro (who gets the Psychic
-reduction?), Celestine (does Geminae Superia protect her?), Tyrant Guard
-(always on, or triggered only?).
+Owner decisions (September 2026), recorded in each row's `Notes`:
+- **Bodyguards count**, even though they're summons. Kell swaps in for Creed
+  (`guard`: attackers get through Kell's health and Armour first). Geminae
+  Superia takes Celestine's post-Armour damage (`heal`: two Geminae as extra
+  health).
+- **Uthar:** Hostile Acquisition for his attack, Fortify Takeover for his
+  defence.
+- **Varro:** Psychic Fortress only protects the units around him, so it
+  doesn't count for him.
+- **Tyrant Guard:** Guardian Organism is always on.
 
 ---
 
@@ -365,6 +373,7 @@ as a separate build rather than replacing the D3 page.
 
 | Date | Change |
 |---|---|
+| September 2026 | Owner answers: Kell and Geminae Superia count as bodyguards, Uthar split stance, Varro not counted, Tyrant Guard always on. New `guard` and `armourpass` tokens. The page's "Reading the chart" lists every trait in each setting and explains "typical character" |
 | September 2026 | Passives added (`passive_abilities.csv`, always on; 41 characters counted, 5 owner questions). Controls are now Ability level + Active on/off. Actives re-checked. Clicking a selected character again unselects it |
 | September 2026 | Defensive actives added (`Defence` column); owner answered the six OWNER rows |
 | September 2026 | First version: `update_game_data.py`, `build_map.py`, `active_abilities.csv` (all 117 reviewed; 6 left for the owner), Attack/Defence/Map views, Active ability at level 36/50, alliance colours from the in-game icons |

@@ -322,7 +322,7 @@ def attack_spec(u, row, level, trig):
 def defence_spec(u, ab, cell, level, trig):
     """Defence tokens (active or passive) -> effects on damage the character takes"""
     ds = dict(pct=[], flat=[], enemy=[], hitsless=[], pctcap=[], heal=0.0, hpmult=1.0, armour=0.0,
-              cap_first=None, text=[])
+              cap_first=None, pass2=0.0, guard=None, text=[])
     for t in tokens(cell):
         kind, arg, scope, vs, trig_only = parse_token(t)
         if trig_only and not trig:
@@ -351,6 +351,13 @@ def defence_spec(u, ab, cell, level, trig):
         elif kind == 'armour':
             v = value_of(ab, arg, level)
             ds['armour'] += v; ds['text'].append(f'+{v:,.0f} Armour')
+        elif kind == 'armourpass':
+            v = value_of(ab, arg, level)
+            ds['pass2'] += v; ds['text'].append(f'attacks go through {v:,.0f} Armour an extra time')
+        elif kind == 'guard':
+            hv, av = arg.split('/')
+            h, a_ = value_of(ab, hv, level), value_of(ab, av, level)
+            ds['guard'] = (h, a_); ds['text'].append(f'a bodyguard ({h:,.0f} health, {a_:,.0f} Armour) takes the hits first')
         elif kind == 'cap_first':
             v = value_of(ab, arg, level)
             ds['cap_first'] = v / 100; ds['text'].append(f'the first attack each turn takes at most {v:.0f}% of its health')
@@ -373,11 +380,12 @@ def merge_defence(*specs):
     if not specs:
         return None
     out = dict(pct=[], flat=[], enemy=[], hitsless=[], pctcap=[], heal=0.0, hpmult=1.0, armour=0.0,
-               cap_first=None, text=[])
+               cap_first=None, pass2=0.0, guard=None, text=[])
     for s in specs:
         for k in ('pct', 'flat', 'enemy', 'hitsless', 'pctcap', 'text'):
             out[k] += s[k]
         out['heal'] += s['heal']; out['hpmult'] *= s['hpmult']; out['armour'] += s['armour']
+        out['pass2'] += s['pass2']; out['guard'] = out['guard'] or s['guard']
         if s['cap_first'] is not None:
             out['cap_first'] = s['cap_first'] if out['cap_first'] is None else min(out['cap_first'], s['cap_first'])
     return out
@@ -430,10 +438,14 @@ def describe_defence(ds):
 
 
 # ---------------------------------------------------------------- damage model
-def hit_value(D, A, p, gravis):
+def hit_value(D, A, p, gravis, pass2=0.0):
+    """one hit after armour. gravis = Mk X Gravis (armour a second time);
+    pass2 = an extra armour pass of that value (Uthar's Fortify Takeover)"""
     y = max(D - A, D * p)
     if gravis and p < 1:
         y = max(y - A, y * p)
+    if pass2 and p < 1:
+        y = max(y - pass2, y * p)
     return y
 
 
@@ -466,7 +478,7 @@ def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, f
         if 'LetTheGalaxyBurn' in at: n += 0.33
         if 'WeaverOfFate' in at: D *= 1.2
         if 'ContagionsOfNurgle' in at and melee: A *= 0.8
-    y = hit_value(D, A, p, 'MkXGravis' in dt)
+    y = hit_value(D, A, p, 'MkXGravis' in dt, d.get('pass2', 0))
     m = _prod(1 + e['value'] / 100 for e in eff if e['kind'] == 'pct')
     if melee and 'Terrifying' in dt: m *= 0.7
     if 'MartialKatah' in dt: m *= 0.8
@@ -504,7 +516,8 @@ def ability_hits(part, d, flat_red=0.0):
     """ability damage: armour, pierce and Mk X Gravis only (abilities aren't 'normal attacks')"""
     p = PIERCE.get(part['type'], .2)
     D = max(part['dmg'] - flat_red, 0)
-    return hit_value(D, d['arm'], p, 'MkXGravis' in d['traits']) * part['hits'], part['type'] in ('Psychic', 'Direct')
+    return (hit_value(D, d['arm'], p, 'MkXGravis' in d['traits'], d.get('pass2', 0)) * part['hits'],
+            part['type'] in ('Psychic', 'Direct'))
 
 
 def _def_ok(scope, vs, kind, first, psychic, a):
@@ -590,8 +603,8 @@ def attacks_to_kill(a, d, trig, spec=None, ds=None):
     """(attacks, best attack kind, normal attack damage, used the active).
     spec = the attacker's active (offence); ds = the defender's defensive effects (active + passive);
     a['ps'] = the attacker's passive."""
-    if ds and ds['armour']:
-        d = dict(d, arm=d['arm'] + ds['armour'])
+    if ds and (ds['armour'] or ds['pass2']):
+        d = dict(d, arm=d['arm'] + ds['armour'], pass2=ds['pass2'])
     hp = d['hp'] * (ds['hpmult'] if ds else 1) + (ds['heal'] if ds else 0)
     cap = ds['cap_first'] if ds else None
     w = pick_weapon(a, d, trig, ds)
@@ -602,6 +615,11 @@ def attacks_to_kill(a, d, trig, spec=None, ds=None):
         k_act = kill_count(opener(a, d, trig, spec, ds), later, d, hp, cap)
         if k_act < k:
             k, used = k_act, True
+    if ds and ds['guard']:
+        # a bodyguard (Kell) takes the attacks first, with its own health and Armour and no traits
+        gh, ga = ds['guard']
+        guard = dict(name='guard', hp=gh, arm=ga, dmg=0, traits=set(), weapons=[])
+        k += gh / max(one_attack(a, guard, w, trig, None, False)[0], 1.0)
     return k, w['kind'], later, used
 
 

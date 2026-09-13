@@ -81,6 +81,8 @@ aside{display:flex;flex-direction:column;gap:14px}
 dl.defs{margin:0;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--ink-2)}
 dl.defs dt{font-family:var(--data);font-weight:700;font-size:13.5px;color:var(--ink)}
 dl.defs dd{margin:0}
+ul.tl{margin:4px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:2px}
+ul.tl li{line-height:1.4}
 .detail h3{font-family:var(--display);font-size:22px;font-weight:700;margin:0;line-height:1.15;text-wrap:balance}
 .detail .fac{color:var(--ink-3);font-size:13px;margin:2px 0 12px;display:flex;align-items:center;gap:7px}
 .detail .fac i{width:9px;height:9px;border-radius:2px;display:inline-block}
@@ -199,17 +201,42 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
         <p class="label">Reading the chart</p>
         <dl class="defs">
           <dt>Damage: higher is better</dt>
-          <dd>How many of their attacks it takes to kill a typical enemy. The middle result against all characters.</dd>
+          <dd>How many of their attacks it takes to kill a typical character.</dd>
           <dt>Toughness: further right is better</dt>
-          <dd>How many attacks a typical enemy needs to kill them. Terminator Armour cuts only the first attack of the turn.</dd>
+          <dd>How many attacks a typical character needs to kill them.</dd>
+          <dt>What "typical character" means</dt>
+          <dd>Not one character. Each fight is worked out against every one of the <span id="rosterCount">117</span> characters, and the middle result is used: half the roster does better than that, half worse. So one unusual matchup can't skew the answer.</dd>
           <dt>Always-on traits</dt>
-          <dd>Only traits that always work: Terminator Armour, Mk X Gravis, Parry, Terrifying, Martial Ka'tah, Camouflage (−1 hit), Beast Slayer.</dd>
+          <dd>Only traits that always work, whatever happens in the battle:
+            <ul class="tl">
+              <li>Terminator Armour: −75% on the first attack each turn (not Psychic/Direct)</li>
+              <li>Mk X Gravis: damage goes through Armour twice</li>
+              <li>Parry: melee attacks against it score −1 hit</li>
+              <li>Terrifying: −30% damage from melee attacks</li>
+              <li>Martial Ka'tah: −20% damage from normal attacks</li>
+              <li>Camouflage: ranged attacks against it score −1 hit</li>
+              <li>Beast Slayer: +20% melee damage vs Big Targets and Vehicles</li>
+            </ul></dd>
           <dt>All triggered</dt>
-          <dd>Every situational trait works: didn't move, first attack of the battle, ranged character starts away from enemies, Khorne at 4 kills, Nurgle aura on melee targets. Random traits (Daemon, Get Stuck In, Let the Galaxy Burn) count at their average.</dd>
+          <dd>All of the always-on traits, plus every trait whose condition is met:
+            <ul class="tl">
+              <li>Rapid Assault: +25% (first attack of the battle)</li>
+              <li>Heavy Weapon: +25% ranged (hasn't moved)</li>
+              <li>Crushing Strike: +50% melee (hasn't moved)</li>
+              <li>Ranged Specialist: +33% ranged (started away from enemies)</li>
+              <li>Prioritised Efficiency: +25% dealt, −25% taken</li>
+              <li>Weaver of Fates: maximum damage roll</li>
+              <li>Contagions of Nurgle: −20% target Armour in melee</li>
+              <li>Blessings of Khorne: at 4 kills, +12% dealt, −32% Psychic taken</li>
+              <li>Shadow in the Warp: −25% Psychic damage from Psykers</li>
+              <li>Camouflage: −2 hits vs range 3+ weapons</li>
+              <li>At their average: Daemon and Beast Slayer blocks, Get Stuck In and Let the Galaxy Burn extra hits</li>
+              <li>Passives that need charging or moving: Kut Skoden, Deathleaper, Ragnar, Tanksmasha, Toth's revive, Wrask's shield</li>
+            </ul></dd>
           <dt>Passives: always on</dt>
-          <dd>Every character's passive counts at the chosen ability level, when it affects their own attacks or protects them. Buffs for allies, reactions and summons don't count.</dd>
+          <dd>Every character's passive counts at the chosen ability level, when it affects their own attacks or protects them. Buffs for allies, reactions and summons don't count, except bodyguards that take the hits for them (Kell, Geminae Superia).</dd>
           <dt>Active ability: on or off</dt>
-          <dd>Everyone opens with their active. For damage, it's used if it beats a normal attack; damage to other enemies, summons and buffs don't count. For toughness, its protection counts: damage reduction, heals, and suppressing or stunning enemies (an area effect covers the enemy turn; a single target only its first attack). At Winged D3 a level 36 active rarely beats a normal attack; at level 50 most do.</dd>
+          <dd>With it on, everyone opens with their active. For damage, it's used if it beats a normal attack; damage to other enemies, summons and buffs don't count. For toughness, its protection counts: damage reduction, heals, and suppressing or stunning enemies (an area effect covers the enemy turn; a single target only its first attack). At Winged D3 a level 36 active rarely beats a normal attack; at level 50 most do.</dd>
         </dl>
       </div>
     </aside>
@@ -260,6 +287,7 @@ const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2
 const offScale=p=>p.d>YD[1]||p.t>XD[1];
 
 document.getElementById('setup').innerHTML=[`Patch ${DATA.version.split('.').slice(0,3).join('.')}`,'Winged D3','No gear or relics','Flat ground','Mid damage roll',`${C.length} characters`].map(t=>`<span>${t}</span>`).join('');
+document.getElementById('rosterCount').textContent=C.length;
 document.getElementById('segLevel').innerHTML=LV.map((l,i)=>`<button data-v="${l}" aria-pressed="${i===0}">Level ${l}</button>`).join('');
 
 /* ---------- chart furniture ---------- */
@@ -267,9 +295,9 @@ const svg=document.getElementById('map');
 el('defs',{},svg).innerHTML='<marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L8,4L0,8Z" fill="#c9ced8"/></marker>';
 const gX=el('g',{},svg), gY=el('g',{},svg);
 [1.5,2,3,4,5,6,8,10].forEach(v=>{el('line',{x1:X(v),x2:X(v),y1:M.t,y2:H-M.b,class:'grid-line'},gX).style.stroke='var(--rule-soft)';el('text',{x:X(v),y:H-M.b+20,'text-anchor':'middle',class:'tick'},gX).textContent=v;});
-el('text',{x:(M.l+W-M.r)/2,y:H-14,'text-anchor':'middle',class:'axis-title'},gX).textContent='Toughness → attacks a typical enemy needs to kill them';
+el('text',{x:(M.l+W-M.r)/2,y:H-14,'text-anchor':'middle',class:'axis-title'},gX).textContent='Toughness → attacks a typical character needs to kill them';
 [0.75,1,1.5,2,3,4,6,8,10].forEach(v=>{el('line',{x1:M.l,x2:W-M.r,y1:Y(v),y2:Y(v)},gY).style.stroke='var(--rule-soft)';el('text',{x:M.l-10,y:Y(v)+4.5,'text-anchor':'end',class:'tick'},gY).textContent=v;});
-el('text',{transform:`translate(20 ${(M.t+H-M.b)/2}) rotate(-90)`,'text-anchor':'middle',class:'axis-title'},gY).textContent='Damage ↑ attacks they need to kill a typical enemy';
+el('text',{transform:`translate(20 ${(M.t+H-M.b)/2}) rotate(-90)`,'text-anchor':'middle',class:'axis-title'},gY).textContent='Damage ↑ attacks they need to kill a typical character';
 const gMed=el('g',{},svg);
 const gQuad=el('g',{},svg);
 [['Glass cannons',M.l+14,M.t+26,'start'],['Hits hard · hard to kill',W-M.r-14,M.t+26,'end'],['Weak stat line',M.l+14,H-M.b-14,'start'],['Tanks',W-M.r-14,H-M.b-14,'end']]
