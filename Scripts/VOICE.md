@@ -1,7 +1,14 @@
 # DB Preacher — Voice Guide
 
-**Status: first draft (September 2026), written from five scripts in
-`Examples/`, waiting for the owner's corrections.**
+**Status: second draft (September 2026).** Written from five scripts in
+`Examples/` and corrected by the owner:
+- **Space Hulk** and **Top 10 Xenos** are entirely his own writing. **They
+  are the voice reference.**
+- The **Genestealer Cults** lore was written with a tool, and parts of
+  **Laviscus** read the same way (short sentences, em dashes). Use those two
+  for structure only, not for sentence style.
+- **No lore section by default.** Include lore only when the video needs
+  it (e.g. a faction guide).
 
 The five scripts:
 - Does Laviscus Do Anything?
@@ -40,10 +47,44 @@ reuse whole lines in new scripts.
 
 ## How it sounds
 
+**Measured on his own scripts** (Space Hulk, Top 10) compared with the
+tool-assisted ones (Genestealers, Laviscus):
+
+| | His own | Tool-assisted |
+|---|---|---|
+| Words per sentence (median) | **23–26** | 13–16 |
+| Longest 10% of sentences | **43–46 words or more** | about 25 |
+| Em dashes | **none** | up to 16 per script |
+| "really" / "just" | **constantly** | rarely |
+
+So:
+- **Long, flowing, spoken sentences** joined with "and", "but", "so",
+  "because", "and then", "which means". Thoughts pile up the way they do
+  when talking:
+  - *"Then a few years later, Space Hulk comes out on the Amiga and again,
+    I'm totally engrossed, but until the Space Marine video games came out,
+    i've been missing that feeling of big boots stomping on a derelict metal
+    spaceship until we get our very own Space Hulk event in Tacticus."*
+- **No em dashes, and no neat three-part lists** in every sentence. Commas
+  and "and" do the joining.
+- **Short sentences are rare and saved for a punch** (*"He is just a
+  brute."*, *"Really awesome stuff."*).
+- **Softeners and intensifiers everywhere:** really, just, pretty, a bit,
+  absolutely, honestly, definitely, incredibly, "oh boy", "as heck".
+- **Talks the viewer through it** with direct instructions:
+  - *"you want to be completing older waves as quickly as possible"*
+  - *"Just note that…"*
+  - *"The first thing that I want to highlight is…"*
+  - *"make sure that you…"*
+- **Self-deprecating asides:** *"which wasn't my smartest move"*, *"I
+  definitely didn't quite catch on to her usefulness"*.
+- **Pop culture and nostalgia** as comparisons: Aliens, the xenomorph,
+  Space Marine 2, the Amiga, Springsteen.
+- **Jokes about how the characters look,** affectionately: *"may look like
+  a mutated shrimp"*, *"That giant nose spike and wrinkly brain gives me
+  indigestion"*, *"let's stick him in the remains of a crane!"*
 - **British English:** armour, defence, levelling, favourite, prioritise,
   "oh boy", "a bit", "pretty decent", "as heck".
-- **First person and chatty.** Medium-length sentences, then a short one for
-  punch: *"Here is the catch: You cannot do both."*
 - **Questions start a section,** then get answered straight away:
   - *"So, how do you get this Lord of Excess into your roster?"*
   - *"So who are the best champions to be picking for this event?"*
@@ -141,20 +182,24 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
 
 - Corporate or hype phrasing: "game-changer", "unlock your potential",
   "let's unpack", "in today's fast-paced…".
-- Stacked em dashes and three-part lists in every sentence. That polished
-  essay rhythm appears in a few passages (parts of the Laviscus hook and the
-  Genestealer lore). **Owner to confirm** whether those are his, or whether
-  they were tidied by a tool.
+- **The tool rhythm:** short, tidy sentences; em dashes; three-part lists;
+  dramatic one-line paragraphs ("Unfortunately, it has only been preparing
+  the planet for consumption."). The owner has confirmed this is the tool's
+  style, not his.
+- **Lore by default.** Only include it when the video needs it.
 - Talking down to newer players, or assuming they have every character.
 - Absolute claims without a caveat when the data is shaky.
 - American spellings.
 
 ## Open questions for the owner
 
-1. Which script sounds most like you on camera? The Space Hulk one reads the
-   most spoken; the Genestealer guide is the most polished.
-2. Are the lore sections written by you, or adapted? Should new scripts
-   include lore by default?
-3. How long should a typical script be? These run from about 2,800 to 7,300
+1. How long should a typical script be? These run from about 2,800 to 7,300
    words.
-4. Anything you'd never say, or always say, that isn't here?
+2. Anything you'd never say, or always say, that isn't here?
+
+## Changelog
+
+| Date | Change |
+|---|---|
+| September 2026 | First draft from five example scripts |
+| September 2026 | Owner: Space Hulk and Top 10 are his own writing, the Genestealer lore was tool-written, and no lore by default. Added measured sentence rhythm; the tool rhythm moved to "doesn't sound like him" |
