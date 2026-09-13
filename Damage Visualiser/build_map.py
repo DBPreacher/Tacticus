@@ -15,7 +15,8 @@ Steps:
      ability level (ABILITY_LEVELS) x active ability off / on. Passives are always on. The plain
      stat line ('base': no abilities, always-on traits) is kept as the reference.
      Rules are in DAMAGE_MODEL.md; the token formats are in INSTRUCTIONS.md.
-  4. Writes ../LRE Script/tacticus_stats.csv and roster-battle-map.html.
+  4. Writes ../LRE Script/tacticus_stats.csv, roster-battle-map.html and roster-battle-map-obs.html
+     (the same page, opening in broadcast mode for OBS).
 See INSTRUCTIONS.md.
 """
 import argparse, csv, json, os, re, statistics as st, sys, unicodedata
@@ -31,6 +32,7 @@ RELICS_CSV = os.path.join(HERE, 'relic_abilities.csv')
 RELIC_OWNERS_CSV = os.path.join(HERE, 'relic_owners.csv')
 TEMPLATE = os.path.join(HERE, 'map_template.html')
 OUT_HTML = os.path.join(HERE, 'roster-battle-map.html')
+OUT_OBS = os.path.join(HERE, 'roster-battle-map-obs.html')   # broadcast mode by default (OBS); not committed
 
 # ---- Progression tiers (DAMAGE_MODEL.md "Standard setup"). set_tier() applies one. ----
 # rank: the rank row in the game data (MYTHIC I/II = Adamantine I/II). stars: rank stats are stored at
@@ -1062,8 +1064,13 @@ def write_html(units, per_tier, actives, passives, relics, version):
         html = f.read()
     if '/*DATA*/' not in html:
         sys.exit('map_template.html is missing its /*DATA*/ placeholder.')
+    if '/*OBS*/false' not in html:
+        sys.exit('map_template.html is missing its /*OBS*/false switch.')
+    page = html.replace('/*DATA*/', json.dumps(data, ensure_ascii=False))
     with open(OUT_HTML, 'w', encoding='utf-8') as f:
-        f.write(html.replace('/*DATA*/', json.dumps(data, ensure_ascii=False)))
+        f.write(page)
+    with open(OUT_OBS, 'w', encoding='utf-8') as f:
+        f.write(page.replace('/*OBS*/false', 'true', 1))
 
 
 def creed_check(path, units):

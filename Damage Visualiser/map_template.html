@@ -129,6 +129,47 @@ th button[aria-sort]{color:var(--ink)}
 .tbl button.nm i{width:8px;height:8px;border-radius:2px;display:inline-block;flex:none}
 .up{color:var(--ink)}.down{color:var(--ink-3)}
 footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
+/* ---------- broadcast mode (OBS): a fixed 1920x1080 stage, scaled to the browser source size ---------- */
+.obs-only{display:none}
+body.obs{overflow:hidden;width:100vw;height:100vh}
+body.obs.clear{background:transparent}
+body.obs .obs-only{display:block}
+body.obs .wrap{position:absolute;left:0;top:0;width:1920px;height:1080px;max-width:none;margin:0;padding:22px 30px 24px;gap:16px;transform-origin:0 0;overflow:hidden}
+body.obs header{padding-bottom:12px}
+body.obs .eyebrow{font-size:15px}
+body.obs h1{font-size:42px}
+body.obs .setup span{font-size:17px;padding:4px 11px}
+body.obs .main{grid-template-columns:minmax(0,1fr) 480px;gap:20px;min-height:0}
+body.obs .chart-card{padding:14px 16px 6px}
+body.obs .chart-head h2{font-size:24px}
+body.obs .hint,body.obs .controls,body.obs .reading,body.obs .table-card,body.obs footer{display:none}
+body.obs aside{gap:14px;max-height:940px;overflow:hidden}
+body.obs .panel{padding:18px 20px}
+body.obs .label{font-size:14px}
+body.obs .obs-legend .legend span{display:inline-flex;align-items:center;gap:8px;font-family:var(--data);font-weight:600;font-size:18px;margin-right:18px}
+body.obs .obs-legend .legend i{width:13px;height:13px;border-radius:2px;display:inline-block}
+body.obs .obs-legend .shapes{font-size:15px;margin-top:10px}
+body.obs .detail h3{font-size:32px}
+body.obs .detail .fac{font-size:16px}
+body.obs .stats b{font-size:24px}
+body.obs .stats small{font-size:13px}
+body.obs .weap{font-size:15px}
+body.obs .scores th{font-size:13px}
+body.obs .scores td{font-size:21px}
+body.obs .scores td:first-child{font-size:16px}
+body.obs .act-name{font-size:19px}
+body.obs .act-line{font-size:15px}
+body.obs .tag{font-size:15px}
+body.obs .creed{font-size:15px}
+body.obs .creed b{font-size:18px}
+body.obs .act-note,body.obs .tag.flag{display:none}
+body.obs .detail.obs-empty{opacity:0}
+body.obs .traits-sect,body.obs .weap{display:none}
+body.obs .sect{margin-bottom:10px;padding-top:10px}
+.obs-find{position:fixed;left:50%;top:40px;transform:translateX(-50%);z-index:50;background:#06080b;border:1px solid var(--rule);border-radius:6px;padding:12px;box-shadow:0 12px 32px rgba(0,0,0,.6)}
+.obs-find input{width:420px;font:600 20px var(--data);background:var(--ground);color:var(--ink);border:1px solid var(--rule);border-radius:4px;padding:8px 12px;outline:none}
+.obs-help{position:fixed;right:24px;bottom:24px;z-index:50;background:#06080b;border:1px solid var(--rule);border-radius:6px;padding:14px 18px;font:500 14px var(--body);color:var(--ink-2);line-height:1.7;box-shadow:0 12px 32px rgba(0,0,0,.6)}
+.obs-help b{font-family:var(--data);color:var(--ink);display:inline-block;min-width:44px}
 @media (prefers-reduced-motion:reduce){.dot,#labels,.check span.box,.check span.box::after{transition:none}}
 </style>
 
@@ -206,9 +247,17 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
         </div>
       </div>
 
+      <div class="panel obs-only obs-legend">
+        <div class="legend"><span><i style="background:#d9ad3f"></i>Imperial</span><span><i style="background:#dc4638"></i>Chaos</span><span><i style="background:#5cbfe0"></i>Xenos</span></div>
+        <div class="shapes">
+          <span><svg viewBox="-7 -7 14 14"><circle r="5.5" fill="#a3aab8"/></svg>Melee is their best attack</span>
+          <span><svg viewBox="-7 -7 14 14"><path d="M0,-6.5L6.5,0L0,6.5L-6.5,0Z" fill="#a3aab8"/></svg>Ranged</span>
+        </div>
+      </div>
+
       <div class="panel detail" id="detail" aria-live="polite"></div>
 
-      <div class="panel">
+      <div class="panel reading">
         <p class="label">Reading the chart</p>
         <dl class="defs">
           <dt>Progression</dt>
@@ -283,14 +332,27 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
   <footer>Stats are from the tacticustable.com game data; relic owners from tacticus.wiki.gg. The rules are in <em>Damage Visualiser/DAMAGE_MODEL.md</em>, and each ability's and relic's handling is in the <em>*_abilities.csv</em> files. The numbers are for comparing characters, not predicting an exact fight.</footer>
 </div>
 
+<div class="obs-find" id="obsFind" hidden><input id="obsQ" type="text" placeholder="Type a character, Enter to pin" autocomplete="off"></div>
+<div class="obs-help" id="obsHelp" hidden>
+  <b>1 2 3</b>Attack / Defence / Map<br><b>P</b>Progression (Gold / Diamond III / Mythic)<br><b>T</b>Traits: always-on / all triggered<br>
+  <b>L</b>Ability level<br><b>G</b>Gear: none / standard<br><b>A</b>Active ability: off / on<br><b>S</b>Shift arrows<br><b>N</b>Names<br>
+  <b>/ F</b>Find and pin a character<br><b>Esc</b>Unpin / clear<br><b>H</b>This help
+</div>
+
 <script>
 const DATA = /*DATA*/;
+const FORCE_OBS = /*OBS*/false;
+/* settings from the URL: ?key=value or #key=value, e.g. #obs&view=map&tier=mythic&gear=1&sel=Kharn */
+const P = new URLSearchParams((location.search.slice(1) + '&' + location.hash.slice(1)).replace(/^&+|&+$/g, ''));
+const OBS = FORCE_OBS || P.has('obs');
+if (OBS) { document.body.classList.add('obs'); if (P.get('bg') === 'transparent') document.body.classList.add('clear'); }
 const C = DATA.chars, TIERS = DATA.tiers;
 let LV = TIERS[1].levels;
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
 const S = {view:'map', tier:TIERS[1].key, traits:'base', level:LV[0], active:0, gear:0, shift:false, names:true, sel:'Castellan Creed', q:'', hidden:new Set(), sort:{k:'d', dir:1}, hover:null};
 const NS='http://www.w3.org/2000/svg';
-const W=1000, H=700, M={l:74,r:26,t:22,b:64};
+const W=1000, H=OBS?640:700, M={l:74,r:26,t:22,b:64};
+document.getElementById('map').setAttribute('viewBox',`0 0 ${W} ${H}`);
 const XD=[1.3,10], YD=[0.6,11];
 const lg=Math.log;
 const X=v=>M.l+(lg(Math.min(Math.max(v,XD[0]),XD[1]))-lg(XD[0]))/(lg(XD[1])-lg(XD[0]))*(W-M.l-M.r);
@@ -468,7 +530,9 @@ function hideTip(){tip.style.opacity=0;}
 function select(name){S.sel=(S.sel===name)?null:name;renderChart(false);renderDetail();renderTable();}
 function renderDetail(){
   const c=C.find(x=>x.name===S.sel);
-  if(!c){document.getElementById('detail').innerHTML='<p class="label">Character</p><p class="none">Click a character on the chart or in the list to see their details. Click them again to unselect.</p>';return;}
+  if(!c){document.getElementById('detail').innerHTML=OBS?'<p class="none">Press / to pin a character.</p>':'<p class="label">Character</p><p class="none">Click a character on the chart or in the list to see their details. Click them again to unselect.</p>';
+    document.getElementById('detail').classList.toggle('obs-empty',OBS);return;}
+  document.getElementById('detail').classList.remove('obs-empty');
   const cur=sc(c), base=T(c).s.base, same=false, tc=T(c);
   const tags=(arr,cls)=>arr.length?`<div class="tags">${arr.map(t=>`<span class="tag ${cls}">${esc(t)}</span>`).join('')}</div>`:`<p class="none">None</p>`;
   const cell=(v,r,on)=>`<td class="${on?'on':'dimcol'}">${fmt(v)}<small>#${r}</small></td>`;
@@ -513,8 +577,8 @@ function renderDetail(){
       ${(S.traits==='trig'?tc.gear.kit_trig[L]:tc.gear.kit[L])?`<p class="act-line">Kit with gear: <b>${esc(S.traits==='trig'?tc.gear.kit_trig[L]:tc.gear.kit[L])}</b></p>`:''}
     </div>
     ${relicSect}
-    <p class="label">Always-on traits counted</p>${tags(c.counted,'')}
-    <p class="label">Situational traits · only when triggered</p>${tags(c.situational,'sit')}
+    <div class="traits-sect"><p class="label">Always-on traits counted</p>${tags(c.counted,'')}
+    <p class="label">Situational traits · only when triggered</p>${tags(c.situational,'sit')}</div>
     <div class="sect creed"><p class="label" style="margin:0">${isCreed?'Creed against himself':'Sparring Creed'} · always-on traits, level ${LV[0]} passives</p>
       <span>Deals <b>${cr.to.toLocaleString()}</b> to Creed per attack, kills him in <b>${fmt(cr.kill)}</b></span>
       <span>Creed deals <b>${cr.frm.toLocaleString()}</b> back, kills ${isCreed?'himself':'them'} in <b>${fmt(cr.die)}</b></span></div>`;
@@ -553,6 +617,64 @@ const legend=document.getElementById('legend');
 Object.entries(ALLY).forEach(([a,col])=>{const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed','true');
   b.innerHTML=`<i style="background:${col}"></i>${a} <span style="color:var(--ink-3)">${C.filter(c=>c.alliance===a).length}</span>`;
   b.onclick=()=>{S.hidden.has(a)?S.hidden.delete(a):S.hidden.add(a);b.setAttribute('aria-pressed',!S.hidden.has(a));renderChart(false);renderTable();};legend.appendChild(b);});
+
+/* ---------- URL settings, keyboard shortcuts and the broadcast stage ---------- */
+function pressed(id,v){document.querySelectorAll(`#${id} button`).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(v))));}
+function syncControls(){
+  pressed('segView',S.view); pressed('segTier',S.tier); pressed('segTraits',S.traits); pressed('segLevel',S.level);
+  pressed('segGear',S.gear); pressed('segActive',S.active);
+  document.getElementById('shift').checked=S.shift; document.getElementById('names').checked=S.names;
+}
+function setTier(k){const t=TIERS.find(x=>x.key===k); if(!t) return; S.tier=k; LV=t.levels; if(!LV.includes(S.level)) S.level=LV[0]; renderLevels(); renderSetup();}
+function findChar(q){q=(q||'').trim().toLowerCase(); if(!q) return null;
+  return C.find(c=>c.name.toLowerCase()===q)||C.find(c=>c.name.toLowerCase().startsWith(q))||C.find(c=>c.name.toLowerCase().includes(q));}
+(function applyUrl(){
+  if(P.get('tier')) setTier(P.get('tier'));
+  if(['attack','defence','map'].includes(P.get('view'))) S.view=P.get('view');
+  if(['base','trig'].includes(P.get('traits'))) S.traits=P.get('traits');
+  if(P.get('level')&&LV.includes(+P.get('level'))) S.level=+P.get('level');
+  if(P.has('gear')) S.gear=+P.get('gear')?1:0;
+  if(P.has('active')) S.active=+P.get('active')?1:0;
+  if(P.has('shift')) S.shift=P.get('shift')!=='0';
+  if(P.has('names')) S.names=P.get('names')!=='0';
+  if(P.has('sel')){const c=findChar(P.get('sel')); S.sel=c?c.name:null;}
+  else if(OBS) S.sel=null;
+  renderLevels(); syncControls();
+})();
+function refresh(animate=true){syncControls(); renderChart(animate); renderDetail(); renderTable();}
+const findBox=document.getElementById('obsFind'), findQ=document.getElementById('obsQ'), help=document.getElementById('obsHelp');
+function openFind(){findBox.hidden=false; findQ.value=''; findQ.focus();}
+function closeFind(){findBox.hidden=true; findQ.blur(); S.q=''; renderChart(false);}
+findQ.addEventListener('input',()=>{S.q=findQ.value; renderChart(false);});
+findQ.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const c=findChar(findQ.value); closeFind(); if(c){S.sel=c.name; refresh(false);} e.preventDefault();}
+  else if(e.key==='Escape'){closeFind(); e.preventDefault();}
+});
+document.addEventListener('keydown',e=>{
+  if(e.target.closest&&e.target.closest('input,textarea')) return;
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  const k=e.key.toLowerCase(); let done=true;
+  if(k==='1') S.view='attack'; else if(k==='2') S.view='defence'; else if(k==='3') S.view='map';
+  else if(k==='p'){const i=TIERS.findIndex(t=>t.key===S.tier); setTier(TIERS[(i+1)%TIERS.length].key);}
+  else if(k==='t') S.traits=S.traits==='base'?'trig':'base';
+  else if(k==='l') S.level=LV[(LV.indexOf(S.level)+1)%LV.length];
+  else if(k==='g') S.gear=S.gear?0:1;
+  else if(k==='a') S.active=S.active?0:1;
+  else if(k==='s') S.shift=!S.shift;
+  else if(k==='n') S.names=!S.names;
+  else if(k==='/'||k==='f'){openFind(); e.preventDefault(); return;}
+  else if(k==='h'||k==='?'){help.hidden=!help.hidden; return;}
+  else if(k==='escape'){S.sel=null; S.q=''; document.getElementById('q').value='';}
+  else done=false;
+  if(done){e.preventDefault(); refresh();}
+});
+function fitStage(){
+  if(!OBS) return;
+  const wrap=document.querySelector('.wrap'), sc_=Math.min(innerWidth/1920, innerHeight/1080);
+  wrap.style.transform=`scale(${sc_})`;
+  wrap.style.left=`${(innerWidth-1920*sc_)/2}px`; wrap.style.top=`${(innerHeight-1080*sc_)/2}px`;
+}
+addEventListener('resize',fitStage); fitStage();
 
 renderChart(false); renderDetail(); renderTable();
 </script>

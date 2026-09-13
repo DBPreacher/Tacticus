@@ -1,28 +1,33 @@
 # Damage Visualiser — Plan
 
-**Status:** the Roster Battle Map explorer is built and is meant to become the video graphic (the owner's call, September 2026). How to update it is in `INSTRUCTIONS.md`. Still to do: the video version (recording reveals, reference characters).
+**Status (September 2026): built.** The Roster Battle Map is the video graphic
+(owner's decision). It runs as a private web page for exploring, and as an OBS
+browser source for recording (broadcast mode). How to update and use it is in
+`INSTRUCTIONS.md`; the damage rules are in `DAMAGE_MODEL.md`.
 
-The goal is a simple on-screen graphic for DB Preacher Plays that shows
-where a new character sits in Tacticus, for both attack and defence. It
-replaces the old "damage against Castellan Creed" bar charts. The damage
-rules behind it are in `DAMAGE_MODEL.md`.
+The goal was a simple on-screen graphic for DB Preacher Plays that shows where
+a character sits in Tacticus, for both attack and defence. It replaces the old
+"damage against Castellan Creed" bar charts.
 
 ---
 
-## Decisions so far
+## Decisions
 
 | Topic | Decision |
 |---|---|
 | Comparison | Against the **whole roster**, not a single "Mr Average" (see Why below) |
-| Setup | Winged D3, no relics, flat ground. **Gear switch** (owner): none, or standard (best Legendary items at top level for each character's slots, boosters included) |
-| Abilities | **Passives always on** (owner). **Ability level: 36 / 50** and **Active ability: Off / On** switches, worked out from `passive_abilities.csv` and `active_abilities.csv`. The "Show the shift from the plain stat line" arrows cover what the ability arrows were for |
-| Ability level | 36 at Legendary. Defensive abilities often cross a breakpoint at 36 (e.g. −30% → −33% damage reduction) |
-| Situational traits | Two scores, owner's idea: **Always-on** (the trait rule) and **All triggered** (situational traits on, random ones at their average). Rapid Assault is off in Always-on (owner) |
-| Views | **Attack** (damage only), **Defence** (toughness only) and **Map** (both), owner's idea. Switching animates the dots between views |
+| The two numbers | **Damage**: attacks needed to kill a typical character. **Toughness**: attacks a typical character needs to kill them. "Typical" = the middle result against every playable character (Machines of War and `Do_Not_Use` rows excluded) |
+| Progression | **Gold / Diamond III / Mythic** switch (owner). Gold = Epic 8★ Gold I, abilities 26/35, Epic gear. Diamond III = Legendary, Winged, abilities 36/50, Legendary gear. Mythic = 14★ Adamantine II, abilities 50/60, Mythic gear + relic at level 10. Every character can be Mythic |
+| Ability level | Two levels per tier. At Diamond III, 36 is the video standard: defensive abilities step up at 36 (e.g. Thoread 31% → 33%) |
+| Abilities | **Passives always on** (owner). **Active ability: Off / On** switch. Worked out from `passive_abilities.csv`, `active_abilities.csv` and, at Mythic, `relic_abilities.csv` |
+| Gear | **None / Standard** switch (owner): standard = the best items of the tier's rarity at top level, boosters included |
+| Situational traits | Two settings, owner's idea: **Always-on** (the trait rule) and **All triggered**. Rapid Assault is off in Always-on (owner) |
+| Views | **Attack**, **Defence** and **Map** (owner's idea). Attack/Defence spread the dots so most names fit |
 | Alliance colours | From the in-game alliance icons: Imperial gold, Chaos red, Xenos light blue (owner) |
-| Reference characters | **None** (owner, September 2026): the charts work as they are, with every character labelled where there is room |
-| Data | Separate file `tacticus_stats.csv`. `tacticus_characters.csv` and `le_analysis.py` are untouched |
-| Progression | **Gold / Diamond III / Mythic** switch (owner). Gold = Epic 8★ Gold I, abilities 26/35, Epic gear. Mythic = 14★ Adamantine II, abilities 50/60, Mythic gear + relic at level 10. Every character can be Mythic |
+| Reference characters | **None** (owner): the charts work as they are |
+| Enemy turn | 5 attacks (a full team). An active's one-round protection only covers those 5 (owner, after the Aesoth case) |
+| Data | Separate file `LRE Script/tacticus_stats.csv` (one row per character per tier). `tacticus_characters.csv` and `le_analysis.py` are untouched |
+| Video | Broadcast mode for OBS: a 1920×1080 stage that scales to the browser source size (1080p, 1440p or 4K), keyboard shortcuts, and URL settings for each scene |
 
 ### Why not one reference character
 
@@ -39,96 +44,35 @@ Tested on the real roster (September 2026):
   - Against a Psychic attacker, Nubari falls from 3rd to 65th.
 - Measuring against the whole roster removes this.
 
----
-
-## The two numbers
-
-Both are counted in **attacks**, which is how viewers already think about
-the game:
-
-- **Damage** — how many of this character's attacks it takes to kill a
-  typical enemy.
-- **Toughness** — how many attacks a typical enemy needs to kill this
-  character.
-
-"Typical" is the middle (median) result across every playable character.
-Machines of War and `Do_Not_Use` rows are excluded.
-
-On screen: *"Kills a typical character in 3 attacks. It takes a typical
-character 8 attacks to bring him down."*
+The Creed test lives on in the detail panel's **Sparring Creed** line, and as
+the model check (`build_map.py --creed`).
 
 ---
 
-## Scenes
+## How it was built
 
-1. **Damage line.** All characters appear as faint dots on one line. The
-   damage reference characters and Creed are labelled. The new character
-   drops in, then their ability arrow extends.
-2. **Toughness line.** The same, with the tank reference characters.
-3. **The map.** The two lines turn into the axes of a scatter plot, and the
-   new character lands where they meet. The corners are labelled, e.g.
-   glass cannon / juggernaut / tank / relies on kit.
-4. **Creed sparring card (optional).** This keeps the old practical-test
-   segment:
-   - The new character's damage against Creed (melee, ranged).
-   - What Creed does back.
-   - How many hits each needs to kill the other.
+1. `update_game_data.py`: the game data from tacticustable.com (only
+   downloaded when the version changes), plus relic owners from the wiki.
+2. `build_map.py`: the model, run for every tier and switch combination.
+   It writes `roster-battle-map.html`, `roster-battle-map-obs.html` and
+   `../LRE Script/tacticus_stats.csv`.
+3. Reviewed data: `active_abilities.csv`, `passive_abilities.csv`,
+   `relic_abilities.csv`. All 117 characters and 32 relics reviewed, and the
+   owner's calls are recorded in their `Notes`.
+4. `map_template.html`: the page (explorer and broadcast mode).
 
-   The numbers come from the model, so they're always there. After testing
-   in the developer build, the owner can type in the in-game numbers and they
-   replace the model's, with no other changes.
-
-The icon on each dot shows whether the character's better attack is melee
-or ranged.
-
-Recording works like the LE template: 1920×1080, Space or click to
-advance, Left arrow to go back, the same fonts and frame, and it runs as an
-OBS browser source.
-
-### Reference characters (not used)
-
-The owner decided against labelled reference characters (September 2026): the charts work as they are. The shortlist below is kept only for the record.
-
-Positions are from the stat-line model (rank out of 117).
-
-| Scene | Top | Middle | Low |
-|---|---|---|---|
-| Damage | Kharn (#2), Jain Zar (#5) | Creed (#32), Abaddon (#58) | Ragnar (#104; his kit, not his stats, makes him a damage dealer, so a big arrow) |
-| Toughness | Marneus Calgar (#2), Typhus (#5), Bellator (#16) | Tyrant Guard (#32, ability arrow), Creed (#67) | Varro (#110) or Celestine (#112) |
-
----
-
-## Ability arrows
-
-These were replaced by the roster-wide **Active ability** switch. The rules
-are in `DAMAGE_MODEL.md` (Active abilities), and each character's handling
-is in `active_abilities.csv`. For a video, the "Show the shift from the plain
-stat line" arrows do the same job, and more clearly: the dot moves from the
-stat line to where the kit puts the character. Defensive actives count
-too (build step 5).
-
----
-
-## Build steps
-
-1. ~~`fetch_stats.py`~~ Done as `update_game_data.py` (download) and
-   `build_map.py`, which writes `../LRE Script/tacticus_stats.csv`.
-2. ~~`damage_model.py`~~ Done inside `build_map.py`, with the Creed check as
-   `--creed`.
-3. ~~Interactive explorer~~ Done: `roster-battle-map.html`, published
-   privately.
-4. **Video version:** 1920×1080, Space/click reveals like the LE template,
-   featured character highlighted, reference characters labelled.
-5. ~~Defensive actives~~ Done: the `Defence` column in `active_abilities.csv`.
-6. ~~Mythic view with relics~~ Done, as the Progression switch (with Gold too).
+Earlier ideas that were replaced:
+- **Scripted video scenes** (damage line → toughness line → map) became the
+  live Attack / Defence / Map views.
+- **Ability arrows** became the Active switch, plus the "shift from the plain
+  stat line" arrows.
+- **A separate Mythic view** became the Progression switch.
 
 ---
 
 ## Open questions
 
-- Which traits setting (or both) to show in videos.
-- Places where tacticustable.com data disagrees with the game (owner to bring
-  examples).
-- Optional: 5–6 fresh Creed test numbers at the current patch, e.g. Jain
-  Zar, Morvenn Vahl, one Terminator Armour character. They would confirm that
-  the leftover mismatches are passives, not a model error.
+- Optional: 5–6 fresh Creed test numbers at the current patch (e.g. Jain Zar,
+  Morvenn Vahl, one Terminator Armour character). They would confirm that the
+  leftover mismatches in the Creed check are passives and old data, not a
+  model error.

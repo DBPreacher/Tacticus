@@ -257,7 +257,7 @@ is only a reference. They use the chosen ability level (36 or 50).
   - summons, reactions and counter-attacks
   - effects that build up, and target-health conditions
   - regeneration at the start of the character's own turn
-  - crit bonuses (no gear)
+  - crit and block bonuses without gear (with Gear: Standard they count; see Gear)
 - **Bodyguards count** (owner): Kell takes the hits for Creed with his own
   health and Armour. Geminae Superia takes Celestine's post-Armour damage, so
   two of them count as extra health.
