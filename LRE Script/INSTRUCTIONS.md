@@ -333,7 +333,7 @@ Characters with these traits survive longest in high-difficulty stages:
 
 | Trait | Effect | Priority |
 |-------|--------|----------|
-| `Terminator_Armour = Y` | First hit each turn deals -75% damage | High |
+| `Terminator_Armour = Y` | First attack each turn deals -75% damage (every hit of it; Psychic/Direct excluded). Can't be Suppressed | High |
 | `Mk_X_Gravis = Y` | All incoming damage goes through armour twice | High |
 | `Resilient = Y` | Survives a lethal hit at 1 HP (unless overkilled) | Medium |
 
@@ -394,6 +394,7 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
+| September 2026 | Corrected the Tanks table: Terminator Armour has reduced the whole first **attack** each turn (not the first hit) since September 2024, and can't be Suppressed. Confirmed by the owner and by in-game Castellan Creed test numbers (Typhus, Toth, Njal, Arjac) | 1.42 |
 | September 2026 | Docs refresh: corrected the repo structure and paths (the CSV lives in `LRE Script/`, not `data/`; each LE has its own folder), fixed the raw GitHub CSV URL, and added `wiki_audit.py` to the workflow here, in `How to use python script.txt` and in `HTML_TEMPLATE_INSTRUCTIONS.md` | 1.42 |
 | September 2026 | Refilled `Melee_Damage_Type`/`Ranged_Damage_Type` for every character from the wiki stat boxes: 103 cells, left over from the initial build and never re-verified. I spot-checked 11 of the odd-looking ones (e.g. Abraxas melee Flame, Cyrus melee Bolter) against tacticustable.com and all matched. Every weapon type was already `Y` in its `Has_` column, so LE analysis results don't change. Vynn's ranged type is now blank, since he has no ranged weapon (`Has_Ranged=N`). The Malleus Rocket Launcher and Biovore wiki traits are ignored as NPC traits (owner) | 1.42 |
 | September 2026 | **Relics no longer count for any column** (owner correction; the tacticustable.com workflow used to say to read an equipped relic). I checked every value the wiki's 32 relics could have set. Stripped the relic-only ones: Maugan Ra `Has_Direct` → N; Corrodius and Nauseous Rotbone `Has_Toxic` → N; Corrodius `Melee_Damage_Type` Toxic → Plasma (his actual weapon). Snotflogga was already `Mechanical=N`. No other relic had leaked into a trait, damage type, `Self_Heal` or `Spawner` value | 1.42 |
