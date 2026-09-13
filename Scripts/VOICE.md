@@ -1,7 +1,8 @@
 # DB Preacher — Voice Guide
 
-**Status: second draft (September 2026).** Written from five scripts in
-`Examples/` and corrected by the owner:
+**Status: third draft (September 2026).** Written from the scripts in
+`Examples/`, corrected by the owner, and checked against his edit of a
+Claude draft (see "What his edit of a draft changed"):
 - **Space Hulk** and **Top 10 Xenos** are entirely his own writing. **They
   are the voice reference.**
 - The **Genestealer Cults** lore was written with a tool, and parts of
@@ -66,7 +67,9 @@ So:
     i've been missing that feeling of big boots stomping on a derelict metal
     spaceship until we get our very own Space Hulk event in Tacticus."*
 - **No em dashes, and no neat three-part lists** in every sentence. Commas
-  and "and" do the joining.
+  and "and" do the joining. He does use the odd **spaced hyphen** as a dash
+  (*"the most overwhelming part of the graph - the map"*), so that's fine
+  once in a while.
 - **Short sentences are rare and saved for a punch** (*"He is just a
   brute."*, *"Really awesome stuff."*).
 - **Softeners and intensifiers everywhere:** really, just, pretty, a bit,
@@ -109,6 +112,34 @@ So:
 - **"Champions" and "characters" are both used.** Game terms are
   abbreviated the way players do: LREs, D3, Gold I, TA (Tournament Arena),
   Guild Raids, Guild Wars, Onslaught, Snowprint.
+
+## What his edit of a draft changed
+
+`Examples/New charts showing the best characters .docx` is his edit of
+Claude's Roster Battle Map explainer (September 2026). He kept most of it,
+and these are the changes, so do them in the first draft next time:
+
+- **The hook is about him and why now,** not the feature: he's back as a
+  creator, hasn't made a "Does this character do anything?" video since
+  because he couldn't compare characters properly, and he wants the
+  viewers' feedback on the results.
+- **He cut the cute lines:** "It's basically Top Trumps for Tacticus" and
+  the teaser "But first, somebody needs to be told, so let's dive in."
+- **He adds a proviso and invites challenge:** *"there is a big proviso
+  here that this is still a simulation… I'll be happy to talk you through
+  any of my decision points in the comments below so don't be afraid to
+  ask."*
+- **He heads off a likely misreading** before a viewer can make it (a
+  circle means melee is their *better* attack, not that they're a melee
+  character).
+- **He brings in the faction angle** ("and also against characters from
+  their own faction").
+- **Creed gets an entrance** before the bad news (*"I'm back baby, let's
+  go! Who am I up against today?"*).
+- **He trimmed some sentence-opening "And"s** and cut the Progression
+  explanation and the CTA from this one.
+- His version measures a median of 22 words per sentence (longest 10% at 34
+  or more), so drafts in that range are about right.
 
 ## Humour toolkit (use sparingly: one or two per section, never forced)
 
@@ -169,6 +200,8 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
   - optional `-- Attribution --` (the Games Workshop fair-use text)
   - **Timestamps:** filled in after the edit
 - **Sections:** `# Hook:`, `# Part N - Name`, `# CTA`, `# Final Word`.
+  His newest script uses `## Hook`, `## Intro`, then `##` topic headings
+  and `## Outro`, with an `Info:` list of facts to use at the top.
   Character reviews use named sections: Lore, Unlocking, Abilities, Damage
   and Defence, Struggles, Which modes does he fit into?, Mythic Missions,
   Legendary Events.
@@ -216,3 +249,4 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
 | September 2026 | First draft from five example scripts |
 | September 2026 | Owner: Space Hulk and Top 10 are his own writing, the Genestealer lore was tool-written, and no lore by default. Added measured sentence rhythm; the tool rhythm moved to "doesn't sound like him" |
 | September 2026 | Owner: reads at about 193 words per minute and aims for 8+ minute videos. Added the Length section. The 37-minute Genestealer guide is not a length example |
+| September 2026 | Third draft: added "What his edit of a draft changed" from his edit of the Roster Battle Map explainer; spaced hyphens are fine |
