@@ -29,3 +29,4 @@ without asking first.
 - LE planning and the character database: `LRE Script/INSTRUCTIONS.md`
 - Video HTML template: `LRE Script/HTML_TEMPLATE_INSTRUCTIONS.md`
 - Damage visualiser (the Roster Battle Map): `Damage Visualiser/INSTRUCTIONS.md`
+- Video scripts and the channel voice: `Scripts/README.md` (and `Scripts/VOICE.md` once written)
