@@ -1,0 +1,458 @@
+<meta charset="utf-8">
+<title>Roster Battle Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<!-- Built by build_map.py: edit this template, never roster-battle-map.html. /*DATA*/ is replaced with the model output. -->
+<style>
+:root{
+  --ground:#0a0a0a; --panel:#0f1318; --panel-2:#141a21; --rule:#232b35; --rule-soft:#1a2029;
+  --ink:#e8eaf0; --ink-2:#a3aab8; --ink-3:#6e7686; --guide:#4a5363;
+  --imperial:#d9ad3f; --chaos:#dc4638; --xenos:#5cbfe0;
+  --flag:#e0a84a;
+  --display:'Cinzel',Georgia,'Times New Roman',serif;
+  --data:'Rajdhani','Arial Narrow',Arial,sans-serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;margin:0}
+.wrap{max-width:1440px;margin:0 auto;padding:28px 28px 48px;display:flex;flex-direction:column;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;border-bottom:1px solid var(--rule);padding-bottom:18px}
+.eyebrow{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
+.setup{display:flex;flex-wrap:wrap;gap:6px}
+.setup span{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:3px 9px;border-radius:3px;font-variant-numeric:tabular-nums}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
+@media (max-width:1100px){.main{grid-template-columns:1fr}}
+.chart-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px 14px 8px;position:relative}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 6px 6px;flex-wrap:wrap}
+.chart-head h2{font-family:var(--display);font-size:18px;font-weight:600;margin:0;letter-spacing:.03em}
+.hint{font-size:12.5px;color:var(--ink-3)}
+svg{display:block;width:100%;height:auto;font-family:var(--data)}
+.grid line{stroke:var(--rule-soft);stroke-width:1}
+.tick{fill:var(--ink-3);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.axis-title{fill:var(--ink-2);font-size:13.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.off{display:none}
+.median{stroke:var(--guide);stroke-width:1;stroke-dasharray:4 5}
+.median-label{fill:var(--ink-3);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.quad{fill:#343b47;font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.dot{cursor:pointer;transition:transform .6s cubic-bezier(.22,.9,.32,1),opacity .25s}
+.dot .mark{stroke:var(--panel);stroke-width:1.6}
+.dot .hit{fill:transparent}
+.dot.dim{opacity:.12}
+.dot.dim .hit{pointer-events:none}
+.ring{fill:none;stroke:var(--ink);stroke-width:2}
+.ring.find{stroke-dasharray:3 3}
+.lbl{fill:var(--ink-2);font-size:12px;font-weight:600;pointer-events:none}
+.lbl.sel{fill:var(--ink);font-size:14px;font-weight:700}
+.lbl.find{fill:var(--ink)}
+#labels{transition:opacity .2s}
+.arrow{stroke:#c9ced8;stroke-width:1.2;opacity:.5;fill:none}
+.arrow.sel{opacity:1;stroke-width:2;stroke:#fff}
+.tip{position:absolute;pointer-events:none;background:#06080b;border:1px solid var(--rule);border-radius:4px;padding:8px 11px;font-size:12.5px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:opacity .12s;z-index:5}
+.tip b{font-family:var(--data);font-size:15px;font-weight:700;display:block;color:var(--ink)}
+.tip .f{color:var(--ink-3);font-size:12px;margin-bottom:5px}
+.tip .r{display:flex;justify-content:space-between;gap:14px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.tip .r span:last-child{color:var(--ink);font-family:var(--data);font-weight:600;font-size:14px}
+aside{display:flex;flex-direction:column;gap:14px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:16px}
+.label{font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.controls{display:flex;flex-direction:column;gap:15px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;text-align:center;font-family:var(--data);font-weight:600;font-size:14.5px;padding:7px 6px;color:var(--ink-2);background:var(--panel-2)}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#0a0a0a}
+.seg button:focus-visible,.chip:focus-visible,.check input:focus-visible+span,.tbl button:focus-visible,th button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.check{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13.5px;color:var(--ink)}
+.check input{position:absolute;opacity:0}
+.check span.box{width:32px;height:18px;border-radius:9px;background:var(--rule);position:relative;flex:none;transition:background .2s}
+.check span.box::after{content:"";position:absolute;top:3px;left:3px;width:12px;height:12px;border-radius:50%;background:var(--ink-2);transition:transform .2s,background .2s}
+.check input:checked+span.box{background:#6e7686}
+.check input:checked+span.box::after{transform:translateX(14px);background:#fff}
+.search{width:100%;background:var(--ground);border:1px solid var(--rule);border-radius:4px;color:var(--ink);font:inherit;padding:8px 10px}
+.search:focus{outline:2px solid var(--ink);outline-offset:0;border-color:transparent}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.chip{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:var(--data);font-weight:600;font-size:14px;padding:4px 10px;border:1px solid var(--rule);border-radius:3px;color:var(--ink)}
+.chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.chip[aria-pressed="false"]{color:var(--ink-3);text-decoration:line-through}
+.chip[aria-pressed="false"] i{opacity:.25}
+.shapes{display:flex;gap:16px;font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.shapes svg{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:5px}
+dl.defs{margin:0;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--ink-2)}
+dl.defs dt{font-family:var(--data);font-weight:700;font-size:13.5px;color:var(--ink)}
+dl.defs dd{margin:0}
+.detail h3{font-family:var(--display);font-size:22px;font-weight:700;margin:0;line-height:1.15;text-wrap:balance}
+.detail .fac{color:var(--ink-3);font-size:13px;margin:2px 0 12px;display:flex;align-items:center;gap:7px}
+.detail .fac i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:3px;overflow:hidden;margin-bottom:12px}
+.stats div{background:var(--panel-2);padding:6px 8px}
+.stats small{display:block;font-family:var(--data);font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.stats b{font-family:var(--data);font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.weap{font-size:13px;color:var(--ink-2);margin:0 0 12px}
+.scores{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin-bottom:14px}
+.scores th{white-space:nowrap;font-family:var(--data);font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);text-align:right;padding:0 0 4px}
+.scores th:first-child{text-align:left}
+.scores td{padding:5px 0;border-top:1px solid var(--rule-soft);text-align:right;font-family:var(--data);font-weight:600;font-size:15px}
+.scores td:first-child{text-align:left;font-family:var(--body);font-weight:500;font-size:13px;color:var(--ink-2)}
+.scores td small{color:var(--ink-3);font-size:12px;margin-left:4px}
+.scores td.on{color:var(--ink)}
+.scores td.dimcol{color:var(--ink-3)}
+.sect{border-top:1px solid var(--rule);padding-top:12px;margin-top:2px;margin-bottom:12px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 12px}
+.tag{font-family:var(--data);font-weight:600;font-size:13px;padding:2px 8px;border-radius:3px;border:1px solid var(--rule);color:var(--ink)}
+.tag.sit{border-style:dashed;color:var(--ink-2)}
+.tag.flag{border-color:rgba(224,168,74,.6);color:var(--flag)}
+.none{font-size:12.5px;color:var(--ink-3);margin:0 0 12px}
+.act-name{font-family:var(--data);font-weight:700;font-size:16px;margin:0 0 6px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.act-line{font-size:12.5px;color:var(--ink-2);margin:0 0 4px}
+.act-line b{font-family:var(--data);font-weight:700;color:var(--ink);font-size:13.5px}
+.act-note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+.creed{font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+.creed b{color:var(--ink);font-family:var(--data);font-size:15px;font-variant-numeric:tabular-nums}
+.table-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px}
+.table-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;padding:14px 18px 10px}
+.table-head h2{font-family:var(--display);font-size:18px;font-weight:600;margin:0}
+.tbl-scroll{max-height:560px;overflow:auto;border-top:1px solid var(--rule)}
+table.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:760px}
+.tbl thead th{position:sticky;top:0;background:var(--panel-2);z-index:1;text-align:right;padding:0;border-bottom:1px solid var(--rule)}
+.tbl thead th:nth-child(-n+3){text-align:left}
+th button{all:unset;cursor:pointer;display:block;width:100%;box-sizing:border-box;padding:9px 14px;font-family:var(--data);font-weight:700;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-align:inherit}
+th button[aria-sort]{color:var(--ink)}
+.tbl td{padding:6px 14px;border-bottom:1px solid var(--rule-soft);text-align:right;font-family:var(--data);font-weight:600;font-size:15px}
+.tbl td:nth-child(-n+3){text-align:left}
+.tbl td:nth-child(2),.tbl td:nth-child(3){font-family:var(--body);font-weight:400;font-size:13px;color:var(--ink-2)}
+.tbl td .rk{color:var(--ink-3);font-size:13px;margin-left:6px;display:inline-block;min-width:34px;text-align:left}
+.tbl tr.sel td{background:rgba(232,234,240,.06)}
+.tbl button.nm{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-family:var(--data);font-weight:700;font-size:15px;color:var(--ink)}
+.tbl button.nm i{width:8px;height:8px;border-radius:2px;display:inline-block;flex:none}
+.up{color:var(--ink)}.down{color:var(--ink-3)}
+footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
+@media (prefers-reduced-motion:reduce){.dot,#labels,.check span.box,.check span.box::after{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">DB Preacher Plays · Damage Visualiser</div>
+      <h1>Roster Battle Map</h1>
+    </div>
+    <div class="setup" id="setup"></div>
+  </header>
+
+  <div class="main">
+    <section class="chart-card" aria-label="Damage and toughness chart">
+      <div class="chart-head">
+        <h2 id="chartTitle">Every character</h2>
+        <span class="hint">Hover a mark for numbers · click to pin it in the panel</span>
+      </div>
+      <svg id="map" viewBox="0 0 1000 700" role="img" aria-label="Chart of all characters by damage and toughness"></svg>
+      <div class="tip" id="tip" role="status"></div>
+    </section>
+
+    <aside>
+      <div class="panel controls">
+        <div>
+          <p class="label">View</p>
+          <div class="seg" role="group" aria-label="View" id="segView">
+            <button data-v="attack" aria-pressed="false">Attack</button>
+            <button data-v="defence" aria-pressed="false">Defence</button>
+            <button data-v="map" aria-pressed="true">Map</button>
+          </div>
+        </div>
+        <div>
+          <p class="label">Traits</p>
+          <div class="seg" role="group" aria-label="Traits" id="segTraits">
+            <button data-v="base" aria-pressed="true">Always-on</button>
+            <button data-v="trig" aria-pressed="false">All triggered</button>
+          </div>
+        </div>
+        <div>
+          <p class="label">Active ability</p>
+          <div class="seg" role="group" aria-label="Active ability" id="segActive"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="shift"><span class="box"></span>Show the shift from the plain stat line</label>
+        <label class="check"><input type="checkbox" id="names" checked><span class="box"></span>Show names that fit</label>
+        <div>
+          <p class="label">Find</p>
+          <input class="search" id="q" type="search" placeholder="Character or faction" autocomplete="off">
+        </div>
+        <div>
+          <p class="label">Alliance</p>
+          <div class="legend" id="legend"></div>
+          <div class="shapes">
+            <span><svg viewBox="-7 -7 14 14"><circle r="5.5" fill="#a3aab8"/></svg>Melee is their best attack</span>
+            <span><svg viewBox="-7 -7 14 14"><path d="M0,-6.5L6.5,0L0,6.5L-6.5,0Z" fill="#a3aab8"/></svg>Ranged</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel detail" id="detail" aria-live="polite"></div>
+
+      <div class="panel">
+        <p class="label">Reading the chart</p>
+        <dl class="defs">
+          <dt>Damage: higher is better</dt>
+          <dd>How many of their attacks it takes to kill a typical enemy. The middle result against all characters.</dd>
+          <dt>Toughness: further right is better</dt>
+          <dd>How many attacks a typical enemy needs to kill them. Terminator Armour cuts only the first attack of the turn.</dd>
+          <dt>Always-on traits</dt>
+          <dd>Only traits that always work: Terminator Armour, Mk X Gravis, Parry, Terrifying, Martial Ka'tah, Camouflage (−1 hit), Beast Slayer.</dd>
+          <dt>All triggered</dt>
+          <dd>Every situational trait works: didn't move, first attack of the battle, ranged character starts away from enemies, Khorne at 4 kills, Nurgle aura on melee targets. Random traits (Daemon, Get Stuck In, Let the Galaxy Burn) count at their average.</dd>
+          <dt>Active ability</dt>
+          <dd>Everyone opens with their active if it beats a normal attack, then carries on with normal attacks. Damage to other enemies, summons and buffs don't count, and defensive actives aren't modelled yet. At Winged D3 a level 36 active rarely beats a normal attack; at level 50 most do.</dd>
+        </dl>
+      </div>
+    </aside>
+  </div>
+
+  <section class="table-card" aria-label="Ranked list">
+    <div class="table-head">
+      <h2>Who is where</h2>
+      <span class="hint" id="tableHint"></span>
+    </div>
+    <div class="tbl-scroll">
+      <table class="tbl" id="tbl">
+        <thead><tr>
+          <th><button data-k="name">Character</button></th>
+          <th><button data-k="faction">Faction</button></th>
+          <th><button data-k="k">Best attack</button></th>
+          <th><button data-k="d">Damage · attacks</button></th>
+          <th><button data-k="t">Toughness · attacks</button></th>
+          <th><button data-k="ds">Damage rank vs stat line</button></th>
+          <th><button data-k="ts">Toughness rank vs stat line</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Stats are from the tacticustable.com game data at Winged D3 with no gear. The rules are in <em>Damage Visualiser/DAMAGE_MODEL.md</em> and each active ability's handling is in <em>active_abilities.csv</em>. The numbers are for comparing characters, not predicting an exact fight.</footer>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+const C = DATA.chars, LV = DATA.levels;
+const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
+const S = {view:'map', traits:'base', active:0, shift:false, names:true, sel:'Castellan Creed', q:'', hidden:new Set(), sort:{k:'d', dir:1}, hover:null};
+const NS='http://www.w3.org/2000/svg';
+const W=1000, H=700, M={l:74,r:26,t:22,b:64};
+const XD=[1.3,10], YD=[0.6,11];
+const lg=Math.log;
+const X=v=>M.l+(lg(Math.min(Math.max(v,XD[0]),XD[1]))-lg(XD[0]))/(lg(XD[1])-lg(XD[0]))*(W-M.l-M.r);
+const Y=v=>M.t+(lg(Math.min(Math.max(v,YD[0]),YD[1]))-lg(YD[0]))/(lg(YD[1])-lg(YD[0]))*(H-M.t-M.b);
+const fmt=v=>v.toFixed(1);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const key=()=>S.traits+(S.active?'_a'+S.active:'');
+const sc=c=>c.s[key()];
+const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+const offScale=p=>p.d>YD[1]||p.t>XD[1];
+
+document.getElementById('setup').innerHTML=[`Patch ${DATA.version.split('.').slice(0,3).join('.')}`,'Winged D3','No gear or relics','Flat ground','Mid damage roll',`${C.length} characters`].map(t=>`<span>${t}</span>`).join('');
+document.getElementById('segActive').innerHTML=`<button data-v="0" aria-pressed="true">Off</button>`+LV.map(l=>`<button data-v="${l}" aria-pressed="false">Level ${l}</button>`).join('');
+
+/* ---------- chart furniture ---------- */
+const svg=document.getElementById('map');
+el('defs',{},svg).innerHTML='<marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L8,4L0,8Z" fill="#c9ced8"/></marker>';
+const gX=el('g',{},svg), gY=el('g',{},svg);
+[1.5,2,3,4,5,6,8,10].forEach(v=>{el('line',{x1:X(v),x2:X(v),y1:M.t,y2:H-M.b,class:'grid-line'},gX).style.stroke='var(--rule-soft)';el('text',{x:X(v),y:H-M.b+20,'text-anchor':'middle',class:'tick'},gX).textContent=v;});
+el('text',{x:(M.l+W-M.r)/2,y:H-14,'text-anchor':'middle',class:'axis-title'},gX).textContent='Toughness → attacks a typical enemy needs to kill them';
+[0.75,1,1.5,2,3,4,6,8,10].forEach(v=>{el('line',{x1:M.l,x2:W-M.r,y1:Y(v),y2:Y(v)},gY).style.stroke='var(--rule-soft)';el('text',{x:M.l-10,y:Y(v)+4.5,'text-anchor':'end',class:'tick'},gY).textContent=v;});
+el('text',{transform:`translate(20 ${(M.t+H-M.b)/2}) rotate(-90)`,'text-anchor':'middle',class:'axis-title'},gY).textContent='Damage ↑ attacks they need to kill a typical enemy';
+const gMed=el('g',{},svg);
+const gQuad=el('g',{},svg);
+[['Glass cannons',M.l+14,M.t+26,'start'],['Hits hard · hard to kill',W-M.r-14,M.t+26,'end'],['Weak stat line',M.l+14,H-M.b-14,'start'],['Tanks',W-M.r-14,H-M.b-14,'end']]
+  .forEach(([t,x,y,a])=>{el('text',{x,y,'text-anchor':a,class:'quad'},gQuad).textContent=t;});
+const gArrows=el('g',{},svg), gDots=el('g',{},svg), gLabels=el('g',{id:'labels'},svg);
+
+/* ---------- dots ---------- */
+const dotEl={};
+C.forEach(c=>{
+  const g=el('g',{class:'dot'},gDots);
+  el('circle',{class:'hit',r:11},g);
+  g.addEventListener('mouseenter',()=>{S.hover=c.name;showTip(c);renderLabels();});
+  g.addEventListener('mouseleave',()=>{S.hover=null;hideTip();renderLabels();});
+  g.addEventListener('click',()=>select(c.name));
+  dotEl[c.name]=g;
+});
+function shapeFor(c,g){
+  const kind=sc(c).k; if(g._kind===kind) return;
+  if(g._mark) g._mark.remove();
+  g._mark=kind==='ranged'?el('path',{d:'M0,-7L7,0L0,7L-7,0Z',class:'mark'}):el('circle',{r:5.6,class:'mark'});
+  g._mark.setAttribute('fill',ALLY[c.alliance]);
+  g.insertBefore(g._mark,g.firstChild.nextSibling); g._kind=kind;
+}
+const visible=c=>!S.hidden.has(c.alliance);
+const matches=c=>{const q=S.q.trim().toLowerCase();return q&&(c.name.toLowerCase().includes(q)||c.faction.toLowerCase().includes(q));};
+
+/* beeswarm: keeps the measured axis exact and spreads dots across the other one */
+function swarm(vals,centre,lo,hi){
+  const D=13, placed=[], out={};
+  [...vals].sort((a,b)=>a.v-b.v).forEach(p=>{
+    for(let i=0;i<400;i++){
+      const off=(i%2?1:-1)*Math.ceil(i/2)*3, pos=centre+off;
+      if(pos<lo||pos>hi) continue;
+      if(placed.every(q=>{const dv=Math.abs(q.v-p.v);return dv>=D||Math.abs(q.pos-pos)>=Math.sqrt(D*D-dv*dv);})){placed.push({v:p.v,pos});out[p.name]=pos;return;}
+    }
+    out[p.name]=centre;
+  });
+  return out;
+}
+function positions(scKey){
+  const pos={};
+  if(S.view==='map'){C.forEach(c=>{const p=c.s[scKey];pos[c.name]=[X(p.t),Y(p.d)];});return pos;}
+  if(S.view==='attack'){
+    const sx=swarm(C.map(c=>({name:c.name,v:Y(c.s[scKey].d)})),(M.l+W-M.r)/2,M.l+12,W-M.r-12);
+    C.forEach(c=>pos[c.name]=[sx[c.name],Y(c.s[scKey].d)]);return pos;
+  }
+  const sy=swarm(C.map(c=>({name:c.name,v:X(c.s[scKey].t)})),(M.t+H-M.b)/2,M.t+12,H-M.b-12);
+  C.forEach(c=>pos[c.name]=[X(c.s[scKey].t),sy[c.name]]);return pos;
+}
+let POS={};
+
+function renderChart(animate=true){
+  const k=key();
+  POS=positions(k);
+  gX.classList.toggle('off',S.view==='attack');
+  gY.classList.toggle('off',S.view==='defence');
+  gQuad.classList.toggle('off',S.view!=='map');
+  const med={d:median(C.map(c=>sc(c).d)),t:median(C.map(c=>sc(c).t))};
+  gMed.innerHTML='';
+  if(S.view!=='attack'){el('line',{x1:X(med.t),x2:X(med.t),y1:M.t,y2:H-M.b,class:'median'},gMed);el('text',{x:X(med.t)+6,y:H-M.b-6,class:'median-label'},gMed).textContent=`roster middle ${fmt(med.t)}`;}
+  if(S.view!=='defence'){el('line',{x1:M.l,x2:W-M.r,y1:Y(med.d),y2:Y(med.d),class:'median'},gMed);el('text',{x:W-M.r-4,y:Y(med.d)-6,'text-anchor':'end',class:'median-label'},gMed).textContent=`roster middle ${fmt(med.d)}`;}
+  const anyQ=S.q.trim()!=='';
+  C.forEach(c=>{
+    const g=dotEl[c.name],[x,y]=POS[c.name];
+    shapeFor(c,g);
+    g.style.transition=(animate&&!reduce)?'':'none';
+    g.style.transform=`translate(${x}px,${y}px)`;
+    g.classList.toggle('dim',!visible(c)||(anyQ&&!matches(c)));
+    if(g._ring){g._ring.remove();g._ring=null;}
+    if(c.name===S.sel||(anyQ&&matches(c)&&visible(c))) g._ring=el('circle',{r:10.5,class:'ring'+(c.name===S.sel?'':' find')},g);
+    if(c.name===S.sel) gDots.appendChild(g);
+  });
+  gArrows.innerHTML='';
+  if(S.shift&&k!=='base'){
+    C.forEach(c=>{
+      if(!visible(c)) return;
+      const b=c.s.base,[x2,y2]=POS[c.name];
+      const x1=S.view==='attack'?x2:X(b.t), y1=S.view==='defence'?y2:Y(b.d);
+      const len=Math.hypot(x2-x1,y2-y1); if(len<9) return;
+      const f=(len-8)/len;
+      el('line',{x1,y1,x2:x1+(x2-x1)*f,y2:y1+(y2-y1)*f,class:'arrow'+(c.name===S.sel?' sel':''),'marker-end':'url(#ah)'},gArrows);
+    });
+  }
+  const bits=[{attack:'Attack',defence:'Defence',map:'Map'}[S.view], S.traits==='base'?'always-on traits':'all traits triggered', S.active?`active at level ${S.active}`:'no active'];
+  document.getElementById('chartTitle').textContent=bits.join(' · ');
+  if(animate&&!reduce){gLabels.style.opacity=0;clearTimeout(renderChart._t);renderChart._t=setTimeout(()=>{renderLabels();gLabels.style.opacity=1;},560);}
+  else renderLabels();
+}
+
+/* greedy label placement: pinned, hovered and search hits first, then everyone that fits */
+function renderLabels(){
+  gLabels.innerHTML='';
+  const boxes=[], anyQ=S.q.trim()!=='';
+  const pts=C.filter(visible).map(c=>({c,x:POS[c.name][0],y:POS[c.name][1]}));
+  const dotBoxes=pts.map(p=>[p.x-6.5,p.y-6.5,p.x+6.5,p.y+6.5]);
+  const pr=p=>p.c.name===S.sel?0:p.c.name===S.hover?1:(anyQ&&matches(p.c))?2:3;
+  let shown=0;
+  for(const p of [...pts].sort((a,b)=>pr(a)-pr(b))){
+    const force=pr(p)<3;
+    if(!force&&(!S.names||anyQ)) continue;
+    const s=sc(p.c), big=p.c.name===S.sel;
+    const text=p.c.name+(offScale(s)?` (${fmt(s.d>YD[1]?s.d:s.t)}, off the scale)`:'');
+    const w=text.length*(big?7.4:6.1)+4, h=big?15:13;
+    const cand=[[p.x+10,p.y+4,'start',[p.x+8,p.y-h/2,p.x+8+w,p.y+h/2]],[p.x-10,p.y+4,'end',[p.x-8-w,p.y-h/2,p.x-8,p.y+h/2]],
+                [p.x,p.y-11,'middle',[p.x-w/2,p.y-11-h+3,p.x+w/2,p.y-8]],[p.x,p.y+19,'middle',[p.x-w/2,p.y+8,p.x+w/2,p.y+8+h]]];
+    const hit=b=>boxes.concat(dotBoxes).some(o=>b[0]<o[2]&&b[2]>o[0]&&b[1]<o[3]&&b[3]>o[1]);
+    let placed=null;
+    for(const c of cand){const b=c[3];if(b[0]<M.l+2||b[2]>W-M.r-2||b[1]<M.t||b[3]>H-M.b) continue;if(!hit(b)){placed=c;break;}}
+    if(!placed&&force) placed=cand[0];
+    if(!placed) continue;
+    boxes.push(placed[3]);
+    el('text',{x:placed[0],y:placed[1],'text-anchor':placed[2],class:'lbl'+(big?' sel':(pr(p)===2?' find':''))},gLabels).textContent=text;
+    shown++;
+  }
+  document.getElementById('tableHint').textContent=`${shown} of ${C.filter(visible).length} names fit on the chart · hover for the rest · sorted by ${SORTS[S.sort.k].toLowerCase()}`;
+}
+
+/* ---------- tooltip ---------- */
+const tip=document.getElementById('tip'), card=tip.parentElement;
+function showTip(c){
+  const p=sc(c);
+  tip.innerHTML=`<b>${esc(c.name)}</b><div class="f">${esc(c.faction)} · best attack ${p.k}</div>
+  <div class="r"><span>Damage</span><span>${fmt(p.d)} attacks · #${p.rd}</span></div>
+  <div class="r"><span>Toughness</span><span>${fmt(p.t)} attacks · #${p.rt}</span></div>`;
+  const g=dotEl[c.name].getBoundingClientRect(), cr=card.getBoundingClientRect();
+  let left=g.left-cr.left+18; if(left+230>cr.width) left=g.left-cr.left-232;
+  tip.style.left=left+'px'; tip.style.top=Math.max(8,g.top-cr.top-10)+'px'; tip.style.opacity=1;
+}
+function hideTip(){tip.style.opacity=0;}
+
+/* ---------- detail panel ---------- */
+function select(name){S.sel=name;renderChart(false);renderDetail();renderTable();}
+function renderDetail(){
+  const c=C.find(x=>x.name===S.sel), cur=sc(c), base=c.s.base, same=key()==='base';
+  const tags=(arr,cls)=>arr.length?`<div class="tags">${arr.map(t=>`<span class="tag ${cls}">${esc(t)}</span>`).join('')}</div>`:`<p class="none">None</p>`;
+  const cell=(v,r,on)=>`<td class="${on?'on':'dimcol'}">${fmt(v)}<small>#${r}</small></td>`;
+  const row=(label,b,br,v,vr)=>`<tr><td>${label}</td>${cell(b,br,same)}${same?'':cell(v,vr,true)}</tr>`;
+  const a=c.active, isCreed=c.name==='Castellan Creed', cr=c.creed;
+  const kindLabel={damage:'deals damage',summon:'summons',heal:'heals',defence:'defensive',support:'support'}[a.kind]||a.kind;
+  const counted=LV.map(l=>a.counted[l]?`<p class="act-line">Level ${l}: <b>${esc(a.counted[l])}</b></p>`:'').join('');
+  document.getElementById('detail').innerHTML=`
+    <h3>${esc(c.name)}</h3>
+    <div class="fac"><i style="background:${ALLY[c.alliance]}"></i>${esc(c.faction)} · ${c.alliance}</div>
+    <div class="stats"><div><small>Health</small><b>${c.hp.toLocaleString()}</b></div><div><small>Damage</small><b>${c.dmg.toLocaleString()}</b></div><div><small>Armour</small><b>${c.arm.toLocaleString()}</b></div></div>
+    <p class="weap">${c.weapons.map(esc).join(' · ')}</p>
+    <table class="scores"><thead><tr><th>Attacks to kill</th><th>Stat line</th>${same?'':'<th>This view</th>'}</tr></thead><tbody>
+      ${row('Damage',base.d,base.rd,cur.d,cur.rd)}
+      ${row('Toughness',base.t,base.rt,cur.t,cur.rt)}
+    </tbody></table>
+    <div class="sect">
+      <p class="label">Active ability</p>
+      <p class="act-name">${esc(a.name||'None')} <span class="tag">${esc(kindLabel)}</span>${a.review?'<span class="tag flag">Needs your review</span>':''}</p>
+      ${counted||'<p class="act-line">Adds no damage of its own to the target.</p>'}
+      ${a.notes?`<p class="act-note">${esc(a.notes)}</p>`:''}
+    </div>
+    <p class="label">Always-on traits counted</p>${tags(c.counted,'')}
+    <p class="label">Situational traits · only when triggered</p>${tags(c.situational,'sit')}
+    <div class="sect creed"><p class="label" style="margin:0">${isCreed?'Creed against himself':'Sparring Creed · stat line'}</p>
+      <span>Deals <b>${cr.to.toLocaleString()}</b> to Creed per attack, kills him in <b>${fmt(cr.kill)}</b></span>
+      <span>Creed deals <b>${cr.frm.toLocaleString()}</b> back, kills ${isCreed?'himself':'them'} in <b>${fmt(cr.die)}</b></span></div>`;
+}
+
+/* ---------- table ---------- */
+const SORTS={name:'Character',faction:'Faction',k:'Best attack',d:'Damage',t:'Toughness',ds:'Damage rank change',ts:'Toughness rank change'};
+function val(c,k){const p=sc(c);return k==='name'?c.name:k==='faction'?c.faction:k==='k'?p.k:k==='d'?p.d:k==='t'?-p.t:k==='ds'?-(c.s.base.rd-p.rd):-(c.s.base.rt-p.rt);}
+function change(a,b){const d=a-b;return d>0?`<span class="up">▲${d}</span>`:d<0?`<span class="down">▼${-d}</span>`:`<span class="down">–</span>`;}
+function renderTable(){
+  const rows=C.filter(c=>visible(c)&&(S.q.trim()===''||matches(c)));
+  rows.sort((a,b)=>{const x=val(a,S.sort.k),y=val(b,S.sort.k);return (x<y?-1:x>y?1:0)*S.sort.dir;});
+  document.querySelector('#tbl tbody').innerHTML=rows.map(c=>{const p=sc(c),b=c.s.base;return `<tr class="${c.name===S.sel?'sel':''}">
+    <td><button class="nm" data-n="${esc(c.name)}"><i style="background:${ALLY[c.alliance]}"></i>${esc(c.name)}</button></td>
+    <td>${esc(c.faction)}</td><td>${p.k==='ranged'?'Ranged':'Melee'}</td>
+    <td>${fmt(p.d)}<span class="rk">#${p.rd}</span></td><td>${fmt(p.t)}<span class="rk">#${p.rt}</span></td>
+    <td>${p.rd}<span class="rk">${change(b.rd,p.rd)}</span></td><td>${p.rt}<span class="rk">${change(b.rt,p.rt)}</span></td></tr>`;}).join('');
+  document.querySelectorAll('th button').forEach(b=>{b.removeAttribute('aria-sort');if(b.dataset.k===S.sort.k)b.setAttribute('aria-sort',S.sort.dir>0?'ascending':'descending');});
+}
+document.querySelector('#tbl tbody').addEventListener('click',e=>{const b=e.target.closest('button.nm');if(b)select(b.dataset.n);});
+document.querySelectorAll('th button').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;S.sort=S.sort.k===k?{k,dir:-S.sort.dir}:{k,dir:1};renderTable();renderLabels();}));
+
+/* ---------- controls ---------- */
+function seg(id,apply){const g=document.getElementById(id);g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));apply(b.dataset.v);renderChart();renderDetail();renderTable();});}
+seg('segView',v=>S.view=v);
+seg('segTraits',v=>S.traits=v);
+seg('segActive',v=>S.active=+v);
+document.getElementById('shift').onchange=e=>{S.shift=e.target.checked;renderChart(false);};
+document.getElementById('names').onchange=e=>{S.names=e.target.checked;renderLabels();};
+document.getElementById('q').addEventListener('input',e=>{S.q=e.target.value;renderChart(false);renderTable();});
+document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter'){const m=C.find(c=>matches(c)&&visible(c));if(m)select(m.name);}});
+const legend=document.getElementById('legend');
+Object.entries(ALLY).forEach(([a,col])=>{const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed','true');
+  b.innerHTML=`<i style="background:${col}"></i>${a} <span style="color:var(--ink-3)">${C.filter(c=>c.alliance===a).length}</span>`;
+  b.onclick=()=>{S.hidden.has(a)?S.hidden.delete(a):S.hidden.add(a);b.setAttribute('aria-pressed',!S.hidden.has(a));renderChart(false);renderTable();};legend.appendChild(b);});
+
+renderChart(false); renderDetail(); renderTable();
+</script>

@@ -14,7 +14,7 @@ Every character is compared under the same conditions:
 |---|---|
 | Rank | Diamond III |
 | Stars | Winged (Legendary star) = 11 stars = ×2.1 on the 0-star rank stats |
-| Abilities | Level 36, Legendary rarity (for ability arrows only) |
+| Abilities | Level 36 (video standard) and level 50 (Legendary cap), Legendary rarity. Only used in the "Active ability" scenarios |
 | Equipment | None. No crits, no blocks from gear |
 | Relics | None (a Mythic + relics view is a later, separate step) |
 | Terrain | Flat ground, no hex effects, no buffs or debuffs |
@@ -110,6 +110,68 @@ Not on any current character: Diminutive, Dakka, Instinctive Behaviour.
 
 ---
 
+## Scenarios
+
+The page offers six combinations of two switches:
+
+| Switch | Options |
+|---|---|
+| Traits | **Always-on** (the rule above) or **All triggered**: every situational trait's condition met, random traits at their average, Blessings of Khorne at 4 of 8 kills |
+| Active ability | **Off**, or open with it at **level 36** or **level 50** |
+
+"All triggered" assumes each trait's condition is met:
+
+- Rapid Assault +25%; Heavy Weapon +25% ranged; Crushing Strike +50% melee;
+  Ranged Specialist +33% ranged.
+- Prioritised Efficiency +25% dealt / −25% taken.
+- Weaver of Fates: maximum damage roll, i.e. ×1.2 before armour.
+- Contagions of Nurgle: −20% target armour on melee attacks.
+- Blessings of Khorne +12% dealt and −32% Psychic taken.
+- Shadow in the Warp −25% Psychic from Psykers.
+- Camouflage −2 hits against range 3+ weapons.
+- Random traits at their average:
+  - Get Stuck In: +0.3 hits per 2 hits.
+  - Let the Galaxy Burn: +0.33 hits.
+  - Daemon: a 25% block chain of 50% of its Damage.
+  - Beast Slayer: a 10% block chain of its Armour.
+
+## Active abilities
+
+Every character is assumed to **open with their active ability**, then
+carry on with normal attacks. The active is only used if that kills faster
+than normal attacks alone.
+
+- **One target, first use only.** Damage to other enemies doesn't count.
+  Neither do persistent effects after the first use.
+- **Summons never count**, the same rule as the LE CSV's `Has_[DamageType]`
+  columns.
+- **Conditional extras don't count:** "+X for each…", "if the target is…",
+  chance-based hits.
+- "Does not end the turn" means the character also makes a normal attack that
+  turn.
+- **Ability damage** uses the middle of the ability's own damage range, times
+  the rarity multiplier (Legendary ×1.8).
+  - It goes through armour, pierce, Mk X Gravis and Terminator Armour
+    (−75% on the first attack of the turn).
+  - Trait bonuses and Parry, Terrifying, Martial Ka'tah and Camouflage are
+    **not** applied to it: those traits are written for normal, melee or
+    ranged *attacks*, and many abilities say they ignore attacker modifiers.
+  - A normal attack made as part of an ability follows the normal-attack
+    rules.
+- **Defensive actives** (heals, shields, damage reduction) **aren't modelled
+  yet**, so Toughness ignores them. In the active scenarios, Toughness only
+  changes because enemies open with *their* actives.
+- **How each character's active is counted** is in `active_abilities.csv`,
+  one reviewed row per character. The review rules are in `INSTRUCTIONS.md`.
+
+**The level 36 finding.** At Winged D3, only about 18 of the 82 actives that
+deal damage beat a normal attack at level 36. At level 50, about 60 do.
+Ability damage climbs steeply between level 35 and 50, while the D3 stat line
+is already high. So at level 36 the stat line is most of the story; at level
+50, kits like Ragnar's War Howl and Kharn's Kill! Maim! Burn! take over.
+
+---
+
 ## Validation: the Castellan Creed test
 
 The owner's old video data (`Tacticus - Castellan Creed Test.csv`, not in
@@ -152,4 +214,5 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | Added the Scenarios and Active abilities sections (All triggered; opening with the active at level 36 or 50). The Creed check is built into `build_map.py --creed`: 148 of 250 within 1% |
 | September 2026 | First version. Trait rule agreed; Rapid Assault left off (owner); Terminator Armour per attack (owner-confirmed, changed September 2024); validated against the Creed test data |

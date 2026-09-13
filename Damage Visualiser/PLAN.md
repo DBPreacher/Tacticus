@@ -1,6 +1,6 @@
 # Damage Visualiser — Plan
 
-**Status: draft for owner sign-off. Nothing is built yet.**
+**Status:** the Roster Battle Map explorer is built and is meant to become the video graphic (the owner's call, September 2026). How to update it is in `INSTRUCTIONS.md`. Still to do: the video version (recording reveals, reference characters) and defensive actives.
 
 The goal is a simple on-screen graphic for DB Preacher Plays that shows
 where a new character sits in Tacticus, for both attack and defence. It
@@ -15,9 +15,11 @@ rules behind it are in `DAMAGE_MODEL.md`.
 |---|---|
 | Comparison | Against the **whole roster**, not a single "Mr Average" (see Why below) |
 | Setup | Winged D3, no equipment, no relics, flat ground |
-| Abilities | Option B: the stat-line dot comes from normal attacks, plus an **ability arrow** for the featured character and the labelled reference characters only |
+| Abilities | The whole roster gets an **Active ability** switch (Off / level 36 / level 50), worked out from `active_abilities.csv`. The "Show the shift from the plain stat line" arrows cover what the ability arrows were for |
 | Ability level | 36 at Legendary. Defensive abilities often cross a breakpoint at 36 (e.g. −30% → −33% damage reduction) |
-| Situational traits | Left off the chart and talked about on camera. Rapid Assault left off (owner) |
+| Situational traits | Two scores, owner's idea: **Always-on** (the trait rule) and **All triggered** (situational traits on, random ones at their average). Rapid Assault is off in Always-on (owner) |
+| Views | **Attack** (damage only), **Defence** (toughness only) and **Map** (both), owner's idea. Switching animates the dots between views |
+| Alliance colours | From the in-game alliance icons: Imperial gold, Chaos red, Xenos light blue (owner) |
 | Reference characters | Long-standing characters that players already have a picture of (not recent releases like Nubari). Different characters for attack and defence |
 | Data | Separate file `tacticus_stats.csv`. `tacticus_characters.csv` and `le_analysis.py` are untouched |
 | Mythic | A later step: Mythic 14★ A2, level 60 abilities, relic effects |
@@ -96,49 +98,37 @@ Positions are from the stat-line model (rank out of 117).
 
 ## Ability arrows
 
-- Ability numbers are pulled automatically at level 36 Legendary from the
-  game data.
-- Deciding what an ability *means* still needs judgement: area damage,
-  conditions, summons. So each video gets a small abilities file covering
-  only the featured character and the reference characters on screen, about
-  6 characters.
-- **Damage arrows:** how much the kit shortens "attacks to kill", e.g.
-  extra hits from passives, or the active used once.
-- **Toughness arrows:** only the clear-cut effects are modelled: percentage
-  damage reduction, flat damage reduction, shields, extra health.
-  Situational effects are flagged for the owner to cover on camera.
-- The exact arrow definition gets fixed on the first real example.
+These were replaced by the roster-wide **Active ability** switch. The rules
+are in `DAMAGE_MODEL.md` (Active abilities), and each character's handling
+is in `active_abilities.csv`. For a video, the "Show the shift from the plain
+stat line" arrows do the same job, and more clearly: the dot moves from the
+stat line to where the kit puts the character. Defensive actives are still
+to do (build step 5).
 
 ---
 
 ## Build steps
 
-1. **`fetch_stats.py`.** Downloads the game data (cached; only downloads
-   again when the patch version changes) and writes `tacticus_stats.csv`:
-   - Health, Damage and Armour at Winged D3
-   - melee and ranged damage type, hits and pierce
-   - movement
-
-   The wiki is the fallback source.
-2. **`damage_model.py`.** Applies `DAMAGE_MODEL.md` and writes the Damage and
-   Toughness numbers for everyone, plus the Creed card numbers. It re-checks
-   itself against the Creed test data.
-3. **HTML template and generator.** One command builds the video page for a
-   named character.
-4. **Ability arrows.** The per-video abilities file, with values filled in
-   automatically at level 36.
-5. **Later:** the Mythic view with relics.
+1. ~~`fetch_stats.py`~~ Done as `update_game_data.py` (download) and
+   `build_map.py`, which writes `../LRE Script/tacticus_stats.csv`.
+2. ~~`damage_model.py`~~ Done inside `build_map.py`, with the Creed check as
+   `--creed`.
+3. ~~Interactive explorer~~ Done: `roster-battle-map.html`, published
+   privately.
+4. **Video version:** 1920×1080, Space/click reveals like the LE template,
+   featured character highlighted, reference characters labelled.
+5. **Defensive actives** (heals, shields, damage reduction) in Toughness.
+6. **Later:** the Mythic view with relics.
 
 ---
 
 ## Open questions
 
-- Pick the reference characters for each scene.
-- **Ranged Specialist** is left off under the trait rule, but it is in the
-  Creed test numbers. Keep it off?
-- **Terminator Armour in Toughness:** reducing only the first enemy attack
-  each turn assumes the enemy focuses fire on the character in one turn.
-  OK?
-- Optional: 5–6 fresh Creed test numbers at the current patch, e.g. Jain Zar, Morvenn Vahl, one
-  Terminator Armour character. They would confirm that the leftover
-  mismatches are passives, not a model error.
+- Pick the reference characters for each view, now that the explorer shows
+  who is where.
+- Which traits setting (or both) to show in videos.
+- The six `OWNER:` rows in `active_abilities.csv`: Abaddon, Ahriman, Asmodai,
+  Azrael, Thaddeus Noble, Titus.
+- Optional: 5–6 fresh Creed test numbers at the current patch, e.g. Jain
+  Zar, Morvenn Vahl, one Terminator Armour character. They would confirm that
+  the leftover mismatches are passives, not a model error.

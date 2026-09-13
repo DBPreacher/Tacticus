@@ -23,3 +23,9 @@ without asking first.
 - Force-push, `git reset --hard`, or rewriting history
 - Deleting files or branches
 - Any change outside this repo directory
+
+## Where the instructions are
+
+- LE planning and the character database: `LRE Script/INSTRUCTIONS.md`
+- Video HTML template: `LRE Script/HTML_TEMPLATE_INSTRUCTIONS.md`
+- Damage visualiser (the Roster Battle Map): `Damage Visualiser/INSTRUCTIONS.md`

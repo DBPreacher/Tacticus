@@ -1,3 +1,6 @@
 # Python bytecode cache - regenerated automatically whenever a script is imported
 __pycache__/
 *.pyc
+
+# Damage visualiser: downloaded game data (re-fetched by update_game_data.py)
+Damage Visualiser/cache/
