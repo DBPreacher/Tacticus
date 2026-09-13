@@ -33,6 +33,10 @@ IGNORED_TRAITS = {'summon', 'none'}
 CONFIRMED = {
     ('Uthar', 'Ranged_Hits'): 'owner confirmed 4 in-game (Sept 2026); wiki says 2',
     ('Uthar', 'X_Hits_Restriction'): 'follows Ranged_Hits',
+    # MoW pages list traits of the NPCs they deploy, not the MoW itself
+    ('Malleus Rocket Launcher', 'Battle Fatigue'): 'NPC trait (owner, Sept 2026)',
+    ('Biovore', 'Flying'): 'NPC trait (owner, Sept 2026)',
+    ('Biovore', 'Instinctive_Behaviour'): 'NPC trait (owner, Sept 2026)',
 }
 
 
@@ -167,6 +171,8 @@ def main():
         wiki_cols = set()
         for t in wiki_traits:
             col = trait_col_by_norm.get(norm(t))
+            if (name, t) in CONFIRMED or (name, col) in CONFIRMED:
+                continue
             if col:
                 wiki_cols.add(col)
             elif norm(t) not in IGNORED_TRAITS:
