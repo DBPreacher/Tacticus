@@ -25,15 +25,16 @@ track info/objectives don't.
 ## File Structure
 
 ```
-tacticus-le-planner/
-├── data/
-│   └── tacticus_characters.csv       ← character database (see INSTRUCTIONS.md)
+LRE Script/
+├── tacticus_characters.csv            ← character database (see INSTRUCTIONS.md)
 ├── le_analysis.py                     ← analysis script
+├── wiki_audit.py                      ← post-patch CSV check (see INSTRUCTIONS.md)
 ├── conditions_template.yaml           ← copy this for each new LE
-├── le14_uthar.yaml                    ← example conditions file
 ├── HTML_TEMPLATE_INSTRUCTIONS.md      ← this file
-└── video_templates/
-    └── dbpreacher_uthar_v4.html       ← video template (one per LE)
+└── LE[N] [Character]/                 ← one folder per LE, e.g. LE15 Lysander/
+    ├── le[N]_[character].yaml         ← that LE's conditions
+    ├── LE_[N]_-_[Character]_analysis.txt
+    └── dbpreacher_*.html              ← video template (one per LE)
 ```
 
 Note: in practice, the HTML is authored directly as static markup per
@@ -187,8 +188,10 @@ non-obvious and easy to accidentally break or "clean up" back in:
 
 ### Step 1 — Run the analysis
 
+Make sure `tacticus_characters.csv` is current first. If there's been a patch since the last check, run `wiki_audit.py` (see `How to use python script.txt`). Then, from the `LRE Script` folder:
+
 ```bash
-python3 le_analysis.py le15_newchar.yaml --csv data/tacticus_characters.csv
+python -X utf8 le_analysis.py "LE16 Newchar/le16_newchar.yaml" --csv tacticus_characters.csv > "LE16 Newchar/LE_16_-_Newchar_analysis.txt"
 ```
 
 Open the output `.txt` file. You need these values for the HTML:

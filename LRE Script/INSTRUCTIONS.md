@@ -2,26 +2,35 @@
 
 ## Overview
 
-This repo contains a master character database (`data/tacticus_characters.csv`) used to generate optimal team recommendations for Legendary Events (LEs) in Warhammer 40,000: Tacticus.
+This repo contains a master character database (`LRE Script/tacticus_characters.csv`) used to generate optimal team recommendations for Legendary Events (LEs) in Warhammer 40,000: Tacticus.
 
 The workflow is:
-1. Keep `tacticus_characters.csv` up to date after each patch
+1. Keep `tacticus_characters.csv` up to date after each patch: apply the patch notes, then run `wiki_audit.py` to catch anything they missed (see Catching changes you missed)
 2. When a new LE is announced, provide Claude with the track conditions
 3. Claude reads the CSV, runs the analysis, and outputs recommended teams for Alpha, Beta, and Gamma tracks
+
+`How to use python script.txt` has the quick-reference commands for both scripts.
 
 ---
 
 ## Repository Structure
 
 ```
-tacticus-le-planner/
-├── data/
-│   └── tacticus_characters.csv   ← master character database
-├── le_analysis.py                ← analysis script (see Running a New LE Analysis)
-├── le[N]_[character].yaml        ← one conditions file per LE
-├── README.md                     ← brief description for GitHub
-└── INSTRUCTIONS.md               ← this file
+LRE Script/
+├── tacticus_characters.csv          ← master character database
+├── le_analysis.py                   ← LE team analysis (see Running a New LE Analysis)
+├── wiki_audit.py                    ← post-patch check of the CSV against wiki.gg
+├── conditions_template.yaml         ← copy this for each new LE
+├── How to use python script.txt     ← quick-reference commands for both scripts
+├── INSTRUCTIONS.md                  ← this file
+├── HTML_TEMPLATE_INSTRUCTIONS.md    ← video HTML template guide
+└── LE[N] [Character]/               ← one folder per LE
+    ├── le[N]_[character].yaml       ← that LE's conditions
+    ├── LE_[N]_-_[Character]_analysis.txt
+    └── dbpreacher_*.html            ← video template
 ```
+
+Run both scripts from inside `LRE Script/`. Both default to `tacticus_characters.csv` in the current folder.
 
 ---
 
@@ -191,12 +200,12 @@ Find the character's row and update the relevant fields. Common rework changes:
 Patch notes don't always list every balance change, and it's easy to miss one (e.g. Anuphet gaining Resilient in August 2026). After each patch, run:
 
 ```
-python -X utf8 wiki_audit.py --since "July 2026"
+python -X utf8 wiki_audit.py --since "September 2026"
 ```
 
 It reads every character's wiki.gg page in bulk through the wiki's API and prints three sections. It only reports and never edits the CSV:
 
-1. **Changelog entries since `--since`**: every change the wiki has logged for any character. Set `--since` to the month of your last full check. For anyone listed here, re-read their abilities by hand, because `Has_[DamageType]`, `Self_Heal`, `Shielding` and `Spawner` come from ability text the script can't judge.
+1. **Changelog entries since `--since`**: every change the wiki has logged for any character. Set `--since` to the month of your last full check. The last one was September 2026, when every column except the ability-derived ones was brought in line with the wiki. For anyone listed here, re-read their abilities by hand, because `Has_[DamageType]`, `Self_Heal`, `Shielding` and `Spawner` come from ability text the script can't judge.
 2. **Mismatches that affect LE analysis**: traits, hit counts / `X_Hits_Restriction`, `Has_Ranged`, and any `Has_[DamageType]=N` where the wiki's primary attack is that type.
 3. **Reference-only mismatches** in the `Melee_Damage_Type`/`Ranged_Damage_Type` text columns. `le_analysis.py` never reads these, so they're low priority. They were refilled from the wiki in September 2026, so anything listed here is a new change or a wiki edit.
 
@@ -248,7 +257,7 @@ Always ignore the "Defeat all enemies" objective line — it applies to all stag
 
 ### Step 2 — Provide Claude with the analysis input
 
-Share the raw CSV (or the GitHub raw URL: `https://raw.githubusercontent.com/DBPreacher/Tacticus/main/tacticus_characters.csv`) and the parsed track data in this format:
+Share the raw CSV (or the GitHub raw URL: `https://raw.githubusercontent.com/DBPreacher/Tacticus/main/LRE%20Script/tacticus_characters.csv`) and the parsed track data in this format:
 
 ```
 LE [number] - [Character Name]
@@ -365,6 +374,8 @@ Traits and the 44+21 Y/N columns for all 112 base characters plus the 10 Machine
 
 ## Regenerating the XLSX
 
+No XLSX is currently committed to this repo, so there's nothing to regenerate after a CSV change unless you're keeping a local copy.
+
 `tacticus_characters.xlsx` is a formatted, human-readable mirror of the CSV — **the CSV is always the source of truth**; never hand-edit the XLSX and expect it to persist, always regenerate it from the CSV after any CSV change.
 
 The formatting rules are:
@@ -383,6 +394,7 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
+| September 2026 | Docs refresh: corrected the repo structure and paths (the CSV lives in `LRE Script/`, not `data/`; each LE has its own folder), fixed the raw GitHub CSV URL, and added `wiki_audit.py` to the workflow here, in `How to use python script.txt` and in `HTML_TEMPLATE_INSTRUCTIONS.md` | 1.42 |
 | September 2026 | Refilled `Melee_Damage_Type`/`Ranged_Damage_Type` for every character from the wiki stat boxes: 103 cells, left over from the initial build and never re-verified. I spot-checked 11 of the odd-looking ones (e.g. Abraxas melee Flame, Cyrus melee Bolter) against tacticustable.com and all matched. Every weapon type was already `Y` in its `Has_` column, so LE analysis results don't change. Vynn's ranged type is now blank, since he has no ranged weapon (`Has_Ranged=N`). The Malleus Rocket Launcher and Biovore wiki traits are ignored as NPC traits (owner) | 1.42 |
 | September 2026 | **Relics no longer count for any column** (owner correction; the tacticustable.com workflow used to say to read an equipped relic). I checked every value the wiki's 32 relics could have set. Stripped the relic-only ones: Maugan Ra `Has_Direct` → N; Corrodius and Nauseous Rotbone `Has_Toxic` → N; Corrodius `Melee_Damage_Type` Toxic → Plasma (his actual weapon). Snotflogga was already `Mechanical=N`. No other relic had leaked into a trait, damage type, `Self_Heal` or `Spawner` value | 1.42 |
 | September 2026 | Owner decisions on the first audit: added the `Putrid_Explosion` trait column (Pestillian `Y`, the only character with it); removed Makhotep's `Mechanic=Y` (not one of his traits); updated Z'kar from the wiki stat box (Psychic melee 4 / ranged 3, `Has_Ranged=Y`); Uthar's ranged hits confirmed as 4 in-game, so the wiki's 2 is wrong and is listed in `wiki_audit.py`'s `CONFIRMED` so it isn't re-flagged. Added a repo `.gitignore` for `__pycache__/` | 1.42 |

@@ -1,36 +1,62 @@
-Copy conditions_template.yaml and rename it. 
-Fill in with LRE data. 
+There are two Python scripts in C:\Video Prod\Github\Tacticus\LRE Script
+- le_analysis.py = works out the recommended LE teams from an event YAML
+- wiki_audit.py  = checks tacticus_characters.csv against the wiki after a patch
 
-
----
-Running Python
-1. le_analysis.py, tacticus_characters.csv, and whichever event YAML file (e.g. le14_uthar.yaml) in the same folder 
-
-2. Navigate there in command prompt terminal
-cd C:\Video Prod\Github\Tacticus\LRE Script
-
-3. Run it
-python -X utf8 le_analysis.py leXX_XXXX.yaml --csv tacticus_characters.csv > output.txt
+Always run them from the LRE Script folder (both look for tacticus_characters.csv there):
+cd "C:\Video Prod\Github\Tacticus\LRE Script"
 
 
 ----
-Preparing for Python: 
+Preparing for Python (one-time setup)
 
 1. Make sure Python is installed
 Open a terminal (Terminal on Mac, or PowerShell/Command Prompt on Windows) and type:
-python3 --version
+python --version
 If you get a version number (3.x), you're set. If not, install Python from python.org — grab the latest 3.x release, and on Windows check the box that says "Add Python to PATH" during install.
 
 2. Install the one dependency
-The script needs PyYAML to read the .yaml event files:
+le_analysis.py needs PyYAML to read the .yaml event files:
 pip install pyyaml
 (On some systems it's pip3 install pyyaml instead of pip.)
+wiki_audit.py needs nothing extra, just an internet connection.
 
----
+
+----
+After each patch: check the character database (wiki_audit.py)
+
+1. Update tacticus_characters.csv from the patch notes as normal (new characters, reworks).
+
+2. Run the audit. Set --since to the month you last checked:
+python -X utf8 wiki_audit.py --since "September 2026" > audit.txt
+
+3. Open audit.txt. It has three sections:
+   1. Changelog entries since that month = every change the wiki has logged for any character.
+      Anyone listed here needs their abilities re-read by hand (damage types, self-heal,
+      shielding, summons can change with a rework and the script can't judge those).
+   2. Mismatches that affect LE analysis = traits, hit counts, ranged Y/N, damage types.
+      Check these on tacticustable.com too. Only change the CSV if both sites agree.
+   3. Reference-only mismatches = the Melee/Ranged_Damage_Type text columns.
+      The analysis never reads these, so they're low priority.
+
+The audit only reports. It never changes the CSV.
+If the wiki is wrong about something you've confirmed in-game, add it to the CONFIRMED list
+at the top of wiki_audit.py so it stops being flagged (e.g. Uthar's ranged hits).
 
 If doing it in Claude
-Run le_analysis.py with [conditions_template.yaml copy] against tacticus_characters.csv and show me the output
+Run wiki_audit.py since [month] and update tacticus_characters.csv from what it finds
+
+
+----
+New LE: run the team analysis (le_analysis.py)
+
+1. Make a folder for the event, e.g. LE16 Name
+   Copy conditions_template.yaml into it, rename it (e.g. le16_name.yaml) and fill in with LRE data.
+
+2. Run it (from the LRE Script folder):
+python -X utf8 le_analysis.py "LE16 Name\le16_name.yaml" --csv tacticus_characters.csv > "LE16 Name\LE_16_-_Name_analysis.txt"
+
+If doing it in Claude
+Run le_analysis.py with "LE16 Name\le16_name.yaml" against tacticus_characters.csv and show me the output
 
 E.G
-Run Tacticus\LRE Script\le_analysis.py with le14_uthar.yaml against Tacticus\tacticus_characters.csv and show me the output
----
+Run LRE Script\le_analysis.py with "LE15 Lysander\le15_Lysander.yaml" against LRE Script\tacticus_characters.csv and show me the output

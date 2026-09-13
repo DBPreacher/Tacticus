@@ -11,7 +11,7 @@ without asking first.
 - Reading, writing, and editing any file anywhere under this repo directory
 - Running Bash/PowerShell commands that operate on files under this repo
   directory (building/regenerating the CSV or XLSX, validation scripts,
-  running `le_analysis.py`, etc.), including scratch/build scripts written
+  running `le_analysis.py` or `wiki_audit.py`, etc.), including scratch/build scripts written
   to a temp folder to support that work
 - `WebFetch` against `tacticus.wiki.gg` (character pages, Factions, Traits,
   Damage Types) for keeping the character database current
