@@ -134,11 +134,11 @@ Positions are from the stat-line model (rank out of 117).
 ## Open questions
 
 - Pick the reference characters for each scene.
-- **Ranged Specialist** is left off under the trait rule, but the in-game
-  preview does apply it. Keep it off?
+- **Ranged Specialist** is left off under the trait rule, but it is in the
+  Creed test numbers. Keep it off?
 - **Terminator Armour in Toughness:** reducing only the first enemy attack
   each turn assumes the enemy focuses fire on the character in one turn.
   OK?
-- Optional: 5–6 current in-game previews, e.g. Jain Zar, Morvenn Vahl, one
+- Optional: 5–6 fresh Creed test numbers at the current patch, e.g. Jain Zar, Morvenn Vahl, one
   Terminator Armour character. They would confirm that the leftover
   mismatches are passives, not a model error.

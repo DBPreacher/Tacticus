@@ -18,7 +18,7 @@ Every character is compared under the same conditions:
 | Equipment | None. No crits, no blocks from gear |
 | Relics | None (a Mythic + relics view is a later, separate step) |
 | Terrain | Flat ground, no hex effects, no buffs or debuffs |
-| Damage roll | Middle of the ±20% range, the same as the in-game damage preview |
+| Damage roll | Middle of the ±20% range, which is what the Creed test numbers show |
 
 Rank and stars multiply Health, Armour and Damage by the same factor for
 every character. So the **basic-attack** comparison doesn't change at any
@@ -71,15 +71,15 @@ Traits that are left off are talked about on camera, not charted.
 
 ### Left off: depends on what happens in the battle
 
-| Trait | Why it's off | In-game preview (Creed test) |
+| Trait | Why it's off | Creed test numbers |
 |---|---|---|
-| Rapid Assault | Only the first attack of each battle. **Owner decision, September 2026** | Preview **does** apply +25% |
-| Heavy Weapon | Only if it hasn't moved this turn | Preview did not apply +25% |
-| Crushing Strike | Only if it hasn't moved this turn | Preview did not apply +50% |
-| Ranged Specialist | Only if it didn't start its turn adjacent to an enemy | Preview **did** apply +33% (Sho'Syl) |
+| Rapid Assault | Only the first attack of each battle. **Owner decision, September 2026** | **Included** +25% |
+| Heavy Weapon | Only if it hasn't moved this turn | Not included |
+| Crushing Strike | Only if it hasn't moved this turn | Not included |
+| Ranged Specialist | Only if it didn't start its turn adjacent to an enemy | **Included** +33% (Sho'Syl) |
 | Prioritised Efficiency | +25% dealt / −25% taken, lost after moving 3+ hexes | No data |
-| Contagions of Nurgle | Aura, position-based, grows over rounds | Preview did not apply it (Typhus, Corrodius, Rotbone) |
-| Weaver of Fate | Needs 3+ enemies to have taken Psychic damage that turn | Not applied |
+| Contagions of Nurgle | Aura, position-based, grows over rounds | Not included (Typhus, Corrodius, Rotbone) |
+| Weaver of Fate | Needs 3+ enemies to have taken Psychic damage that turn | Not included |
 | Blessings of Khorne | Builds up with melee kills | — |
 | Act of Faith | Builds up with Imperial deaths and kills; needs a crit item | — |
 | Thrill Seekers | Crit chance only; no crits without gear | — |
@@ -113,7 +113,7 @@ Not on any current character: Diminutive, Dakka, Instinctive Behaviour.
 ## Validation: the Castellan Creed test
 
 The owner's old video data (`Tacticus - Castellan Creed Test.csv`, not in
-the repo) holds in-game preview numbers from a developer build. They are for
+the repo) holds the Creed test numbers, read in-game in a developer build. They are for
 104 characters attacking Creed (melee, ranged) and taking Creed's attack,
 all at Winged D3 with no equipment. The numbers were captured bit by bit
 from 2024 to 2026 and never updated for patches.
@@ -121,15 +121,15 @@ from 2024 to 2026 and never updated for patches.
 Run against the September 2026 (1.42.110) game data, with the rules above:
 
 - Creed hitting Creed: game **3,260**, model **3,258**.
-- **150 of the 256** in-game numbers match to within 1%, using stats and
+- **150 of the 256** Creed test numbers match to within 1%, using stats and
   traits alone.
 - Several mismatches came in groups at one exact ratio. Those groups
   confirmed trait behaviour:
   - Terminator Armour works per attack (×0.40 before the fix).
-  - Heavy Weapon ×0.80 and Crushing Strike ×0.67 are not in the preview.
-  - Rapid Assault ×1.25 and Ranged Specialist ×1.33 are in the preview.
+  - Heavy Weapon ×0.80 and Crushing Strike ×0.67 are not in the Creed test numbers.
+  - Rapid Assault ×1.25 and Ranged Specialist ×1.33 are in the Creed test numbers.
 - The remaining mismatches are one-off per character. Two causes:
-  - passive abilities, which the in-game preview includes (e.g. Jain Zar,
+  - passive abilities, which the Creed test numbers include (e.g. Jain Zar,
     Gibbascrapz, Morvenn Vahl's ranged)
   - balance changes since that character was captured (e.g. Anuphet's
     August 2026 rework)
