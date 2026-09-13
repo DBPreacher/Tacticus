@@ -235,6 +235,12 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
   weapons and pierce, traits, and every ability variable for every level.
   An ability's value = the level's entry × its rarity multiplier (Legendary
   ×1.8, Mythic ×2.0). Only re-download when the version changes.
+- **Cross-check, September 2026:** tacticustable's base stats and weapons
+  were compared with the wiki for all 117 characters. Only 3 differed, and
+  the owner confirmed tacticustable is right each time:
+  - Lysander base Damage 50 (the wiki says 25).
+  - Titus base Damage 26 (the wiki says 25).
+  - Uthar 4 ranged hits (the wiki says 2).
 - Formula: tacticus.wiki.gg `HDTW_Damage`, `Damage_Types_and_Pierce_Ratio`,
   `HDTW_Shields`, and the trait pages.
 
@@ -244,6 +250,7 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | Cross-checked tacticustable against the wiki. Tacticustable is right on all 3 differences (owner-confirmed), so no model change |
 | September 2026 | Defensive actives now count for Toughness (Defence column: damage reduction, flat reduction, extra health, weakened enemies, self-costs). The six owner questions on actives were answered; the model already matched them |
 | September 2026 | Added the Scenarios and Active abilities sections (All triggered; opening with the active at level 36 or 50). The Creed check is built into `build_map.py --creed`: 148 of 250 within 1% |
 | September 2026 | First version. Trait rule agreed; Rapid Assault left off (owner); Terminator Armour per attack (owner-confirmed, changed September 2024); validated against the Creed test data |

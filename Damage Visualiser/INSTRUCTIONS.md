@@ -253,6 +253,10 @@ as a separate build rather than replacing the D3 page.
     `../LRE Script/INSTRUCTIONS.md`, but that applies to the web pages, not
     this API.
   - Download it once per game version. It's a fan site, so don't hammer it.
+- **Where tacticustable and the wiki disagree on stats or weapons,
+  tacticustable has been right so far:** Lysander, Titus and Uthar, all
+  confirmed by the owner in September 2026. Still flag new disagreements to
+  the owner rather than assuming.
 - **Hero names:** `name` is the short name (e.g. "Creed", "Tigurius"), and
   `longName` is usually the CSV name. The script matches on `longName`, `name`
   and `id`, then `ALIAS`.
