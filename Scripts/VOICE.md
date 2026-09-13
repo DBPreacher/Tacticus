@@ -119,12 +119,17 @@ So:
 Claude's Roster Battle Map explainer (September 2026). He kept most of it,
 and these are the changes, so do them in the first draft next time:
 
-- **The hook is about him and why now,** not the feature: he's back as a
+- **The hook is about what the video is about,** not what the new thing
+  is. Explaining the map is the intro's job. His hook: he's back as a
   creator, hasn't made a "Does this character do anything?" video since
   because he couldn't compare characters properly, and he wants the
   viewers' feedback on the results.
-- **He cut the cute lines:** "It's basically Top Trumps for Tacticus" and
-  the teaser "But first, somebody needs to be told, so let's dive in."
+- **Keep references current.** He liked "It's basically Top Trumps for
+  Tacticus" as an idea, but Top Trumps is a very old game, so it didn't
+  land for today's audience. His own nostalgia (the Amiga, Space Crusade)
+  is fine because it's personal; a comparison the viewer has to know to
+  follow the point should be something they'll recognise. It's a balance,
+  so offer these lightly and expect some to be cut.
 - **He adds a proviso and invites challenge:** *"there is a big proviso
   here that this is still a simulation… I'll be happy to talk you through
   any of my decision points in the comments below so don't be afraid to
