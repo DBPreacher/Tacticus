@@ -14,25 +14,50 @@ so a new Claude session (or future you) can pick it up without re-deriving it.
 
 ---
 
-## Production Standard
+## Preserve Original Headers and Subject Nesting
 
-- Build compact reference screens for Andy to narrate over. Default to one screen per section; split substantial content by meaningful category, not one slide per character, mechanic or pair of bullets.
-- Keep the approved original header: update month on the left, version on the right, italic section title and section-colored rule. No extra category subtitle or duplicate heading above the body. Do not redesign the header during content edits.
-- Preserve the navy background, gold outer frame, corner logo and established fonts. Use section headings, bold subject labels and short nested bullets. Nest characters under their faction where applicable, with abilities beneath the character (for example Leagues of Votann > Ûthar > abilities).
-- Keep a clear character area on the right. Body content for Monthly Improvements and Bug Fixes ends around x=1658 on the 2560px canvas. Suggested portrait area: x=1740, y=270, width=720, height=1070. No guide, placeholder text or visible box.
-- Condense wording to what matters to players: effect, affected units, numbers, dates, conditions and exceptions. Remove filler, repeated labels, rationale and unnecessary examples. Preserve full detail in the extraction for narration. Do not simplify a mechanic into a misleading statement.
-- Avoid em dashes in authored copy unless absolutely necessary. Use headings, colons, commas, full stops or separate bullets. Preserve original source documents.
-- Native HTML and PNG size is 2560×1440. Capture at that viewport with device scale factor 1 after fonts, images and layout are ready. Deliver one matching PNG per final HTML and a ZIP of the set.
-- Judge text at the actual canvas and scaled video size. Starting body sizes: Monthly Improvements 28–29px, Bug Fixes 26–27px, Economy 34–36px. These are CSS pixels, not a direct equivalent of Andy's size-11 reference in another tool. Reduce unnecessary spacing and shorten wording before adding pages.
-- Check every bullet and heading against its content region and footer, not only the browser viewport. Confirm no clipping, overlapping headings, missing assets or text entering the portrait area.
-- Rebuild only requested sections. Keep approved slides unchanged. For V1.42, Calendar and Blessed Requisitions are protected, including their existing resolution. New templates use 2560×1440; do not migrate archived/approved files automatically.
+Latest rules override earlier conflicting examples:
+- Preserve the original approved header: September Update on the left, Version on the right, original italic section title and section accent line. Scale its dimensions proportionally for 2560×1440. Do not add category subtitles or duplicate body section headings in the header.
+- Bug Fixes: stack Characters above Guilds & User Experience within the left content area, never side by side. Keep the right character area clear. Smaller body text (approximately 26–27px at 2560×1440) is acceptable to fit one screen.
+- Nest character-specific changes beneath their faction when that faction already has a heading. In V1.42, Ûthar belongs under Leagues of Votann, with his abilities beneath him.
 
-## Authoritative Templates and References
+## Character Space and Compact Layout: Latest Direction
 
-- Use the HTML files in `Templates/` for revised Economy, Monthly Improvements and Bug Fixes. The root `economy_mockup.html` and `bugfixes_mockup.html` mirror the corresponding current templates.
-- `Templates/README.md` explains file selection, page grouping, dimensions and checks. Template body text consists of clearly marked placeholders, not patch facts.
-- The latest populated examples are in `V1.42/V1.42_Header_Restored/`. Earlier V1.42_Revised (22-slide), V1.42_Compact and V1.42_Portrait sets are superseded for these sections.
-- Calendar, Requisitions and Character Card source files retain their existing design. Use approved V1.42 Calendar/Requisitions as references rather than redesigning them. Special Events is optional only for a new mode.
+This section supersedes earlier full-width compact-screen advice and rigid slide-count/font-size targets.
+
+- Always preserve a clear right-hand character composition area on Economy, Monthly Improvements and Bug Fixes. Keep content on the left, with no placeholder, border or text in the character area.
+- **Economy:** retain the approved compact Shop Rotations column at its existing text size and width. Remove Offers & Bundles completely from the slide, leaving that right-hand area for Andy's character. Retain offer details in the extraction for reference; do not move them to another slide automatically.
+- **Monthly Improvements:** Characters & Traits gets its own screen. Group Operations & Vault under Crusade. Place Other Modes directly below Crusade on the same screen when it fits. Keep Guild Raids together on its own screen when necessary rather than dropping that category. Minimize page changes within this grouping.
+- **Bug Fixes:** aim for one screen with alphabetical subjects within sections; two narrow sections may sit side by side inside the left content area, leaving the right side free.
+- Smaller body text is acceptable. At 2560×1440, start around 28–29 CSS pixels for compact Monthly Improvements and Bug Fixes, then inspect actual renders. Economy retains its approved 34–36px text. Andy's size-11 reference describes desired visual density, not a requirement to use literal 11px HTML text; point sizes and on-screen sizes differ between tools.
+- Validate every heading and bullet against the content area and footer, not only the browser viewport. Ensure Characters & Traits fits fully. Condense copy and reduce unnecessary spacing before adding pages. Keep important mechanics and qualifications intact.
+- Current content boundary for Monthly Improvements and Bug Fixes is x=1658 on a 2560px canvas. Reserve approximately x=1740 to 2460, y=315 to 1340 for the character. Economy's existing column ends around x=1248 and leaves more character space.
+
+---
+
+## Compact Reference Screens for Video
+
+This is Andy's approved presentation approach and supersedes the earlier advice to split subjects into many slides or enforce a 48px body-text floor.
+
+- Aim for **one screen per section**, or **two when the section is genuinely substantial**. Do not turn every faction, character or mechanic into a separate slide. V1.42 target: two Monthly Improvements, one Economy, one Bug Fixes.
+- Screens remain visible as compact reference sheets while Andy narrates. Show related changes together, with category headings, bold subject labels and short nested bullets. Two bullet levels are appropriate; avoid unnecessarily deep trees.
+- Edit copy first: retain what changes for players, key numbers, timing, conditions and exceptions. Remove repeated names, introductory filler, design rationale and unnecessary examples. Keep full details in the extraction for narration; never shorten a mechanic into a misleading claim.
+- Use a balanced two-column layout where useful. Maintain the existing navy/gold shell and section colors. The supplied old screenshot demonstrates acceptable density only; do not copy its styling.
+- Native canvas remains 2560×1440. For compact reference screens, start around 34–38px body text, 44–50px category headings and 70–80px main titles. Judge actual renders, not an arbitrary font-size floor. Use bold labels and modest spacing to make the hierarchy clear.
+- Full-width content is appropriate for these compact sections; reserve a portrait area only when specifically needed for the composition. Do not waste a third of the slide and compensate with extra pages.
+- Check clipping, column balance and scaled video previews. Condense and regroup before adding a second screen; do not exceed two screens per section without discussing it with Andy.
+- Bug Fixes remain alphabetized within sections. Shop Rotations lead Economy. Avoid em dashes. Preserve the approved V1.42 Calendar and Blessed Requisitions unchanged.
+
+---
+
+## Editorial Rules and V1.42 Rebuild Scope
+
+These instructions supersede conflicting older examples in this document.
+
+- **Punctuation:** avoid the em dash (Unicode U+2014) in authored slide copy and scripts unless absolutely necessary. Prefer a heading, colon, comma, full stop or separate bullet. Older examples containing this punctuation are not a style requirement. Preserve source documents and the explicitly protected V1.42 screens rather than applying a global replacement to them.
+- **V1.42 protected screens:** Blessed Requisitions and Monthly Calendar are approved. Leave their HTML and PNG files unchanged, including wording, layout and resolution. This specific exception overrides the general native-resolution migration for these two existing screens. Future new builds still use 2560×1440.
+- **V1.42 rebuild work:** restructure Monthly Improvements and Monthly Bug Fixes with clear category and subject groupings; reorder and simplify Economy Changes. Build revised slides at native 2560×1440 and regenerate their matching PNGs. Do not start a rebuild merely because these instructions are being recorded.
+- **V1.42 Special Events:** omit this slide from the recording sequence and active delivery set. Retain the existing file as an unused asset; do not delete it. Keep event information in the extraction and cover it through the Calendar and narration where appropriate.
 
 ---
 
@@ -134,7 +159,16 @@ the extraction doc and confirm with Andy rather than guessing.
 
 ### Reading the calendar image reliably
 
-Compute recurring cadence dates as a cross-check against the developer image. Carefully verify day columns and inclusive spans. The developer calendar remains the primary date/duration source; formulas do not silently override it. Recheck apparent one-day conflicts before flagging genuine disagreements. Retain confirmed user corrections explicitly.
+Manually reading which day-column an event bar starts/ends under is
+error-prone — this session repeatedly misread bars by one day (HSEs, TA
+Power-Ups, a Quest, all initially misread, all off by exactly one column).
+**Whenever a category has an entry in the recurring-cadence formula table
+below, compute its date from the formula and treat that as authoritative
+over a manual pixel-read of the calendar image** — cross-check the image
+against the formula's answer rather than the other way around. Only fall
+back to a careful manual read for categories with no formula yet (new,
+one-off, or brand-new-mode content — e.g. Crusade this patch), and if still
+uncertain, ask Andy directly rather than guessing from the image.
 
 ---
 
@@ -156,7 +190,7 @@ Compute recurring cadence dates as a cross-check against the developer image. Ca
 
 ### Deliberately not dedicated slides
 Per the house script structure, these stay pure narration with no slide:
-Hook and Final Word. Monthly Improvements has its own reference screens as described below.
+Hook, Character Updates, Improvements, Final Word.
 
 ---
 
@@ -246,11 +280,11 @@ possible:
 ## Content-Specific Layout Notes
 
 ### Bug Fixes
-- Aim for one screen. Stack Characters above Guilds & User Experience vertically in the left content area; do not put them side by side.
-- Alphabetize subjects within each section by displayed name, case-insensitively. Keep related fixes together beneath a subject and retain order if a continuation is unavoidable.
-- Use short corrected-behavior bullets with subject labels. Nested detail is appropriate for multiple fixes, such as Thothmek's tooltip and passive.
-- Keep deferred fixes clearly marked as deferred; never present them as shipped.
-- Use the red/rust accent, original header, 26–27px body starting size and clear right character space.
+- Use the Monthly Improvements hierarchy: section/category, then a named character, enemy, faction or system, then short fix bullets. Express hierarchy with headings and grouped blocks; avoid deeply indented bullet trees.
+- **Alphabetize subjects within each section**, case-insensitively by displayed character/enemy/system name. Keep every subject's related fix bullets together. When there is no named subject, use the leading descriptive fix label as the sorting key. Alphabetize separately within each section, not across the whole deck; preserve that order across continuation slides.
+- Write each fix as a concise statement of the corrected behavior. Keep important conditions attached to the fix. Avoid em dashes; put the subject in its heading rather than repeating it before a punctuation separator.
+- Use the same readable text sizes, short blocks, spacing and small-preview checks as Monthly Improvements. Add continuation pages before shrinking text below the readability floor. Preserve complete details in the extraction and narration.
+- Retain the section's red/rust accent and shared shell. Group related bullets visually and check the final HTML and PNGs for overlap or clipping.
 
 ### Requisitions
 - Grid column count should auto-flow based on how many requisitions exist
@@ -262,10 +296,10 @@ possible:
   convention seen in Requisition screens.
 
 ### Economy Changes
-- Show Shop Rotations in a single left column at the approved compact size: approximately x=88, width=1159.5 at 2560×1440; body 34–36px.
-- Group by shop, with concise dates, affected units and replacement details underneath. Shop Rotations are the priority.
-- Omit Offers & Bundles from the slide completely and leave the right side for Andy's character. Keep offer details in the extraction; do not automatically create a separate offers slide.
-- Retain the purple accent and original header. Preserve the existing left-column size when removing right-side content.
+- **Shop Rotations come first.** Place other shop/economy changes next; offers and bundles come afterwards and must not dominate the page or receive the strongest emphasis.
+- Use clear section headings and subject/change blocks, following Monthly Improvements' readable hierarchy. Put supporting details directly beneath their parent change, avoiding dense paragraphs and deep indentation.
+- Keep dates and important availability conditions with the relevant shop item. Use short lines, bold key changes, generous spacing and the same video readability checks. Split into continuation slides if needed, maintaining the priority order.
+- Avoid em dashes in authored copy. Retain the purple section accent and any intended empty portrait area.
 
 ### Calendar
 The biggest automation opportunity, and the one slide meant to be
@@ -403,15 +437,38 @@ instructions describe.
 - Use the shared shell without a portrait zone unless a specific composition calls for one. Apply the same native 2560×1440 production and PNG export requirements.
 
 ### Monthly Improvements
-- Retain the steel-blue accent and original Monthly Improvements header. Put category headings only in the body.
-- Group category > faction/subject > character or mechanic > concise supporting bullets. Meaningful indentation is welcome; do not flatten a faction member into a peer faction heading.
-- Characters & Traits gets one screen when it fits. Nest Ûthar under Leagues of Votann, with his abilities underneath.
-- Keep Guild Raids together on a separate screen when needed. Do not omit it just because another category was explicitly discussed.
-- Group Operations & Vault under Crusade. Put Other Modes below Crusade on the same page when possible.
-- V1.42 therefore uses three Monthly Improvements screens: Characters & Traits, Guild Raids, and Crusade with Other Modes. This is a category grouping, not a requirement for every future patch to have three pages.
-- Use the left content area, 28–29px body starting size and right portrait space. Shorten text and tighten spacing before adding pages. Avoid the earlier fragmented 11-page Monthly Improvements approach.
-- Preserve relevant mechanics, conditions and exceptions. X/Y scaling placeholders are acceptable. Existing-character rebalances belong here; new debut cards stay in Characters / Machine of War.
-- Relic entries use name, equipped character and plain-English effect; omit Crit Chance/Crit Damage stat lines as previously agreed.
+
+Use the shared navy/gold shell and steel-blue section accent. Organize changes for a narrated YouTube video using **category → subject → change group → detail**. The extraction keeps the full hierarchy; the slide expresses it through headings and grouped blocks rather than four levels of indented bullets.
+
+**Hierarchy on screen:**
+- Small section label: Monthly Improvements.
+- Category label: Characters & Traits, Guild Raids, or Modes & Features, as appropriate to the source.
+- Main slide title: the faction, character, enemy or mode being discussed, such as Leagues of Votann. Keep subjects together on the section reference screen; use a second screen only for a substantial section.
+- Separate change blocks: named trait/ability, stat change, or mechanic, such as Prioritised Efficiency and Movement 2 → 3.
+- Inside each block: short, left-aligned bullets explaining that change. Use concise subject bullets with supporting sub-bullets when useful. Place affected character names directly beneath the relevant change, so its scope is explicit.
+
+**Layout and pacing:**
+- Group related changes into compact sections across one or two columns with an obvious reading order.
+- Aim for 2–3 short bullets per block, usually one line each and no more than two lines. These are starting limits, not a reason to omit information. Split complex mechanics or long affected-character lists across clearly titled continuation slides.
+- Keep a trait's conditions and exceptions with its effect. Do not simplify away mechanically important distinctions or invent a shared change for characters whose changes differ.
+- Use direct before/after notation for confirmed numeric changes (for example Movement 2 → 3). This example is illustrative, not source data. Use X/Y where the source uses scaling placeholders.
+- Avoid repeating the faction or character name in every bullet when the heading already establishes it. For miscellaneous changes, group by the relevant subject; do not manufacture unnecessary subcategories for one short item.
+- Preserve the reserved portrait area when Andy intends to composite a render. Keep it free of guides and placeholder text. If no render is planned, content may use the available width, while keeping line lengths short.
+- Repeat category and subject on continuation pages, adding a descriptive focus or page number. Default to one screen per section and at most two for substantial content, as described above.
+
+**Typography and video readability at 2560×1440:**
+- Use the typography ranges in Compact Reference Screens for Video. The earlier large-text slide sequence was too fragmented for Andy’s videos.
+- Give blocks generous separation, use roughly 1.2–1.3 body line height, and keep text left aligned. Use bright body text on dark backgrounds; steel-blue accents support headings, not low-contrast paragraph text.
+- Bold the changed value or key effect rather than whole paragraphs. Use labels, grouping and spacing alongside color so meaning does not depend on color perception.
+- Keep narration conversational and fuller than the slide. Preserve complete source details in the extraction and ensure any detail removed from slide copy remains available for the script.
+- Render and check every slide for clipping and overlaps, then inspect a 640×360 preview to judge the actual video hierarchy and readability. Higher PNG resolution alone is not a readability fix.
+
+**Content conventions:**
+- Existing-character rebalances belong under Characters & Traits; new debut cards remain in Characters / Machine of War.
+- Relics: name, equipped character and a plain-English effect; omit the Crit Chance/Crit Damage stat line as previously agreed.
+- Mode changes: lead with the mode/system in the group heading. Dates normally belong on the Calendar.
+
+This hierarchy supersedes the earlier flat Economy-style lists and the old preference to compress Monthly Improvements into 2–3 categories on a slide. Group related information by subject and use additional slides when needed.
 
 ### Character reveal cards
 Single static layout (not a click-through reveal sequence — Andy narrates
@@ -514,13 +571,35 @@ else in the deck:
 
 ---
 
-## Remaining Checks for Each Patch
+## Open Items / Known Gaps
 
-- Source new patch content and character details fresh; reference examples are not evidence for future facts.
-- Machine of War card field structure still needs validation against a real release.
-- Crusade cadence remains unestablished; source its timing rather than inventing a recurring formula.
-- Confirm unreleased relic status separately from missing research. If Andy confirms a relic is not released, label it “Not yet released” and do not keep asking for it.
-- Render every modified slide, verify its PNG dimensions, and ensure protected sections remain unchanged.
+- Auto-shrink/overflow handling not yet implemented for Bug Fixes or
+  Requisitions (currently hardcoded to one month's example content) — the
+  Calendar has this solved and could serve as the reference implementation.
+- Economy Changes' purple accent isn't sourced from an actual game screen —
+  worth revisiting if something more on-brand turns up.
+- Machine of War reveal cards not yet built — same shell/approach as
+  Character cards should largely transfer (Primary/Secondary/Mythic instead
+  of Passive/Active/Relic), but untested against a real MoW's actual field
+  shape.
+- TA Power-Ups date conflict (July 13 vs. ~July 15–17 on the dev calendar)
+  unresolved as of the last Calendar build — confirm before finalizing that
+  patch's video.
+- No automated generator script yet for the Calendar (or anything else) —
+  everything is still hand-built HTML per patch.
+- Crusade has no cadence formula yet — only one data point (Season 1 start,
+  tied to Lhykis's debut). Currently treated as a single-day marker like
+  Guild Raid; revisit once a second season's start date is known.
+- Special Events slide only tested with 4 blocks in one patch — not yet
+  clear how it should scale for a lighter or heavier patch.
+- Monthly Improvements only tested with 2 categories in one patch — not yet
+  clear how it holds up in a month with more content (e.g. several existing
+  characters getting rebalanced at once, or 3+ new Relics).
+- Sekhetar Robot's "Heavy Warpflamer" ability name is a translation from
+  Spanish-only source material — confirm against the real English text once
+  available, in case Snowprint's actual EN name differs.
+
+---
 
 ## Changelog
 
@@ -544,4 +623,3 @@ else in the deck:
 | September 8, 2026 | Recorded minimal em-dash use; protected the approved V1.42 Calendar and Requisitions files; added grouped, alphabetized Bug Fixes; prioritized Shop Rotations in Economy; limited Special Events slides to new modes and omitted the V1.42 slide from the recording sequence. |
 | September 8, 2026 | Replaced the fragmented 22-slide approach with compact reference screens: one per section, two for substantial sections, concise player-focused wording and nested subject bullets. |
 | September 8, 2026 | Restored right-hand character space; removed Economy offers from the slide; reduced compact body text; separated Characters & Traits and nested Operations & Vault under Crusade with Other Modes below. |
-| September 8, 2026 | Consolidated final compact portrait layout, original headers, nested faction/character structure, stacked alphabetical bugs, Shop Rotations-only Economy, category-based Monthly Improvements, native exports and reusable HTML templates. Removed contradictory superseded layout guidance. |
