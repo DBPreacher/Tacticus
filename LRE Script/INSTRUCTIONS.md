@@ -62,7 +62,7 @@ Z'kar is a partial exception to the "no base stat block" pattern — it has real
 
 **Trait Columns (Y/N)**
 
-All 44 character-applicable traits from the wiki are tracked as Y/N columns. Key ones for LE analysis:
+All 44 character-applicable traits from the wiki are tracked as Y/N columns. There were 43 until `Putrid_Explosion` (Death Guard; only Pestillian has it) was added in September 2026. When `wiki_audit.py` reports a wiki trait with no CSV column, add a new column in alphabetical order among the trait columns. Key ones for LE analysis:
 
 | Trait | LE Relevance |
 |-------|-------------|
@@ -81,7 +81,7 @@ All 44 character-applicable traits from the wiki are tracked as Y/N columns. Key
 
 **`Parrying` / `Shielding` / `Spawner` Columns (Y/N)**
 
-These three are separate meta-tag columns, not part of the 43 wiki traits — they exist purely as the lowest-priority tiebreak in `le_analysis.py` (see Meta Notes → Full tiebreak hierarchy). Confirmed definitions (owner-provided):
+These three are separate meta-tag columns, not part of the 44 wiki traits — they exist purely as the lowest-priority tiebreak in `le_analysis.py` (see Meta Notes → Full tiebreak hierarchy). Confirmed definitions (owner-provided):
 
 - `Parrying` — `Y` if the character has the `Parry` trait. This always mirrors the `Parry` trait column exactly — if `Parry=Y` in the trait block, `Parrying=Y` too, and vice versa. Example: Forcas.
 - `Shielding` — `Y` if any of the character's abilities grant a shield / block-damage bonus to **another** friendly character (not just to themselves — check whether the effect extends to allies). Example: Wrask (his passive shields allies).
@@ -196,7 +196,7 @@ It reads every character's wiki.gg page in bulk through the wiki's API and print
 2. **Mismatches that affect LE analysis**: traits, hit counts / `X_Hits_Restriction`, `Has_Ranged`, and any `Has_[DamageType]=N` where the wiki's primary attack is that type.
 3. **Reference-only mismatches** in the `Melee_Damage_Type`/`Ranged_Damage_Type` text columns. `le_analysis.py` never reads these, so they're low priority.
 
-The wiki can be wrong or behind too, so cross-check anything in section 2 against tacticustable.com before changing it. Only fix a value when both sources agree. If they disagree (e.g. Uthar's ranged hits: wiki 2, tacticustable 4), flag it to the owner.
+The wiki can be wrong or behind too, so cross-check anything in section 2 against tacticustable.com before changing it. Only fix a value when both sources agree. If they disagree (e.g. Uthar's ranged hits: wiki 2, tacticustable 4), flag it to the owner. Once the owner confirms the CSV value, add it to the `CONFIRMED` dict at the top of `wiki_audit.py` so it stops being reported.
 
 ### When a trait is retired or renamed
 
@@ -377,6 +377,7 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
+| September 2026 | Owner decisions on the first audit: added the `Putrid_Explosion` trait column (Pestillian `Y`, the only character with it); removed Makhotep's `Mechanic=Y` (not one of his traits); updated Z'kar from the wiki stat box (Psychic melee 4 / ranged 3, `Has_Ranged=Y`); Uthar's ranged hits confirmed as 4 in-game, so the wiki's 2 is wrong and is listed in `wiki_audit.py`'s `CONFIRMED` so it isn't re-flagged. Added a repo `.gitignore` for `__pycache__/` | 1.42 |
 | September 2026 | Added `wiki_audit.py` (see Catching changes you missed). The first run found **Anuphet**'s missed August rework: `Resilient=Y`, and his weapons are now Energy/Energy. It also found long-standing errors, each confirmed on both wiki.gg and tacticustable.com: **Boss Gulgortz** ranged hits 3→1 (`X_Hits` 3→1); **Darkstrider** ranged hits 2→4 (`X_Hits` 2→4); **Macer** `Has_Chain=Y` (Chain melee); **Thutmose** melee hits 1→2. Left for the owner: Uthar ranged hits (sources disagree), Makhotep `Mechanic=Y` (not a listed trait, but his passive repairs), Pestillian's "Putrid Explosion" trait (no column), Z'kar's stat block (MoW, so never in LE analysis) | 1.42 |
 | September 2026 | Patch 1.42 pass (wiki.gg + tacticustable.com): added **Nubari** (Adeptus Astartes / Salamanders, Melta 2/2, Heavy Weapon + Mk X Gravis; `Has_Flame=Y` from his fire hex, same as Wrask/Vindicta/Toth). **Kimm** is now released (Epic Battle Pass, Sept 6), so `Do_Not_Use` is back to `N`; her released kit adds `Rapid_Assault=Y` and her passive text changed. **Uthar** rework: `Shielding=Y` because Grim Efficiency's Fortify Takeover gives allies within 2 hexes an extra Armour pass (same precedent as Sekhetar's +Armour). Also fixed his swapped damage types to Melee Plasma / Ranged Energy. The Sekhetar Psychic flag fix, Rotbone's relic Toxic fix and the Votann trait/movement changes needed no CSV change | 1.42 |
 | July 2026 | Fixed Z'kar's `Is_MoW` flag (was `N`, should be `Y`) — confirmed via wiki.gg that Z'kar is the Thousand Sons Machine of War despite having a real stat block. `le_analysis.py` already unconditionally excludes `Is_MoW=Y` from every track's eligible pool (no code change needed there), so this was a pure data fix; corrected the Machines of War note's "depends on the event's rules" wording to match that unconditional behavior, added Z'kar to the named MoW list, and regenerated the LE 15 Lysander analysis + HTML (Z'kar dropped from Beta Team 2's pool listing, 9→8 eligible; no Recommended-5 picks changed since Z'kar was never actually selected) | 1.41 |

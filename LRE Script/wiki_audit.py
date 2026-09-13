@@ -28,6 +28,12 @@ MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july',
 DAMAGE_ALIASES = {'eviscerate': 'Eviscerating', 'gauss': 'Molecular'}
 # Wiki traits that exist but aren't tracked as CSV columns
 IGNORED_TRAITS = {'summon', 'none'}
+# CSV values the owner has confirmed where the wiki is wrong - not reported.
+# Remove an entry if the wiki is later corrected.
+CONFIRMED = {
+    ('Uthar', 'Ranged_Hits'): 'owner confirmed 4 in-game (Sept 2026); wiki says 2',
+    ('Uthar', 'X_Hits_Restriction'): 'follows Ranged_Hits',
+}
 
 
 def api_get(params):
@@ -175,7 +181,9 @@ def main():
         r_type, r_hits = parse_attack(infobox_field(text, 'ranged_attack'))
         is_mow = r['Is_MoW'] == 'Y'
 
-        def differs(wiki_val, csv_val):
+        def differs(wiki_val, csv_val, col=None):
+            if (name, col) in CONFIRMED:
+                return False
             if is_mow and not wiki_val:
                 return False  # MoW stat blocks are often blank on purpose
             return str(wiki_val or '').lower() != str(csv_val or '').lower()
@@ -183,10 +191,10 @@ def main():
         wiki_has_ranged = 'Y' if r_type or r_hits else ('N' if m_type or not is_mow else None)
         for col, wiki_val in [('Melee_Hits', m_hits), ('Ranged_Hits', r_hits),
                               ('Has_Ranged', wiki_has_ranged)]:
-            if differs(wiki_val, r[col]):
+            if differs(wiki_val, r[col], col):
                 issues.append(f'{col}: wiki={wiki_val or "(blank)"}  CSV={r[col] or "(blank)"}')
         wiki_x = r_hits if r_hits else m_hits
-        if differs(wiki_x, r['X_Hits_Restriction']):
+        if differs(wiki_x, r['X_Hits_Restriction'], 'X_Hits_Restriction'):
             issues.append(f'X_Hits_Restriction: wiki implies {wiki_x}  CSV={r["X_Hits_Restriction"] or "(blank)"}')
         for kind, wiki_type in [('melee', m_type), ('ranged', r_type)]:
             col = 'Has_' + (wiki_type or '').replace(' ', '_')
