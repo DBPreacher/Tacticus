@@ -115,8 +115,12 @@ removed).
   header and the whole chart stay on screen (`fitPage()` in the template).
   - Use the browser's full screen (**F11**) so the chart gets the full
     height. At 2560×1440 full screen it zooms about 1.7 times.
-  - The character card sits under the controls; scroll the page to show the
-    rest of it.
+  - The layout is chart | controls | character card, side by side, so the
+    buttons you click and the card they change are both on screen. A long
+    card scrolls inside its own panel (it jumps back to the top when you pin
+    someone new).
+  - The alliance chips and the melee/ranged key sit under the chart, so
+    they're always in shot.
   - Below 1440 pixels wide it's the normal page, with no zoom.
 - **Fonts** come from Google Fonts, so the PC needs internet access.
   Without it the page falls back to standard fonts.
@@ -392,7 +396,13 @@ The **Mythic tier** is built in (September 2026).
 - **Filling the screen** is `fitPage()` at the end of the script and the
   `.wrap.fit` CSS: above 1440 pixels wide the page is laid out at 1440 and
   zoomed with CSS `zoom`. The tooltip divides by that zoom when it positions
-  itself. The chart is 1000×640 so it fits a 16:9 screen with the header.
+  itself. The chart is 1000×670 so that at 2560×1440 full screen the page
+  fills the whole width with the header and chart on screen.
+- **Layout:** `.main` is a three-column grid (chart, 232px controls, 316px
+  character card). The two side panels use `contain: size` so they take the
+  chart's height instead of stretching it, and scroll inside if longer.
+  Below 1280px wide they stack under the chart. "Reading the chart" sits
+  under the main row in three text columns.
 - The page is deliberately **dark only**, to match the channel's video
   template.
 - Fonts are Cinzel (headings), Rajdhani (numbers and labels) and Inter (text),
@@ -468,7 +478,7 @@ The **Mythic tier** is built in (September 2026).
 
 | Date | Change |
 |---|---|
-| September 2026 | OBS broadcast mode removed (owner prefers to record the normal page and press the buttons on camera). The page now zooms up to fill wide screens; the chart is 1000×640 |
+| September 2026 | OBS broadcast mode removed (owner prefers to record the normal page and press the buttons on camera). The page now zooms up to fill wide screens. Layout is chart | controls | character card side by side, with the alliance and melee/ranged key under the chart ("Ranged is their best attack") and "Reading the chart" below; the chart is 1000×670 |
 | September 2026 | Broadcast mode for OBS (1920×1080 stage scaling to any 16:9 size, keyboard shortcuts, URL settings, `roster-battle-map-obs.html`); Attack/Defence views spread so most names fit; no reference characters (owner) |
 | September 2026 | Progression tiers (Gold / Diamond III / Mythic), relics at Mythic (`relic_owners.csv` from the wiki, `relic_abilities.csv` reviewed), long-format `tacticus_stats.csv` |
 | September 2026 | Gear switch (standard Legendary loadouts, crits/blocks at their average) and the `Gear` column |

@@ -23,7 +23,7 @@ Enter ingame for 100 free blackstone: ABA-88-PLY
 screen (F11), clicking the buttons on camera. Cues are in [On screen: …]
 brackets.*
 
-*Length: about 2,030 spoken words ÷ 193 = roughly 10½ minutes.*
+*Length: about 2,110 spoken words ÷ 193 = roughly 10.9 minutes.*
 
 *Draft 3: in the Space Hulk / Top 10 voice (long spoken sentences with the
 odd short punch, no em dashes). Edit freely and save your version next to
@@ -68,7 +68,11 @@ The first is **Damage**, which is how many attacks this character needs to kill 
 
 [On screen only: "Damage = attacks they need to kill a typical character" / "Toughness = attacks a typical character needs to kill them"]
 
-Now when I say typical, I don't mean one character like Creed. I work out the fight against all 117 characters and take the result right in the middle, so half the roster does better than that and half does worse, which means one weird matchup can't mess the whole thing up.
+Now when I say typical, I don't mean one character like Creed. What I actually do is take Kharn, for example, and work out how many attacks he needs to kill every single character in the game, one at a time, so that's 117 different answers. Then I line all of those answers up from quickest to slowest and pick the one right in the middle, and that's his score.
+
+[On screen only: Kharn's 117 answers in a row, quickest to slowest, with the middle one highlighted]
+
+So half the roster goes down quicker than that and half takes longer, and because it's the middle one and not an average, one really weird matchup at either end can't drag the whole thing off. Toughness is exactly the same but the other way round, with every character in the game taking their turn to hit him.
 
 So when I say that Kharn kills a typical character in about one and a half attacks, that's exactly what I mean. And it's also why he's been sat at the top of pretty much every damage list since he arrived.
 

@@ -24,11 +24,15 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
 .setup{display:flex;flex-wrap:wrap;gap:6px}
 .setup span{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:3px 9px;border-radius:3px;font-variant-numeric:tabular-nums}
-.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
-@media (max-width:1100px){.main{grid-template-columns:1fr}}
+/* chart | controls | character card. The two side panels take the chart's height (contain:size stops
+   them stretching the row) and scroll inside if they're longer. Narrower windows stack them under the chart. */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 232px 316px;gap:16px;align-items:stretch}
+.main>.controls,.main>.detail{contain:size;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+@media (max-width:1280px){.main{grid-template-columns:1fr 1fr}.main>.chart-card{grid-column:1/-1}.main>.controls,.main>.detail{contain:none;overflow:visible}}
+@media (max-width:760px){.main{grid-template-columns:1fr}}
 .chart-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px 14px 8px;position:relative}
 .chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 6px 6px;flex-wrap:wrap}
-.chart-head h2{font-family:var(--display);font-size:18px;font-weight:600;margin:0;letter-spacing:.03em}
+.chart-head h2{font-family:var(--display);font-size:16px;font-weight:600;margin:0;letter-spacing:.03em}
 .hint{font-size:12.5px;color:var(--ink-3)}
 svg{display:block;width:100%;height:auto;font-family:var(--data)}
 .grid line{stroke:var(--rule-soft);stroke-width:1}
@@ -56,12 +60,12 @@ svg{display:block;width:100%;height:auto;font-family:var(--data)}
 .tip .f{color:var(--ink-3);font-size:12px;margin-bottom:5px}
 .tip .r{display:flex;justify-content:space-between;gap:14px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
 .tip .r span:last-child{color:var(--ink);font-family:var(--data);font-weight:600;font-size:14px}
-aside{display:flex;flex-direction:column;gap:14px}
 .panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:16px}
 .label{font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
-.controls{display:flex;flex-direction:column;gap:15px}
+.controls{display:flex;flex-direction:column;gap:12px;padding:14px}
+.controls .label{margin-bottom:6px}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
-.seg button{all:unset;cursor:pointer;text-align:center;font-family:var(--data);font-weight:600;font-size:14.5px;padding:7px 6px;color:var(--ink-2);background:var(--panel-2)}
+.seg button{all:unset;cursor:pointer;text-align:center;font-family:var(--data);font-weight:600;font-size:14.5px;padding:6px 3px;white-space:nowrap;color:var(--ink-2);background:var(--panel-2)}
 .seg button+button{border-left:1px solid var(--rule)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:#0a0a0a}
 .seg button:focus-visible,.chip:focus-visible,.check input:focus-visible+span,.tbl button:focus-visible,th button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
@@ -78,11 +82,13 @@ aside{display:flex;flex-direction:column;gap:14px}
 .chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
 .chip[aria-pressed="false"]{color:var(--ink-3);text-decoration:line-through}
 .chip[aria-pressed="false"] i{opacity:.25}
-.shapes{display:flex;gap:16px;font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.chart-key{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 20px;margin:6px 6px 4px;padding-top:10px;border-top:1px solid var(--rule-soft)}
+.shapes{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink-2)}
 .shapes svg{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:5px}
-dl.defs{margin:0;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--ink-2)}
+dl.defs{margin:0;font-size:12.5px;color:var(--ink-2);columns:3 300px;column-gap:32px}
+dl.defs dt{break-after:avoid}
+dl.defs dd{margin:0 0 10px;break-inside:avoid}
 dl.defs dt{font-family:var(--data);font-weight:700;font-size:13.5px;color:var(--ink)}
-dl.defs dd{margin:0}
 ul.tl{margin:4px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:2px}
 ul.tl li{line-height:1.4}
 .detail h3{font-family:var(--display);font-size:22px;font-weight:700;margin:0;line-height:1.15;text-wrap:balance}
@@ -149,11 +155,17 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
         <h2 id="chartTitle">Every character</h2>
         <span class="hint">Hover a mark for numbers · click to pin it in the panel</span>
       </div>
-      <svg id="map" viewBox="0 0 1000 640" role="img" aria-label="Chart of all characters by damage and toughness"></svg>
+      <svg id="map" viewBox="0 0 1000 670" role="img" aria-label="Chart of all characters by damage and toughness"></svg>
+      <div class="chart-key">
+        <div class="legend" id="legend" role="group" aria-label="Alliances (click to hide or show)"></div>
+        <div class="shapes">
+          <span><svg viewBox="-7 -7 14 14"><circle r="5.5" fill="#a3aab8"/></svg>Melee is their best attack</span>
+          <span><svg viewBox="-7 -7 14 14"><path d="M0,-6.5L6.5,0L0,6.5L-6.5,0Z" fill="#a3aab8"/></svg>Ranged is their best attack</span>
+        </div>
+      </div>
       <div class="tip" id="tip" role="status"></div>
     </section>
 
-    <aside>
       <div class="panel controls">
         <div>
           <p class="label">View</p>
@@ -198,19 +210,12 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           <p class="label">Find</p>
           <input class="search" id="q" type="search" placeholder="Character or faction" autocomplete="off">
         </div>
-        <div>
-          <p class="label">Alliance</p>
-          <div class="legend" id="legend"></div>
-          <div class="shapes">
-            <span><svg viewBox="-7 -7 14 14"><circle r="5.5" fill="#a3aab8"/></svg>Melee is their best attack</span>
-            <span><svg viewBox="-7 -7 14 14"><path d="M0,-6.5L6.5,0L0,6.5L-6.5,0Z" fill="#a3aab8"/></svg>Ranged</span>
-          </div>
-        </div>
       </div>
 
       <div class="panel detail" id="detail" aria-live="polite"></div>
+  </div>
 
-      <div class="panel">
+  <section class="panel reading" aria-label="Reading the chart">
         <p class="label">Reading the chart</p>
         <dl class="defs">
           <dt>Progression</dt>
@@ -220,7 +225,7 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           <dt>Toughness: further right is better</dt>
           <dd>How many attacks a typical character needs to kill them.</dd>
           <dt>What "typical character" means</dt>
-          <dd>Not one character. Each fight is worked out against every one of the <span id="rosterCount">117</span> characters, and the middle result is used: half the roster does better than that, half worse. So one unusual matchup can't skew the answer.</dd>
+          <dd>Not one character. For Damage, the model works out how many attacks this character needs to kill each of the <span id="rosterCount">117</span> characters, one at a time. Those answers are lined up from quickest to slowest, and the one in the middle is the score: half the roster goes down quicker than that, half takes longer. Toughness is the same the other way round, with every character attacking them. Using the middle answer rather than the average means one extreme matchup can't drag the score.</dd>
           <dt>Always-on traits</dt>
           <dd>Only traits that always work, whatever happens in the battle:
             <ul class="tl">
@@ -257,9 +262,7 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           <dt>Active ability: on or off</dt>
           <dd>With it on, everyone opens with their active. For damage, it's used if it beats a normal attack; damage to other enemies, summons and buffs don't count. For toughness, its protection counts: damage reduction, heals, and suppressing or stunning enemies (an area effect covers the enemy turn; a single target only its first attack). At the lower ability level an active often doesn't beat a strong normal attack; at the higher level most do.</dd>
         </dl>
-      </div>
-    </aside>
-  </div>
+  </section>
 
   <section class="table-card" aria-label="Ranked list">
     <div class="table-head">
@@ -292,7 +295,7 @@ let LV = TIERS[1].levels;
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
 const S = {view:'map', tier:TIERS[1].key, traits:'base', level:LV[0], active:0, gear:0, shift:false, names:true, sel:'Castellan Creed', q:'', hidden:new Set(), sort:{k:'d', dir:1}, hover:null};
 const NS='http://www.w3.org/2000/svg';
-const W=1000, H=640, M={l:74,r:26,t:22,b:64};
+const W=1000, H=670, M={l:74,r:26,t:22,b:64};
 const XD=[1.3,10], YD=[0.6,11];
 const lg=Math.log;
 const X=v=>M.l+(lg(Math.min(Math.max(v,XD[0]),XD[1]))-lg(XD[0]))/(lg(XD[1])-lg(XD[0]))*(W-M.l-M.r);
@@ -468,7 +471,7 @@ function showTip(c){
 function hideTip(){tip.style.opacity=0;}
 
 /* ---------- detail panel ---------- */
-function select(name){S.sel=(S.sel===name)?null:name;renderChart(false);renderDetail();renderTable();}
+function select(name){S.sel=(S.sel===name)?null:name;renderChart(false);renderDetail();renderTable();document.getElementById('detail').scrollTop=0;}
 function renderDetail(){
   const c=C.find(x=>x.name===S.sel);
   if(!c){document.getElementById('detail').innerHTML='<p class="label">Character</p><p class="none">Click a character on the chart or in the list to see their details. Click them again to unselect.</p>';return;}
@@ -572,6 +575,10 @@ function fitPage(){
   const z=Math.min(w/1440, innerHeight/bottom);
   if(z>1) wrapEl.style.zoom=z; else wrapEl.classList.remove('fit');
 }
-addEventListener('resize',fitPage); fitPage();
+let fitSize='';
+function refit(){const s=document.documentElement.clientWidth+'x'+innerHeight; if(s!==fitSize){fitSize=s; fitPage();}}
+addEventListener('resize',refit);
+if(window.ResizeObserver) new ResizeObserver(refit).observe(document.documentElement);
+fitPage();
 if(document.fonts) document.fonts.ready.then(fitPage);
 </script>
