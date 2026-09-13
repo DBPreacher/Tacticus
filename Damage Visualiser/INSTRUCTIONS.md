@@ -119,6 +119,7 @@ target, and only the first use counts.**
 | `Normal_Attack` | `Y` = the ability includes a normal attack by the character; `PCT` = a normal attack at `{[dmgPct]}`% of their Damage, capped at `{[maxDmg]}` a hit; `N` = no |
 | `Normal_Bonus` | Extra damage on that normal attack (see below). Blank = none |
 | `Same_Turn` | `Y` if the text says using it **does not end the turn**: the character also makes a normal attack that turn |
+| `Defence` | How the active protects the character itself (Toughness), as tokens separated by `;` (see below). Blank = nothing |
 | `Needs_Review` | `Y` = waiting for a decision. The build lists these |
 | `Notes` | What was and wasn't counted, in plain words. Start with `OWNER:` for anything the owner must decide |
 | `Ability_Text` | The ability text with `{[placeholders]}`. Refreshed on each build; a change flags the row for review |
@@ -140,6 +141,27 @@ target, and only the first use counts.**
   for the attack (Ragnar, Celestine, Lucien, Jaeger, Farsight, Gulgortz).
 - It applies to the first normal attack in the opening turn, whether that
   attack comes from `Normal_Attack` or `Same_Turn`.
+
+**`Defence` tokens.** `VAR` is an ability variable name. `A+B` adds two
+variables together. The scope can be `all` (the default), `melee`, `ranged`
+or `one`:
+
+| Token | Meaning | Example |
+|---|---|---|
+| `pct:VAR[:scope]` | Takes −VAR% damage | Aesoth `pct:dmgReductionPct`; Azkor `pct:dmgReductionPct:ranged` |
+| `flat:VAR[:scope]` | Enemies deal −VAR Damage per hit, before armour | Calandis `flat:dmgReduction:ranged`; Jaeger `flat:dmgReduction:one` |
+| `epct:VAR[:scope]` | Enemies deal −VAR% | Dante `epct:dmgReductionPct:melee` |
+| `suppress[:scope]` / `stun[:scope]` | Enemies deal −30% / −50% | Thothmek `suppress:all`; Arjac `stun:one` |
+| `heal:VAR[+VAR]` | Extra health (heal, repair, revive) | Rotbone `heal:hpToHeal+hpToHeal_2` |
+| `lose:VAR` / `setpct:VAR` | Costs health: loses VAR% / is set to VAR% | Macer `lose:hpPct`; Lucien `setpct:hpPct` |
+
+What each scope means:
+- `all`: every enemy attack in the turn.
+- `one`: the first attack only. Use it for effects on a single target.
+- `melee`: use it for "adjacent enemies".
+- `ranged`: ranged attacks only.
+
+The build stops with an error on a token it doesn't know.
 
 **Review rules.** These are the precedents set in September 2026; apply them
 consistently:
@@ -164,12 +186,21 @@ consistently:
    opening turn, and say so in `Notes`.
 6. **Damage that only hits enemies moving away** (Trajann) is defence, not
    damage.
-7. **Defensive actives** (heals, shields, damage reduction) are `defence` or
-   `heal` and **aren't modelled yet**. Toughness ignores them. This is a
-   planned later step.
+7. **Defence: only protection for the character itself.**
+   - Heals that also reach allies count for the character, e.g. Incisus uses
+     his Imperial amount.
+   - Protecting an ally doesn't count (Xybia, Aun'Shi).
+   - Block bonuses need block gear, so they don't count.
+   - Conditional heals don't count (rule 3).
+   - An area suppress or stun is scope `all`; one on the target or a line of
+     enemies is `one`.
+8. **Percentage values step at level 36**, e.g. Thoread 31% → 33%. The build
+   reads the value for each level from the game data, so no manual numbers
+   are needed.
 
-The six `OWNER:` rows waiting on the owner in September 2026: Abaddon,
-Ahriman, Asmodai, Azrael, Thaddeus Noble, Titus.
+All six owner questions from September 2026 (Abaddon, Ahriman, Asmodai,
+Azrael, Thaddeus Noble, Titus) were answered and are recorded in their
+`Notes` as "Owner-confirmed".
 
 ---
 
@@ -248,4 +279,5 @@ as a separate build rather than replacing the D3 page.
 
 | Date | Change |
 |---|---|
+| September 2026 | Defensive actives added (`Defence` column); owner answered the six OWNER rows |
 | September 2026 | First version: `update_game_data.py`, `build_map.py`, `active_abilities.csv` (all 117 reviewed; 6 left for the owner), Attack/Defence/Map views, Active ability at level 36/50, alliance colours from the in-game icons |

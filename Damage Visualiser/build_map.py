@@ -50,7 +50,8 @@ SITUATIONAL = {'RapidAssault', 'HeavyWeapon', 'CrushingStrike', 'RangedSpecialis
                'GetStuckIn', 'LetTheGalaxyBurn'}
 
 ACTIVE_COLS = ['Name', 'Active', 'Kind', 'Damage_Parts', 'Normal_Attack', 'Normal_Bonus', 'Same_Turn',
-               'Needs_Review', 'Notes', 'Ability_Text']
+               'Defence', 'Needs_Review', 'Notes', 'Ability_Text']
+SUPPRESSED, STUNNED = 0.7, 0.5      # damage multipliers of a Suppressed / Stunned enemy (wiki)
 
 
 def norm(s):
@@ -142,11 +143,19 @@ def draft_active(u):
         kind = 'support'
     flags = [w for w in ('for each', 'if ', 'instead', 'behind', 'additional enemy', 'up to', 'possess',
                          'summon', 'rest of the battle', 'all adjacent') if w in low]
-    review = 'Y' if (kind == 'damage' and (flags or len(parts) > 1)) else 'N'
+    defence = []
+    if '-{[dmgreductionpct]}% damage' in low: defence.append('pct:dmgReductionPct')
+    if '-{[dmgreduction]} damage' in low: defence.append('flat:dmgReduction')
+    if re.search(r'(heals|repairs) (himself|herself|itself)', low): defence.append('heal:hpToHeal')
+    if 'suppress' in low: defence.append('suppress:one')
+    if 'stun' in low: defence.append('stun:one')
+    review = 'Y' if ((kind == 'damage' and (flags or len(parts) > 1)) or defence) else 'N'
     notes = ('Check: ' + ', '.join(repr(f) for f in flags)) if review == 'Y' and flags else ''
+    if defence:
+        notes = (notes + ' Check the Defence guess.').strip()
     return dict(Name=u['name'], Active=ab.get('name', ''), Kind=kind, Damage_Parts=';'.join(parts),
                 Normal_Attack='PCT' if pct else ('Y' if normal else 'N'), Normal_Bonus=bonus,
-                Same_Turn=same_turn, Needs_Review=review, Notes=notes, Ability_Text=txt)
+                Same_Turn=same_turn, Defence=';'.join(defence), Needs_Review=review, Notes=notes, Ability_Text=txt)
 
 
 def sync_actives(units):
@@ -345,26 +354,124 @@ def opener(a, d, trig, spec):
     return attacks
 
 
-def kill_count(first_turn, normal, d):
+def kill_count(first_turn, normal, d, hp=None):
     """attacks to kill; first_turn is a list of (damage, ignores_TA) dealt in the first turn"""
     ta = 'TerminatorArmour' in d['traits']
     opening = 0
     for i, (dmg, psy) in enumerate(first_turn):
         opening += dmg * (0.25 if (ta and i == 0 and not psy) else 1)
-    hp = d['hp']
+    hp = d['hp'] if hp is None else hp
     if opening >= hp:
         return hp / opening
-    return 1 + (hp - opening) / normal
+    return 1 + (hp - opening) / max(normal, 1.0)
 
 
-def attacks_to_kill(a, d, trig, spec):
-    dmg, psy, kind = best_normal(a, d, trig)
-    k = kill_count([(dmg, psy)], dmg, d)
+def _prod(vals):
+    out = 1.0
+    for v in vals:
+        out *= v
+    return out
+
+
+def _scoped(items, kind):
+    """values of (value, scope) pairs that apply to an attack of this kind"""
+    return [v for v, sc in items if sc in ('all', kind)]
+
+
+def normal_vs_defence(a, d, w, trig, ds):
+    """one normal attack against a defender using a defensive active:
+    (damage of every attack, damage of the first attack only, ignores TA)"""
+    flat = sum(_scoped(ds['flat'], w['kind']))
+    flat_one = sum(v for v, sc in ds['flat'] if sc == 'one')
+    dmg, psy = normal_attack(a, d, w, trig, max(a['dmg'] - flat, 0) if flat else None)
+    first = normal_attack(a, d, w, trig, max(a['dmg'] - flat - flat_one, 0))[0] if flat_one else dmg
+    m = _prod(_scoped(ds['pct'], w['kind'])) * _prod(_scoped(ds['enemy'], w['kind']))
+    m1 = _prod(v for v, sc in ds['enemy'] if sc == 'one')
+    return dmg * m, first * m * m1, psy
+
+
+def attacks_to_kill(a, d, trig, spec, ds=None):
+    """(attacks, best attack kind, normal attack damage, used the active).
+    spec = the attacker's active (offence), ds = the defender's active (defence)."""
+    if not ds:
+        dmg, psy, kind = best_normal(a, d, trig)
+        k = kill_count([(dmg, psy)], dmg, d)
+        if spec:
+            k_act = kill_count(opener(a, d, trig, spec), dmg, d)
+            if k_act < k:
+                return k_act, kind, dmg, True
+        return k, kind, dmg, False
+    hp = d['hp'] * ds['hpmult'] + ds['heal']
+    best = None
+    for w in a['weapons']:
+        dmg, first, psy = normal_vs_defence(a, d, w, trig, ds)
+        if best is None or dmg > best[0]:
+            best = (dmg, first, psy, w['kind'])
+    dmg, first, psy, kind = best
+    k = kill_count([(first, psy)], dmg, d, hp)
+    used = False
     if spec:
-        k_act = kill_count(opener(a, d, trig, spec), dmg, d)
+        # ability damage: only the defender's effects that cover every attack apply (no melee/ranged scope)
+        m_all = _prod(v for v, sc in ds['pct'] if sc == 'all') * _prod(v for v, sc in ds['enemy'] if sc == 'all')
+        m1 = _prod(v for v, sc in ds['enemy'] if sc == 'one')
+        op = [(x * m_all * (m1 if i == 0 else 1), p) for i, (x, p) in enumerate(opener(a, d, trig, spec))]
+        k_act = kill_count(op, dmg, d, hp)
         if k_act < k:
-            return k_act, kind, dmg, True
-    return k, kind, dmg, False
+            k, used = k_act, True
+    return k, kind, dmg, used
+
+
+def defence_spec(u, row, level):
+    """parse a row's Defence tokens (see INSTRUCTIONS.md) into numbers the model can use"""
+    toks = [t.strip() for t in (row or {}).get('Defence', '').split(';') if t.strip()]
+    if not toks:
+        return None
+    ab = u['ability'] or {}
+
+    def val(expr):
+        return sum(ability_value(ab, k, level) or 0 for k in expr.split('+'))
+    ds = dict(pct=[], flat=[], enemy=[], heal=0.0, hpmult=1.0, text=[])
+    where = {'all': '', 'ranged': ' from ranged attacks', 'melee': ' from melee attacks', 'one': ' from one enemy'}
+    for t in toks:
+        p = t.split(':')
+        kind, arg = p[0], (p[1] if len(p) > 1 else '')
+        if kind in ('suppress', 'stun'):
+            scope = arg or 'all'
+            ds['enemy'].append((SUPPRESSED if kind == 'suppress' else STUNNED, scope))
+            who = {'one': 'one enemy', 'melee': 'adjacent enemies'}.get(scope, 'nearby enemies')
+            ds['text'].append(('suppresses ' if kind == 'suppress' else 'stuns ') + who)
+        elif kind in ('pct', 'epct', 'flat'):
+            v, scope = val(arg), (p[2] if len(p) > 2 else 'all')
+            if kind == 'pct':
+                v = min(v, 95)
+                ds['pct'].append((1 - v / 100, scope))
+                ds['text'].append(f'takes -{v:.0f}% damage{where[scope]}')
+            elif kind == 'epct':
+                v = min(v, 95)
+                ds['enemy'].append((1 - v / 100, scope))
+                ds['text'].append(f"{'adjacent enemies' if scope == 'melee' else 'enemies'} deal -{v:.0f}% damage")
+            else:
+                ds['flat'].append((v, scope))
+                ds['text'].append(f'takes -{v:,.0f} damage per hit{where[scope]}')
+        elif kind == 'heal':
+            v = val(arg)
+            ds['heal'] += v
+            ds['text'].append(f'+{v:,.0f} health')
+        elif kind == 'lose':
+            v = val(arg)
+            ds['hpmult'] *= 1 - v / 100
+            ds['text'].append(f'loses {v:.0f}% of its health')
+        elif kind == 'setpct':
+            v = val(arg)
+            ds['hpmult'] *= v / 100
+            ds['text'].append(f'drops to {v:.0f}% health')
+        else:
+            sys.exit(f"{u['name']}: unknown Defence token {t!r} in active_abilities.csv")
+    return ds
+
+
+def describe_defence(ds):
+    return '; '.join(ds['text']) if ds else ''
 
 
 def scenario_keys():
@@ -374,11 +481,13 @@ def scenario_keys():
     return keys
 
 
-def run_scenarios(units, specs):
-    """specs[level][name] -> active spec. Scenario keys: base, trig, base_a36, trig_a36, ..."""
+def run_scenarios(units, specs, dspecs):
+    """specs[level][name] -> offence spec, dspecs[level][name] -> defence spec.
+    Scenario keys: base, trig, base_a36, trig_a36, ..."""
     out = {}
     for key, trig, lv in scenario_keys():
-        K = {a['name']: {d['name']: attacks_to_kill(a, d, trig, specs[lv].get(a['name']) if lv else None) for d in units}
+        K = {a['name']: {d['name']: attacks_to_kill(a, d, trig, specs[lv].get(a['name']) if lv else None,
+                                                    dspecs[lv].get(d['name']) if lv else None) for d in units}
              for a in units}
         dmg = {a: st.median(v[0] for v in K[a].values()) for a in K}
         tough = {d['name']: st.median(K[a['name']][d['name']][0] for a in units) for d in units}
@@ -399,10 +508,13 @@ def pretty(t):
     return {'Martial Katah': "Martial Ka'tah", 'Weaver of Fate': 'Weaver of Fates', 'Mk X Gravis': 'Mk X Gravis'}.get(s, s)
 
 
-def write_stats(units, res, actives, specs, version):
+def write_stats(units, res, actives, specs, dspecs, version):
     cols = ['Name', 'Faction', 'Alliance', 'Health', 'Damage', 'Armour',
             'Melee_Type', 'Melee_Hits', 'Melee_Pierce', 'Ranged_Type', 'Ranged_Hits', 'Ranged_Pierce', 'Ranged_Range',
-            'Active_Ability', 'Active_Kind'] + [f'Active_Counted_L{lv}' for lv in ABILITY_LEVELS] +            [f'Damage_{k}' for k, _, _ in scenario_keys()] + [f'Toughness_{k}' for k, _, _ in scenario_keys()] + ['Game_Version']
+            'Active_Ability', 'Active_Kind']
+    cols += [f'Active_Counted_L{lv}' for lv in ABILITY_LEVELS] + [f'Active_Defence_L{lv}' for lv in ABILITY_LEVELS]
+    cols += [f'Damage_{k}' for k, _, _ in scenario_keys()] + [f'Toughness_{k}' for k, _, _ in scenario_keys()]
+    cols += ['Game_Version']
     with open(STATS_CSV, 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
         w.writerow(cols)
@@ -414,12 +526,13 @@ def write_stats(units, res, actives, specs, version):
                         m['type'] if m else '', m['hits'] if m else '', f"{m['pierce']:.0%}" if m else '',
                         r['type'] if r else '', r['hits'] if r else '', f"{r['pierce']:.0%}" if r else '', r['range'] if r else '',
                         actives[n]['Active'], actives[n]['Kind'], *[describe_active(specs[lv].get(n)) for lv in ABILITY_LEVELS],
+                        *[describe_defence(dspecs[lv].get(n)) for lv in ABILITY_LEVELS],
                         *[f"{res[k][n]['d']:.2f}" for k, _, _ in scenario_keys()],
                         *[f"{res[k][n]['t']:.2f}" for k, _, _ in scenario_keys()],
                         version])
 
 
-def write_html(units, res, actives, specs, version):
+def write_html(units, res, actives, specs, dspecs, version):
     chars = []
     for u in units:
         n = u['name']
@@ -431,6 +544,7 @@ def write_html(units, res, actives, specs, version):
                           situational=sorted(pretty(t) for t in u['traits'] & SITUATIONAL),
                           active=dict(name=row.get('Active', ''), kind=row.get('Kind', ''), notes=row.get('Notes', ''),
                                       counted={lv: describe_active(specs[lv].get(n)) for lv in ABILITY_LEVELS},
+                                      defence={lv: describe_defence(dspecs[lv].get(n)) for lv in ABILITY_LEVELS},
                                       review=row.get('Needs_Review') == 'Y'),
                           s={k: res[k][n] for k, _, _ in scenario_keys()},
                           creed=res['creed'][n]))
@@ -478,12 +592,13 @@ def main():
     args = ap.parse_args()
     g, units = load()
     actives = sync_actives(units)
-    specs = {None: {}}
+    specs, dspecs = {None: {}}, {None: {}}
     for lv in ABILITY_LEVELS:
         specs[lv] = {u['name']: sp for u in units if (sp := active_spec(u, actives.get(u['name']), lv))}
-    res = run_scenarios(units, specs)
-    write_stats(units, res, actives, specs, g['version'])
-    write_html(units, res, actives, specs, g['version'])
+        dspecs[lv] = {u['name']: ds for u in units if (ds := defence_spec(u, actives.get(u['name']), lv))}
+    res = run_scenarios(units, specs, dspecs)
+    write_stats(units, res, actives, specs, dspecs, g['version'])
+    write_html(units, res, actives, specs, dspecs, g['version'])
     print(f'Built roster-battle-map.html and tacticus_stats.csv: {len(units)} characters, game version {g["version"]}.')
     if args.creed:
         creed_check(args.creed, units)

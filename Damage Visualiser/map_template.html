@@ -200,7 +200,7 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           <dt>All triggered</dt>
           <dd>Every situational trait works: didn't move, first attack of the battle, ranged character starts away from enemies, Khorne at 4 kills, Nurgle aura on melee targets. Random traits (Daemon, Get Stuck In, Let the Galaxy Burn) count at their average.</dd>
           <dt>Active ability</dt>
-          <dd>Everyone opens with their active if it beats a normal attack, then carries on with normal attacks. Damage to other enemies, summons and buffs don't count, and defensive actives aren't modelled yet. At Winged D3 a level 36 active rarely beats a normal attack; at level 50 most do.</dd>
+          <dd>Everyone opens with their active. For damage, it's used if it beats a normal attack; damage to other enemies, summons and buffs don't count. For toughness, its protection counts: damage reduction, heals, and suppressing or stunning enemies (an area effect covers the enemy turn; a single target only its first attack). At Winged D3 a level 36 active rarely beats a normal attack; at level 50 most do.</dd>
         </dl>
       </div>
     </aside>
@@ -400,7 +400,8 @@ function renderDetail(){
   const row=(label,b,br,v,vr)=>`<tr><td>${label}</td>${cell(b,br,same)}${same?'':cell(v,vr,true)}</tr>`;
   const a=c.active, isCreed=c.name==='Castellan Creed', cr=c.creed;
   const kindLabel={damage:'deals damage',summon:'summons',heal:'heals',defence:'defensive',support:'support'}[a.kind]||a.kind;
-  const counted=LV.map(l=>a.counted[l]?`<p class="act-line">Level ${l}: <b>${esc(a.counted[l])}</b></p>`:'').join('');
+  const counted=LV.map(l=>a.counted[l]?`<p class="act-line">Attack, level ${l}: <b>${esc(a.counted[l])}</b></p>`:'').join('')
+               +LV.map(l=>a.defence&&a.defence[l]?`<p class="act-line">Defence, level ${l}: <b>${esc(a.defence[l])}</b></p>`:'').join('');
   document.getElementById('detail').innerHTML=`
     <h3>${esc(c.name)}</h3>
     <div class="fac"><i style="background:${ALLY[c.alliance]}"></i>${esc(c.faction)} · ${c.alliance}</div>
@@ -413,7 +414,7 @@ function renderDetail(){
     <div class="sect">
       <p class="label">Active ability</p>
       <p class="act-name">${esc(a.name||'None')} <span class="tag">${esc(kindLabel)}</span>${a.review?'<span class="tag flag">Needs your review</span>':''}</p>
-      ${counted||'<p class="act-line">Adds no damage of its own to the target.</p>'}
+      ${counted||'<p class="act-line">Nothing counted: no damage to the target and no protection for itself.</p>'}
       ${a.notes?`<p class="act-note">${esc(a.notes)}</p>`:''}
     </div>
     <p class="label">Always-on traits counted</p>${tags(c.counted,'')}

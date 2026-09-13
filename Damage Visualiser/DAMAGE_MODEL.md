@@ -158,11 +158,41 @@ than normal attacks alone.
     ranged *attacks*, and many abilities say they ignore attacker modifiers.
   - A normal attack made as part of an ability follows the normal-attack
     rules.
-- **Defensive actives** (heals, shields, damage reduction) **aren't modelled
-  yet**, so Toughness ignores them. In the active scenarios, Toughness only
-  changes because enemies open with *their* actives.
+- **Defensive actives count for Toughness.** Each character's active is
+  assumed to be in place before the enemy turn. Each effect is recorded in
+  the `Defence` column of `active_abilities.csv`:
+  - **Damage reduction on itself:** −X% (Aesoth, Thoread, Hascule; Azkor
+    against ranged only).
+  - **Flat reduction:** −X Damage per hit, taken off the attacker's Damage
+    before armour (Calandis against ranged; Jaeger against the taunted enemy;
+    Darkstrider against adjacent enemies).
+  - **Extra health:** heals, repairs and revives count as extra health
+    (Incisus, Actus, Rotbone, Isabella, Trajann, Lysander, Baldr).
+  - **Weakened enemies:** Suppressed deals −30% and Stunned −50% (wiki);
+    Dante's target and the enemies around it deal −30%.
+  - **Costs to itself:** Macer and Snappawrecka lose a % of health; Lucien
+    drops to 50%.
+- **Scope of those effects.** Kill counts assume the enemy focuses fire in
+  one turn, so:
+  - An **area** effect (Thothmek suppressing everything within 2 hexes) covers
+    every enemy attack.
+  - A **single-target** stun or suppress only weakens the **first** attack,
+    the same logic as Terminator Armour.
+  - Effects on "adjacent enemies" apply to melee attackers only.
+- **Not counted:**
+  - Block bonuses: they need block gear, which the model leaves out (Trajann,
+    Lysander, Uthar).
+  - Conditional heals (Cezare below 50% health, Neurothrope's % of damage).
+  - Abaddon's "set to X Health": an emergency heal.
+  - Deathleaper vanishing for a round.
+  - Njal's stun, which only hits Flying enemies.
 - **How each character's active is counted** is in `active_abilities.csv`,
   one reviewed row per character. The review rules are in `INSTRUCTIONS.md`.
+
+**Percentage effects step up at level 36.** For example, Thoread goes from
+31% to 33%, Aesoth 62% to 66%, Hascule and Dante 25% to 30%, Azkor 56% to 64%.
+They stay flat after that up to level 50. This confirms the owner's choice of
+36 over 35.
 
 **The level 36 finding.** At Winged D3, only about 18 of the 82 actives that
 deal damage beat a normal attack at level 36. At level 50, about 60 do.
@@ -214,5 +244,6 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | Defensive actives now count for Toughness (Defence column: damage reduction, flat reduction, extra health, weakened enemies, self-costs). The six owner questions on actives were answered; the model already matched them |
 | September 2026 | Added the Scenarios and Active abilities sections (All triggered; opening with the active at level 36 or 50). The Creed check is built into `build_map.py --creed`: 148 of 250 within 1% |
 | September 2026 | First version. Trait rule agreed; Rapid Assault left off (owner); Terminator Armour per attack (owner-confirmed, changed September 2024); validated against the Creed test data |

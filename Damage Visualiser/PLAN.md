@@ -1,6 +1,6 @@
 # Damage Visualiser — Plan
 
-**Status:** the Roster Battle Map explorer is built and is meant to become the video graphic (the owner's call, September 2026). How to update it is in `INSTRUCTIONS.md`. Still to do: the video version (recording reveals, reference characters) and defensive actives.
+**Status:** the Roster Battle Map explorer is built and is meant to become the video graphic (the owner's call, September 2026). How to update it is in `INSTRUCTIONS.md`. Still to do: the video version (recording reveals, reference characters).
 
 The goal is a simple on-screen graphic for DB Preacher Plays that shows
 where a new character sits in Tacticus, for both attack and defence. It
@@ -102,8 +102,8 @@ These were replaced by the roster-wide **Active ability** switch. The rules
 are in `DAMAGE_MODEL.md` (Active abilities), and each character's handling
 is in `active_abilities.csv`. For a video, the "Show the shift from the plain
 stat line" arrows do the same job, and more clearly: the dot moves from the
-stat line to where the kit puts the character. Defensive actives are still
-to do (build step 5).
+stat line to where the kit puts the character. Defensive actives count
+too (build step 5).
 
 ---
 
@@ -117,7 +117,7 @@ to do (build step 5).
    privately.
 4. **Video version:** 1920×1080, Space/click reveals like the LE template,
    featured character highlighted, reference characters labelled.
-5. **Defensive actives** (heals, shields, damage reduction) in Toughness.
+5. ~~Defensive actives~~ Done: the `Defence` column in `active_abilities.csv`.
 6. **Later:** the Mythic view with relics.
 
 ---
@@ -127,8 +127,8 @@ to do (build step 5).
 - Pick the reference characters for each view, now that the explorer shows
   who is where.
 - Which traits setting (or both) to show in videos.
-- The six `OWNER:` rows in `active_abilities.csv`: Abaddon, Ahriman, Asmodai,
-  Azrael, Thaddeus Noble, Titus.
+- Places where tacticustable.com data disagrees with the game (owner to bring
+  examples).
 - Optional: 5–6 fresh Creed test numbers at the current patch, e.g. Jain
   Zar, Morvenn Vahl, one Terminator Armour character. They would confirm that
   the leftover mismatches are passives, not a model error.
