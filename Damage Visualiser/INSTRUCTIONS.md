@@ -152,6 +152,8 @@ shows one character's 117 answers as bars.
   the end label then says "off the scale".
 - It's a fixed 1600×900 stage zoomed to fit the window, so it fills any
   screen. Hover a bar for that matchup.
+- **Live page (private):** https://claude.ai/code/artifact/cc647bac-9f07-40ac-af58-ce3572c44933
+  (republish `typical-character.html` to it the same way as the map).
 
 ---
 
