@@ -182,6 +182,22 @@ Find the character's row and update the relevant fields. Common rework changes:
 - Damage type changes → update `Melee_Damage_Type` or `Ranged_Damage_Type`
 - Trait added/removed → update the relevant Y/N column
 
+### Catching changes you missed — `wiki_audit.py`
+
+Patch notes don't always list every balance change, and it's easy to miss one (e.g. Anuphet gaining Resilient in August 2026). After each patch, run:
+
+```
+python -X utf8 wiki_audit.py --since "July 2026"
+```
+
+It reads every character's wiki.gg page in bulk through the wiki's API and prints three sections. It only reports and never edits the CSV:
+
+1. **Changelog entries since `--since`**: every change the wiki has logged for any character. Set `--since` to the month of your last full check. For anyone listed here, re-read their abilities by hand, because `Has_[DamageType]`, `Self_Heal`, `Shielding` and `Spawner` come from ability text the script can't judge.
+2. **Mismatches that affect LE analysis**: traits, hit counts / `X_Hits_Restriction`, `Has_Ranged`, and any `Has_[DamageType]=N` where the wiki's primary attack is that type.
+3. **Reference-only mismatches** in the `Melee_Damage_Type`/`Ranged_Damage_Type` text columns. `le_analysis.py` never reads these, so they're low priority.
+
+The wiki can be wrong or behind too, so cross-check anything in section 2 against tacticustable.com before changing it. Only fix a value when both sources agree. If they disagree (e.g. Uthar's ranged hits: wiki 2, tacticustable 4), flag it to the owner.
+
 ### When a trait is retired or renamed
 
 Update the column header and all affected rows. Document in git commit message with the patch version.
@@ -361,6 +377,7 @@ If no Python/openpyxl is available (as was the case for this pass), the `.xlsx` 
 
 | Date | Change | Patch |
 |------|--------|-------|
+| September 2026 | Added `wiki_audit.py` (see Catching changes you missed). The first run found **Anuphet**'s missed August rework: `Resilient=Y`, and his weapons are now Energy/Energy. It also found long-standing errors, each confirmed on both wiki.gg and tacticustable.com: **Boss Gulgortz** ranged hits 3→1 (`X_Hits` 3→1); **Darkstrider** ranged hits 2→4 (`X_Hits` 2→4); **Macer** `Has_Chain=Y` (Chain melee); **Thutmose** melee hits 1→2. Left for the owner: Uthar ranged hits (sources disagree), Makhotep `Mechanic=Y` (not a listed trait, but his passive repairs), Pestillian's "Putrid Explosion" trait (no column), Z'kar's stat block (MoW, so never in LE analysis) | 1.42 |
 | September 2026 | Patch 1.42 pass (wiki.gg + tacticustable.com): added **Nubari** (Adeptus Astartes / Salamanders, Melta 2/2, Heavy Weapon + Mk X Gravis; `Has_Flame=Y` from his fire hex, same as Wrask/Vindicta/Toth). **Kimm** is now released (Epic Battle Pass, Sept 6), so `Do_Not_Use` is back to `N`; her released kit adds `Rapid_Assault=Y` and her passive text changed. **Uthar** rework: `Shielding=Y` because Grim Efficiency's Fortify Takeover gives allies within 2 hexes an extra Armour pass (same precedent as Sekhetar's +Armour). Also fixed his swapped damage types to Melee Plasma / Ranged Energy. The Sekhetar Psychic flag fix, Rotbone's relic Toxic fix and the Votann trait/movement changes needed no CSV change | 1.42 |
 | July 2026 | Fixed Z'kar's `Is_MoW` flag (was `N`, should be `Y`) — confirmed via wiki.gg that Z'kar is the Thousand Sons Machine of War despite having a real stat block. `le_analysis.py` already unconditionally excludes `Is_MoW=Y` from every track's eligible pool (no code change needed there), so this was a pure data fix; corrected the Machines of War note's "depends on the event's rules" wording to match that unconditional behavior, added Z'kar to the named MoW list, and regenerated the LE 15 Lysander analysis + HTML (Z'kar dropped from Beta Team 2's pool listing, 9→8 eligible; no Recommended-5 picks changed since Z'kar was never actually selected) | 1.41 |
 | July 2026 | Added `Do_Not_Use` Y/N column and wired it into `le_analysis.py`'s `load_characters()` to exclude flagged characters from analysis (data preserved, not deleted) — flagged Kimm `Y` since she's datamined but not yet officially announced | 1.41 |
