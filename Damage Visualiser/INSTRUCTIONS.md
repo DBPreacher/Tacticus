@@ -194,7 +194,11 @@ consistently:
    - Conditional heals don't count (rule 3).
    - An area suppress or stun is scope `all`; one on the target or a line of
      enemies is `one`.
-8. **Percentage values step at level 36**, e.g. Thoread 31% → 33%. The build
+8. **Overwatch set up by an active counts as that turn's attack:** one
+   normal attack, with any +Damage the ability gives (`Normal_Attack=Y`,
+   `Normal_Bonus=+extraDmg`). Re'vas was the first case; she was wrongly
+   logged as a summon at first.
+9. **Percentage values step at level 36**, e.g. Thoread 31% → 33%. The build
    reads the value for each level from the game data, so no manual numbers
    are needed.
 
