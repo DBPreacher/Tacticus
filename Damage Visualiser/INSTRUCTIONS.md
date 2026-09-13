@@ -23,6 +23,7 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `update_game_data.py` | Downloads the game data from tacticustable.com into `cache/gameinfo.json`, only when the game version has changed | No |
 | `build_map.py` | Runs the model and writes every output below. The standard setup (rank, stars, ability levels) is at the top | Only to change the setup |
 | `active_abilities.csv` | One row per character: how their active ability is counted. **Reviewed data**: the script adds rows but never overwrites your decisions | **Yes** |
+| `passive_abilities.csv` | The same, for passive abilities: `Attack` and `Defence` tokens | **Yes** |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
 | `cache/gameinfo.json` | The downloaded game data (about 11 MB), ignored by git | No |
@@ -54,12 +55,13 @@ python -X utf8 build_map.py
      the game data name (lowercase letters and digits only, e.g.
      `'commandershadowsun': 'shadowsun'`).
    - `drafted N new row(s)`: new characters now have a best-guess row in
-     `active_abilities.csv`. Review them (see below).
+     `active_abilities.csv` and `passive_abilities.csv`. Review them (see
+     below).
    - `ability text changed, now flagged for review`: a patch changed an active
      ability's wording. Re-read those rows.
    - `N row(s) marked Needs_Review=Y`: the full list still waiting for a
      decision.
-3. **Review** the flagged rows in `active_abilities.csv` (rules below).
+3. **Review** the flagged rows in both ability files (rules below).
    - Fix the columns, write a short `Notes` entry, and set `Needs_Review=N`.
    - For a genuine judgement call, leave `Needs_Review=Y`, start the note with
      `OWNER:` and ask the owner.
@@ -85,8 +87,8 @@ python -X utf8 build_map.py
 | Check | Expected | If it doesn't |
 |---|---|---|
 | Creed against himself (click Castellan Creed; the Sparring line) | About **3,260** per attack, matching the Creed test | The stat or formula handling broke |
-| Kharn, Map view, Active Level 50 | Damage **below 1 attack** | Active parsing broke |
-| Kharn, Active Level 36 | No better than his normal attack (see "The level 36 finding" below) | Active parsing broke |
+| Kharn, Map view, Ability level 50, Active on | Damage **below 1 attack** | Active parsing broke |
+| Re'vas detail panel, Ability level 50 | Passive shows "+3× Particle 749 on each attack" | Passive parsing broke |
 | Number of characters | Same as the non-MoW, non-Do_Not_Use rows in the CSV | A name didn't match; see the `ALIAS` warning |
 
 ---
@@ -208,6 +210,78 @@ Azrael, Thaddeus Noble, Titus) were answered and are recorded in their
 
 ---
 
+## `passive_abilities.csv`: columns and review rules
+
+Passives are **always on** in every view: they're the character's own kit.
+The plain stat line, with no abilities at all, is kept only as the reference
+for the "Stat line" column and the shift arrows.
+
+| Column | Meaning |
+|---|---|
+| `Name`, `Passive`, `Ability_Text` | As in the actives file |
+| `Attack` | Effects on the character's **own normal attacks**, as tokens separated by `;` |
+| `Defence` | Effects protecting the character itself: the same tokens as the actives' `Defence`, plus the extra ones below |
+| `Needs_Review`, `Notes` | As in the actives file. Start the note with `OWNER:` for owner questions |
+
+**Token format:** `kind:VAR[:scope][:vsTrait|Trait][@trig]`.
+- `VAR` is an ability variable name, or a plain number.
+- The scope can be `all` (the default), `melee`, `ranged`, `after` (every
+  attack except the first) or `one` (the first attack only).
+- `vs…` limits the effect to targets with one of those traits, using the game
+  data trait IDs: `Psyker`, `BigTarget`, `MkXGravis`, `TerminatorArmour`,
+  `Mechanical`, `Vehicle`. In a `Defence` token, `vs…` means the *attacker*
+  has that trait.
+- `@trig` means the effect only counts with **Traits: All triggered**. Use it
+  when the passive needs charging, moving or not moving, e.g. Kut Skoden
+  `flat:extraDmg:melee@trig`.
+
+**`Attack` tokens:**
+
+| Token | Meaning | Example |
+|---|---|---|
+| `extra:PART` | Extra ability hits after each normal attack (`PART` as in `Damage_Parts`) | Kharn `extra:1`; Burchard `extra:1:ranged` |
+| `flat:VAR` | +VAR Damage on each hit | Lysander `flat:extraDmg`; Roswitha `flat:extraDmg::vsPsyker` |
+| `pct:VAR` | +VAR% damage | Forcas `pct:extraDmgPct:melee` |
+| `pierce:VAR` | +VAR% pierce ratio | Sy-Gex `pierce:extraPierceRatio:ranged:vsMkXGravis\|TerminatorArmour\|Mechanical` |
+| `hits:VAR` | +VAR hits | Vitruvius `hits:nrOfHits:after` |
+| `armignore:VAR` | Ignores VAR Armour | Snappawrecka `armignore:armorIgnored` |
+| `ramp:VAR` | Each hit deals +VAR more than the last | Lhykhis `ramp:extraDmg:after` |
+| `follow:ranged` | Melee attacks are followed by a normal ranged attack | Commander Farsight |
+
+**Extra `Defence` tokens** (for passives, though actives can use them too):
+
+| Token | Meaning | Example |
+|---|---|---|
+| `armour:VAR` | +VAR Armour | Gibbascrapz `armour:extraArmor_2` |
+| `hitsless:VAR[:scope]` | Attackers score −VAR hits (min 1) | Jain Zar `hitsless:hitsReduction:melee` |
+| `pctcap:PCT/CAP` | Takes −PCT% damage, at most −CAP per hit | Tyrant Guard `pctcap:dmgReductionPct/dmgReduction@trig` |
+| `cap_first:VAR` | The first attack each turn takes at most VAR% of health | Judh `cap_first:hpPct` |
+| scope `psychic` | Only against Psychic damage | Atlacoya `flat:dmgReduction:psychic` |
+
+**Review rules for passives:** the same as the actives' rules 1–3 and 7
+(one target; no summons; no conditional extras; only the character itself).
+Also:
+- **Buffs that reach "friendly units" also count for the character if the
+  text includes them** ("Lysander and all friendly adjacent…"). Buffs for
+  other units only don't count (Abaddon, Calgar, Thaddeus Noble).
+- **Effects that hit adjacent enemies every turn** (Cezare, Mephiston,
+  Godswyl, Typhus) count as `extra:1:melee`, because the melee target is
+  adjacent.
+- **Effects the character switches on with its own first attack** (Ahriman's
+  Fire, Lhykhis's Web, Vitruvius's mark, Neurothrope's first Neuroparasite
+  level) use scope `after`.
+- **Things that build up** (per kill, per time attacked, per active used),
+  **target-health conditions** ("at or below 50% health"), **regeneration at
+  the start of the character's own turn**, **reactions** (counter-attacks,
+  Overwatch shots) and **crit bonuses** (no gear) don't count.
+
+Owner questions still open (September 2026): Castellan Creed (count Kell as
+extra health?), Uthar (which stance?), Varro (who gets the Psychic
+reduction?), Celestine (does Geminae Superia protect her?), Tyrant Guard
+(always on, or triggered only?).
+
+---
+
 ## Changing the setup
 
 The constants at the top of `build_map.py`:
@@ -216,7 +290,8 @@ The constants at the top of `build_map.py`:
 |---|---|---|
 | `RANK` | `DIAMOND III` | The rank row used from the game data (`STONE I` … `ADAMANTINE II`, also `MYTHIC I`/`II` in the data) |
 | `STARS` | `11` | Winged. Rank stats are stored at 0 stars; each star adds 10% (`STAR_MULT = 1 + 0.1 × STARS`) |
-| `ABILITY_LEVELS` | `(36, 50)` | One "Active ability" button per level on the page |
+| `ABILITY_LEVELS` | `(36, 50)` | One "Ability level" button per level on the page (passives and actives) |
+| `STANDARD` | `base_l36` | The scenario the Creed sparring line uses |
 | `RARITY_MULT` | `1.8` | Legendary. Ability values = the level's entry × this, only for variables listed in `variablesAffectedByRarityBonus`. Common 1.0 … Mythic 2.0 |
 
 For the planned **Mythic view**: 14 stars, `ADAMANTINE II`, levels up to 60,
@@ -243,9 +318,12 @@ as a separate build rather than replacing the D3 page.
   - **Attack** keeps the damage axis and spreads the dots sideways, so they
     don't overlap.
   - **Defence** does the same for toughness.
-- **Scenario keys** in the data: `base`, `trig`, `base_a36`, `trig_a36`,
-  `base_a50`, `trig_a50`. The first part is the traits setting, the suffix is
-  the active ability level.
+- **Controls:** Traits (always-on / all triggered), Ability level (36 / 50)
+  and Active ability (off / on). Clicking a selected character again
+  unselects them.
+- **Scenario keys** in the data: `base` is the plain stat line (reference
+  only). The others are `{base|trig}_l{level}` with passives on, plus `_a`
+  when the active is on, e.g. `base_l36`, `trig_l50_a`.
 
 ---
 
@@ -278,8 +356,8 @@ as a separate build rather than replacing the D3 page.
   owner's decision. `--creed` adds them back for the comparison only.
 - **The level 36 finding.** At Winged D3, only about 18 of the 82 damaging
   actives beat a normal attack at level 36; at level 50, about 60 do. So
-  "Active: Level 36" barely moves the chart. That's correct, not a bug, and
-  it's why both levels are offered.
+  turning the active on at ability level 36 barely moves the chart. That's
+  correct, not a bug, and it's why both levels are offered.
 
 ---
 
@@ -287,5 +365,6 @@ as a separate build rather than replacing the D3 page.
 
 | Date | Change |
 |---|---|
+| September 2026 | Passives added (`passive_abilities.csv`, always on; 41 characters counted, 5 owner questions). Controls are now Ability level + Active on/off. Actives re-checked. Clicking a selected character again unselects it |
 | September 2026 | Defensive actives added (`Defence` column); owner answered the six OWNER rows |
 | September 2026 | First version: `update_game_data.py`, `build_map.py`, `active_abilities.csv` (all 117 reviewed; 6 left for the owner), Attack/Defence/Map views, Active ability at level 36/50, alliance colours from the in-game icons |

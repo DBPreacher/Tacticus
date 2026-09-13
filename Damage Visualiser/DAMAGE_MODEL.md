@@ -112,12 +112,13 @@ Not on any current character: Diminutive, Dakka, Instinctive Behaviour.
 
 ## Scenarios
 
-The page offers six combinations of two switches:
+The page offers eight combinations of three switches, plus the plain stat line as a reference:
 
 | Switch | Options |
 |---|---|
 | Traits | **Always-on** (the rule above) or **All triggered**: every situational trait's condition met, random traits at their average, Blessings of Khorne at 4 of 8 kills |
-| Active ability | **Off**, or open with it at **level 36** or **level 50** |
+| Ability level | **36** or **50**, for passives (always on) and the active |
+| Active ability | **Off** or **On** (open with it) |
 
 "All triggered" assumes each trait's condition is met:
 
@@ -134,6 +135,30 @@ The page offers six combinations of two switches:
   - Let the Galaxy Burn: +0.33 hits.
   - Daemon: a 25% block chain of 50% of its Damage.
   - Beast Slayer: a 10% block chain of its Armour.
+
+## Passive abilities
+
+Passives are **always on** in every view except the plain stat line, which
+is only a reference. They use the chosen ability level (36 or 50).
+
+- A passive counts if it adds to the **character's own normal attacks** or
+  **protects the character itself**. For example:
+  - extra hits after each attack: Kharn, Re'vas, Gulgortz, Lucien
+  - +Damage or +%: Lysander, Forcas, Nubari
+  - a follow-up ranged attack: Commander Farsight
+  - damage or hits taken off attackers: Jain Zar, Thothmek
+  - extra Armour: Gibbascrapz
+- **Not counted:**
+  - buffs for other units only
+  - summons, reactions and counter-attacks
+  - effects that build up, and target-health conditions
+  - regeneration at the start of the character's own turn
+  - crit bonuses (no gear)
+- **Movement conditions:** passives that need charging or moving (Kut
+  Skoden, Deathleaper, Ragnar, Tanksmasha) only count with **Traits: All
+  triggered**.
+- **How each character's passive is counted** is in `passive_abilities.csv`
+  (41 characters). The token formats and rules are in `INSTRUCTIONS.md`.
 
 ## Active abilities
 
@@ -250,6 +275,7 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | Passives added, always on, with Attack/Defence tokens. Re'vas's Overwatch active counted. Scenarios are now traits × ability level × active on/off |
 | September 2026 | Cross-checked tacticustable against the wiki. Tacticustable is right on all 3 differences (owner-confirmed), so no model change |
 | September 2026 | Defensive actives now count for Toughness (Defence column: damage reduction, flat reduction, extra health, weakened enemies, self-costs). The six owner questions on actives were answered; the model already matched them |
 | September 2026 | Added the Scenarios and Active abilities sections (All triggered; opening with the active at level 36 or 50). The Creed check is built into `build_map.py --creed`: 148 of 250 within 1% |

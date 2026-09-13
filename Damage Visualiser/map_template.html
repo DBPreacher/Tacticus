@@ -167,8 +167,15 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           </div>
         </div>
         <div>
+          <p class="label">Ability level</p>
+          <div class="seg" role="group" aria-label="Ability level" id="segLevel"></div>
+        </div>
+        <div>
           <p class="label">Active ability</p>
-          <div class="seg" role="group" aria-label="Active ability" id="segActive"></div>
+          <div class="seg" role="group" aria-label="Active ability" id="segActive">
+            <button data-v="0" aria-pressed="true">Off</button>
+            <button data-v="1" aria-pressed="false">On</button>
+          </div>
         </div>
         <label class="check"><input type="checkbox" id="shift"><span class="box"></span>Show the shift from the plain stat line</label>
         <label class="check"><input type="checkbox" id="names" checked><span class="box"></span>Show names that fit</label>
@@ -199,7 +206,9 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           <dd>Only traits that always work: Terminator Armour, Mk X Gravis, Parry, Terrifying, Martial Ka'tah, Camouflage (−1 hit), Beast Slayer.</dd>
           <dt>All triggered</dt>
           <dd>Every situational trait works: didn't move, first attack of the battle, ranged character starts away from enemies, Khorne at 4 kills, Nurgle aura on melee targets. Random traits (Daemon, Get Stuck In, Let the Galaxy Burn) count at their average.</dd>
-          <dt>Active ability</dt>
+          <dt>Passives: always on</dt>
+          <dd>Every character's passive counts at the chosen ability level, when it affects their own attacks or protects them. Buffs for allies, reactions and summons don't count.</dd>
+          <dt>Active ability: on or off</dt>
           <dd>Everyone opens with their active. For damage, it's used if it beats a normal attack; damage to other enemies, summons and buffs don't count. For toughness, its protection counts: damage reduction, heals, and suppressing or stunning enemies (an area effect covers the enemy turn; a single target only its first attack). At Winged D3 a level 36 active rarely beats a normal attack; at level 50 most do.</dd>
         </dl>
       </div>
@@ -234,7 +243,7 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
 const DATA = /*DATA*/;
 const C = DATA.chars, LV = DATA.levels;
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
-const S = {view:'map', traits:'base', active:0, shift:false, names:true, sel:'Castellan Creed', q:'', hidden:new Set(), sort:{k:'d', dir:1}, hover:null};
+const S = {view:'map', traits:'base', level:LV[0], active:0, shift:false, names:true, sel:'Castellan Creed', q:'', hidden:new Set(), sort:{k:'d', dir:1}, hover:null};
 const NS='http://www.w3.org/2000/svg';
 const W=1000, H=700, M={l:74,r:26,t:22,b:64};
 const XD=[1.3,10], YD=[0.6,11];
@@ -245,13 +254,13 @@ const fmt=v=>v.toFixed(1);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;};
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const key=()=>S.traits+(S.active?'_a'+S.active:'');
+const key=()=>`${S.traits}_l${S.level}${S.active?'_a':''}`;
 const sc=c=>c.s[key()];
 const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
 const offScale=p=>p.d>YD[1]||p.t>XD[1];
 
 document.getElementById('setup').innerHTML=[`Patch ${DATA.version.split('.').slice(0,3).join('.')}`,'Winged D3','No gear or relics','Flat ground','Mid damage roll',`${C.length} characters`].map(t=>`<span>${t}</span>`).join('');
-document.getElementById('segActive').innerHTML=`<button data-v="0" aria-pressed="true">Off</button>`+LV.map(l=>`<button data-v="${l}" aria-pressed="false">Level ${l}</button>`).join('');
+document.getElementById('segLevel').innerHTML=LV.map((l,i)=>`<button data-v="${l}" aria-pressed="${i===0}">Level ${l}</button>`).join('');
 
 /* ---------- chart furniture ---------- */
 const svg=document.getElementById('map');
@@ -334,7 +343,7 @@ function renderChart(animate=true){
     if(c.name===S.sel) gDots.appendChild(g);
   });
   gArrows.innerHTML='';
-  if(S.shift&&k!=='base'){
+  if(S.shift){
     C.forEach(c=>{
       if(!visible(c)) return;
       const b=c.s.base,[x2,y2]=POS[c.name];
@@ -344,7 +353,7 @@ function renderChart(animate=true){
       el('line',{x1,y1,x2:x1+(x2-x1)*f,y2:y1+(y2-y1)*f,class:'arrow'+(c.name===S.sel?' sel':''),'marker-end':'url(#ah)'},gArrows);
     });
   }
-  const bits=[{attack:'Attack',defence:'Defence',map:'Map'}[S.view], S.traits==='base'?'always-on traits':'all traits triggered', S.active?`active at level ${S.active}`:'no active'];
+  const bits=[{attack:'Attack',defence:'Defence',map:'Map'}[S.view], S.traits==='base'?'always-on traits':'all traits triggered', `abilities level ${S.level}`, S.active?'active on':'active off'];
   document.getElementById('chartTitle').textContent=bits.join(' · ');
   if(animate&&!reduce){gLabels.style.opacity=0;clearTimeout(renderChart._t);renderChart._t=setTimeout(()=>{renderLabels();gLabels.style.opacity=1;},560);}
   else renderLabels();
@@ -392,34 +401,44 @@ function showTip(c){
 function hideTip(){tip.style.opacity=0;}
 
 /* ---------- detail panel ---------- */
-function select(name){S.sel=name;renderChart(false);renderDetail();renderTable();}
+function select(name){S.sel=(S.sel===name)?null:name;renderChart(false);renderDetail();renderTable();}
 function renderDetail(){
-  const c=C.find(x=>x.name===S.sel), cur=sc(c), base=c.s.base, same=key()==='base';
+  const c=C.find(x=>x.name===S.sel);
+  if(!c){document.getElementById('detail').innerHTML='<p class="label">Character</p><p class="none">Click a character on the chart or in the list to see their details. Click them again to unselect.</p>';return;}
+  const cur=sc(c), base=c.s.base, same=false;
   const tags=(arr,cls)=>arr.length?`<div class="tags">${arr.map(t=>`<span class="tag ${cls}">${esc(t)}</span>`).join('')}</div>`:`<p class="none">None</p>`;
   const cell=(v,r,on)=>`<td class="${on?'on':'dimcol'}">${fmt(v)}<small>#${r}</small></td>`;
   const row=(label,b,br,v,vr)=>`<tr><td>${label}</td>${cell(b,br,same)}${same?'':cell(v,vr,true)}</tr>`;
   const a=c.active, isCreed=c.name==='Castellan Creed', cr=c.creed;
   const kindLabel={damage:'deals damage',summon:'summons',heal:'heals',defence:'defensive',support:'support'}[a.kind]||a.kind;
-  const counted=LV.map(l=>a.counted[l]?`<p class="act-line">Attack, level ${l}: <b>${esc(a.counted[l])}</b></p>`:'').join('')
-               +LV.map(l=>a.defence&&a.defence[l]?`<p class="act-line">Defence, level ${l}: <b>${esc(a.defence[l])}</b></p>`:'').join('');
+  const L=S.level;
+  const counted=(a.counted[L]?`<p class="act-line">Attack: <b>${esc(a.counted[L])}</b></p>`:'')
+               +(a.defence&&a.defence[L]?`<p class="act-line">Defence: <b>${esc(a.defence[L])}</b></p>`:'');
+  const pa=c.passive, pTxt=(S.traits==='trig'?pa.triggered[L]:pa.counted[L]);
   document.getElementById('detail').innerHTML=`
     <h3>${esc(c.name)}</h3>
     <div class="fac"><i style="background:${ALLY[c.alliance]}"></i>${esc(c.faction)} · ${c.alliance}</div>
     <div class="stats"><div><small>Health</small><b>${c.hp.toLocaleString()}</b></div><div><small>Damage</small><b>${c.dmg.toLocaleString()}</b></div><div><small>Armour</small><b>${c.arm.toLocaleString()}</b></div></div>
     <p class="weap">${c.weapons.map(esc).join(' · ')}</p>
-    <table class="scores"><thead><tr><th>Attacks to kill</th><th>Stat line</th>${same?'':'<th>This view</th>'}</tr></thead><tbody>
+    <table class="scores"><thead><tr><th>Attacks to kill</th><th>Stat line</th><th>This view</th></tr></thead><tbody>
       ${row('Damage',base.d,base.rd,cur.d,cur.rd)}
       ${row('Toughness',base.t,base.rt,cur.t,cur.rt)}
     </tbody></table>
     <div class="sect">
-      <p class="label">Active ability</p>
+      <p class="label">Passive · always on · level ${L}</p>
+      <p class="act-name">${esc(pa.name||'None')}${pa.review?'<span class="tag flag">Needs your review</span>':''}</p>
+      ${pTxt?`<p class="act-line"><b>${esc(pTxt)}</b></p>`:'<p class="act-line">Nothing counted for the character itself.</p>'}
+      ${pa.notes?`<p class="act-note">${esc(pa.notes)}</p>`:''}
+    </div>
+    <div class="sect">
+      <p class="label">Active ability · ${S.active?'on':'off'} · level ${L}</p>
       <p class="act-name">${esc(a.name||'None')} <span class="tag">${esc(kindLabel)}</span>${a.review?'<span class="tag flag">Needs your review</span>':''}</p>
       ${counted||'<p class="act-line">Nothing counted: no damage to the target and no protection for itself.</p>'}
       ${a.notes?`<p class="act-note">${esc(a.notes)}</p>`:''}
     </div>
     <p class="label">Always-on traits counted</p>${tags(c.counted,'')}
     <p class="label">Situational traits · only when triggered</p>${tags(c.situational,'sit')}
-    <div class="sect creed"><p class="label" style="margin:0">${isCreed?'Creed against himself':'Sparring Creed · stat line'}</p>
+    <div class="sect creed"><p class="label" style="margin:0">${isCreed?'Creed against himself':'Sparring Creed'} · always-on traits, level ${LV[0]} passives</p>
       <span>Deals <b>${cr.to.toLocaleString()}</b> to Creed per attack, kills him in <b>${fmt(cr.kill)}</b></span>
       <span>Creed deals <b>${cr.frm.toLocaleString()}</b> back, kills ${isCreed?'himself':'them'} in <b>${fmt(cr.die)}</b></span></div>`;
 }
@@ -445,6 +464,7 @@ document.querySelectorAll('th button').forEach(b=>b.addEventListener('click',()=
 function seg(id,apply){const g=document.getElementById(id);g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));apply(b.dataset.v);renderChart();renderDetail();renderTable();});}
 seg('segView',v=>S.view=v);
 seg('segTraits',v=>S.traits=v);
+seg('segLevel',v=>S.level=+v);
 seg('segActive',v=>S.active=+v);
 document.getElementById('shift').onchange=e=>{S.shift=e.target.checked;renderChart(false);};
 document.getElementById('names').onchange=e=>{S.names=e.target.checked;renderLabels();};
