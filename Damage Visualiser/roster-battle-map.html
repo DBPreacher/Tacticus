@@ -32,8 +32,10 @@ h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;mar
 @media (max-width:760px){.main{grid-template-columns:1fr}}
 .chart-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px 14px 8px;position:relative}
 .chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 6px 6px;flex-wrap:wrap}
-.chart-head h2{font-family:var(--display);font-size:16px;font-weight:600;margin:0;letter-spacing:.03em}
+/* the title stays on one line and the hint always gets its own, so the chart never shifts when the settings change */
+.chart-head h2{font-family:var(--display);font-size:16px;font-weight:600;margin:0;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 100%}
 .hint{font-size:12.5px;color:var(--ink-3)}
+.chart-head .hint{flex:1 1 100%}
 svg{display:block;width:100%;height:auto;font-family:var(--data)}
 .grid line{stroke:var(--rule-soft);stroke-width:1}
 .tick{fill:var(--ink-3);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -423,7 +425,7 @@ function renderChart(animate=true){
       el('line',{x1,y1,x2:x1+(x2-x1)*f,y2:y1+(y2-y1)*f,class:'arrow'+(c.name===S.sel?' sel':''),'marker-end':'url(#ah)'},gArrows);
     });
   }
-  const bits=[{attack:'Attack',defence:'Defence',map:'Map'}[S.view], TIERS.find(t=>t.key===S.tier).label, S.traits==='base'?'always-on traits':'all traits triggered', `abilities level ${S.level}`, S.active?'active on':'active off', S.gear?'standard gear':'no gear'];
+  const bits=[{attack:'Attack',defence:'Defence',map:'Map'}[S.view], TIERS.find(t=>t.key===S.tier).label, S.traits==='base'?'always-on traits':'all triggered', `abilities ${S.level}`, S.active?'active on':'active off', S.gear?'standard gear':'no gear'];
   document.getElementById('chartTitle').textContent=bits.join(' · ');
   if(animate&&!reduce){gLabels.style.opacity=0;clearTimeout(renderChart._t);renderChart._t=setTimeout(()=>{renderLabels();gLabels.style.opacity=1;},560);}
   else renderLabels();
