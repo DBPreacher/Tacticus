@@ -138,7 +138,7 @@ boosters included (owner). Relics are never used.
   - Titus always crits.
   - Ragnar, Shiron and Laviscus get +crit chance; Ulf's Ice gives +25% Crit
     Damage.
-  - Trajann, Uthar, Lysander, Arjac and Azrael gain block chance or Block
+  - Trajann, Uthar, Lysander and Arjac gain block chance or Block
     Damage; Lysander's Damage also grows with his block value.
   - Marshal Dreir reduces attackers' crits.
   - Maugan Ra and Ragnar's charge get crit bonuses with Traits: All
@@ -342,6 +342,7 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | Azrael's Lion Helm only helps other characters (owner), so it doesn't count for him |
 | September 2026 | Gear switch: standard Legendary top-level loadouts per character, crits and blocks at their average, `Gear` column for crit/block kit effects (owner decisions: switch, top-level Legendary, boosters) |
 | September 2026 | One enemy turn = 5 attacks: an active's one-round protection only covers the first 5 attacks; first-attack-each-turn effects repeat every 5. Aesoth (active on) 14.6 → 8.3 |
 | September 2026 | Owner answers on passives: bodyguards (Kell, Geminae), Uthar split stance, Varro not counted, Tyrant Guard always on |
