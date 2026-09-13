@@ -24,9 +24,9 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
 .setup{display:flex;flex-wrap:wrap;gap:6px}
 .setup span{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:3px 9px;border-radius:3px;font-variant-numeric:tabular-nums}
-/* chart | controls | character card. The two side panels take the chart's height (contain:size stops
+/* chart | character card | controls. The two side panels take the chart's height (contain:size stops
    them stretching the row) and scroll inside if they're longer. Narrower windows stack them under the chart. */
-.main{display:grid;grid-template-columns:minmax(0,1fr) 232px 316px;gap:16px;align-items:stretch}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 316px 232px;gap:16px;align-items:stretch}
 .main>.controls,.main>.detail{contain:size;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
 @media (max-width:1280px){.main{grid-template-columns:1fr 1fr}.main>.chart-card{grid-column:1/-1}.main>.controls,.main>.detail{contain:none;overflow:visible}}
 @media (max-width:760px){.main{grid-template-columns:1fr}}
@@ -166,6 +166,8 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
       <div class="tip" id="tip" role="status"></div>
     </section>
 
+      <div class="panel detail" id="detail" aria-live="polite"></div>
+
       <div class="panel controls">
         <div>
           <p class="label">View</p>
@@ -212,7 +214,6 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
         </div>
       </div>
 
-      <div class="panel detail" id="detail" aria-live="polite"></div>
   </div>
 
   <section class="panel reading" aria-label="Reading the chart">
