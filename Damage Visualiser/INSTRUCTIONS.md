@@ -23,7 +23,7 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `update_game_data.py` | Downloads the game data from tacticustable.com into `cache/gameinfo.json`, only when the game version has changed | No |
 | `build_map.py` | Runs the model and writes every output below. The standard setup (rank, stars, ability levels) is at the top | Only to change the setup |
 | `active_abilities.csv` | One row per character: how their active ability is counted. **Reviewed data**: the script adds rows but never overwrites your decisions | **Yes** |
-| `passive_abilities.csv` | The same, for passive abilities: `Attack` and `Defence` tokens | **Yes** |
+| `passive_abilities.csv` | The same, for passive abilities: `Attack`, `Defence` and `Gear` tokens | **Yes** |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
 | `cache/gameinfo.json` | The downloaded game data (about 11 MB), ignored by git | No |
@@ -89,6 +89,7 @@ python -X utf8 build_map.py
 | Creed against himself (click Castellan Creed; the Sparring line) | About **3,260** per attack, matching the Creed test | The stat or formula handling broke |
 | Kharn, Map view, Ability level 50, Active on | Damage **below 1 attack** | Active parsing broke |
 | Re'vas detail panel, Ability level 50 | Passive shows "+3× Particle 749 on each attack" | Passive parsing broke |
+| Judh, Gear: Standard | Two Monstrous Boneswords + a Lash-Whip; damage about 2.4 attacks (about 19th) | Gear loading broke |
 | Number of characters | Same as the non-MoW, non-Do_Not_Use rows in the CSV | A name didn't match; see the `ALIAS` warning |
 
 ---
@@ -290,6 +291,29 @@ Owner decisions (September 2026), recorded in each row's `Notes`:
 
 ---
 
+## The `Gear` column (both ability files)
+
+Crit and block effects of a kit only count with **Gear: Standard**, because
+without gear nobody can crit or block. They go in the `Gear` column, with
+the same token format as the other columns:
+
+| Token | Meaning | Example |
+|---|---|---|
+| `critchance:VAR[:scope]` | +VAR% crit chance | Ragnar's active `critchance:extraCritChance:melee` |
+| `critdmg:VAR[:scope]` | +VAR Crit Damage | Titus `critdmg:extraCritDmg` |
+| `critdmgpct:VAR` | +VAR% Crit Damage | Ulf `critdmgpct:25` (Ice) |
+| `alwayscrit` | Every hit crits (active only) | Titus |
+| `dmgfromblock:VAR` | +VAR% of its own Block Damage as Damage | Lysander's passive `dmgfromblock:chance` |
+| `blockchance:VAR` / `blockdmg:VAR` | Its own block improves | Trajann `blockchance:blockChance;blockdmg:blockDmg` |
+| `critreduce:CHANCE/DMG` | Attackers get −CHANCE% crit chance and −DMG Crit Damage | Dreir `critreduce:critChanceReduction/critDmgReduction` |
+
+- An active's `Gear` effects only apply on the turn it's used (offence) or
+  for its one round (defence).
+- A passive's `Gear` effects apply all the time. `@trig` works as usual.
+- **Not counted:** conditional crit bonuses (Judh per free hex, Tarvakh
+  against targets at or below 50% health), and bonuses for allies only.
+  Abilities marked "cannot Crit" are detected from their text automatically.
+
 ## Changing the setup
 
 The constants at the top of `build_map.py`:
@@ -300,6 +324,7 @@ The constants at the top of `build_map.py`:
 | `STARS` | `11` | Winged. Rank stats are stored at 0 stars; each star adds 10% (`STAR_MULT = 1 + 0.1 × STARS`) |
 | `ABILITY_LEVELS` | `(36, 50)` | One "Ability level" button per level on the page (passives and actives) |
 | `STANDARD` | `base_l36` | The scenario the Creed sparring line uses |
+| `GEAR_RARITY` | `Legendary` | The rarity of standard gear (top level of each item). Use `Mythic` for the Mythic view |
 | `RARITY_MULT` | `1.8` | Legendary. Ability values = the level's entry × this, only for variables listed in `variablesAffectedByRarityBonus`. Common 1.0 … Mythic 2.0 |
 
 For the planned **Mythic view**: 14 stars, `ADAMANTINE II`, levels up to 60,
@@ -331,7 +356,8 @@ as a separate build rather than replacing the D3 page.
   unselects them.
 - **Scenario keys** in the data: `base` is the plain stat line (reference
   only). The others are `{base|trig}_l{level}` with passives on, plus `_a`
-  when the active is on, e.g. `base_l36`, `trig_l50_a`.
+  when the active is on and `_g` with standard gear, e.g. `base_l36`,
+  `trig_l50_a_g`.
 
 ---
 
@@ -377,6 +403,7 @@ as a separate build rather than replacing the D3 page.
 
 | Date | Change |
 |---|---|
+| September 2026 | Gear switch (standard Legendary loadouts, crits/blocks at their average) and the `Gear` column |
 | September 2026 | One enemy turn = 5 attacks (`ATTACKS_PER_TURN`); round-limited actives noted on the page |
 | September 2026 | Owner answers: Kell and Geminae Superia count as bodyguards, Uthar split stance, Varro not counted, Tyrant Guard always on. New `guard` and `armourpass` tokens. The page's "Reading the chart" lists every trait in each setting and explains "typical character" |
 | September 2026 | Passives added (`passive_abilities.csv`, always on; 41 characters counted, 5 owner questions). Controls are now Ability level + Active on/off. Actives re-checked. Clicking a selected character again unselects it |

@@ -15,7 +15,7 @@ Every character is compared under the same conditions:
 | Rank | Diamond III |
 | Stars | Winged (Legendary star) = 11 stars = ×2.1 on the 0-star rank stats |
 | Abilities | Level 36 (video standard) and level 50 (Legendary cap), Legendary rarity. Only used in the "Active ability" scenarios |
-| Equipment | None. No crits, no blocks from gear |
+| Equipment | A switch: **None**, or **Standard**: the best Legendary items at top level for the character's own slots, boosters included (owner) |
 | Relics | None (a Mythic + relics view is a later, separate step) |
 | Terrain | Flat ground, no hex effects, no buffs or debuffs |
 | Damage roll | Middle of the ±20% range, which is what the Creed test numbers show |
@@ -109,6 +109,48 @@ Slayer target).
 Not on any current character: Diminutive, Dakka, Instinctive Behaviour.
 
 ---
+
+## Gear
+
+With **Gear: Standard**, every character gets its own item slots (fixed
+per character in the game data) filled with the best **Legendary** item it
+can equip (faction rules apply), at the item's **top level (11)**,
+boosters included (owner). Relics are never used.
+
+- **Which item:** crit and block items trade chance against damage (e.g.
+  35% / 1,024 against 20% / 1,808), so the highest chance is used, because
+  it keeps chains going across multi-hit attacks. Defensive items: Health +
+  Armour where the faction allows it, otherwise Armour only (Votann's
+  Greaves).
+- **Two crit items** (Calandis, Judh, Tarvakh):
+  chance = 1 − (1 − c₁)(1 − c₂), plus the booster (wiki `HDTW_TwoCrit`).
+- **Defensive items** add Health and Armour directly. They don't scale with
+  stars or rank.
+- **Crits** count at their average, using the wiki's chain rule: the chain
+  starts on hit 1 and each later hit re-rolls until one fails. A crit adds
+  Crit Damage **before** armour and **skips Mk X Gravis**. That's why
+  Gravis tanks (Bellator, Nubari) lose toughness with gear on. Ability hits
+  crit too, unless the ability "cannot Crit".
+- **Blocks** count at their average with the same chain rule. They come
+  last, after every other modifier. Psychic can't be blocked.
+- **Crit and block parts of kits** are in the `Gear` column of both ability
+  files and only count with gear on:
+  - Titus always crits.
+  - Ragnar, Shiron and Laviscus get +crit chance; Ulf's Ice gives +25% Crit
+    Damage.
+  - Trajann, Uthar, Lysander, Arjac and Azrael gain block chance or Block
+    Damage; Lysander's Damage also grows with his block value.
+  - Marshal Dreir reduces attackers' crits.
+  - Maugan Ra and Ragnar's charge get crit bonuses with Traits: All
+    triggered.
+- **Traits with gear, when triggered:** Act of Faith at one stack (+10%
+  crit chance, +25% Crit Damage) and Thrill Seekers (+15%).
+
+Biggest effects at level 36: Judh (111th → 19th for damage) and Calandis
+(85th → 31st), who both have two crit items. Psychic attackers such as
+Mephiston (32nd → 4th) gain a lot, because every point of Crit Damage gets
+through. Bellator (9th → 37th for toughness) and Nubari (3rd → 14th) lose
+the most, because crits skip Mk X Gravis.
 
 ## Turns: one enemy turn = 5 attacks
 
@@ -300,6 +342,7 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | Gear switch: standard Legendary top-level loadouts per character, crits and blocks at their average, `Gear` column for crit/block kit effects (owner decisions: switch, top-level Legendary, boosters) |
 | September 2026 | One enemy turn = 5 attacks: an active's one-round protection only covers the first 5 attacks; first-attack-each-turn effects repeat every 5. Aesoth (active on) 14.6 → 8.3 |
 | September 2026 | Owner answers on passives: bodyguards (Kell, Geminae), Uthar split stance, Varro not counted, Tyrant Guard always on |
 | September 2026 | Passives added, always on, with Attack/Defence tokens. Re'vas's Overwatch active counted. Scenarios are now traits × ability level × active on/off |

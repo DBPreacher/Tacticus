@@ -53,8 +53,9 @@ SITUATIONAL = {'RapidAssault', 'HeavyWeapon', 'CrushingStrike', 'RangedSpecialis
                'GetStuckIn', 'LetTheGalaxyBurn'}
 
 ACTIVE_COLS = ['Name', 'Active', 'Kind', 'Damage_Parts', 'Normal_Attack', 'Normal_Bonus', 'Same_Turn',
-               'Defence', 'Needs_Review', 'Notes', 'Ability_Text']
-PASSIVE_COLS = ['Name', 'Passive', 'Attack', 'Defence', 'Needs_Review', 'Notes', 'Ability_Text']
+               'Defence', 'Gear', 'Needs_Review', 'Notes', 'Ability_Text']
+PASSIVE_COLS = ['Name', 'Passive', 'Attack', 'Defence', 'Gear', 'Needs_Review', 'Notes', 'Ability_Text']
+GEAR_RARITY = 'Legendary'           # standard gear: the best item of this rarity per slot, at its top level (owner)
 SUPPRESSED, STUNNED = 0.7, 0.5      # damage multipliers of a Suppressed / Stunned enemy (wiki)
 ATTACKS_PER_TURN = 5                # one enemy turn = a full team of 5 attacking (owner, September 2026)
 
@@ -80,6 +81,55 @@ def _prod(vals):
 
 
 # ---------------------------------------------------------------- data loading
+def standard_gear(h, items):
+    """the character's standard loadout: for each of its item slots, the best GEAR_RARITY item it may
+    equip, at the item's top level. Crit/block items: the highest chance (keeps chains going across hits).
+    Defensive items: the most Health + 2 x Armour. Relics are never used."""
+    def allowed(v):
+        return ((not v.get('allowedFactions') or h['factionId'] in v['allowedFactions'])
+                and (not v.get('allowedUnits') or h['id'] in v['allowedUnits']))
+    pool = [v for v in items.values() if v.get('rarity') == GEAR_RARITY and not v.get('isUniqueRelic') and allowed(v)]
+    gear = dict(cc=0.0, cd=0.0, bc=0.0, bd=0.0, hp=0.0, arm=0.0, items=[])
+    crit_chances, crit_bonus = [], 0.0
+    for slot in h.get('itemSlots') or []:
+        cands = [v for v in pool if v['itemType'] == slot]
+        if not cands:
+            continue
+        top = lambda v: v['levels'][-1]['stats']
+        key = {'I_Crit': lambda v: (top(v).get('critChance', 0), top(v).get('critDmg', 0)),
+               'I_Block': lambda v: (top(v).get('blockChance', 0), top(v).get('blockDmg', 0)),
+               'I_Defensive': lambda v: top(v).get('hp', 0) + 2 * top(v).get('fixedArmor', 0)}.get(
+            slot, lambda v: (top(v).get('critChanceBonus', 0) + top(v).get('blockChanceBonus', 0)))
+        v = max(cands, key=key)
+        st_ = top(v)
+        if slot == 'I_Crit':
+            crit_chances.append(st_.get('critChance', 0) / 100)
+            gear['cd'] += st_.get('critDmg', 0)
+            label = f"{st_.get('critChance', 0)}% crit, {st_.get('critDmg', 0):,} Crit Damage"
+        elif slot == 'I_Block':
+            gear['bc'] += st_.get('blockChance', 0) / 100
+            gear['bd'] += st_.get('blockDmg', 0)
+            label = f"{st_.get('blockChance', 0)}% block, {st_.get('blockDmg', 0):,} Block Damage"
+        elif slot == 'I_Defensive':
+            gear['hp'] += st_.get('hp', 0)
+            gear['arm'] += st_.get('fixedArmor', 0)
+            label = ' '.join(x for x in (f"+{st_['hp']:,} Health" if st_.get('hp') else '',
+                                         f"+{st_['fixedArmor']:,} Armour" if st_.get('fixedArmor') else '') if x)
+        elif slot == 'I_Booster_Crit':
+            crit_bonus += st_.get('critChanceBonus', 0) / 100
+            gear['cd'] += st_.get('critDmgBonus', 0)
+            label = f"+{st_.get('critChanceBonus', 0)}% crit, +{st_.get('critDmgBonus', 0):,} Crit Damage"
+        else:
+            gear['bc'] += st_.get('blockChanceBonus', 0) / 100
+            gear['bd'] += st_.get('blockDmgBonus', 0)
+            label = f"+{st_.get('blockChanceBonus', 0)}% block, +{st_.get('blockDmgBonus', 0):,} Block Damage"
+        gear['items'].append(f"{v['name']} ({label})")
+    # two crit items (e.g. Calandis): 1 - (1-c1)(1-c2), then the booster is added (wiki HDTW_TwoCrit)
+    gear['cc'] = (1 - _prod(1 - c for c in crit_chances) if crit_chances else 0.0) + crit_bonus
+    gear['bc'] = min(gear['bc'], 1.0)
+    return gear
+
+
 def load():
     if not os.path.exists(CACHE):
         sys.exit('No cache/gameinfo.json yet: run update_game_data.py first.')
@@ -112,7 +162,7 @@ def load():
                           traits=set(h['traits'] or []),
                           ability=g['abilities'].get(h.get('activeAbility') or ''),
                           passive=g['abilities'].get(h.get('passiveAbility') or ''),
-                          ps=None))
+                          gear=standard_gear(h, g['items']), ps=None, pg=None, g=None))
     if missing:
         print('WARNING - in the CSV but not in the game data (add to ALIAS?):', ', '.join(missing))
     return g, units
@@ -160,13 +210,14 @@ def build_part(ab, text, tok, level):
         vals = (ab.get('variables') or {})[key][level - 1].split(',')
         dmg = float(vals[int(i)]) * (RARITY_MULT if key in (ab.get('variablesAffectedByRarityBonus') or []) else 1)
         return dict(dmg=dmg, hits=int(ability_value(ab, 'nrOfHits', level) or 1),
-                    type=dtype(consts.get('damageProfile') or 'Physical'))
+                    type=dtype(consts.get('damageProfile') or 'Physical'), crit='cannot crit' not in text.lower())
     s = part_suffix(tok)
     lo, hi = ability_value(ab, f'minDmg{s}', level), ability_value(ab, f'maxDmg{s}', level)
     if lo is None or hi is None:
         raise ValueError(f'no minDmg{s}/maxDmg{s} in {ab.get("name")}')
     return dict(dmg=(lo + hi) / 2, hits=part_hits(ab, text, s, f'minDmg{s}', level),
-                type=dtype(consts.get(f'damageProfile{s}') or consts.get('damageProfile') or 'Physical'))
+                type=dtype(consts.get(f'damageProfile{s}') or consts.get('damageProfile') or 'Physical'),
+                crit='cannot crit' not in text.lower())
 
 
 def part_text(p):
@@ -322,8 +373,7 @@ def attack_spec(u, row, level, trig):
 
 def defence_spec(u, ab, cell, level, trig):
     """Defence tokens (active or passive) -> effects on damage the character takes"""
-    ds = dict(pct=[], flat=[], enemy=[], hitsless=[], pctcap=[], heal=0.0, hpmult=1.0, armour=0.0,
-              cap_first=None, pass2=0.0, guard=None, text=[])
+    ds = new_ds()
     for t in tokens(cell):
         kind, arg, scope, vs, trig_only = parse_token(t)
         if trig_only and not trig:
@@ -376,20 +426,60 @@ def defence_spec(u, ab, cell, level, trig):
     return ds if ds['text'] else None
 
 
+def new_ds():
+    return dict(pct=[], flat=[], enemy=[], hitsless=[], pctcap=[], heal=0.0, hpmult=1.0, armour=0.0,
+                cap_first=None, pass2=0.0, guard=None, bc=0.0, bd=0.0, ccr=0.0, cdr=0.0, text=[])
+
+
 def merge_defence(*specs):
     specs = [s for s in specs if s]
     if not specs:
         return None
-    out = dict(pct=[], flat=[], enemy=[], hitsless=[], pctcap=[], heal=0.0, hpmult=1.0, armour=0.0,
-               cap_first=None, pass2=0.0, guard=None, text=[])
+    out = new_ds()
     for s in specs:
         for k in ('pct', 'flat', 'enemy', 'hitsless', 'pctcap', 'text'):
             out[k] += s[k]
         out['heal'] += s['heal']; out['hpmult'] *= s['hpmult']; out['armour'] += s['armour']
         out['pass2'] += s['pass2']; out['guard'] = out['guard'] or s['guard']
+        for k in ('bc', 'bd', 'ccr', 'cdr'):
+            out[k] += s[k]
         if s['cap_first'] is not None:
             out['cap_first'] = s['cap_first'] if out['cap_first'] is None else min(out['cap_first'], s['cap_first'])
     return out
+
+
+def gear_spec(u, ab, cell, level, trig):
+    """Gear tokens (only used with standard gear on): crit and block effects of an ability.
+    Returns (attacker effects, defence ds or None, text)."""
+    off, ds, text = [], new_ds(), []
+    for t in tokens(cell):
+        kind, arg, scope, vs, trig_only = parse_token(t)
+        if trig_only and not trig:
+            continue
+        v = value_of(ab, arg, level) if arg else 0.0
+        w = WHERE.get(scope, '') + vs_text(vs)
+        if kind in ('critchance', 'critdmgpct', 'dmgfromblock'):
+            off.append(dict(kind=kind, value=v / 100, scope=scope, vs=vs))
+            text.append({'critchance': f'+{v:.0f}% crit chance', 'critdmgpct': f'+{v:.0f}% Crit Damage',
+                         'dmgfromblock': f'+{v:.0f}% of its Block Damage as Damage'}[kind] + w)
+        elif kind == 'critdmg':
+            off.append(dict(kind=kind, value=v, scope=scope, vs=vs)); text.append(f'+{v:,.0f} Crit Damage{w}')
+        elif kind == 'alwayscrit':
+            off.append(dict(kind=kind, value=1, scope=scope, vs=vs)); text.append('always crits')
+        elif kind == 'blockchance':
+            ds['bc'] += v / 100; ds['text'].append(f'+{v:.0f}% block chance'); text.append(f'+{v:.0f}% block chance')
+        elif kind == 'blockdmg':
+            ds['bd'] += v; ds['text'].append(f'+{v:,.0f} Block Damage'); text.append(f'+{v:,.0f} Block Damage')
+        elif kind == 'critreduce':
+            c, dd = arg.split('/')
+            cv, dv = value_of(ab, c, level), value_of(ab, dd, level)
+            ds['ccr'] += cv / 100; ds['cdr'] += dv
+            ds['text'].append(f'attackers -{cv:.0f}% crit chance, -{dv:,.0f} Crit Damage')
+            text.append(ds['text'][-1])
+        else:
+            sys.exit(f"{u['name']}: unknown Gear token {t!r}")
+    has_ds = ds['bc'] or ds['bd'] or ds['ccr'] or ds['cdr']
+    return off, (ds if has_ds else None), text
 
 
 def active_spec(u, row, level):
@@ -466,15 +556,57 @@ def _applies(e, kind, first, d):
     return ok and (e['vs'] is None or bool(e['vs'] & d['traits']))
 
 
-def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, follow=True):
+def _chain(c, n):
+    """expected number of hits in a crit/block chain: it starts on hit 1 and each later hit
+    re-rolls until one fails (wiki HDTW_Damage)"""
+    return sum(c ** k for k in range(1, max(1, int(n)) + 1))
+
+
+def crit_of(a, kind, first, d, trig, gearx=None, dblk=None):
+    """(crit chance, Crit Damage) of the attacker's hits, or None without gear.
+    kind = 'melee' / 'ranged' / 'ability' (ability hits only get effects with scope 'all')."""
+    g = a.get('g')
+    if not g:
+        return None
+    eff = [e for e in (a.get('pg') or []) + (gearx or []) if _applies(e, kind, first, d)]
+    cc = g['cc'] + sum(e['value'] for e in eff if e['kind'] == 'critchance')
+    cd = g['cd'] + sum(e['value'] for e in eff if e['kind'] == 'critdmg')
+    if trig and 'ActOfFaith' in a['traits']:
+        cc += 0.10; cd *= 1.25                            # one stack
+    if trig and 'ThrillSeekers' in a['traits']:
+        cc += 0.15                                        # Thrilled
+    cd *= _prod(1 + e['value'] for e in eff if e['kind'] == 'critdmgpct')
+    if dblk:
+        cc -= dblk['ccr']; cd -= dblk['cdr']
+    if any(e['kind'] == 'alwayscrit' for e in eff):
+        cc = 1.0
+    return min(max(cc, 0.0), 1.0), max(cd, 0.0)
+
+
+def block_of(d, ds):
+    """the defender's block (chance, Block Damage) and crit reductions: gear + abilities"""
+    g = d.get('g')
+    if not g and not ds:
+        return None
+    x = dict(bc=(g['bc'] if g else 0.0) + (ds['bc'] if ds else 0.0), bd=(g['bd'] if g else 0.0) + (ds['bd'] if ds else 0.0),
+             ccr=ds['ccr'] if ds else 0.0, cdr=ds['cdr'] if ds else 0.0)
+    x['bc'] = min(x['bc'], 1.0)
+    return x
+
+
+def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, follow=True, gearx=None, dblk=None):
     """one normal attack by a on d with weapon w: (damage, ignores Terminator Armour).
-    Includes a's passive (a['ps']). See DAMAGE_MODEL.md."""
+    Includes a's passive (a['ps']) and, with gear, crits (a['g'], a['pg'], gearx) and d's blocks (dblk).
+    See DAMAGE_MODEL.md."""
     at, dt = a['traits'], d['traits']
     melee = w['kind'] == 'melee'
     eff = [e for e in (a.get('ps') or ([], []))[0] if _applies(e, w['kind'], first, d)]
     add = lambda k: sum(e['value'] for e in eff if e['kind'] == k)
     n, p = w['hits'] + int(add('hits')), min(1.0, w['pierce'] + add('pierce') / 100)
     D = (dmg_override if dmg_override is not None else a['dmg']) + add('flat')
+    if a.get('g'):
+        effg = [e for e in (a.get('pg') or []) + (gearx or []) if _applies(e, w['kind'], first, d)]
+        D += sum(e['value'] * a['g']['bd'] for e in effg if e['kind'] == 'dmgfromblock')
     A = max(0.0, d['arm'] - add('armignore'))
     psychic = w['type'] in ('Psychic', 'Direct')
     if melee and 'Parry' in dt and n > 1:
@@ -507,28 +639,43 @@ def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, f
         if psychic and 'ShadowInTheWarp' in dt and 'Psyker' in at: m *= 0.75
     per_hit = y * m
     total = per_hit * n
+    cr = crit_of(a, w['kind'], first, d, trig, gearx, dblk)
+    if cr and cr[0] > 0:
+        # a crit adds Crit Damage before armour and skips Mk X Gravis
+        per_crit = hit_value(D + cr[1], A, p, False, d.get('pass2', 0)) * m
+        total += _chain(cr[0], n) * max(per_crit - per_hit, 0)
+    if dblk and dblk['bc'] > 0 and not psychic:
+        total -= _chain(dblk['bc'], n) * min(dblk['bd'], per_hit)   # blocks come last; Psychic can't be blocked
     if trig and not psychic:
-        # random blocks: the chain starts on hit 1, each later hit re-rolls until one fails
+        # random blocks from traits: the chain starts on hit 1, each later hit re-rolls until one fails
         for chance, block in (((0.25, 0.5 * d['dmg']) if 'Daemon' in dt else (0, 0)),
                               ((0.10, d['arm']) if 'BeastSlayer' in dt else (0, 0))):
             if chance:
-                total -= sum(chance ** k for k in range(1, int(n) + 1)) * min(block, per_hit)
+                total -= _chain(chance, n) * min(block, per_hit)
     for e in eff:                                         # passive: extra hits after each attack
         if e['kind'] == 'extra':
-            total += ability_hits(e['part'], d)[0]
+            total += ability_hits(e['part'], d, 0.0, cr, dblk)[0]
     if follow and melee and any(e['kind'] == 'follow' for e in eff):
         rw = next((x for x in a['weapons'] if x['kind'] == 'ranged'), None)
         if rw:
-            total += normal_attack(a, d, rw, trig, dmg_override, first, hits_minus, follow=False)[0]
+            total += normal_attack(a, d, rw, trig, dmg_override, first, hits_minus, False, gearx, dblk)[0]
     return max(total, 1.0), psychic
 
 
-def ability_hits(part, d, flat_red=0.0):
-    """ability damage: armour, pierce and Mk X Gravis only (abilities aren't 'normal attacks')"""
+def ability_hits(part, d, flat_red=0.0, crit=None, block=None):
+    """ability damage: armour, pierce and Mk X Gravis (abilities aren't 'normal attacks'),
+    plus crits (unless the ability 'cannot Crit') and the defender's blocks when there is gear"""
     p = PIERCE.get(part['type'], .2)
     D = max(part['dmg'] - flat_red, 0)
-    return (hit_value(D, d['arm'], p, 'MkXGravis' in d['traits'], d.get('pass2', 0)) * part['hits'],
-            part['type'] in ('Psychic', 'Direct'))
+    psychic = part['type'] in ('Psychic', 'Direct')
+    y = hit_value(D, d['arm'], p, 'MkXGravis' in d['traits'], d.get('pass2', 0))
+    total = y * part['hits']
+    if crit and crit[0] > 0 and part.get('crit', True):
+        yc = hit_value(D + crit[1], d['arm'], p, False, d.get('pass2', 0))
+        total += _chain(crit[0], part['hits']) * max(yc - y, 0)
+    if block and block['bc'] > 0 and not psychic:
+        total -= _chain(block['bc'], part['hits']) * min(block['bd'], y)
+    return max(total, 0.0), psychic
 
 
 def _def_ok(scope, vs, kind, first_turn, psychic, a):
@@ -537,19 +684,20 @@ def _def_ok(scope, vs, kind, first_turn, psychic, a):
     return ok and (vs is None or bool(vs & a['traits']))
 
 
-def one_attack(a, d, w, trig, ds, first_seq, first_turn=None, dmg_override=None):
+def one_attack(a, d, w, trig, ds, first_seq, first_turn=None, dmg_override=None, gearx=None):
     """a normal attack after the defender's defensive effects (ds may be None).
     first_seq = the first attack of the whole kill (the attacker's own 'after' effects);
     first_turn = the first attack of an enemy turn (the defender's 'one' effects)."""
     first_turn = first_seq if first_turn is None else first_turn
+    dblk = block_of(d, ds)
     if not ds:
-        return normal_attack(a, d, w, trig, dmg_override, first_seq)
+        return normal_attack(a, d, w, trig, dmg_override, first_seq, gearx=gearx, dblk=dblk)
     psychic = w['type'] in ('Psychic', 'Direct')
     ok = lambda sc, vs: _def_ok(sc, vs, w['kind'], first_turn, psychic, a)
     flat = sum(v for v, sc, vs in ds['flat'] if ok(sc, vs))
     hits_minus = int(sum(v for v, sc, vs in ds['hitsless'] if ok(sc, vs)))
     base = dmg_override if dmg_override is not None else a['dmg']
-    dmg, psy = normal_attack(a, d, w, trig, max(base - flat, 0), first_seq, hits_minus)
+    dmg, psy = normal_attack(a, d, w, trig, max(base - flat, 0), first_seq, hits_minus, gearx=gearx, dblk=dblk)
     dmg *= _prod(m for m, sc, vs in ds['pct'] if ok(sc, vs)) * _prod(m for m, sc, vs in ds['enemy'] if ok(sc, vs))
     for p, cap, sc, vs in ds['pctcap']:
         if ok(sc, vs):
@@ -557,26 +705,28 @@ def one_attack(a, d, w, trig, ds, first_seq, first_turn=None, dmg_override=None)
     return max(dmg, 1.0), psy
 
 
-def part_vs_defence(part, d, ds, first_turn):
-    """an ability damage part after the defender's defensive effects"""
+def part_vs_defence(part, d, ds, first_turn, a=None, trig=False, gearx=None):
+    """an ability damage part after the defender's defensive effects (and gear, when on)"""
     psychic = part['type'] in ('Psychic', 'Direct')
+    dblk = block_of(d, ds)
+    cr = crit_of(a, 'ability', first_turn, d, trig, gearx, dblk) if a else None
     if not ds:
-        return ability_hits(part, d)
+        return ability_hits(part, d, 0.0, cr, dblk)
     ok = lambda sc, vs: vs is None and (sc == 'all' or (sc == 'one' and first_turn)
                                         or (sc == 'after' and not first_turn) or (sc == 'psychic' and psychic))
     flat = sum(v for v, sc, vs in ds['flat'] if ok(sc, vs))
-    dmg, psy = ability_hits(part, d, flat)
+    dmg, psy = ability_hits(part, d, flat, cr, dblk)
     dmg *= _prod(m for m, sc, vs in ds['pct'] if ok(sc, vs))
     dmg *= _prod(m for m, sc, vs in ds['enemy'] if ok(sc, vs))
     return dmg, psy
 
 
-def best_attack(a, d, trig, ds, first_seq, first_turn, kind=None, dmg_override=None):
+def best_attack(a, d, trig, ds, first_seq, first_turn, kind=None, dmg_override=None, gearx=None):
     """(damage, ignores TA, weapon) of the attacker's best normal attack in this situation"""
     ws = [w for w in a['weapons'] if not kind or w['kind'] == kind] or a['weapons']
     best = None
     for w in ws:
-        dmg, psy = one_attack(a, d, w, trig, ds, first_seq, first_turn, dmg_override)
+        dmg, psy = one_attack(a, d, w, trig, ds, first_seq, first_turn, dmg_override, gearx)
         if best is None or dmg > best[0]:
             best = (dmg, psy, w)
     return best
@@ -584,7 +734,8 @@ def best_attack(a, d, trig, ds, first_seq, first_turn, kind=None, dmg_override=N
 
 def opener(a, d, trig, spec, ds):
     """the attacks of the turn the character uses its active ability, in order"""
-    attacks = [part_vs_defence(p, d, ds, i == 0) for i, p in enumerate(spec['parts'])]
+    gx = spec.get('gear')
+    attacks = [part_vs_defence(p, d, ds, i == 0, a, trig, gx) for i, p in enumerate(spec['parts'])]
     bonus_used = False
 
     def normal_with_bonus(kind, override):
@@ -592,9 +743,9 @@ def opener(a, d, trig, spec, ds):
         if spec.get('flat') and not bonus_used:
             override = (override if override is not None else a['dmg']) + spec['flat']
         first = not attacks
-        dmg, psy, _ = best_attack(a, d, trig, ds, first, first, kind, override)
+        dmg, psy, _ = best_attack(a, d, trig, ds, first, first, kind, override, gx)
         if spec.get('bonus') and not bonus_used:
-            dmg += part_vs_defence(spec['bonus'], d, ds, False)[0]
+            dmg += part_vs_defence(spec['bonus'], d, ds, False, a, trig, gx)[0]
         bonus_used = True
         return dmg, psy
     if spec['normal'] in ('Y', 'PCT'):
@@ -665,30 +816,39 @@ def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None):
 
 
 def scenario_keys():
-    """(key, traits triggered, ability level or None, active on)"""
-    keys = [('base', False, None, False)]
-    for trig in (False, True):
-        for lv in ABILITY_LEVELS:
-            for act in (False, True):
-                keys.append((f"{'trig' if trig else 'base'}_l{lv}{'_a' if act else ''}", trig, lv, act))
+    """(key, traits triggered, ability level or None, active on, gear on)"""
+    keys = [('base', False, None, False, False)]
+    for gear in (False, True):
+        for trig in (False, True):
+            for lv in ABILITY_LEVELS:
+                for act in (False, True):
+                    keys.append((f"{'trig' if trig else 'base'}_l{lv}{'_a' if act else ''}{'_g' if gear else ''}",
+                                 trig, lv, act, gear))
     return keys
 
 
 def run_scenarios(units, specs):
-    """specs[(level, trig)] = dict(active=, active_def=, passive=, passive_def=) keyed by name"""
+    """specs[(level, trig, gear)] = dict(active=, active_def=, active_gdef=, passive=, passive_def=,
+    passive_goff=, passive_gdef=) keyed by name"""
     out = {}
-    for key, trig, lv, act in scenario_keys():
-        sp = specs.get((lv, trig)) if lv else None
-        for u in units:
-            u['ps'] = sp['passive'].get(u['name']) if sp else None
-        rnd = {u['name']: merge_defence(sp['active_def'].get(u['name']) if act else None,
-                                        sp['passive_def'].get(u['name'])) if sp else None for u in units}
-        rest = {u['name']: merge_defence(sp['passive_def'].get(u['name'])) if sp else None for u in units}
+    for key, trig, lv, act, gear in scenario_keys():
+        sp = specs.get((lv, trig, gear)) if lv else None
+        U = [dict(u, hp=u['hp'] + u['gear']['hp'], arm=u['arm'] + u['gear']['arm'], g=u['gear']) if gear
+             else dict(u, g=None) for u in units]
+        for u in U:
+            n = u['name']
+            u['ps'] = sp['passive'].get(n) if sp else None
+            u['pg'] = sp['passive_goff'].get(n) if sp else None
+        rnd = {u['name']: merge_defence(*((sp['active_def'].get(u['name']), sp['active_gdef'].get(u['name'])) if act else ()),
+                                        sp['passive_def'].get(u['name']), sp['passive_gdef'].get(u['name']))
+               if sp else None for u in U}
+        rest = {u['name']: merge_defence(sp['passive_def'].get(u['name']), sp['passive_gdef'].get(u['name']))
+                if sp else None for u in U}
         K = {a['name']: {d['name']: attacks_to_kill(a, d, trig, sp['active'].get(a['name']) if (sp and act) else None,
-                                                    rnd[d['name']], rest[d['name']]) for d in units}
-             for a in units}
+                                                    rnd[d['name']], rest[d['name']]) for d in U}
+             for a in U}
         dmg = {a: st.median(v[0] for v in K[a].values()) for a in K}
-        tough = {d['name']: st.median(K[a['name']][d['name']][0] for a in units) for d in units}
+        tough = {d['name']: st.median(K[a['name']][d['name']][0] for a in U) for d in U}
         kinds = {a: max(('melee', 'ranged'), key=lambda k: sum(1 for v in K[a].values() if v[1] == k)) for a in K}
         rd = {n: i + 1 for i, n in enumerate(sorted(dmg, key=dmg.get))}
         rt = {n: i + 1 for i, n in enumerate(sorted(tough, key=tough.get, reverse=True))}
@@ -697,8 +857,6 @@ def run_scenarios(units, specs):
             out['creed'] = {n: dict(to=round(K[n]['Castellan Creed'][2]), frm=round(K['Castellan Creed'][n][2]),
                                     kill=round(K[n]['Castellan Creed'][0], 2), die=round(K['Castellan Creed'][n][0], 2))
                             for n in dmg}
-    for u in units:
-        u['ps'] = None
     return out
 
 
@@ -706,6 +864,10 @@ def run_scenarios(units, specs):
 def pretty(t):
     s = re.sub(r'(?<!^)(?=[A-Z])', ' ', t).replace(' Of ', ' of ').replace(' The ', ' the ')
     return {'Martial Katah': "Martial Ka'tah", 'Weaver of Fate': 'Weaver of Fates'}.get(s, s)
+
+
+def describe_gear_kit(sp, name):
+    return '; '.join(sp['active_gtext'].get(name, []) + sp['passive_gtext'].get(name, []))
 
 
 def describe_passive(sp, name):
@@ -721,11 +883,12 @@ def describe_passive(sp, name):
 
 def write_stats(units, res, actives, passives, specs, version):
     keys = [k for k, *_ in scenario_keys()]
-    cols = ['Name', 'Faction', 'Alliance', 'Health', 'Damage', 'Armour',
+    cols = ['Name', 'Faction', 'Alliance', 'Health', 'Damage', 'Armour', 'Standard_Gear',
             'Melee_Type', 'Melee_Hits', 'Melee_Pierce', 'Ranged_Type', 'Ranged_Hits', 'Ranged_Pierce', 'Ranged_Range',
             'Passive_Ability', 'Active_Ability', 'Active_Kind']
     cols += [f'Passive_Counted_L{lv}' for lv in ABILITY_LEVELS]
     cols += [f'Active_Counted_L{lv}' for lv in ABILITY_LEVELS] + [f'Active_Defence_L{lv}' for lv in ABILITY_LEVELS]
+    cols += [f'Gear_Kit_L{lv}' for lv in ABILITY_LEVELS]
     cols += [f'Damage_{k}' for k in keys] + [f'Toughness_{k}' for k in keys] + ['Game_Version']
     with open(STATS_CSV, 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
@@ -735,12 +898,14 @@ def write_stats(units, res, actives, passives, specs, version):
             m, r = wp.get('melee'), wp.get('ranged')
             n = u['name']
             w.writerow([n, u['faction'], u['alliance'], round(u['hp']), round(u['dmg']), round(u['arm']),
+                        '; '.join(u['gear']['items']),
                         m['type'] if m else '', m['hits'] if m else '', f"{m['pierce']:.0%}" if m else '',
                         r['type'] if r else '', r['hits'] if r else '', f"{r['pierce']:.0%}" if r else '', r['range'] if r else '',
                         passives[n]['Passive'], actives[n]['Active'], actives[n]['Kind'],
-                        *[describe_passive(specs[(lv, False)], n) for lv in ABILITY_LEVELS],
-                        *[describe_active(specs[(lv, False)]['active'].get(n)) for lv in ABILITY_LEVELS],
-                        *[describe_defence(specs[(lv, False)]['active_def'].get(n)) for lv in ABILITY_LEVELS],
+                        *[describe_passive(specs[(lv, False, False)], n) for lv in ABILITY_LEVELS],
+                        *[describe_active(specs[(lv, False, False)]['active'].get(n)) for lv in ABILITY_LEVELS],
+                        *[describe_defence(specs[(lv, False, False)]['active_def'].get(n)) for lv in ABILITY_LEVELS],
+                        *[describe_gear_kit(specs[(lv, False, True)], n) for lv in ABILITY_LEVELS],
                         *[f"{res[k][n]['d']:.2f}" for k in keys],
                         *[f"{res[k][n]['t']:.2f}" for k in keys],
                         version])
@@ -757,14 +922,17 @@ def write_html(units, res, actives, passives, specs, version):
                           counted=sorted(pretty(t) for t in u['traits'] & COUNTED),
                           situational=sorted(pretty(t) for t in u['traits'] & SITUATIONAL),
                           active=dict(name=row.get('Active', ''), kind=row.get('Kind', ''), notes=row.get('Notes', ''),
-                                      counted={lv: describe_active(specs[(lv, False)]['active'].get(n)) for lv in ABILITY_LEVELS},
-                                      defence={lv: describe_defence(specs[(lv, False)]['active_def'].get(n)) for lv in ABILITY_LEVELS},
+                                      counted={lv: describe_active(specs[(lv, False, False)]['active'].get(n)) for lv in ABILITY_LEVELS},
+                                      defence={lv: describe_defence(specs[(lv, False, False)]['active_def'].get(n)) for lv in ABILITY_LEVELS},
                                       round=one_round(row.get('Defence')),
                                       review=row.get('Needs_Review') == 'Y'),
                           passive=dict(name=prow.get('Passive', ''), notes=prow.get('Notes', ''),
-                                       counted={lv: describe_passive(specs[(lv, False)], n) for lv in ABILITY_LEVELS},
-                                       triggered={lv: describe_passive(specs[(lv, True)], n) for lv in ABILITY_LEVELS},
+                                       counted={lv: describe_passive(specs[(lv, False, False)], n) for lv in ABILITY_LEVELS},
+                                       triggered={lv: describe_passive(specs[(lv, True, False)], n) for lv in ABILITY_LEVELS},
                                        review=prow.get('Needs_Review') == 'Y'),
+                          gear=dict(items=u['gear']['items'],
+                                    kit={lv: describe_gear_kit(specs[(lv, False, True)], n) for lv in ABILITY_LEVELS},
+                                    kit_trig={lv: describe_gear_kit(specs[(lv, True, True)], n) for lv in ABILITY_LEVELS}),
                           s={k: res[k][n] for k, *_ in scenario_keys()},
                           creed=res['creed'][n]))
     data = dict(version=version, levels=list(ABILITY_LEVELS), chars=chars)
@@ -816,17 +984,30 @@ def main():
     specs = {}
     for lv in ABILITY_LEVELS:
         for trig in (False, True):
-            sp = dict(active={}, active_def={}, passive={}, passive_def={})
-            for u in units:
-                n, arow, prow = u['name'], actives.get(u['name']), passives.get(u['name'])
-                try:
-                    if (x := active_spec(u, arow, lv)): sp['active'][n] = x
-                    if (x := defence_spec(u, u['ability'] or {}, (arow or {}).get('Defence'), lv, trig)): sp['active_def'][n] = x
-                    if (x := attack_spec(u, prow, lv, trig)): sp['passive'][n] = x
-                    if (x := defence_spec(u, u['passive'] or {}, (prow or {}).get('Defence'), lv, trig)): sp['passive_def'][n] = x
-                except (ValueError, KeyError, IndexError) as e:
-                    sys.exit(f'{n}: can\'t read its ability row ({e}). Check the tokens in the abilities CSVs.')
-            specs[(lv, trig)] = sp
+            for gear in (False, True):
+                sp = dict(active={}, active_def={}, active_gdef={}, active_gtext={},
+                          passive={}, passive_def={}, passive_goff={}, passive_gdef={}, passive_gtext={})
+                for u in units:
+                    n, arow, prow = u['name'], actives.get(u['name']), passives.get(u['name'])
+                    try:
+                        if (x := active_spec(u, arow, lv)):
+                            sp['active'][n] = x
+                        if (x := defence_spec(u, u['ability'] or {}, (arow or {}).get('Defence'), lv, trig)): sp['active_def'][n] = x
+                        if (x := attack_spec(u, prow, lv, trig)): sp['passive'][n] = x
+                        if (x := defence_spec(u, u['passive'] or {}, (prow or {}).get('Defence'), lv, trig)): sp['passive_def'][n] = x
+                        if gear:
+                            off, gds, txt = gear_spec(u, u['ability'] or {}, (arow or {}).get('Gear'), lv, trig)
+                            if off and n in sp['active']:
+                                sp['active'][n] = dict(sp['active'][n], gear=off)
+                            if gds: sp['active_gdef'][n] = gds
+                            if txt: sp['active_gtext'][n] = [f'Active: {t}' for t in txt]
+                            off, gds, txt = gear_spec(u, u['passive'] or {}, (prow or {}).get('Gear'), lv, trig)
+                            if off: sp['passive_goff'][n] = off
+                            if gds: sp['passive_gdef'][n] = gds
+                            if txt: sp['passive_gtext'][n] = [f'Passive: {t}' for t in txt]
+                    except (ValueError, KeyError, IndexError) as e:
+                        sys.exit(f'{n}: can\'t read its ability row ({e}). Check the tokens in the abilities CSVs.')
+                specs[(lv, trig, gear)] = sp
     res = run_scenarios(units, specs)
     write_stats(units, res, actives, passives, specs, g['version'])
     write_html(units, res, actives, passives, specs, g['version'])

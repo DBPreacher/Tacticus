@@ -14,7 +14,7 @@ rules behind it are in `DAMAGE_MODEL.md`.
 | Topic | Decision |
 |---|---|
 | Comparison | Against the **whole roster**, not a single "Mr Average" (see Why below) |
-| Setup | Winged D3, no equipment, no relics, flat ground |
+| Setup | Winged D3, no relics, flat ground. **Gear switch** (owner): none, or standard (best Legendary items at top level for each character's slots, boosters included) |
 | Abilities | **Passives always on** (owner). **Ability level: 36 / 50** and **Active ability: Off / On** switches, worked out from `passive_abilities.csv` and `active_abilities.csv`. The "Show the shift from the plain stat line" arrows cover what the ability arrows were for |
 | Ability level | 36 at Legendary. Defensive abilities often cross a breakpoint at 36 (e.g. −30% → −33% damage reduction) |
 | Situational traits | Two scores, owner's idea: **Always-on** (the trait rule) and **All triggered** (situational traits on, random ones at their average). Rapid Assault is off in Always-on (owner) |
