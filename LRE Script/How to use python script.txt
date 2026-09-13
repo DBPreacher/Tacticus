@@ -53,7 +53,10 @@ New LE: run the team analysis (le_analysis.py)
    Copy conditions_template.yaml into it, rename it (e.g. le16_name.yaml) and fill in with LRE data.
 
 2. Run it (from the LRE Script folder):
-python -X utf8 le_analysis.py "LE16 Name\le16_name.yaml" --csv tacticus_characters.csv > "LE16 Name\LE_16_-_Name_analysis.txt"
+python -X utf8 le_analysis.py "LE16 Name\le16_name.yaml" --csv tacticus_characters.csv
+
+3. It prints the results and also saves them to the LRE Script folder, named after le_name in the
+   YAML (e.g. LE_16_-_Name_analysis.txt). Move that file into the event's folder.
 
 If doing it in Claude
 Run le_analysis.py with "LE16 Name\le16_name.yaml" against tacticus_characters.csv and show me the output

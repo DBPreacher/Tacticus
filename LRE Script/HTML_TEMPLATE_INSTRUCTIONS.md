@@ -191,10 +191,10 @@ non-obvious and easy to accidentally break or "clean up" back in:
 Make sure `tacticus_characters.csv` is current first. If there's been a patch since the last check, run `wiki_audit.py` (see `How to use python script.txt`). Then, from the `LRE Script` folder:
 
 ```bash
-python -X utf8 le_analysis.py "LE16 Newchar/le16_newchar.yaml" --csv tacticus_characters.csv > "LE16 Newchar/LE_16_-_Newchar_analysis.txt"
+python -X utf8 le_analysis.py "LE16 Newchar/le16_newchar.yaml" --csv tacticus_characters.csv
 ```
 
-Open the output `.txt` file. You need these values for the HTML:
+The script saves its output as `<le_name>_analysis.txt` (e.g. `LE_16_-_Newchar_analysis.txt`) in the folder you ran it from. Move it into the LE's folder, then open it. You need these values for the HTML:
 
 - Track names, enemies, eligible factions, restriction — **now printed directly in
   the analysis output**, right above each track's objective list, as long as
