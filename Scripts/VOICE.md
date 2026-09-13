@@ -188,6 +188,8 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
 - The example scripts run longer than that (about 2,700 to 3,800 spoken
   words, so 14 to 20 minutes), so 8 minutes is a floor, not a target to
   trim down to.
+- **Don't use the Genestealer Cults guide as a length example.** It ran to
+  37 minutes (about 7,000 words), and the owner says it isn't typical.
 - Put an estimate at the top of each draft: *spoken words ÷ 193 = minutes*.
 
 ## Things that don't sound like him
@@ -213,4 +215,4 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
 |---|---|
 | September 2026 | First draft from five example scripts |
 | September 2026 | Owner: Space Hulk and Top 10 are his own writing, the Genestealer lore was tool-written, and no lore by default. Added measured sentence rhythm; the tool rhythm moved to "doesn't sound like him" |
-| September 2026 | Owner: reads at about 193 words per minute and aims for 8+ minute videos. Added the Length section |
+| September 2026 | Owner: reads at about 193 words per minute and aims for 8+ minute videos. Added the Length section. The 37-minute Genestealer guide is not a length example |
