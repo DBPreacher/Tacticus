@@ -110,6 +110,26 @@ Not on any current character: Diminutive, Dakka, Instinctive Behaviour.
 
 ---
 
+## Turns: one enemy turn = 5 attacks
+
+Toughness counts the attacks a typical character needs to kill, assuming a
+**full enemy team of 5 focuses on the character**. So one enemy turn is 5
+attacks (`ATTACKS_PER_TURN` in `build_map.py`; owner, September 2026).
+
+- **An active's protection lasts one round**, so it only covers attacks 1–5,
+  then wears off: damage reduction, flat reduction, suppress or stun on
+  nearby enemies. This matters for Aesoth, Thoread, Azkor, Calandis, Dante,
+  Darkstrider, Deathleaper, Hascule and Thothmek, and the page notes it.
+  - Before this rule, Aesoth's −66% let him soak 14.6 attacks, more than a
+    team can make in a turn. Now it's 8.3.
+- **A single-target stun or suppress** from an active only weakens attack 1.
+- **"First attack each turn" effects come back every 5 attacks** (attacks 1,
+  6, 11 …): Terminator Armour, Thothmek's Timesplinter Mantle, Judh's cap.
+- **Passive protection works on every attack.** Extra health (heals,
+  revives, bodyguards) is used up once.
+- Kill counts are worked out attack by attack. A fraction means the last
+  attack was only partly needed.
+
 ## Scenarios
 
 The page offers eight combinations of three switches, plus the plain stat line as a reference:
@@ -280,6 +300,7 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | One enemy turn = 5 attacks: an active's one-round protection only covers the first 5 attacks; first-attack-each-turn effects repeat every 5. Aesoth (active on) 14.6 → 8.3 |
 | September 2026 | Owner answers on passives: bodyguards (Kell, Geminae), Uthar split stance, Varro not counted, Tyrant Guard always on |
 | September 2026 | Passives added, always on, with Attack/Defence tokens. Re'vas's Overwatch active counted. Scenarios are now traits × ability level × active on/off |
 | September 2026 | Cross-checked tacticustable against the wiki. Tacticustable is right on all 3 differences (owner-confirmed), so no model change |

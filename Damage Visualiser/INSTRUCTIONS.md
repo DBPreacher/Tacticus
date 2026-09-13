@@ -357,8 +357,12 @@ as a separate build rather than replacing the D3 page.
 - **Ability arrays** hold one entry per level: entry `level − 1`, so level 36
   = index 35.
 - **Terminator Armour** has reduced the whole first *attack* each turn since
-  September 2024, not the first hit. In kill counts, only the first attack is
-  reduced; the enemy is assumed to focus fire in one turn.
+  September 2024, not the first hit.
+- **One enemy turn = 5 attacks** (`ATTACKS_PER_TURN`). An active's defensive
+  effects cover only the first 5 attacks. Passives cover every attack.
+  Terminator Armour and other "first attack each turn" effects come back
+  every 5 attacks. If an active's `Defence` has a round-long effect, the page
+  notes it for that character automatically.
 - **Creed test numbers** include Rapid Assault and Ranged Specialist, which
   the game shows. The chart's always-on scenario leaves them out, by the
   owner's decision. `--creed` adds them back for the comparison only.
@@ -373,6 +377,7 @@ as a separate build rather than replacing the D3 page.
 
 | Date | Change |
 |---|---|
+| September 2026 | One enemy turn = 5 attacks (`ATTACKS_PER_TURN`); round-limited actives noted on the page |
 | September 2026 | Owner answers: Kell and Geminae Superia count as bodyguards, Uthar split stance, Varro not counted, Tyrant Guard always on. New `guard` and `armourpass` tokens. The page's "Reading the chart" lists every trait in each setting and explains "typical character" |
 | September 2026 | Passives added (`passive_abilities.csv`, always on; 41 characters counted, 5 owner questions). Controls are now Ability level + Active on/off. Actives re-checked. Clicking a selected character again unselects it |
 | September 2026 | Defensive actives added (`Defence` column); owner answered the six OWNER rows |

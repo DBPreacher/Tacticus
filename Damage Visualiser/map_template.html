@@ -233,6 +233,8 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
               <li>At their average: Daemon and Beast Slayer blocks, Get Stuck In and Let the Galaxy Burn extra hits</li>
               <li>Passives that need charging or moving: Kut Skoden, Deathleaper, Ragnar, Tanksmasha, Toth's revive, Wrask's shield</li>
             </ul></dd>
+          <dt>One enemy turn = 5 attacks</dt>
+          <dd>Toughness assumes a full enemy team of 5 focuses on the character. Effects that last one round, from an active, only protect against those first 5 attacks, then wear off. Terminator Armour and other "first attack each turn" effects come back every 5 attacks. Characters whose active is limited this way: <span id="roundList"></span>.</dd>
           <dt>Passives: always on</dt>
           <dd>Every character's passive counts at the chosen ability level, when it affects their own attacks or protects them. Buffs for allies, reactions and summons don't count, except bodyguards that take the hits for them (Kell, Geminae Superia).</dd>
           <dt>Active ability: on or off</dt>
@@ -288,6 +290,7 @@ const offScale=p=>p.d>YD[1]||p.t>XD[1];
 
 document.getElementById('setup').innerHTML=[`Patch ${DATA.version.split('.').slice(0,3).join('.')}`,'Winged D3','No gear or relics','Flat ground','Mid damage roll',`${C.length} characters`].map(t=>`<span>${t}</span>`).join('');
 document.getElementById('rosterCount').textContent=C.length;
+document.getElementById('roundList').textContent=C.filter(c=>c.active.round).map(c=>c.name).join(', ');
 document.getElementById('segLevel').innerHTML=LV.map((l,i)=>`<button data-v="${l}" aria-pressed="${i===0}">Level ${l}</button>`).join('');
 
 /* ---------- chart furniture ---------- */
@@ -462,6 +465,7 @@ function renderDetail(){
       <p class="label">Active ability · ${S.active?'on':'off'} · level ${L}</p>
       <p class="act-name">${esc(a.name||'None')} <span class="tag">${esc(kindLabel)}</span>${a.review?'<span class="tag flag">Needs your review</span>':''}</p>
       ${counted||'<p class="act-line">Nothing counted: no damage to the target and no protection for itself.</p>'}
+      ${a.round?'<p class="act-note">Its protection lasts one enemy turn: it covers the first 5 attacks, then wears off.</p>':''}
       ${a.notes?`<p class="act-note">${esc(a.notes)}</p>`:''}
     </div>
     <p class="label">Always-on traits counted</p>${tags(c.counted,'')}

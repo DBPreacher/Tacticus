@@ -56,6 +56,7 @@ ACTIVE_COLS = ['Name', 'Active', 'Kind', 'Damage_Parts', 'Normal_Attack', 'Norma
                'Defence', 'Needs_Review', 'Notes', 'Ability_Text']
 PASSIVE_COLS = ['Name', 'Passive', 'Attack', 'Defence', 'Needs_Review', 'Notes', 'Ability_Text']
 SUPPRESSED, STUNNED = 0.7, 0.5      # damage multipliers of a Suppressed / Stunned enemy (wiki)
+ATTACKS_PER_TURN = 5                # one enemy turn = a full team of 5 attacking (owner, September 2026)
 
 
 def norm(s):
@@ -433,6 +434,16 @@ def describe_active(spec):
     return ' + '.join(bits)
 
 
+def one_round(cell):
+    """True if an active's Defence protects for a whole enemy turn (not just one attack or extra health),
+    so the ATTACKS_PER_TURN limit changes its result"""
+    for t in tokens(cell):
+        kind, _, scope, _, _ = parse_token(t)
+        if kind in ('pct', 'flat', 'epct', 'suppress', 'stun', 'hitsless', 'pctcap') and scope != 'one':
+            return True
+    return False
+
+
 def describe_defence(ds):
     return '; '.join(ds['text']) if ds else ''
 
@@ -520,22 +531,25 @@ def ability_hits(part, d, flat_red=0.0):
             part['type'] in ('Psychic', 'Direct'))
 
 
-def _def_ok(scope, vs, kind, first, psychic, a):
-    ok = (scope == 'all' or scope == kind or (scope == 'one' and first) or (scope == 'after' and not first)
+def _def_ok(scope, vs, kind, first_turn, psychic, a):
+    ok = (scope == 'all' or scope == kind or (scope == 'one' and first_turn) or (scope == 'after' and not first_turn)
           or (scope == 'psychic' and psychic))
     return ok and (vs is None or bool(vs & a['traits']))
 
 
-def one_attack(a, d, w, trig, ds, first, dmg_override=None):
-    """a normal attack after the defender's defensive effects (ds may be None)"""
+def one_attack(a, d, w, trig, ds, first_seq, first_turn=None, dmg_override=None):
+    """a normal attack after the defender's defensive effects (ds may be None).
+    first_seq = the first attack of the whole kill (the attacker's own 'after' effects);
+    first_turn = the first attack of an enemy turn (the defender's 'one' effects)."""
+    first_turn = first_seq if first_turn is None else first_turn
     if not ds:
-        return normal_attack(a, d, w, trig, dmg_override, first)
+        return normal_attack(a, d, w, trig, dmg_override, first_seq)
     psychic = w['type'] in ('Psychic', 'Direct')
-    ok = lambda sc, vs: _def_ok(sc, vs, w['kind'], first, psychic, a)
+    ok = lambda sc, vs: _def_ok(sc, vs, w['kind'], first_turn, psychic, a)
     flat = sum(v for v, sc, vs in ds['flat'] if ok(sc, vs))
     hits_minus = int(sum(v for v, sc, vs in ds['hitsless'] if ok(sc, vs)))
     base = dmg_override if dmg_override is not None else a['dmg']
-    dmg, psy = normal_attack(a, d, w, trig, max(base - flat, 0), first, hits_minus)
+    dmg, psy = normal_attack(a, d, w, trig, max(base - flat, 0), first_seq, hits_minus)
     dmg *= _prod(m for m, sc, vs in ds['pct'] if ok(sc, vs)) * _prod(m for m, sc, vs in ds['enemy'] if ok(sc, vs))
     for p, cap, sc, vs in ds['pctcap']:
         if ok(sc, vs):
@@ -543,22 +557,29 @@ def one_attack(a, d, w, trig, ds, first, dmg_override=None):
     return max(dmg, 1.0), psy
 
 
-def part_vs_defence(part, d, ds, first):
+def part_vs_defence(part, d, ds, first_turn):
     """an ability damage part after the defender's defensive effects"""
     psychic = part['type'] in ('Psychic', 'Direct')
     if not ds:
         return ability_hits(part, d)
-    ok = lambda sc, vs: sc in ('all',) or (sc == 'one' and first) or (sc == 'after' and not first) or (sc == 'psychic' and psychic)
-    flat = sum(v for v, sc, vs in ds['flat'] if ok(sc, vs) and vs is None)
+    ok = lambda sc, vs: vs is None and (sc == 'all' or (sc == 'one' and first_turn)
+                                        or (sc == 'after' and not first_turn) or (sc == 'psychic' and psychic))
+    flat = sum(v for v, sc, vs in ds['flat'] if ok(sc, vs))
     dmg, psy = ability_hits(part, d, flat)
-    dmg *= _prod(m for m, sc, vs in ds['pct'] if ok(sc, vs) and vs is None)
-    dmg *= _prod(m for m, sc, vs in ds['enemy'] if ok(sc, vs) and vs is None)
+    dmg *= _prod(m for m, sc, vs in ds['pct'] if ok(sc, vs))
+    dmg *= _prod(m for m, sc, vs in ds['enemy'] if ok(sc, vs))
     return dmg, psy
 
 
-def pick_weapon(a, d, trig, ds, kind=None):
+def best_attack(a, d, trig, ds, first_seq, first_turn, kind=None, dmg_override=None):
+    """(damage, ignores TA, weapon) of the attacker's best normal attack in this situation"""
     ws = [w for w in a['weapons'] if not kind or w['kind'] == kind] or a['weapons']
-    return max(ws, key=lambda w: one_attack(a, d, w, trig, ds, False)[0])
+    best = None
+    for w in ws:
+        dmg, psy = one_attack(a, d, w, trig, ds, first_seq, first_turn, dmg_override)
+        if best is None or dmg > best[0]:
+            best = (dmg, psy, w)
+    return best
 
 
 def opener(a, d, trig, spec, ds):
@@ -570,8 +591,8 @@ def opener(a, d, trig, spec, ds):
         nonlocal bonus_used
         if spec.get('flat') and not bonus_used:
             override = (override if override is not None else a['dmg']) + spec['flat']
-        w = pick_weapon(a, d, trig, ds, kind)
-        dmg, psy = one_attack(a, d, w, trig, ds, not attacks, override)
+        first = not attacks
+        dmg, psy, _ = best_attack(a, d, trig, ds, first, first, kind, override)
         if spec.get('bonus') and not bonus_used:
             dmg += part_vs_defence(spec['bonus'], d, ds, False)[0]
         bonus_used = True
@@ -584,43 +605,63 @@ def opener(a, d, trig, spec, ds):
     return attacks
 
 
-def kill_count(first_turn, normal, d, hp, cap_first=None):
-    """attacks to kill; first_turn is a list of (damage, ignores_TA) dealt in the first turn"""
+def kill_count(first, early, turn_first, later, d, hp, cap_first=None):
+    """attacks to kill, one attack at a time. An enemy turn is ATTACKS_PER_TURN attacks.
+    first = list of (damage, ignores_TA) making up attack 1 (several parts for an active);
+    early = damage of attacks 2..ATTACKS_PER_TURN (inside the first enemy turn);
+    turn_first = (damage, ignores_TA) of the first attack of each later turn; later = the rest.
+    Terminator Armour and cap_first (Judh) apply to the first attack of every turn."""
     ta = 'TerminatorArmour' in d['traits']
-    opening = 0
-    for i, (dmg, psy) in enumerate(first_turn):
+    left = hp
+    for i in range(5000):
         if i == 0:
-            dmg *= 0.25 if (ta and not psy) else 1
-            if cap_first is not None:
-                dmg = min(dmg, cap_first * hp)
-        opening += dmg
-    if opening >= hp:
-        return hp / opening
-    return 1 + (hp - opening) / max(normal, 1.0)
+            dmg = sum(x * (0.25 if (j == 0 and ta and not p) else 1) for j, (x, p) in enumerate(first))
+        elif i % ATTACKS_PER_TURN == 0:
+            dmg = turn_first[0] * (0.25 if (ta and not turn_first[1]) else 1)
+        elif i < ATTACKS_PER_TURN:
+            dmg = early
+        else:
+            dmg = later
+        if cap_first is not None and i % ATTACKS_PER_TURN == 0:
+            dmg = min(dmg, cap_first * left)
+        dmg = max(dmg, 1.0)
+        if dmg >= left:
+            return i + left / dmg
+        left -= dmg
+    return 5000.0
 
 
-def attacks_to_kill(a, d, trig, spec=None, ds=None):
-    """(attacks, best attack kind, normal attack damage, used the active).
-    spec = the attacker's active (offence); ds = the defender's defensive effects (active + passive);
-    a['ps'] = the attacker's passive."""
+def _with_defence(d, ds):
     if ds and (ds['armour'] or ds['pass2']):
-        d = dict(d, arm=d['arm'] + ds['armour'], pass2=ds['pass2'])
-    hp = d['hp'] * (ds['hpmult'] if ds else 1) + (ds['heal'] if ds else 0)
-    cap = ds['cap_first'] if ds else None
-    w = pick_weapon(a, d, trig, ds)
-    later = one_attack(a, d, w, trig, ds, False)[0]
-    first = one_attack(a, d, w, trig, ds, True)
-    k, used = kill_count([first], later, d, hp, cap), False
+        return dict(d, arm=d['arm'] + ds['armour'], pass2=ds['pass2'])
+    return d
+
+
+def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None):
+    """(attacks, best attack kind, normal attack damage, used the active).
+    spec = the attacker's active (offence); a['ps'] = the attacker's passive.
+    ds_round = the defender's defence during the first enemy turn (active + passive);
+    ds_rest = the defender's defence after that (passive only): active effects last one round."""
+    d1, d2 = _with_defence(d, ds_round), _with_defence(d, ds_rest)
+    hp = d['hp'] * (ds_round['hpmult'] if ds_round else 1) + (ds_round['heal'] if ds_round else 0)
+    cap = next((x['cap_first'] for x in (ds_rest, ds_round) if x and x['cap_first'] is not None), None)
+    a1 = best_attack(a, d1, trig, ds_round, True, True)
+    early = best_attack(a, d1, trig, ds_round, False, False)[0]
+    tf = best_attack(a, d2, trig, ds_rest, False, True)
+    later_dmg, _, later_w = best_attack(a, d2, trig, ds_rest, False, False)
+    k = kill_count([a1[:2]], early, tf[:2], later_dmg, d, hp, cap)
+    used = False
     if spec:
-        k_act = kill_count(opener(a, d, trig, spec, ds), later, d, hp, cap)
+        k_act = kill_count(opener(a, d1, trig, spec, ds_round), early, tf[:2], later_dmg, d, hp, cap)
         if k_act < k:
             k, used = k_act, True
-    if ds and ds['guard']:
+    guard = (ds_round or {}).get('guard') or (ds_rest or {}).get('guard')
+    if guard:
         # a bodyguard (Kell) takes the attacks first, with its own health and Armour and no traits
-        gh, ga = ds['guard']
-        guard = dict(name='guard', hp=gh, arm=ga, dmg=0, traits=set(), weapons=[])
-        k += gh / max(one_attack(a, guard, w, trig, None, False)[0], 1.0)
-    return k, w['kind'], later, used
+        gh, ga = guard
+        body = dict(name='guard', hp=gh, arm=ga, dmg=0, traits=set(), weapons=[])
+        k += gh / max(one_attack(a, body, later_w, trig, None, False)[0], 1.0)
+    return k, later_w['kind'], later_dmg, used
 
 
 def scenario_keys():
@@ -640,10 +681,11 @@ def run_scenarios(units, specs):
         sp = specs.get((lv, trig)) if lv else None
         for u in units:
             u['ps'] = sp['passive'].get(u['name']) if sp else None
-        ds = {u['name']: merge_defence(sp['active_def'].get(u['name']) if act else None,
-                                       sp['passive_def'].get(u['name'])) if sp else None for u in units}
+        rnd = {u['name']: merge_defence(sp['active_def'].get(u['name']) if act else None,
+                                        sp['passive_def'].get(u['name'])) if sp else None for u in units}
+        rest = {u['name']: merge_defence(sp['passive_def'].get(u['name'])) if sp else None for u in units}
         K = {a['name']: {d['name']: attacks_to_kill(a, d, trig, sp['active'].get(a['name']) if (sp and act) else None,
-                                                    ds[d['name']]) for d in units}
+                                                    rnd[d['name']], rest[d['name']]) for d in units}
              for a in units}
         dmg = {a: st.median(v[0] for v in K[a].values()) for a in K}
         tough = {d['name']: st.median(K[a['name']][d['name']][0] for a in units) for d in units}
@@ -717,6 +759,7 @@ def write_html(units, res, actives, passives, specs, version):
                           active=dict(name=row.get('Active', ''), kind=row.get('Kind', ''), notes=row.get('Notes', ''),
                                       counted={lv: describe_active(specs[(lv, False)]['active'].get(n)) for lv in ABILITY_LEVELS},
                                       defence={lv: describe_defence(specs[(lv, False)]['active_def'].get(n)) for lv in ABILITY_LEVELS},
+                                      round=one_round(row.get('Defence')),
                                       review=row.get('Needs_Review') == 'Y'),
                           passive=dict(name=prow.get('Passive', ''), notes=prow.get('Notes', ''),
                                        counted={lv: describe_passive(specs[(lv, False)], n) for lv in ABILITY_LEVELS},
