@@ -19,9 +19,9 @@ Enter ingame for 100 free blackstone: ABA-88-PLY
 0:00 Hook
 (fill in after the edit)
 
-*Recording notes: one OBS Browser source at 2560×1440 pointed at
-`roster-battle-map.html`, using the settings in each cue below, or press the
-keys in Interact. Cues are in [On screen: …] brackets.*
+*Recording notes: screen capture of `roster-battle-map.html` in full
+screen (F11), clicking the buttons on camera. Cues are in [On screen: …]
+brackets.*
 
 *Length: about 2,030 spoken words ÷ 193 = roughly 10½ minutes.*
 
@@ -43,7 +43,7 @@ But first, somebody needs to be told, so let's dive in.
 
 # Part 1 - Creed's retirement
 
-[On screen: Map view · Diamond III · Creed pinned. `#obs&view=map&tier=d3&sel=Creed`]
+[On screen: Map view · Diamond III · Creed pinned (he is by default)]
 
 - **ME:** Creed, sit down, we need to talk.
 - **CREED:** If this is about the Laviscus thing, he started it.
@@ -74,7 +74,7 @@ So when I say that Kharn kills a typical character in about one and a half attac
 
 # Part 3 - Reading the map
 
-[On screen: Map view. Press **3**]
+[On screen: click **Map**]
 
 So here is the map, and every dot on it is a character.
 
@@ -88,7 +88,7 @@ And when I pin a character, I get their card on the right with their stats, thei
 
 # Part 4 - Attack and Defence
 
-[On screen: press **1** for Attack, then **2** for Defence]
+[On screen: click **Attack**, then **Defence**]
 
 If the map is a bit much to take in all at once, and trust me with 117 characters it really can be, then I can split it into two.
 
@@ -103,21 +103,21 @@ And this is really how you'll see me use it whenever a new character arrives, be
 Now Tacticus is a ridiculously complicated game, as we all know, so one number was never going to be enough. And that's why the map has a few switches that I want to show you, because each one really does change the picture.
 
 ## Progression
-[On screen: press **P** to cycle Gold → Diamond III → Mythic]
+[On screen: Progression: click **Gold**, **Diamond III**, then **Mythic**]
 
 The first is progression, and there are three settings. **Gold** is an Epic character at eight stars and Gold I, **Diamond III** is a Legendary character with the wings, which is what I've always used for Creed's testing. And **Mythic** is fourteen stars at Adamantine II, with abilities up to level 60 and their relic as well.
 
 Just note that each one is compared against the rest of the roster at that same level, so Mythic Kharn is being measured against Mythic everyone else, not against your Gold characters.
 
 ## Traits
-[On screen: Boss Gulgortz pinned, press **T**. `#obs&view=attack&tier=d3&sel=Gulgortz`]
+[On screen: Attack view, Diamond III. Type Gulgortz in Find and click him, then click **All triggered**]
 
 Next up is traits, and by default I only count the ones that always work, like Terminator Armour, Mk X Gravis or Parry. But a lot of traits only work when something happens first, so Crushing Strike only works if you haven't moved and Heavy Weapon is just the same. And Rapid Assault only helps with your very first attack of the battle.
 
 So there's a second setting called **All triggered**, where every character gets their conditions met. And if you watch Boss Gulgortz here, he's 68th for damage on his always-on traits. But let him stand still and get that Crushing Strike and oh boy, he rockets all the way up to 14th. That's really the difference between a good Gulgortz player and a bad one, and it's a mistake I've definitely made myself more times than I'd like to admit.
 
 ## Ability level and the active
-[On screen: Kharn pinned. Press **L**, then **A**]
+[On screen: Kharn pinned. Ability level **50**, then Active ability **On**]
 
 Passives are always switched on, because they're always part of the character, but the active ability has its own switch, because you're the one choosing when to use it.
 
@@ -126,7 +126,7 @@ And the level of those skills really matters, because at Diamond III with level 
 It works the other way round too, because Aesoth's active gives him 66% damage reduction for a turn. And with that switched on he jumps from 7th toughest in the game all the way up to 2nd.
 
 ## Gear
-[On screen: Judh pinned. Press **G**]
+[On screen: Judh pinned. Gear **Standard**]
 
 And finally there's gear, because with no gear nobody can crit or block, and that really punishes some characters, so the standard setting gives everyone the best items they can equip at their level.
 
@@ -141,7 +141,7 @@ And if you want to see where the next new character lands on this map the day th
 
 # Part 6 - So does it actually work?
 
-[On screen: Attack view, Diamond III. Press **1**]
+[On screen: click **Attack**, Diamond III, everything else back to the defaults]
 
 So how do I know this isn't just a pretty picture? Well, let's look at the very bottom of the damage list, because right down at 117th out of 117 is Ammuk.
 

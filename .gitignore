@@ -4,5 +4,3 @@ __pycache__/
 
 # Damage visualiser: downloaded game data (re-fetched by update_game_data.py)
 Damage Visualiser/cache/
-# Damage visualiser: OBS copy of the page, rebuilt by build_map.py
-Damage Visualiser/roster-battle-map-obs.html

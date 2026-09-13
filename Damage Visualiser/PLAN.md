@@ -1,8 +1,8 @@
 # Damage Visualiser — Plan
 
 **Status (September 2026): built.** The Roster Battle Map is the video graphic
-(owner's decision). It runs as a private web page for exploring, and as an OBS
-browser source for recording (broadcast mode). How to update and use it is in
+(owner's decision). It's a private web page that zooms up to fill the screen,
+recorded with screen capture for videos. How to update and use it is in
 `INSTRUCTIONS.md`; the damage rules are in `DAMAGE_MODEL.md`.
 
 The goal was a simple on-screen graphic for DB Preacher Plays that shows where
@@ -27,7 +27,7 @@ a character sits in Tacticus, for both attack and defence. It replaces the old
 | Reference characters | **None** (owner): the charts work as they are |
 | Enemy turn | 5 attacks (a full team). An active's one-round protection only covers those 5 (owner, after the Aesoth case) |
 | Data | Separate file `LRE Script/tacticus_stats.csv` (one row per character per tier). `tacticus_characters.csv` and `le_analysis.py` are untouched |
-| Video | Broadcast mode for OBS: a 1920×1080 stage that scales to the browser source size (1080p, 1440p or 4K), keyboard shortcuts, and URL settings for each scene |
+| Video | Record the normal page with screen capture, pressing the buttons on camera (owner). It zooms up to fill wide screens. An OBS broadcast mode was tried and removed |
 
 ### Why not one reference character
 
@@ -54,12 +54,12 @@ the model check (`build_map.py --creed`).
 1. `update_game_data.py`: the game data from tacticustable.com (only
    downloaded when the version changes), plus relic owners from the wiki.
 2. `build_map.py`: the model, run for every tier and switch combination.
-   It writes `roster-battle-map.html`, `roster-battle-map-obs.html` and
+   It writes `roster-battle-map.html` and
    `../LRE Script/tacticus_stats.csv`.
 3. Reviewed data: `active_abilities.csv`, `passive_abilities.csv`,
    `relic_abilities.csv`. All 117 characters and 32 relics reviewed, and the
    owner's calls are recorded in their `Notes`.
-4. `map_template.html`: the page (explorer and broadcast mode).
+4. `map_template.html`: the page.
 
 Earlier ideas that were replaced:
 - **Scripted video scenes** (damage line → toughness line → map) became the

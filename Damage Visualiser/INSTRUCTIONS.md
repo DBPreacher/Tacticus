@@ -9,8 +9,8 @@ shouldn't need this conversation's history.
   - **Toughness** = how many attacks a typical character needs to kill them.
   - At Gold, Diamond III or Mythic, with or without standard gear, for the
     DB Preacher Plays channel.
-  - It runs as a private web page for exploring, and as an **OBS browser
-    source** for recording (see "Using it in OBS").
+  - It's a private web page, recorded with screen capture for videos (see
+    "Recording it for a video").
 - **The rules behind the numbers:** `DAMAGE_MODEL.md`.
 - **Design decisions and next steps:** `PLAN.md`.
 
@@ -31,7 +31,6 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
-| `roster-battle-map-obs.html` | The same page, opening in broadcast mode, for OBS. Not committed (git ignores it); every build rewrites it | **Never** |
 | `cache/gameinfo.json` | The downloaded game data (about 11 MB), ignored by git | No |
 | `../LRE Script/tacticus_stats.csv` | Output: the stats "second tab" (stats, weapons, active ability, all scenario scores) | **Never.** It's overwritten |
 | `DAMAGE_MODEL.md` / `PLAN.md` | Rules record and design plan | Yes, whenever a rule or decision changes |
@@ -105,61 +104,24 @@ python -X utf8 build_map.py
 
 ---
 
-## Using it in OBS
+## Recording it for a video
 
-The page has a **broadcast mode** built for recording. Everything sits on a
-fixed 1920×1080 stage that scales to fit the browser source. At 2560×1440 or
-3840×2160 it renders sharper, because the chart is drawn as vectors, not
-blown up.
+Record the page itself with screen capture, pressing the buttons on camera
+(owner's choice, September 2026; the separate OBS broadcast mode was tried and
+removed).
 
-- **Layout:** a large chart with the current settings in its title, the
-  alliance/shape key, and a card for the pinned character (stats, both
-  scores, passive, active, gear, relic and the Creed sparring line). The
-  controls, table, notes and trait lists are hidden.
-- **Setting up the browser source:**
-  1. Add a Browser source.
-  2. Either tick **Local file** and pick
-     `Damage Visualiser/roster-battle-map-obs.html`, or untick it and use a
-     URL (needed for the per-scene settings below), e.g.
-     `file:///C:/Video%20Prod/Github/Tacticus/Damage%20Visualiser/roster-battle-map.html#obs&view=map&tier=mythic&gear=1&sel=Kharn`.
-  3. Set the width and height to **1920×1080**, or **2560×1440** to scale it
-     down in the edit for a sharper image. Any 16:9 size works.
-  4. After a rebuild, press **Refresh cache of current page** in the source's
-     properties.
-- **URL settings** (after `#` or `?`, joined with `&`), so each OBS scene
-  can open on its own view:
-  - `obs`: broadcast mode (not needed for the `-obs` file)
-  - `view=attack|defence|map`
-  - `tier=gold|d3|mythic`
-  - `traits=base|trig`
-  - `level=` one of the tier's two levels (e.g. 36, 50)
-  - `gear=0|1` and `active=0|1`
-  - `shift=1`, and `names=0` to hide names
-  - `sel=Name` pins a character; part of a name works
-  - `bg=transparent` gives a see-through background, for overlaying
-    footage. The cards keep their dark panels.
-- **Keyboard** (use OBS's **Interact** window, or the page in a browser):
-
-  | Key | Does |
-  |---|---|
-  | 1 / 2 / 3 | Attack / Defence / Map view |
-  | P | Progression: Gold → Diamond III → Mythic |
-  | T | Traits: always-on / all triggered |
-  | L | Ability level |
-  | G | Gear: none / standard |
-  | A | Active ability: off / on |
-  | S | Shift arrows |
-  | N | Names |
-  | / or F | Find a character: type, then Enter pins them |
-  | Esc | Unpin |
-  | H | Show / hide the key list (not on screen otherwise) |
-
-  Clicking a dot pins it too, and clicking it again unpins it. The dots
-  animate between settings, so a key press on camera looks deliberate.
+- **It fills the screen.** On a window wider than 1440 pixels the page lays
+  itself out at 1440 and zooms up, as big as the window allows while the
+  header and the whole chart stay on screen (`fitPage()` in the template).
+  - Use the browser's full screen (**F11**) so the chart gets the full
+    height. At 2560×1440 full screen it zooms about 1.7 times.
+  - The character card sits under the controls; scroll the page to show the
+    rest of it.
+  - Below 1440 pixels wide it's the normal page, with no zoom.
 - **Fonts** come from Google Fonts, so the PC needs internet access.
   Without it the page falls back to standard fonts.
-- **No `requestAnimationFrame`** is used, so reveals don't freeze in an OBS
-  source that isn't painting (the same lesson as the LE template).
+- Open the local file `Damage Visualiser/roster-battle-map.html`, or the live
+  page above. After a rebuild, refresh the page.
 
 ---
 
@@ -426,11 +388,11 @@ The **Mythic tier** is built in (September 2026).
 ## Changing the page
 
 - Edit **`map_template.html` only**, then run `build_map.py`. Never edit
-  `roster-battle-map.html` or the `-obs` copy.
-- **Broadcast mode** is the `body.obs` CSS and the "URL settings, keyboard
-  shortcuts and the broadcast stage" part of the script. The build turns it
-  on for the `-obs` file by replacing `/*OBS*/false` with `true`. In broadcast
-  mode the chart is shorter (`H = 640`) so the stage fits 1080 pixels.
+  `roster-battle-map.html`.
+- **Filling the screen** is `fitPage()` at the end of the script and the
+  `.wrap.fit` CSS: above 1440 pixels wide the page is laid out at 1440 and
+  zoomed with CSS `zoom`. The tooltip divides by that zoom when it positions
+  itself. The chart is 1000×640 so it fits a 16:9 screen with the header.
 - The page is deliberately **dark only**, to match the channel's video
   template.
 - Fonts are Cinzel (headings), Rajdhani (numbers and labels) and Inter (text),
@@ -506,6 +468,7 @@ The **Mythic tier** is built in (September 2026).
 
 | Date | Change |
 |---|---|
+| September 2026 | OBS broadcast mode removed (owner prefers to record the normal page and press the buttons on camera). The page now zooms up to fill wide screens; the chart is 1000×640 |
 | September 2026 | Broadcast mode for OBS (1920×1080 stage scaling to any 16:9 size, keyboard shortcuts, URL settings, `roster-battle-map-obs.html`); Attack/Defence views spread so most names fit; no reference characters (owner) |
 | September 2026 | Progression tiers (Gold / Diamond III / Mythic), relics at Mythic (`relic_owners.csv` from the wiki, `relic_abilities.csv` reviewed), long-format `tacticus_stats.csv` |
 | September 2026 | Gear switch (standard Legendary loadouts, crits/blocks at their average) and the `Gear` column |
