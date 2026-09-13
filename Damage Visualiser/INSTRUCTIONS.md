@@ -5,8 +5,8 @@ owner and for future Claude sessions: follow it step by step, and you
 shouldn't need this conversation's history.
 
 - **What it is:** an interactive chart of every playable character.
-  - **Damage** = how many of their attacks it takes to kill a typical enemy.
-  - **Toughness** = how many attacks a typical enemy needs to kill them.
+  - **Damage** = how many of their attacks it takes to kill a typical character (the middle result against the whole roster).
+  - **Toughness** = how many attacks a typical character needs to kill them.
   - All at Winged D3 with no gear, for the DB Preacher Plays channel.
 - **The rules behind the numbers:** `DAMAGE_MODEL.md`.
 - **Design decisions and next steps:** `PLAN.md`.
@@ -78,7 +78,7 @@ python -X utf8 build_map.py
    - Then publish `Damage Visualiser/roster-battle-map.html` with `url` set to
      that URL.
    - Publishing without `url` creates a separate page with a new link.
-7. **Commit and push:** `active_abilities.csv`, `roster-battle-map.html`,
+7. **Commit and push:** `active_abilities.csv`, `passive_abilities.csv`, `roster-battle-map.html`,
    `../LRE Script/tacticus_stats.csv`, and any doc changes. `CLAUDE.md`
    pre-approves commit and push to `main`.
 
@@ -100,7 +100,7 @@ python -X utf8 build_map.py
    `Do_Not_Use=Y` until they're released.
 2. Wait until tacticustable.com has them: `update_game_data.py` reports the new
    version.
-3. Run `build_map.py`. It drafts their `active_abilities.csv` row. Review it
+3. Run `build_map.py`. It drafts their `active_abilities.csv` and `passive_abilities.csv` rows. Review them
    against the rules below, then build again and republish.
 
 ---
