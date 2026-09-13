@@ -178,6 +178,18 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
   all 32"*).
 - **Directions** go in brackets: *("HERO" text over footage…)*.
 
+## Length
+
+- **He reads at about 193 words per minute** and aims for **8 minutes or
+  more** per video.
+- So a script needs **at least 1,550 spoken words**. Count only what he
+  reads out: leave out the YouTube details, `[On screen…]` cues and
+  on-screen-only lists, but include the Creed sketch lines.
+- The example scripts run longer than that (about 2,700 to 3,800 spoken
+  words, so 14 to 20 minutes), so 8 minutes is a floor, not a target to
+  trim down to.
+- Put an estimate at the top of each draft: *spoken words ÷ 193 = minutes*.
+
 ## Things that don't sound like him
 
 - Corporate or hype phrasing: "game-changer", "unlock your potential",
@@ -193,9 +205,7 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
 
 ## Open questions for the owner
 
-1. How long should a typical script be? These run from about 2,800 to 7,300
-   words.
-2. Anything you'd never say, or always say, that isn't here?
+1. Anything you'd never say, or always say, that isn't here?
 
 ## Changelog
 
@@ -203,3 +213,4 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
 |---|---|
 | September 2026 | First draft from five example scripts |
 | September 2026 | Owner: Space Hulk and Top 10 are his own writing, the Genestealer lore was tool-written, and no lore by default. Added measured sentence rhythm; the tool rhythm moved to "doesn't sound like him" |
+| September 2026 | Owner: reads at about 193 words per minute and aims for 8+ minute videos. Added the Length section |

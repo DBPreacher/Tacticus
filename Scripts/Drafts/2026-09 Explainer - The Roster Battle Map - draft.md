@@ -23,6 +23,8 @@ Enter ingame for 100 free blackstone: ABA-88-PLY
 `roster-battle-map.html`, using the settings in each cue below, or press the
 keys in Interact. Cues are in [On screen: …] brackets.*
 
+*Length: about 2,030 spoken words ÷ 193 = roughly 10½ minutes.*
+
 *Draft 3: in the Space Hulk / Top 10 voice (long spoken sentences with the
 odd short punch, no em dashes). Edit freely and save your version next to
 this one as `... - final.md`, so the two can be compared to improve
