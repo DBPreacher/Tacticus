@@ -1,0 +1,223 @@
+<meta charset="utf-8">
+<title>What Is a Typical Character?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<!-- Built by build_typical.py: edit this template, never typical-character.html. /*DATA*/ is replaced with the model output. -->
+<style>
+:root{
+  --ground:#0a0a0a; --panel:#0f1318; --panel-2:#141a21; --rule:#232b35; --rule-soft:#1a2029;
+  --ink:#e8eaf0; --ink-2:#a3aab8; --ink-3:#6e7686; --guide:#4a5363;
+  --imperial:#d9ad3f; --chaos:#dc4638; --xenos:#5cbfe0;
+  --display:'Cinzel',Georgia,'Times New Roman',serif;
+  --data:'Rajdhani','Arial Narrow',Arial,sans-serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);margin:0;overflow:hidden;display:grid;place-items:center}
+/* a fixed 1600x900 stage, zoomed to fit the window by fit() */
+.stage{width:1600px;height:900px;padding:34px 44px 30px;display:flex;flex-direction:column;gap:18px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;border-bottom:1px solid var(--rule);padding-bottom:16px}
+.eyebrow{font-family:var(--data);font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--display);font-weight:700;font-size:40px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em}
+.setting{font-family:var(--data);font-weight:600;font-size:16px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:4px 12px;border-radius:3px;white-space:nowrap}
+.caption{min-height:92px}
+.caption b{display:block;font-family:var(--data);font-weight:700;font-size:38px;line-height:1.15;letter-spacing:.01em}
+.caption span{display:block;font-size:19px;color:var(--ink-2);margin-top:6px}
+.chart{position:relative;flex:1;min-height:0}
+svg{display:block;width:100%;height:100%;font-family:var(--data)}
+.tick{fill:var(--ink-3);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.grid line{stroke:var(--rule-soft)}
+.axis-title{fill:var(--ink-2);font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.bar{transition:transform .9s cubic-bezier(.22,.9,.32,1)}
+.bar rect.fill{transform-box:fill-box;transform-origin:50% 100%;transition:transform .7s cubic-bezier(.22,.9,.32,1),opacity .4s,fill .4s}
+.bar rect.hit{fill:transparent;cursor:default}
+.dim .bar rect.fill{opacity:.25}
+.dim .bar.mid rect.fill{opacity:1;fill:#fff}
+.bar.hover rect.fill{opacity:1}
+.end{fill:var(--ink-2);font-size:16px;font-weight:600;transition:opacity .4s}
+.end b{fill:var(--ink)}
+.midline{stroke:#fff;stroke-width:1.5;stroke-dasharray:5 6;transition:opacity .4s}
+.callout rect{fill:#06080b;stroke:#fff;stroke-width:1.5}
+.callout .big{fill:#fff;font-size:34px;font-weight:700}
+.callout .small{fill:var(--ink-2);font-size:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.bracket{stroke:var(--ink-3);stroke-width:1.5;fill:none}
+.bracket-t{fill:var(--ink-2);font-size:18px;font-weight:600}
+.fade{opacity:0}
+.reveal{transition:opacity .45s .5s}
+.readout{position:absolute;right:0;top:0;font-family:var(--data);font-size:20px;font-weight:600;color:var(--ink-2);text-align:right;min-height:26px}
+.readout b{color:var(--ink)}
+.controls{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.seg{display:inline-grid;grid-auto-flow:column;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;font-family:var(--data);font-weight:600;font-size:18px;padding:9px 18px;color:var(--ink-2);background:var(--panel-2);white-space:nowrap}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#0a0a0a}
+.seg button:focus-visible,select:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.label{font-family:var(--data);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-right:10px}
+select{font:600 18px var(--data);color:var(--ink);background:var(--panel-2);border:1px solid var(--rule);border-radius:4px;padding:8px 12px}
+.legend{margin-left:auto;display:flex;gap:16px;font-family:var(--data);font-weight:600;font-size:16px;color:var(--ink-2)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px}
+@media (prefers-reduced-motion:reduce){.bar,.bar rect.fill,.reveal,.end,.midline{transition:none}}
+</style>
+
+<div class="stage" id="stage">
+  <header>
+    <div>
+      <div class="eyebrow">DB Preacher Plays · Roster Battle Map</div>
+      <h1>What is a “typical character”?</h1>
+    </div>
+    <div class="setting" id="setting"></div>
+  </header>
+
+  <div class="caption" aria-live="polite"><b id="capBig"></b><span id="capSmall"></span></div>
+
+  <div class="chart">
+    <svg id="svg" viewBox="0 0 1512 540" role="img" aria-label="One character's result against every character, as bars"></svg>
+    <div class="readout" id="readout"></div>
+  </div>
+
+  <div class="controls">
+    <div><span class="label">Step</span><span class="seg" id="segStep">
+      <button data-v="1" aria-pressed="true">1 · Every answer</button>
+      <button data-v="2" aria-pressed="false">2 · Line them up</button>
+      <button data-v="3" aria-pressed="false">3 · Pick the middle</button>
+    </span></div>
+    <div><span class="seg" id="segDir">
+      <button data-v="dmg" aria-pressed="true">Damage</button>
+      <button data-v="tough" aria-pressed="false">Toughness</button>
+    </span></div>
+    <div><span class="label">Character</span><select id="who" aria-label="Character"></select></div>
+    <div class="legend"><span><i style="background:var(--imperial)"></i>Imperial</span><span><i style="background:var(--chaos)"></i>Chaos</span><span><i style="background:var(--xenos)"></i>Xenos</span></div>
+  </div>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+const C = DATA.chars, K = DATA.k, N = C.length, MID = (N - 1) >> 1;   // 117 answers: the 59th is the middle
+const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
+const S = {step:1, dir:'dmg', who:Math.max(0, C.findIndex(c => c.n === DATA.start))};
+const NS = 'http://www.w3.org/2000/svg';
+const W = 1512, H = 540, M = {l:64, r:8, t:92, b:66};
+const PW = W - M.l - M.r, PH = H - M.t - M.b, SLOT = PW / N, BW = SLOT * 0.72;
+const svg = document.getElementById('svg');
+const el = (tag, attrs = {}, parent = svg) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+const f1 = v => v.toFixed(1);
+const ord = n => n + (['th','st','nd','rd'][(n % 100 - 20) % 10] || ['th','st','nd','rd'][n % 100] || 'th');
+
+document.getElementById('setting').textContent = DATA.setting;
+const sel = document.getElementById('who');
+[...C.keys()].sort((a, b) => C[a].n.localeCompare(C[b].n)).forEach(i => { const o = document.createElement('option'); o.value = i; o.textContent = C[i].n; sel.appendChild(o); });
+sel.value = S.who;
+
+/* static layers: grid + axis, then bars, then the step-3 overlay */
+const gGrid = el('g', {class:'grid'}), gBars = el('g'), gOver = el('g');
+el('text', {x:-(M.t + PH / 2), y:18, transform:'rotate(-90)', 'text-anchor':'middle', class:'axis-title'}).textContent = 'Attacks to kill';
+const bars = C.map((c, i) => {
+  const g = el('g', {class:'bar'}, gBars);
+  const r = el('rect', {class:'fill', x:(SLOT - BW) / 2, y:M.t, width:BW, height:PH, rx:2, fill:ALLY[c.a]}, g);
+  el('rect', {class:'hit', x:0, y:M.t - 40, width:SLOT, height:PH + 40}, g);
+  g.addEventListener('pointerenter', () => hover(i, true));
+  g.addEventListener('pointerleave', () => hover(i, false));
+  return {g, r};
+});
+const endL = el('text', {class:'end reveal', 'text-anchor':'start'}), endR = el('text', {class:'end reveal', 'text-anchor':'end'});
+const midLine = el('line', {class:'midline reveal'}, gOver);
+const callout = el('g', {class:'callout reveal'}, gOver);
+const coStem = el('line', {stroke:'#fff', 'stroke-width':1.5}, callout), coBox = el('rect', {rx:4}, callout), coBig = el('text', {class:'big', 'text-anchor':'middle'}, callout), coSmall = el('text', {class:'small', 'text-anchor':'middle'}, callout);
+const brL = el('path', {class:'bracket reveal'}, gOver), brR = el('path', {class:'bracket reveal'}, gOver);
+const brLt = el('text', {class:'bracket-t reveal', 'text-anchor':'middle'}, gOver), brRt = el('text', {class:'bracket-t reveal', 'text-anchor':'middle'}, gOver);
+
+function values() { const w = S.who; return S.dir === 'dmg' ? K[w] : K.map(row => row[w]); }
+function niceMax(v) { const steps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]; const p = Math.pow(10, Math.floor(Math.log10(v))); for (const s of steps) if (s * p >= v) return s * p; return 10 * p; }
+
+function render() {
+  const who = C[S.who].n, vals = values();
+  const order = [...vals.keys()].sort((a, b) => vals[a] - vals[b] || C[a].n.localeCompare(C[b].n));
+  const slot = new Array(N); order.forEach((idx, pos) => slot[idx] = pos);
+  const m = vals[order[MID]];
+  // the scale stops at 4x the middle answer, so one freak matchup can't flatten every other bar
+  const sorted = S.step >= 2, ymax = niceMax(Math.min(Math.max(...vals), 4 * m) * 1.05);
+  const Y = v => M.t + PH - Math.min(v, ymax) / ymax * PH;
+
+  // grid and ticks for this character's scale
+  gGrid.replaceChildren();
+  const tickStep = niceMax(ymax / 5);
+  for (let v = 0; v <= ymax + 1e-9; v += tickStep) {
+    el('line', {x1:M.l, x2:W - M.r, y1:Y(v), y2:Y(v)}, gGrid);
+    el('text', {x:M.l - 10, y:Y(v) + 5, 'text-anchor':'end', class:'tick'}, gGrid).textContent = Number.isInteger(v) ? v : v.toFixed(1);
+  }
+
+  bars.forEach((b, i) => {
+    const pos = sorted ? slot[i] : i;
+    b.g.style.transform = `translateX(${M.l + pos * SLOT}px)`;
+    b.g.style.transitionDelay = sorted ? `${slot[i] * 4}ms` : `${i * 2}ms`;
+    b.r.style.transform = `scaleY(${Math.min(Math.max(vals[i] / ymax, 0.004), 1)})`;
+    b.g.classList.toggle('mid', i === order[MID]);
+  });
+  svg.classList.toggle('dim', S.step === 3);
+
+  // step 2+: the two ends
+  const first = order[0], last = order[N - 1];
+  endL.innerHTML = `<tspan>${esc(C[first].n)} </tspan><tspan style="fill:var(--ink)">${f1(vals[first])}</tspan>`;
+  endL.setAttribute('x', M.l); endL.setAttribute('y', Y(vals[first]) - 14);
+  endR.innerHTML = `<tspan>${esc(C[last].n)} </tspan><tspan style="fill:var(--ink)">${f1(vals[last])}</tspan>${vals[last] > ymax ? '<tspan> · off the scale</tspan>' : ''}`;
+  endR.setAttribute('x', W - M.r); endR.setAttribute('y', Y(vals[last]) - 14);
+  [endL, endR].forEach(e => e.classList.toggle('fade', !sorted));
+
+  // step 3: the middle one
+  const mx = M.l + MID * SLOT + SLOT / 2, my = Y(m);
+  midLine.setAttribute('x1', M.l); midLine.setAttribute('x2', W - M.r); midLine.setAttribute('y1', my); midLine.setAttribute('y2', my);
+  const cw = 230, ch = 74, cy = Math.max(4, Math.min(my - ch - 26, M.t - 10));
+  coStem.setAttribute('x1', mx); coStem.setAttribute('x2', mx); coStem.setAttribute('y1', cy + ch); coStem.setAttribute('y2', my - 8);
+  coBox.setAttribute('x', mx - cw / 2); coBox.setAttribute('y', cy); coBox.setAttribute('width', cw); coBox.setAttribute('height', ch);
+  coBig.setAttribute('x', mx); coBig.setAttribute('y', cy + 38); coBig.textContent = `${f1(m)} attacks`;
+  coSmall.setAttribute('x', mx); coSmall.setAttribute('y', cy + 62); coSmall.textContent = `${ord(MID + 1)} of ${N} · ${S.dir === 'dmg' ? 'Damage' : 'Toughness'}`;
+  const by = H - M.b + 20, lx1 = M.l + 2, lx2 = mx - SLOT, rx1 = mx + SLOT, rx2 = W - M.r - 2;
+  brL.setAttribute('d', `M${lx1},${by - 8}V${by}H${lx2}V${by - 8}`);
+  brR.setAttribute('d', `M${rx1},${by - 8}V${by}H${rx2}V${by - 8}`);
+  brLt.setAttribute('x', (lx1 + lx2) / 2); brLt.setAttribute('y', by + 28);
+  brRt.setAttribute('x', (rx1 + rx2) / 2); brRt.setAttribute('y', by + 28);
+  brLt.textContent = S.dir === 'dmg' ? `${MID} characters go down quicker` : `${MID} characters kill ${who} quicker`;
+  brRt.textContent = `${N - 1 - MID} take longer`;
+  [midLine, callout, brL, brR, brLt, brRt].forEach(e => e.classList.toggle('fade', S.step !== 3));
+
+  // caption
+  const cap = S.dir === 'dmg' ? [
+    [`${who} attacks every character in the game, one at a time`, `That's ${N} different answers: how many attacks ${who} needs to kill each of them.`],
+    [`Line all ${N} answers up, quickest to slowest`, `From ${C[first].n} in ${f1(vals[first])} attacks to ${C[last].n} in ${f1(vals[last])}.`],
+    [`The one right in the middle is the score: ${f1(m)} attacks`, `That's ${who}'s Damage. Half the roster goes down quicker than that, half takes longer.`]
+  ] : [
+    [`Every character in the game attacks ${who}, one at a time`, `That's ${N} different answers: how many attacks each of them needs to kill ${who}.`],
+    [`Line all ${N} answers up, quickest to slowest`, `From ${C[first].n} in ${f1(vals[first])} attacks to ${C[last].n} in ${f1(vals[last])}.`],
+    [`The one right in the middle is the score: ${f1(m)} attacks`, `That's ${who}'s Toughness. Half the roster kills ${who} quicker than that, half takes longer.`]
+  ];
+  document.getElementById('capBig').textContent = cap[S.step - 1][0];
+  document.getElementById('capSmall').textContent = cap[S.step - 1][1];
+  pressed('segStep', S.step); pressed('segDir', S.dir);
+  render.vals = vals;
+}
+
+function hover(i, on) {
+  bars[i].g.classList.toggle('hover', on);
+  const who = C[S.who].n, v = render.vals[i];
+  document.getElementById('readout').innerHTML = on ? (S.dir === 'dmg'
+    ? `${esc(who)} kills <b>${esc(C[i].n)}</b> in <b>${f1(v)}</b> attacks`
+    : `<b>${esc(C[i].n)}</b> kills ${esc(who)} in <b>${f1(v)}</b> attacks`) : '';
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function pressed(id, v) { document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === String(v)))); }
+
+document.querySelectorAll('#segStep button').forEach(b => b.onclick = () => { S.step = +b.dataset.v; render(); });
+document.querySelectorAll('#segDir button').forEach(b => b.onclick = () => { S.dir = b.dataset.v; render(); });
+sel.onchange = () => { S.who = +sel.value; render(); };
+
+/* zoom the 1600x900 stage to fit the window, as big as it will go */
+const stage = document.getElementById('stage');
+let fitSize = '';
+function fit() { const s = innerWidth + 'x' + innerHeight; if (s === fitSize) return; fitSize = s; stage.style.zoom = Math.min(innerWidth / 1600, innerHeight / 900); }
+addEventListener('resize', fit);
+if (window.ResizeObserver) new ResizeObserver(fit).observe(document.documentElement);
+fit();
+render();
+</script>

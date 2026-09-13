@@ -31,6 +31,8 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
+| `build_typical.py` / `typical_template.html` | Build the "what is a typical character?" graphic (see below) | Template only, for design changes |
+| `typical-character.html` | That graphic, built | **Never.** It's overwritten |
 | `cache/gameinfo.json` | The downloaded game data (about 11 MB), ignored by git | No |
 | `../LRE Script/tacticus_stats.csv` | Output: the stats "second tab" (stats, weapons, active ability, all scenario scores) | **Never.** It's overwritten |
 | `DAMAGE_MODEL.md` / `PLAN.md` | Rules record and design plan | Yes, whenever a rule or decision changes |
@@ -48,6 +50,7 @@ Run these from inside `Damage Visualiser/`:
 ```
 python -X utf8 update_game_data.py
 python -X utf8 build_map.py
+python -X utf8 build_typical.py
 ```
 
 1. **`update_game_data.py`** prints the live and cached game versions. It only
@@ -126,6 +129,29 @@ removed).
   Without it the page falls back to standard fonts.
 - Open the local file `Damage Visualiser/roster-battle-map.html`, or the live
   page above. After a rebuild, refresh the page.
+
+---
+
+## The "typical character" graphic
+
+`typical-character.html` explains what "a typical character" means, for
+videos. `build_typical.py` works out every single matchup (117 × 117) at the
+map's opening setting (Diamond III, always-on traits, the lower ability
+level, active off, no gear) with `build_map.py`'s own model, and the page
+shows one character's 117 answers as bars.
+
+- **Three steps, as buttons to press on camera:** 1 · Every answer (roster
+  order), 2 · Line them up (quickest to slowest), 3 · Pick the middle (the
+  59th answer is highlighted, with the two halves bracketed).
+- **Damage / Toughness:** the character attacking everyone, or everyone
+  attacking them. The middle answers are exactly the map's Damage and
+  Toughness at that setting; the build prints Kharn's as a check.
+- **Character** picker: opens on Kharn, any character works.
+- **The bar scale stops at 4× the middle answer,** so one freak matchup
+  (Ammuk against Uthar is over 4,000 attacks) can't flatten every other bar;
+  the end label then says "off the scale".
+- It's a fixed 1600×900 stage zoomed to fit the window, so it fills any
+  screen. Hover a bar for that matchup.
 
 ---
 
@@ -478,6 +504,7 @@ The **Mythic tier** is built in (September 2026).
 
 | Date | Change |
 |---|---|
+| September 2026 | `build_typical.py` and `typical-character.html`: the "what is a typical character?" graphic (one character's 117 answers, lined up, middle picked out) |
 | September 2026 | OBS broadcast mode removed (owner prefers to record the normal page and press the buttons on camera). The page now zooms up to fill wide screens. Layout is chart | character card | controls side by side (owner), with the alliance and melee/ranged key under the chart ("Ranged is their best attack") and "Reading the chart" below; the chart is 1000×670 |
 | September 2026 | Broadcast mode for OBS (1920×1080 stage scaling to any 16:9 size, keyboard shortcuts, URL settings, `roster-battle-map-obs.html`); Attack/Defence views spread so most names fit; no reference characters (owner) |
 | September 2026 | Progression tiers (Gold / Diamond III / Mythic), relics at Mythic (`relic_owners.csv` from the wiki, `relic_abilities.csv` reviewed), long-format `tacticus_stats.csv` |
