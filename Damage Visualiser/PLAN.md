@@ -20,7 +20,7 @@ rules behind it are in `DAMAGE_MODEL.md`.
 | Situational traits | Two scores, owner's idea: **Always-on** (the trait rule) and **All triggered** (situational traits on, random ones at their average). Rapid Assault is off in Always-on (owner) |
 | Views | **Attack** (damage only), **Defence** (toughness only) and **Map** (both), owner's idea. Switching animates the dots between views |
 | Alliance colours | From the in-game alliance icons: Imperial gold, Chaos red, Xenos light blue (owner) |
-| Reference characters | Long-standing characters that players already have a picture of (not recent releases like Nubari). Different characters for attack and defence |
+| Reference characters | **None** (owner, September 2026): the charts work as they are, with every character labelled where there is room |
 | Data | Separate file `tacticus_stats.csv`. `tacticus_characters.csv` and `le_analysis.py` are untouched |
 | Progression | **Gold / Diamond III / Mythic** switch (owner). Gold = Epic 8★ Gold I, abilities 26/35, Epic gear. Mythic = 14★ Adamantine II, abilities 50/60, Mythic gear + relic at level 10. Every character can be Mythic |
 
@@ -124,8 +124,6 @@ too (build step 5).
 
 ## Open questions
 
-- Pick the reference characters for each view, now that the explorer shows
-  who is where.
 - Which traits setting (or both) to show in videos.
 - Places where tacticustable.com data disagrees with the game (owner to bring
   examples).

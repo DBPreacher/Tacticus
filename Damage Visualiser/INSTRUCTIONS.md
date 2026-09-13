@@ -375,6 +375,7 @@ The **Mythic tier** is built in (September 2026).
   - The colourblind separation check passes (ΔE 15.9).
   - Everything else on the page is neutral grey or white, so no interface
     colour can be mistaken for an alliance.
+- **Attack / Defence views** keep the measured axis exact and spread the dots across the other one, each dot reserving room for its name (`spread()` in the template). About 100 of 117 names fit in Attack and all of them in Defence; the rest show on hover.
 - **Views:**
   - **Map** is the scatter plot.
   - **Attack** keeps the damage axis and spreads the dots sideways, so they

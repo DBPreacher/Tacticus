@@ -34,7 +34,7 @@ svg{display:block;width:100%;height:auto;font-family:var(--data)}
 .axis-title{fill:var(--ink-2);font-size:13.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .off{display:none}
 .median{stroke:var(--guide);stroke-width:1;stroke-dasharray:4 5}
-.median-label{fill:var(--ink-3);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.median-label{paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round;fill:var(--ink-3);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
 .quad{fill:#343b47;font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
 .dot{cursor:pointer;transition:transform .6s cubic-bezier(.22,.9,.32,1),opacity .25s}
 .dot .mark{stroke:var(--panel);stroke-width:1.6}
@@ -43,7 +43,7 @@ svg{display:block;width:100%;height:auto;font-family:var(--data)}
 .dot.dim .hit{pointer-events:none}
 .ring{fill:none;stroke:var(--ink);stroke-width:2}
 .ring.find{stroke-dasharray:3 3}
-.lbl{fill:var(--ink-2);font-size:12px;font-weight:600;pointer-events:none}
+.lbl{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round;fill:var(--ink-2);font-size:12px;font-weight:600;pointer-events:none}
 .lbl.sel{fill:var(--ink);font-size:14px;font-weight:700}
 .lbl.find{fill:var(--ink)}
 #labels{transition:opacity .2s}
@@ -350,28 +350,38 @@ function shapeFor(c,g){
 const visible=c=>!S.hidden.has(c.alliance);
 const matches=c=>{const q=S.q.trim().toLowerCase();return q&&(c.name.toLowerCase().includes(q)||c.faction.toLowerCase().includes(q));};
 
-/* beeswarm: keeps the measured axis exact and spreads dots across the other one */
-function swarm(vals,centre,lo,hi){
-  const D=13, placed=[], out={};
-  [...vals].sort((a,b)=>a.v-b.v).forEach(p=>{
-    for(let i=0;i<400;i++){
-      const off=(i%2?1:-1)*Math.ceil(i/2)*3, pos=centre+off;
-      if(pos<lo||pos>hi) continue;
-      if(placed.every(q=>{const dv=Math.abs(q.v-p.v);return dv>=D||Math.abs(q.pos-pos)>=Math.sqrt(D*D-dv*dv);})){placed.push({v:p.v,pos});out[p.name]=pos;return;}
+/* Attack / Defence views: the measured axis stays exact and dots spread across the other axis.
+   Each dot reserves room for its name to its right, so most names fit without overlapping;
+   if there's no room left, the dot is placed without label room (its name then shows on hover). */
+const labelText=(c,p)=>c.name+(offScale(p)?` (${fmt(p.d>YD[1]?p.d:p.t)}, off the scale)`:'');
+function spread(items,vertical){
+  // items: {name, v = fixed coordinate, w = label width}; vertical=false: v is y, spread x (Attack)
+  const placed=[], out={}, cx=(M.l+W-M.r)/2, cy=(M.t+H-M.b)/2;
+  const lo=vertical?M.t+8:M.l+8, hi=vertical?H-M.b-8:W-M.r-8, centre=vertical?cy:cx;
+  const clash=r=>placed.some(o=>r[0]<o[2]&&r[2]>o[0]&&r[1]<o[3]&&r[3]>o[1]);
+  const rectAt=(it,pos,withLabel)=>{const x=vertical?it.v:pos, y=vertical?pos:it.v, right=withLabel?12+it.w:7;
+    return [x-7,y-7,x+right,y+7];};
+  const inside=r=>r[0]>=M.l+2&&r[2]<=W-M.r-2&&r[1]>=M.t&&r[3]<=H-M.b;
+  [...items].sort((a,b)=>a.v-b.v).forEach(it=>{
+    for(const withLabel of [true,false]){
+      for(let i=0;i<700;i++){
+        const pos=centre+(i%2?1:-1)*Math.ceil(i/2)*4;
+        if(pos<lo||pos>hi) continue;
+        const r=rectAt(it,pos,withLabel);
+        if(inside(r)&&!clash(r)){placed.push(r);out[it.name]=pos;return;}
+      }
     }
-    out[p.name]=centre;
+    out[it.name]=centre;
   });
   return out;
 }
 function positions(scKey){
   const pos={};
   if(S.view==='map'){C.forEach(c=>{const p=T(c).s[scKey];pos[c.name]=[X(p.t),Y(p.d)];});return pos;}
-  if(S.view==='attack'){
-    const sx=swarm(C.map(c=>({name:c.name,v:Y(T(c).s[scKey].d)})),(M.l+W-M.r)/2,M.l+12,W-M.r-12);
-    C.forEach(c=>pos[c.name]=[sx[c.name],Y(T(c).s[scKey].d)]);return pos;
-  }
-  const sy=swarm(C.map(c=>({name:c.name,v:X(T(c).s[scKey].t)})),(M.t+H-M.b)/2,M.t+12,H-M.b-12);
-  C.forEach(c=>pos[c.name]=[X(T(c).s[scKey].t),sy[c.name]]);return pos;
+  const items=C.map(c=>{const p=T(c).s[scKey];return {name:c.name,v:S.view==='attack'?Y(p.d):X(p.t),w:labelText(c,p).length*6.1+4};});
+  const sp=spread(items,S.view==='defence');
+  C.forEach(c=>{const p=T(c).s[scKey];pos[c.name]=S.view==='attack'?[sp[c.name],Y(p.d)]:[X(p.t),sp[c.name]];});
+  return pos;
 }
 let POS={};
 
