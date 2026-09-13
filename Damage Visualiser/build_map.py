@@ -27,16 +27,36 @@ ROSTER_CSV = os.path.join(ROOT, 'LRE Script', 'tacticus_characters.csv')
 STATS_CSV = os.path.join(ROOT, 'LRE Script', 'tacticus_stats.csv')
 ACTIVES_CSV = os.path.join(HERE, 'active_abilities.csv')
 PASSIVES_CSV = os.path.join(HERE, 'passive_abilities.csv')
+RELICS_CSV = os.path.join(HERE, 'relic_abilities.csv')
+RELIC_OWNERS_CSV = os.path.join(HERE, 'relic_owners.csv')
 TEMPLATE = os.path.join(HERE, 'map_template.html')
 OUT_HTML = os.path.join(HERE, 'roster-battle-map.html')
 
-# ---- Standard setup (DAMAGE_MODEL.md "Standard setup") ----
-RANK = 'DIAMOND III'
-STARS = 11                      # Winged = the Legendary star = 11 stars
-STAR_MULT = 1 + 0.1 * STARS     # rank stats in the game data are at 0 stars
-ABILITY_LEVELS = (36, 50)       # 36 = the video standard, 50 = Legendary cap
-RARITY_MULT = 1.8               # Legendary. Common 1.0, +0.2 per rarity step, Mythic 2.0
-STANDARD = 'base_l36'           # the scenario the Creed sparring line uses
+# ---- Progression tiers (DAMAGE_MODEL.md "Standard setup"). set_tier() applies one. ----
+# rank: the rank row in the game data (MYTHIC I/II = Adamantine I/II). stars: rank stats are stored at
+# 0 stars and each star adds 10%. rarity: ability multiplier (Common 1.0, +0.2 per step, Mythic 2.0).
+# levels: the two Ability level buttons. gear: rarity of standard gear (each item at its top level).
+TIERS = [
+    dict(key='gold', label='Gold', rank='GOLD I', stars=8, rarity=1.6, levels=(26, 35), gear='Epic', relics=False,
+         about='Epic, 8 stars, Gold I'),
+    dict(key='d3', label='Diamond III', rank='DIAMOND III', stars=11, rarity=1.8, levels=(36, 50), gear='Legendary',
+         relics=False, about='Legendary, Winged (11 stars), Diamond III'),
+    dict(key='mythic', label='Mythic', rank='MYTHIC II', stars=14, rarity=2.0, levels=(50, 60), gear='Mythic',
+         relics=True, about='Mythic, 14 stars, Adamantine II, relic at level 10'),
+]
+RELIC_LEVEL = 10                # relic effects: max level. Relic values have no rarity multiplier
+
+
+def set_tier(t):
+    global TIER, RANK, STARS, STAR_MULT, RARITY_MULT, ABILITY_LEVELS, GEAR_RARITY, RELICS, STANDARD
+    TIER = t
+    RANK, STARS, RARITY_MULT, ABILITY_LEVELS = t['rank'], t['stars'], t['rarity'], t['levels']
+    STAR_MULT = 1 + 0.1 * STARS
+    GEAR_RARITY, RELICS = t['gear'], t['relics']
+    STANDARD = f'base_l{ABILITY_LEVELS[0]}'     # the scenario the Creed sparring line uses
+
+
+set_tier(TIERS[1])
 
 PIERCE = {'Bio': .30, 'Blast': .15, 'Bolter': .20, 'Chain': .20, 'Direct': 1, 'Energy': .30,
           'Eviscerating': .50, 'Flame': .25, 'Heavy Round': .55, 'Las': .10, 'Melta': .75,
@@ -55,7 +75,7 @@ SITUATIONAL = {'RapidAssault', 'HeavyWeapon', 'CrushingStrike', 'RangedSpecialis
 ACTIVE_COLS = ['Name', 'Active', 'Kind', 'Damage_Parts', 'Normal_Attack', 'Normal_Bonus', 'Same_Turn',
                'Defence', 'Gear', 'Needs_Review', 'Notes', 'Ability_Text']
 PASSIVE_COLS = ['Name', 'Passive', 'Attack', 'Defence', 'Gear', 'Needs_Review', 'Notes', 'Ability_Text']
-GEAR_RARITY = 'Legendary'           # standard gear: the best item of this rarity per slot, at its top level (owner)
+RELIC_COLS = ['Relic', 'Owners', 'Attack', 'Defence', 'Gear', 'Needs_Review', 'Notes', 'Ability_Text']
 SUPPRESSED, STUNNED = 0.7, 0.5      # damage multipliers of a Suppressed / Stunned enemy (wiki)
 ATTACKS_PER_TURN = 5                # one enemy turn = a full team of 5 attacking (owner, September 2026)
 
@@ -81,14 +101,23 @@ def _prod(vals):
 
 
 # ---------------------------------------------------------------- data loading
-def standard_gear(h, items):
+def standard_gear(h, items, relic=None):
     """the character's standard loadout: for each of its item slots, the best GEAR_RARITY item it may
     equip, at the item's top level. Crit/block items: the highest chance (keeps chains going across hits).
     Defensive items: the most Health + 2 x Armour. Relics are never used."""
     def allowed(v):
         return ((not v.get('allowedFactions') or h['factionId'] in v['allowedFactions'])
                 and (not v.get('allowedUnits') or h['id'] in v['allowedUnits']))
-    pool = [v for v in items.values() if v.get('rarity') == GEAR_RARITY and not v.get('isUniqueRelic') and allowed(v)]
+    pool = [v for v in items.values() if v.get('rarity') == GEAR_RARITY and not v.get('isUniqueRelic')
+            and not v.get('abilityId') and allowed(v)]
+    relic_slot = None
+    if RELICS and relic:
+        # the relic takes one of the character's slots: the same type, or else the nearest kind
+        # (Aethana's Phoenix Gem is a block booster but her booster slot is a crit booster)
+        near = {'I_Crit': ['I_Crit'], 'I_Block': ['I_Block', 'I_Defensive'], 'I_Defensive': ['I_Defensive', 'I_Block'],
+                'I_Booster_Block': ['I_Booster_Block', 'I_Booster_Crit'],
+                'I_Booster_Crit': ['I_Booster_Crit', 'I_Booster_Block']}.get(relic['item']['itemType'], [])
+        relic_slot = next((t for t in near if t in (h.get('itemSlots') or [])), None)
     gear = dict(cc=0.0, cd=0.0, bc=0.0, bd=0.0, hp=0.0, arm=0.0, items=[])
     crit_chances, crit_bonus = [], 0.0
     for slot in h.get('itemSlots') or []:
@@ -101,6 +130,8 @@ def standard_gear(h, items):
                'I_Defensive': lambda v: top(v).get('hp', 0) + 2 * top(v).get('fixedArmor', 0)}.get(
             slot, lambda v: (top(v).get('critChanceBonus', 0) + top(v).get('blockChanceBonus', 0)))
         v = max(cands, key=key)
+        if slot == relic_slot:
+            v, relic_slot = relic['item'], None           # the relic takes this slot
         st_ = top(v)
         if slot == 'I_Crit':
             crit_chances.append(st_.get('critChance', 0) / 100)
@@ -123,7 +154,7 @@ def standard_gear(h, items):
             gear['bc'] += st_.get('blockChanceBonus', 0) / 100
             gear['bd'] += st_.get('blockDmgBonus', 0)
             label = f"+{st_.get('blockChanceBonus', 0)}% block, +{st_.get('blockDmgBonus', 0):,} Block Damage"
-        gear['items'].append(f"{v['name']} ({label})")
+        gear['items'].append(f"{v['name']} ({label}){' · relic' if v.get('abilityId') else ''}")
     # two crit items (e.g. Calandis): 1 - (1-c1)(1-c2), then the booster is added (wiki HDTW_TwoCrit)
     gear['cc'] = (1 - _prod(1 - c for c in crit_chances) if crit_chances else 0.0) + crit_bonus
     gear['bc'] = min(gear['bc'], 1.0)
@@ -142,6 +173,12 @@ def load():
             by_norm.setdefault(norm(k), h)
     with open(ROSTER_CSV, newline='', encoding='utf-8') as f:
         roster = [r for r in csv.DictReader(f) if r['Is_MoW'] == 'N' and r['Do_Not_Use'] == 'N']
+    relic_items = {norm(v['name']): v for v in g['items'].values() if v.get('abilityId')}
+    owners = {}
+    if os.path.exists(RELIC_OWNERS_CSV):
+        with open(RELIC_OWNERS_CSV, newline='', encoding='utf-8') as f:
+            for r in csv.DictReader(f):
+                owners[norm(r['Character'])] = r['Relic']
     units, missing = [], []
     for r in roster:
         h = by_norm.get(norm(r['Name'])) or by_norm.get(ALIAS.get(norm(r['Name']), '#'))
@@ -149,6 +186,9 @@ def load():
             missing.append(r['Name'])
             continue
         rk = next(x for x in h['ranks'] if x['level'] == RANK)
+        rname = owners.get(norm(r['Name'])) or owners.get(norm(h['longName']))
+        ritem = relic_items.get(norm(rname)) if rname else None
+        relic = dict(name=ritem['name'], item=ritem, ability=g['abilities'].get(ritem['abilityId'])) if ritem else None
 
         def weapon(w, kind):
             if not w:
@@ -162,7 +202,7 @@ def load():
                           traits=set(h['traits'] or []),
                           ability=g['abilities'].get(h.get('activeAbility') or ''),
                           passive=g['abilities'].get(h.get('passiveAbility') or ''),
-                          gear=standard_gear(h, g['items']), ps=None, pg=None, g=None))
+                          relic=relic, gear=standard_gear(h, g['items'], relic), ps=None, pg=None, g=None))
     if missing:
         print('WARNING - in the CSV but not in the game data (add to ALIAS?):', ', '.join(missing))
     return g, units
@@ -319,6 +359,51 @@ def sync_rows(path, cols, name_col, units, drafter, label):
     return rows
 
 
+def sync_relics(g, units):
+    """relic_abilities.csv: one row per relic, reviewed like the ability files"""
+    rows = {}
+    if os.path.exists(RELICS_CSV):
+        with open(RELICS_CSV, newline='', encoding='utf-8') as f:
+            rows = {r['Relic']: r for r in csv.DictReader(f)}
+    by_relic = {}
+    for u in units:
+        if u['relic']:
+            by_relic.setdefault(u['relic']['name'], []).append(u['name'])
+    added, changed = [], []
+    for v in g['items'].values():
+        if not v.get('abilityId'):
+            continue
+        txt = clean((g['abilities'].get(v['abilityId']) or {}).get('description'))
+        own = '; '.join(sorted(by_relic.get(v['name'], [])))
+        if v['name'] not in rows:
+            rows[v['name']] = dict(Relic=v['name'], Owners=own, Attack='', Defence='', Gear='', Needs_Review='Y',
+                                   Notes='Draft: decide what counts.', Ability_Text=txt)
+            added.append(v['name'])
+            continue
+        r = rows[v['name']]
+        if r.get('Ability_Text') != txt:
+            r['Needs_Review'] = 'Y'
+            r['Notes'] = ('Relic text changed; ' + r.get('Notes', '')).strip()
+            changed.append(v['name'])
+        r['Owners'], r['Ability_Text'] = own, txt
+    with open(RELICS_CSV, 'w', newline='', encoding='utf-8') as f:
+        w = csv.DictWriter(f, fieldnames=RELIC_COLS)
+        w.writeheader()
+        for name in sorted(rows):
+            w.writerow({k: rows[name].get(k, '') for k in RELIC_COLS})
+    if added:
+        print(f'relic_abilities.csv: drafted {len(added)} new row(s): {", ".join(added)}')
+    if changed:
+        print(f'relic_abilities.csv: relic text changed, now flagged for review: {", ".join(changed)}')
+    review = [n for n, r in rows.items() if r['Needs_Review'] == 'Y']
+    if review:
+        print(f'relic_abilities.csv: {len(review)} row(s) marked Needs_Review=Y: {", ".join(sorted(review))}')
+    unowned = [n for n in rows if not rows[n]['Owners']]
+    if unowned:
+        print('WARNING - relics with no character in the roster (check relic_owners.csv):', ', '.join(unowned))
+    return rows
+
+
 # ---------------------------------------------------------------- tokens
 def parse_token(t):
     """'kind:arg[:scope][:vsTrait|Trait][@trig]' -> (kind, arg, scope, vs, trig_only)"""
@@ -345,9 +430,9 @@ def vs_text(vs):
     return f" vs {'/'.join(sorted(vs))}" if vs else ''
 
 
-def attack_spec(u, row, level, trig):
-    """a passive's Attack tokens -> effects on the character's own normal attacks"""
-    ab, text = u['passive'] or {}, (row or {}).get('Ability_Text', '')
+def attack_spec(u, row, level, trig, ab=None):
+    """a passive's (or relic's) Attack tokens -> effects on the character's own normal attacks"""
+    ab, text = (u['passive'] or {}) if ab is None else ab, (row or {}).get('Ability_Text', '')
     effects, desc = [], []
     for t in tokens((row or {}).get('Attack')):
         kind, arg, scope, vs, trig_only = parse_token(t)
@@ -359,10 +444,10 @@ def attack_spec(u, row, level, trig):
             desc.append(f"+{part_text(e['part'])} on each attack{WHERE[scope]}{vs_text(vs)}")
         elif kind == 'follow':
             desc.append('melee attacks are followed by a normal ranged attack')
-        elif kind in ('flat', 'pct', 'pierce', 'hits', 'armignore', 'ramp'):
+        elif kind in ('flat', 'pct', 'pierce', 'hits', 'armignore', 'ramp', 'armpct'):
             e['value'] = value_of(ab, arg, level)
             fmt = {'flat': '+{:,.0f} Damage', 'pct': '+{:.0f}% damage', 'pierce': '+{:.0f}% pierce',
-                   'hits': '+{:.0f} hit(s)', 'armignore': 'ignores {:,.0f} Armour',
+                   'hits': '+{:.0f} hit(s)', 'armignore': 'ignores {:,.0f} Armour', 'armpct': "target's Armour -{:.0f}%",
                    'ramp': 'each hit +{:,.0f} more than the last'}[kind]
             desc.append(fmt.format(e['value']) + WHERE[scope] + vs_text(vs))
         else:
@@ -448,10 +533,11 @@ def merge_defence(*specs):
     return out
 
 
-def gear_spec(u, ab, cell, level, trig):
+def gear_spec(u, ab, cell, level, trig, text=''):
     """Gear tokens (only used with standard gear on): crit and block effects of an ability.
     Returns (attacker effects, defence ds or None, text)."""
-    off, ds, text = [], new_ds(), []
+    off, ds, desc_extra = [], new_ds(), []
+    text_in, text = text, []
     for t in tokens(cell):
         kind, arg, scope, vs, trig_only = parse_token(t)
         if trig_only and not trig:
@@ -464,6 +550,10 @@ def gear_spec(u, ab, cell, level, trig):
                          'dmgfromblock': f'+{v:.0f}% of its Block Damage as Damage'}[kind] + w)
         elif kind == 'critdmg':
             off.append(dict(kind=kind, value=v, scope=scope, vs=vs)); text.append(f'+{v:,.0f} Crit Damage{w}')
+        elif kind == 'critextra':
+            part = build_part(ab, text_in, arg, level)
+            off.append(dict(kind=kind, value=0, part=part, scope=scope, vs=vs))
+            text.append(f'+{part_text(part)} when the attack crits{w}')
         elif kind == 'alwayscrit':
             off.append(dict(kind=kind, value=1, scope=scope, vs=vs)); text.append('always crits')
         elif kind == 'blockchance':
@@ -479,7 +569,7 @@ def gear_spec(u, ab, cell, level, trig):
         else:
             sys.exit(f"{u['name']}: unknown Gear token {t!r}")
     has_ds = ds['bc'] or ds['bd'] or ds['ccr'] or ds['cdr']
-    return off, (ds if has_ds else None), text
+    return off, (ds if has_ds else None), text + desc_extra
 
 
 def active_spec(u, row, level):
@@ -553,7 +643,7 @@ def hit_value(D, A, p, gravis, pass2=0.0):
 def _applies(e, kind, first, d):
     sc = e['scope']
     ok = sc == 'all' or sc == kind or (sc == 'after' and not first) or (sc == 'one' and first)
-    return ok and (e['vs'] is None or bool(e['vs'] & d['traits']))
+    return ok and (e['vs'] is None or bool(e['vs'] & (d['traits'] | {d.get('alliance')})))
 
 
 def _chain(c, n):
@@ -604,10 +694,9 @@ def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, f
     add = lambda k: sum(e['value'] for e in eff if e['kind'] == k)
     n, p = w['hits'] + int(add('hits')), min(1.0, w['pierce'] + add('pierce') / 100)
     D = (dmg_override if dmg_override is not None else a['dmg']) + add('flat')
-    if a.get('g'):
-        effg = [e for e in (a.get('pg') or []) + (gearx or []) if _applies(e, w['kind'], first, d)]
-        D += sum(e['value'] * a['g']['bd'] for e in effg if e['kind'] == 'dmgfromblock')
-    A = max(0.0, d['arm'] - add('armignore'))
+    effg = [e for e in (a.get('pg') or []) + (gearx or []) if _applies(e, w['kind'], first, d)] if a.get('g') else []
+    D += sum(e['value'] * a['g']['bd'] for e in effg if e['kind'] == 'dmgfromblock')
+    A = max(0.0, d['arm'] - add('armignore')) * (1 - min(add('armpct'), 100) / 100)
     psychic = w['type'] in ('Psychic', 'Direct')
     if melee and 'Parry' in dt and n > 1:
         n -= 1
@@ -644,6 +733,9 @@ def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, f
         # a crit adds Crit Damage before armour and skips Mk X Gravis
         per_crit = hit_value(D + cr[1], A, p, False, d.get('pass2', 0)) * m
         total += _chain(cr[0], n) * max(per_crit - per_hit, 0)
+        for e in effg:                                    # relic: extra hits when the attack crits (Maugetar)
+            if e['kind'] == 'critextra':
+                total += cr[0] * ability_hits(e['part'], d, 0.0, None, dblk)[0]
     if dblk and dblk['bc'] > 0 and not psychic:
         total -= _chain(dblk['bc'], n) * min(dblk['bd'], per_hit)   # blocks come last; Psychic can't be blocked
     if trig and not psychic:
@@ -681,7 +773,7 @@ def ability_hits(part, d, flat_red=0.0, crit=None, block=None):
 def _def_ok(scope, vs, kind, first_turn, psychic, a):
     ok = (scope == 'all' or scope == kind or (scope == 'one' and first_turn) or (scope == 'after' and not first_turn)
           or (scope == 'psychic' and psychic))
-    return ok and (vs is None or bool(vs & a['traits']))
+    return ok and (vs is None or bool(vs & (a['traits'] | {a.get('alliance')})))
 
 
 def one_attack(a, d, w, trig, ds, first_seq, first_turn=None, dmg_override=None, gearx=None):
@@ -872,70 +964,100 @@ def describe_gear_kit(sp, name):
 
 def describe_passive(sp, name):
     bits = []
-    ps = sp['passive'].get(name)
+    ps = sp['passive_only'].get(name)
     if ps:
         bits += ps[1]
-    ds = sp['passive_def'].get(name)
+    ds = sp['passive_only_def'].get(name)
     if ds:
         bits += ds['text']
     return '; '.join(bits)
 
 
-def write_stats(units, res, actives, passives, specs, version):
+def generic(key):
+    """scenario key with the tier's ability levels replaced by lv1/lv2 (for the long-format CSV)"""
+    for i, lv in enumerate(ABILITY_LEVELS):
+        key = key.replace(f'_l{lv}', f'_lv{i + 1}')
+    return key
+
+
+def tier_rows(units, res, actives, passives, specs):
+    """rows of tacticus_stats.csv for the current tier"""
     keys = [k for k, *_ in scenario_keys()]
-    cols = ['Name', 'Faction', 'Alliance', 'Health', 'Damage', 'Armour', 'Standard_Gear',
-            'Melee_Type', 'Melee_Hits', 'Melee_Pierce', 'Ranged_Type', 'Ranged_Hits', 'Ranged_Pierce', 'Ranged_Range',
-            'Passive_Ability', 'Active_Ability', 'Active_Kind']
-    cols += [f'Passive_Counted_L{lv}' for lv in ABILITY_LEVELS]
-    cols += [f'Active_Counted_L{lv}' for lv in ABILITY_LEVELS] + [f'Active_Defence_L{lv}' for lv in ABILITY_LEVELS]
-    cols += [f'Gear_Kit_L{lv}' for lv in ABILITY_LEVELS]
-    cols += [f'Damage_{k}' for k in keys] + [f'Toughness_{k}' for k in keys] + ['Game_Version']
+    out = []
+    for u in sorted(units, key=lambda u: u['name']):
+        wp = {x['kind']: x for x in u['weapons']}
+        m, r = wp.get('melee'), wp.get('ranged')
+        n = u['name']
+        row = dict(Tier=TIER['label'], Name=n, Faction=u['faction'], Alliance=u['alliance'],
+                   Health=round(u['hp']), Damage=round(u['dmg']), Armour=round(u['arm']),
+                   Standard_Gear='; '.join(u['gear']['items']), Relic=u['relic']['name'] if (RELICS and u['relic']) else '',
+                   Melee_Type=m['type'] if m else '', Melee_Hits=m['hits'] if m else '', Melee_Pierce=f"{m['pierce']:.0%}" if m else '',
+                   Ranged_Type=r['type'] if r else '', Ranged_Hits=r['hits'] if r else '',
+                   Ranged_Pierce=f"{r['pierce']:.0%}" if r else '', Ranged_Range=r['range'] if r else '',
+                   Passive_Ability=passives[n]['Passive'], Active_Ability=actives[n]['Active'], Active_Kind=actives[n]['Kind'],
+                   Ability_Level_1=ABILITY_LEVELS[0], Ability_Level_2=ABILITY_LEVELS[1])
+        for i, lv in enumerate(ABILITY_LEVELS):
+            row[f'Passive_Counted_Lv{i + 1}'] = describe_passive(specs[(lv, False, False)], n)
+            row[f'Active_Counted_Lv{i + 1}'] = describe_active(specs[(lv, False, False)]['active'].get(n))
+            row[f'Active_Defence_Lv{i + 1}'] = describe_defence(specs[(lv, False, False)]['active_def'].get(n))
+            row[f'Gear_Kit_Lv{i + 1}'] = describe_gear_kit(specs[(lv, False, True)], n)
+        row['Relic_Effect'] = '; '.join(specs[(ABILITY_LEVELS[0], False, True)]['relic_text'].get(n, []))
+        for k in keys:
+            row[f'Damage_{generic(k)}'] = f"{res[k][n]['d']:.2f}"
+        for k in keys:
+            row[f'Toughness_{generic(k)}'] = f"{res[k][n]['t']:.2f}"
+        out.append(row)
+    return out
+
+
+def tier_html(units, res, specs):
+    """per-character data for the current tier"""
+    out = {}
+    L = ABILITY_LEVELS
+    for u in units:
+        n = u['name']
+        out[n] = dict(hp=round(u['hp']), dmg=round(u['dmg']), arm=round(u['arm']),
+                      gear=dict(items=u['gear']['items'],
+                                kit={lv: describe_gear_kit(specs[(lv, False, True)], n) for lv in L},
+                                kit_trig={lv: describe_gear_kit(specs[(lv, True, True)], n) for lv in L}),
+                      relic='; '.join(specs[(L[0], False, True)]['relic_text'].get(n, [])),
+                      active=dict(counted={lv: describe_active(specs[(lv, False, False)]['active'].get(n)) for lv in L},
+                                  defence={lv: describe_defence(specs[(lv, False, False)]['active_def'].get(n)) for lv in L}),
+                      passive=dict(counted={lv: describe_passive(specs[(lv, False, False)], n) for lv in L},
+                                   triggered={lv: describe_passive(specs[(lv, True, False)], n) for lv in L}),
+                      s={k: res[k][n] for k, *_ in scenario_keys()},
+                      creed=res['creed'][n])
+    return out
+
+
+def write_stats(rows, version):
+    cols = list(rows[0].keys()) + ['Game_Version']
     with open(STATS_CSV, 'w', newline='', encoding='utf-8') as f:
-        w = csv.writer(f)
-        w.writerow(cols)
-        for u in sorted(units, key=lambda u: u['name']):
-            wp = {x['kind']: x for x in u['weapons']}
-            m, r = wp.get('melee'), wp.get('ranged')
-            n = u['name']
-            w.writerow([n, u['faction'], u['alliance'], round(u['hp']), round(u['dmg']), round(u['arm']),
-                        '; '.join(u['gear']['items']),
-                        m['type'] if m else '', m['hits'] if m else '', f"{m['pierce']:.0%}" if m else '',
-                        r['type'] if r else '', r['hits'] if r else '', f"{r['pierce']:.0%}" if r else '', r['range'] if r else '',
-                        passives[n]['Passive'], actives[n]['Active'], actives[n]['Kind'],
-                        *[describe_passive(specs[(lv, False, False)], n) for lv in ABILITY_LEVELS],
-                        *[describe_active(specs[(lv, False, False)]['active'].get(n)) for lv in ABILITY_LEVELS],
-                        *[describe_defence(specs[(lv, False, False)]['active_def'].get(n)) for lv in ABILITY_LEVELS],
-                        *[describe_gear_kit(specs[(lv, False, True)], n) for lv in ABILITY_LEVELS],
-                        *[f"{res[k][n]['d']:.2f}" for k in keys],
-                        *[f"{res[k][n]['t']:.2f}" for k in keys],
-                        version])
+        w = csv.DictWriter(f, fieldnames=cols)
+        w.writeheader()
+        for r in rows:
+            w.writerow(dict(r, Game_Version=version))
 
 
-def write_html(units, res, actives, passives, specs, version):
+def write_html(units, per_tier, actives, passives, relics, version):
     chars = []
     for u in units:
         n = u['name']
         row, prow = actives.get(n, {}), passives.get(n, {})
+        rrow = relics.get(u['relic']['name'], {}) if u['relic'] else {}
         chars.append(dict(name=n, faction=u['faction'], alliance=u['alliance'],
-                          hp=round(u['hp']), dmg=round(u['dmg']), arm=round(u['arm']),
                           weapons=[f"{w['kind'].title()}: {w['type']} ×{w['hits']}" for w in u['weapons']],
                           counted=sorted(pretty(t) for t in u['traits'] & COUNTED),
                           situational=sorted(pretty(t) for t in u['traits'] & SITUATIONAL),
                           active=dict(name=row.get('Active', ''), kind=row.get('Kind', ''), notes=row.get('Notes', ''),
-                                      counted={lv: describe_active(specs[(lv, False, False)]['active'].get(n)) for lv in ABILITY_LEVELS},
-                                      defence={lv: describe_defence(specs[(lv, False, False)]['active_def'].get(n)) for lv in ABILITY_LEVELS},
-                                      round=one_round(row.get('Defence')),
-                                      review=row.get('Needs_Review') == 'Y'),
+                                      round=one_round(row.get('Defence')), review=row.get('Needs_Review') == 'Y'),
                           passive=dict(name=prow.get('Passive', ''), notes=prow.get('Notes', ''),
-                                       counted={lv: describe_passive(specs[(lv, False, False)], n) for lv in ABILITY_LEVELS},
-                                       triggered={lv: describe_passive(specs[(lv, True, False)], n) for lv in ABILITY_LEVELS},
                                        review=prow.get('Needs_Review') == 'Y'),
-                          gear=dict(items=u['gear']['items'],
-                                    kit={lv: describe_gear_kit(specs[(lv, False, True)], n) for lv in ABILITY_LEVELS},
-                                    kit_trig={lv: describe_gear_kit(specs[(lv, True, True)], n) for lv in ABILITY_LEVELS}),
-                          s={k: res[k][n] for k, *_ in scenario_keys()},
-                          creed=res['creed'][n]))
-    data = dict(version=version, levels=list(ABILITY_LEVELS), chars=chars)
+                          relic=dict(name=u['relic']['name'] if u['relic'] else '', notes=rrow.get('Notes', ''),
+                                     review=rrow.get('Needs_Review') == 'Y'),
+                          t={tk: per_tier[tk][n] for tk in per_tier}))
+    data = dict(version=version, tiers=[dict(key=t['key'], label=t['label'], about=t['about'], levels=list(t['levels']))
+                                        for t in TIERS], chars=chars)
     with open(TEMPLATE, encoding='utf-8') as f:
         html = f.read()
     if '/*DATA*/' not in html:
@@ -974,45 +1096,84 @@ def creed_check(path, units):
     print(f'Creed check: {ok} of {tot} Creed test numbers within 1% (September 2026 baseline: 148 of 250).')
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('--creed', help='path to the Castellan Creed test CSV, to re-check the model')
-    args = ap.parse_args()
-    g, units = load()
-    actives = sync_rows(ACTIVES_CSV, ACTIVE_COLS, 'Active', units, draft_active, 'active_abilities.csv')
-    passives = sync_rows(PASSIVES_CSV, PASSIVE_COLS, 'Passive', units, draft_passive, 'passive_abilities.csv')
+def build_specs(units, actives, passives, relics):
+    """every ability effect for the current tier: specs[(level, trig, gear)]"""
     specs = {}
     for lv in ABILITY_LEVELS:
         for trig in (False, True):
             for gear in (False, True):
                 sp = dict(active={}, active_def={}, active_gdef={}, active_gtext={},
-                          passive={}, passive_def={}, passive_goff={}, passive_gdef={}, passive_gtext={})
+                          passive={}, passive_def={}, passive_goff={}, passive_gdef={}, passive_gtext={},
+                          passive_only={}, passive_only_def={}, relic_text={})
                 for u in units:
                     n, arow, prow = u['name'], actives.get(u['name']), passives.get(u['name'])
                     try:
                         if (x := active_spec(u, arow, lv)):
                             sp['active'][n] = x
                         if (x := defence_spec(u, u['ability'] or {}, (arow or {}).get('Defence'), lv, trig)): sp['active_def'][n] = x
-                        if (x := attack_spec(u, prow, lv, trig)): sp['passive'][n] = x
-                        if (x := defence_spec(u, u['passive'] or {}, (prow or {}).get('Defence'), lv, trig)): sp['passive_def'][n] = x
+                        if (x := attack_spec(u, prow, lv, trig)): sp['passive'][n] = sp['passive_only'][n] = x
+                        if (x := defence_spec(u, u['passive'] or {}, (prow or {}).get('Defence'), lv, trig)):
+                            sp['passive_def'][n] = sp['passive_only_def'][n] = x
                         if gear:
-                            off, gds, txt = gear_spec(u, u['ability'] or {}, (arow or {}).get('Gear'), lv, trig)
+                            off, gds, txt = gear_spec(u, u['ability'] or {}, (arow or {}).get('Gear'), lv, trig,
+                                                      (arow or {}).get('Ability_Text', ''))
                             if off and n in sp['active']:
                                 sp['active'][n] = dict(sp['active'][n], gear=off)
                             if gds: sp['active_gdef'][n] = gds
                             if txt: sp['active_gtext'][n] = [f'Active: {t}' for t in txt]
-                            off, gds, txt = gear_spec(u, u['passive'] or {}, (prow or {}).get('Gear'), lv, trig)
+                            off, gds, txt = gear_spec(u, u['passive'] or {}, (prow or {}).get('Gear'), lv, trig,
+                                                      (prow or {}).get('Ability_Text', ''))
                             if off: sp['passive_goff'][n] = off
                             if gds: sp['passive_gdef'][n] = gds
                             if txt: sp['passive_gtext'][n] = [f'Passive: {t}' for t in txt]
+                            if RELICS and u['relic']:
+                                # the relic's effect: always on, like a passive (relic level RELIC_LEVEL)
+                                rrow, rab = relics.get(u['relic']['name']), u['relic']['ability'] or {}
+                                rtext = []
+                                if (x := attack_spec(u, rrow, RELIC_LEVEL, trig, rab)):
+                                    old = sp['passive'].get(n) or ([], [])
+                                    sp['passive'][n] = (old[0] + x[0], old[1] + x[1])
+                                    rtext += x[1]
+                                if (x := defence_spec(u, rab, (rrow or {}).get('Defence'), RELIC_LEVEL, trig)):
+                                    sp['passive_def'][n] = merge_defence(sp['passive_def'].get(n), x)
+                                    rtext += x['text']
+                                off, gds, txt = gear_spec(u, rab, (rrow or {}).get('Gear'), RELIC_LEVEL, trig,
+                                                          (rrow or {}).get('Ability_Text', ''))
+                                if off: sp['passive_goff'][n] = (sp['passive_goff'].get(n) or []) + off
+                                if gds: sp['passive_gdef'][n] = merge_defence(sp['passive_gdef'].get(n), gds)
+                                rtext += txt
+                                if rtext: sp['relic_text'][n] = rtext
                     except (ValueError, KeyError, IndexError) as e:
-                        sys.exit(f'{n}: can\'t read its ability row ({e}). Check the tokens in the abilities CSVs.')
+                        sys.exit(f'{n}: can\'t read its ability row ({e}). Check the tokens in the ability CSVs.')
                 specs[(lv, trig, gear)] = sp
-    res = run_scenarios(units, specs)
-    write_stats(units, res, actives, passives, specs, g['version'])
-    write_html(units, res, actives, passives, specs, g['version'])
-    print(f'Built roster-battle-map.html and tacticus_stats.csv: {len(units)} characters, game version {g["version"]}.')
+    return specs
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--creed', help='path to the Castellan Creed test CSV, to re-check the model')
+    args = ap.parse_args()
+    set_tier(TIERS[1])
+    g, units = load()
+    actives = sync_rows(ACTIVES_CSV, ACTIVE_COLS, 'Active', units, draft_active, 'active_abilities.csv')
+    passives = sync_rows(PASSIVES_CSV, PASSIVE_COLS, 'Passive', units, draft_passive, 'passive_abilities.csv')
+    relics = sync_relics(g, units)
+    per_tier, rows = {}, []
+    for t in TIERS:
+        set_tier(t)
+        g, units = load()
+        specs = build_specs(units, actives, passives, relics)
+        res = run_scenarios(units, specs)
+        per_tier[t['key']] = tier_html(units, res, specs)
+        rows += tier_rows(units, res, actives, passives, specs)
+        print(f"  {t['label']}: done")
+    write_stats(rows, g['version'])
+    write_html(units, per_tier, actives, passives, relics, g['version'])
+    print(f'Built roster-battle-map.html and tacticus_stats.csv: {len(units)} characters x {len(TIERS)} tiers, '
+          f'game version {g["version"]}.')
     if args.creed:
+        set_tier(TIERS[1])
+        g, units = load()
         creed_check(args.creed, units)
 
 

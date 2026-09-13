@@ -8,6 +8,21 @@ check this file first. The design and build plan is in `PLAN.md`.
 
 ## Standard setup
 
+The page has a **Progression** switch with three tiers (owner, September
+2026). Every character in a tier is compared under the same conditions, and
+each tier is compared within itself:
+
+| Tier | Rarity (ability ×) | Rank | Stars | Ability levels | Standard gear |
+|---|---|---|---|---|---|
+| Gold | Epic (×1.6) | Gold I | 8 | 26 / 35 | Epic items, top level (9) |
+| Diamond III | Legendary (×1.8) | Diamond III | 11 (Winged) | 36 / 50 | Legendary items, top level (11) |
+| Mythic | Mythic (×2.0) | Adamantine II (`MYTHIC II` in the data) | 14 | 50 / 60 | Mythic items, top level (10), **plus the character's relic at level 10** |
+
+The table below describes the Diamond III tier, the original video
+standard. The other tiers differ only as in the table above.
+Check: Bellator at Mythic comes out at 11,350 Health / 1,334 Damage / 1,735
+Armour, exactly the wiki's Mythic 14★ Adamantine II values.
+
 Every character is compared under the same conditions:
 
 | Setting | Value |
@@ -151,6 +166,33 @@ Biggest effects at level 36: Judh (111th → 19th for damage) and Calandis
 Mephiston (32nd → 4th) gain a lot, because every point of Crit Damage gets
 through. Bellator (9th → 37th for toughness) and Nubari (3rd → 14th) lose
 the most, because crits skip Mk X Gravis.
+
+## Relics (Mythic tier)
+
+Every character can go Mythic. The 65 characters with a relic (32 relics,
+19 unique and 13 shared) get it at level 10 when **Gear: Standard** is on.
+
+- **Who owns which relic** comes from the wiki's relic pages
+  (`relic_owners.csv`, written by `update_game_data.py`). The game data
+  doesn't say.
+- **The relic's item stats** replace the standard Mythic item in its slot.
+  If the character has no slot of exactly that type, it takes the nearest
+  one, e.g. Aethana's Phoenix Gem (a block booster) takes her booster slot.
+- **Relic values have no rarity multiplier.** Talon of Horus at level 1 is
+  exactly the wiki's 1,175–1,565.
+- **The relic's effect** works like a passive (always on), reviewed in
+  `relic_abilities.csv` with the same Attack / Defence / Gear tokens and the
+  same rules. 13 relic effects count, for example:
+  - Relic Bolt Pistol: melee pierce and ranged Crit Damage, doubled vs Chaos
+    or Xenos.
+  - Paragon Spear: Tyrith's start-of-turn attack.
+  - Lakrimae and Orbs of Decay: Contamination, −30% target Armour.
+  - Maugetar: a Direct hit on crits, triggered only.
+  - Monster Slayer of Caliban: +Damage vs Big Targets and a block.
+  - Phoenix Gem: a revive.
+
+  19 don't count: they need kills, summons, allies or other targets (e.g.
+  Talon of Horus only hits enemies next to the target).
 
 ## Turns: one enemy turn = 5 attacks
 
@@ -342,6 +384,7 @@ Run against the September 2026 (1.42.110) game data, with the rules above:
 
 | Date | Change |
 |---|---|
+| September 2026 | Progression switch: Gold / Diamond III / Mythic tiers; relics at Mythic (owners from the wiki, effects reviewed in relic_abilities.csv) |
 | September 2026 | Azrael's Lion Helm only helps other characters (owner), so it doesn't count for him |
 | September 2026 | Gear switch: standard Legendary top-level loadouts per character, crits and blocks at their average, `Gear` column for crit/block kit effects (owner decisions: switch, top-level Legendary, boosters) |
 | September 2026 | One enemy turn = 5 attacks: an active's one-round protection only covers the first 5 attacks; first-attack-each-turn effects repeat every 5. Aesoth (active on) 14.6 → 8.3 |

@@ -24,6 +24,8 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `build_map.py` | Runs the model and writes every output below. The standard setup (rank, stars, ability levels) is at the top | Only to change the setup |
 | `active_abilities.csv` | One row per character: how their active ability is counted. **Reviewed data**: the script adds rows but never overwrites your decisions | **Yes** |
 | `passive_abilities.csv` | The same, for passive abilities: `Attack`, `Defence` and `Gear` tokens | **Yes** |
+| `relic_abilities.csv` | One row per relic: its effect as `Attack` / `Defence` / `Gear` tokens (Mythic tier, gear on) | **Yes** |
+| `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
 | `cache/gameinfo.json` | The downloaded game data (about 11 MB), ignored by git | No |
@@ -46,7 +48,10 @@ python -X utf8 build_map.py
 ```
 
 1. **`update_game_data.py`** prints the live and cached game versions. It only
-   downloads when they differ; add `--force` to download anyway.
+   downloads when they differ; add `--force` to download anyway. After a
+   download it also refreshes `relic_owners.csv` from the wiki. Use
+   `--relics` to refresh only that, e.g. when a new relic's wiki page
+   appears after the patch.
    tacticustable.com usually updates a day or two after a patch. If the version
    hasn't moved yet, try again later.
 2. **`build_map.py`** prints what needs attention:
@@ -90,6 +95,8 @@ python -X utf8 build_map.py
 | Kharn, Map view, Ability level 50, Active on | Damage **below 1 attack** | Active parsing broke |
 | Re'vas detail panel, Ability level 50 | Passive shows "+3× Particle 749 on each attack" | Passive parsing broke |
 | Judh, Gear: Standard | Two Monstrous Boneswords + a Lash-Whip; damage about 2.4 attacks (about 19th) | Gear loading broke |
+| Bellator, Progression: Mythic | 11,350 Health / 1,334 Damage / 1,735 Armour (the wiki's Mythic 14★ A2 values) | Tier settings broke |
+| Every relic placed | The build warns if a relic has no owner in the roster | Check `relic_owners.csv` / the wiki page |
 | Number of characters | Same as the non-MoW, non-Do_Not_Use rows in the CSV | A name didn't match; see the `ALIAS` warning |
 
 ---
@@ -314,22 +321,44 @@ the same token format as the other columns:
   against targets at or below 50% health), and bonuses for allies only.
   Abilities marked "cannot Crit" are detected from their text automatically.
 
+## `relic_abilities.csv`: relic effects
+
+One row per relic (not per character: shared relics apply to all their
+owners). Columns: `Relic`, `Owners` (refreshed each build), `Attack`,
+`Defence`, `Gear`, `Needs_Review`, `Notes`, `Ability_Text`. The tokens are
+the same as for passives, and values are read at relic level 10
+(`RELIC_LEVEL`) with no rarity multiplier. The review rules are the
+passives' rules.
+
+Relic-only token features:
+- `armpct:VAR` (target Armour −VAR%, for Contamination).
+- `critextra:PART` in `Gear` (extra hits only when the attack crits;
+  Maugetar).
+- `vs` filters can name an alliance, e.g. `:vsChaos|Xenos` for the Relic
+  Bolt Pistol.
+
 ## Changing the setup
 
-The constants at the top of `build_map.py`:
+**Progression tiers** are the `TIERS` list at the top of `build_map.py`.
+Each tier sets rank, stars, rarity multiplier, the two ability levels,
+standard gear rarity and whether relics apply. `set_tier()` applies one, and
+the build loops over all of them (about 25 seconds). Add or change a tier
+there; the page picks it up automatically.
+
+The other constants at the top of `build_map.py`:
 
 | Constant | Now | Meaning |
 |---|---|---|
-| `RANK` | `DIAMOND III` | The rank row used from the game data (`STONE I` … `ADAMANTINE II`, also `MYTHIC I`/`II` in the data) |
-| `STARS` | `11` | Winged. Rank stats are stored at 0 stars; each star adds 10% (`STAR_MULT = 1 + 0.1 × STARS`) |
-| `ABILITY_LEVELS` | `(36, 50)` | One "Ability level" button per level on the page (passives and actives) |
-| `STANDARD` | `base_l36` | The scenario the Creed sparring line uses |
-| `GEAR_RARITY` | `Legendary` | The rarity of standard gear (top level of each item). Use `Mythic` for the Mythic view |
-| `RARITY_MULT` | `1.8` | Legendary. Ability values = the level's entry × this, only for variables listed in `variablesAffectedByRarityBonus`. Common 1.0 … Mythic 2.0 |
+| `RELIC_LEVEL` | `10` | Relic effect level (max) |
+| `ATTACKS_PER_TURN` | `5` | One enemy turn = a full team attacking |
 
-For the planned **Mythic view**: 14 stars, `ADAMANTINE II`, levels up to 60,
-`RARITY_MULT = 2.0`, plus relic effects, which aren't in the model yet. Run it
-as a separate build rather than replacing the D3 page.
+Inside a tier: the rank row name (`GOLD I`, `DIAMOND III`, `MYTHIC II` =
+Adamantine II); stars (rank stats are stored at 0 stars, and each star adds
+10%); the rarity multiplier, which applies only to ability variables listed
+in `variablesAffectedByRarityBonus`; the gear rarity (each item at its top
+level); and the Creed sparring scenario (`base_l{first level}`).
+
+The **Mythic tier** is built in (September 2026).
 
 ## Changing the page
 
@@ -351,13 +380,19 @@ as a separate build rather than replacing the D3 page.
   - **Attack** keeps the damage axis and spreads the dots sideways, so they
     don't overlap.
   - **Defence** does the same for toughness.
-- **Controls:** Traits (always-on / all triggered), Ability level (36 / 50)
-  and Active ability (off / on). Clicking a selected character again
-  unselects them.
+- **Controls:** Progression (Gold / Diamond III / Mythic), Traits
+  (always-on / all triggered), Ability level (the tier's two levels), Gear
+  (none / standard) and Active ability (off / on). Clicking a selected
+  character again unselects them.
+- **Page data** is nested by tier: `c.t[tier].s[key]`, plus each tier's
+  stats, gear, ability texts and relic text.
 - **Scenario keys** in the data: `base` is the plain stat line (reference
   only). The others are `{base|trig}_l{level}` with passives on, plus `_a`
   when the active is on and `_g` with standard gear, e.g. `base_l36`,
   `trig_l50_a_g`.
+- **`tacticus_stats.csv`** has one row per character per tier. Its columns
+  use `lv1`/`lv2` for the tier's two ability levels, e.g.
+  `Damage_base_lv1_g`, with `Ability_Level_1/2` giving the actual levels.
 
 ---
 
@@ -403,6 +438,7 @@ as a separate build rather than replacing the D3 page.
 
 | Date | Change |
 |---|---|
+| September 2026 | Progression tiers (Gold / Diamond III / Mythic), relics at Mythic (`relic_owners.csv` from the wiki, `relic_abilities.csv` reviewed), long-format `tacticus_stats.csv` |
 | September 2026 | Gear switch (standard Legendary loadouts, crits/blocks at their average) and the `Gear` column |
 | September 2026 | One enemy turn = 5 attacks (`ATTACKS_PER_TURN`); round-limited actives noted on the page |
 | September 2026 | Owner answers: Kell and Geminae Superia count as bodyguards, Uthar split stance, Varro not counted, Tyrant Guard always on. New `guard` and `armourpass` tokens. The page's "Reading the chart" lists every trait in each setting and explains "typical character" |

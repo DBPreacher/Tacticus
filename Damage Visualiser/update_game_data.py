@@ -30,10 +30,44 @@ def cached_version():
     return g.get('data', g).get('version')
 
 
+def update_relic_owners():
+    """Which characters can equip each relic. The game data doesn't say, so this reads the wiki's
+    Category:Relics pages ('== Shared Relic ==' lists characters; '== X Unique Relic ==' names one)
+    and writes relic_owners.csv. Check it after a patch that adds relics."""
+    import csv, re
+    sys.path.insert(0, os.path.join(os.path.dirname(HERE), 'LRE Script'))
+    import wiki_audit as wa
+    data = wa.api_get({'action': 'query', 'list': 'categorymembers', 'cmtitle': 'Category:Relics', 'cmlimit': '500'})
+    titles = sorted(m['title'] for m in data['query']['categorymembers'])
+    pages = wa.fetch_wikitext(titles)
+    rows = []
+    for relic in titles:
+        text = pages.get(relic, '')
+        unique = re.search(r'==\s*(.+?)\s+Unique Relic\s*==', text)
+        if unique:
+            owners = [re.sub(r'\[\[(?:[^\]|]*\|)?([^\]]+)\]\]', r'\1', unique.group(1)).strip()]
+        else:
+            block = re.search(r'==\s*Shared Relic\s*==(.*?)(?:\n==|\Z)', text, re.S)
+            owners = re.findall(r'\*\s*\[\[([^\]|]+)', block.group(1)) if block else []
+        if not owners:
+            print(f'WARNING - no owner found on the wiki page for relic {relic}')
+        rows += [(relic, o.strip()) for o in owners]
+    path = os.path.join(HERE, 'relic_owners.csv')
+    with open(path, 'w', newline='', encoding='utf-8') as f:
+        w = csv.writer(f)
+        w.writerow(['Relic', 'Character'])
+        w.writerows(rows)
+    print(f'relic_owners.csv: {len(titles)} relics, {len(rows)} relic/character pairs (from the wiki).')
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--force', action='store_true', help='download even if the version is unchanged')
+    ap.add_argument('--relics', action='store_true', help='only refresh relic_owners.csv from the wiki')
     args = ap.parse_args()
+    if args.relics:
+        update_relic_owners()
+        return
 
     live = json.loads(get(API + '/version'))['version']
     have = cached_version()
@@ -50,6 +84,7 @@ def main():
     with open(CACHE, 'wb') as f:
         f.write(raw)
     print(f'Saved {len(raw) / 1e6:.1f} MB: version {data["version"]}, {len(data["heroes"])} heroes.')
+    update_relic_owners()
 
 
 if __name__ == '__main__':

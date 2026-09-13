@@ -162,6 +162,10 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           </div>
         </div>
         <div>
+          <p class="label">Progression</p>
+          <div class="seg" role="group" aria-label="Progression" id="segTier"></div>
+        </div>
+        <div>
           <p class="label">Traits</p>
           <div class="seg" role="group" aria-label="Traits" id="segTraits">
             <button data-v="base" aria-pressed="true">Always-on</button>
@@ -207,6 +211,8 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
       <div class="panel">
         <p class="label">Reading the chart</p>
         <dl class="defs">
+          <dt>Progression</dt>
+          <dd>Gold: Epic, 8 stars, Gold I, abilities at 26 or 35, Epic gear. Diamond III: Legendary, Winged (11 stars), abilities at 36 or 50, Legendary gear. Mythic: 14 stars, Adamantine II, abilities at 50 or 60, Mythic gear with the character's relic at level 10. Each tier is compared within itself, so "typical" means the middle of the roster at that tier.</dd>
           <dt>Damage: higher is better</dt>
           <dd>How many of their attacks it takes to kill a typical character.</dd>
           <dt>Toughness: further right is better</dt>
@@ -245,9 +251,9 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           <dt>Passives: always on</dt>
           <dd>Every character's passive counts at the chosen ability level, when it affects their own attacks or protects them. Buffs for allies, reactions and summons don't count, except bodyguards that take the hits for them (Kell, Geminae Superia).</dd>
           <dt>Gear: none or standard</dt>
-          <dd>Standard gear is each character's own item slots filled with the best Legendary items they can equip, at top level, including boosters. No relics. Crits and blocks count at their average: a chain starts on the first hit and carries on while each roll succeeds. Crits add Crit Damage before armour and skip Mk X Gravis, so Gravis tanks lose some toughness. Abilities that "cannot Crit" don't. Crit and block parts of kits (Titus, Ragnar, Lysander, Trajann, Arjac, Dreir and others) only count with gear on.</dd>
+          <dd>Standard gear is each character's own item slots filled with the best items of the tier's rarity they can equip (Epic, Legendary or Mythic), at top level, including boosters. At Mythic the character's relic takes its slot, and its effect counts too. Crits and blocks count at their average: a chain starts on the first hit and carries on while each roll succeeds. Crits add Crit Damage before armour and skip Mk X Gravis, so Gravis tanks lose some toughness. Abilities that "cannot Crit" don't. Crit and block parts of kits (Titus, Ragnar, Lysander, Trajann, Arjac, Dreir and others) only count with gear on.</dd>
           <dt>Active ability: on or off</dt>
-          <dd>With it on, everyone opens with their active. For damage, it's used if it beats a normal attack; damage to other enemies, summons and buffs don't count. For toughness, its protection counts: damage reduction, heals, and suppressing or stunning enemies (an area effect covers the enemy turn; a single target only its first attack). At Winged D3 a level 36 active rarely beats a normal attack; at level 50 most do.</dd>
+          <dd>With it on, everyone opens with their active. For damage, it's used if it beats a normal attack; damage to other enemies, summons and buffs don't count. For toughness, its protection counts: damage reduction, heals, and suppressing or stunning enemies (an area effect covers the enemy turn; a single target only its first attack). At the lower ability level an active often doesn't beat a strong normal attack; at the higher level most do.</dd>
         </dl>
       </div>
     </aside>
@@ -274,14 +280,15 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
     </div>
   </section>
 
-  <footer>Stats are from the tacticustable.com game data at Winged D3 with no gear. The rules are in <em>Damage Visualiser/DAMAGE_MODEL.md</em> and each active ability's handling is in <em>active_abilities.csv</em>. The numbers are for comparing characters, not predicting an exact fight.</footer>
+  <footer>Stats are from the tacticustable.com game data; relic owners from tacticus.wiki.gg. The rules are in <em>Damage Visualiser/DAMAGE_MODEL.md</em>, and each ability's and relic's handling is in the <em>*_abilities.csv</em> files. The numbers are for comparing characters, not predicting an exact fight.</footer>
 </div>
 
 <script>
 const DATA = /*DATA*/;
-const C = DATA.chars, LV = DATA.levels;
+const C = DATA.chars, TIERS = DATA.tiers;
+let LV = TIERS[1].levels;
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
-const S = {view:'map', traits:'base', level:LV[0], active:0, gear:0, shift:false, names:true, sel:'Castellan Creed', q:'', hidden:new Set(), sort:{k:'d', dir:1}, hover:null};
+const S = {view:'map', tier:TIERS[1].key, traits:'base', level:LV[0], active:0, gear:0, shift:false, names:true, sel:'Castellan Creed', q:'', hidden:new Set(), sort:{k:'d', dir:1}, hover:null};
 const NS='http://www.w3.org/2000/svg';
 const W=1000, H=700, M={l:74,r:26,t:22,b:64};
 const XD=[1.3,10], YD=[0.6,11];
@@ -293,14 +300,21 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const el=(tag,attrs={},parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;};
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const key=()=>`${S.traits}_l${S.level}${S.active?'_a':''}${S.gear?'_g':''}`;
-const sc=c=>c.s[key()];
+const T=c=>c.t[S.tier];
+const sc=c=>T(c).s[key()];
 const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
 const offScale=p=>p.d>YD[1]||p.t>XD[1];
 
-document.getElementById('setup').innerHTML=[`Patch ${DATA.version.split('.').slice(0,3).join('.')}`,'Winged D3','No relics','Flat ground','Mid damage roll',`${C.length} characters`].map(t=>`<span>${t}</span>`).join('');
+function renderSetup(){
+  const t=TIERS.find(x=>x.key===S.tier);
+  document.getElementById('setup').innerHTML=[`Patch ${DATA.version.split('.').slice(0,3).join('.')}`,t.about,'Flat ground','Mid damage roll',`${C.length} characters`].map(x=>`<span>${x}</span>`).join('');
+}
+renderSetup();
+document.getElementById('segTier').innerHTML=TIERS.map(t=>`<button data-v="${t.key}" aria-pressed="${t.key===S.tier}">${t.label}</button>`).join('');
 document.getElementById('rosterCount').textContent=C.length;
 document.getElementById('roundList').textContent=C.filter(c=>c.active.round).map(c=>c.name).join(', ');
-document.getElementById('segLevel').innerHTML=LV.map((l,i)=>`<button data-v="${l}" aria-pressed="${i===0}">Level ${l}</button>`).join('');
+function renderLevels(){document.getElementById('segLevel').innerHTML=LV.map(l=>`<button data-v="${l}" aria-pressed="${l===S.level}">Level ${l}</button>`).join('');}
+renderLevels();
 
 /* ---------- chart furniture ---------- */
 const svg=document.getElementById('map');
@@ -351,13 +365,13 @@ function swarm(vals,centre,lo,hi){
 }
 function positions(scKey){
   const pos={};
-  if(S.view==='map'){C.forEach(c=>{const p=c.s[scKey];pos[c.name]=[X(p.t),Y(p.d)];});return pos;}
+  if(S.view==='map'){C.forEach(c=>{const p=T(c).s[scKey];pos[c.name]=[X(p.t),Y(p.d)];});return pos;}
   if(S.view==='attack'){
-    const sx=swarm(C.map(c=>({name:c.name,v:Y(c.s[scKey].d)})),(M.l+W-M.r)/2,M.l+12,W-M.r-12);
-    C.forEach(c=>pos[c.name]=[sx[c.name],Y(c.s[scKey].d)]);return pos;
+    const sx=swarm(C.map(c=>({name:c.name,v:Y(T(c).s[scKey].d)})),(M.l+W-M.r)/2,M.l+12,W-M.r-12);
+    C.forEach(c=>pos[c.name]=[sx[c.name],Y(T(c).s[scKey].d)]);return pos;
   }
-  const sy=swarm(C.map(c=>({name:c.name,v:X(c.s[scKey].t)})),(M.t+H-M.b)/2,M.t+12,H-M.b-12);
-  C.forEach(c=>pos[c.name]=[X(c.s[scKey].t),sy[c.name]]);return pos;
+  const sy=swarm(C.map(c=>({name:c.name,v:X(T(c).s[scKey].t)})),(M.t+H-M.b)/2,M.t+12,H-M.b-12);
+  C.forEach(c=>pos[c.name]=[X(T(c).s[scKey].t),sy[c.name]]);return pos;
 }
 let POS={};
 
@@ -386,14 +400,14 @@ function renderChart(animate=true){
   if(S.shift){
     C.forEach(c=>{
       if(!visible(c)) return;
-      const b=c.s.base,[x2,y2]=POS[c.name];
+      const b=T(c).s.base,[x2,y2]=POS[c.name];
       const x1=S.view==='attack'?x2:X(b.t), y1=S.view==='defence'?y2:Y(b.d);
       const len=Math.hypot(x2-x1,y2-y1); if(len<9) return;
       const f=(len-8)/len;
       el('line',{x1,y1,x2:x1+(x2-x1)*f,y2:y1+(y2-y1)*f,class:'arrow'+(c.name===S.sel?' sel':''),'marker-end':'url(#ah)'},gArrows);
     });
   }
-  const bits=[{attack:'Attack',defence:'Defence',map:'Map'}[S.view], S.traits==='base'?'always-on traits':'all traits triggered', `abilities level ${S.level}`, S.active?'active on':'active off', S.gear?'standard gear':'no gear'];
+  const bits=[{attack:'Attack',defence:'Defence',map:'Map'}[S.view], TIERS.find(t=>t.key===S.tier).label, S.traits==='base'?'always-on traits':'all traits triggered', `abilities level ${S.level}`, S.active?'active on':'active off', S.gear?'standard gear':'no gear'];
   document.getElementById('chartTitle').textContent=bits.join(' · ');
   if(animate&&!reduce){gLabels.style.opacity=0;clearTimeout(renderChart._t);renderChart._t=setTimeout(()=>{renderLabels();gLabels.style.opacity=1;},560);}
   else renderLabels();
@@ -445,20 +459,26 @@ function select(name){S.sel=(S.sel===name)?null:name;renderChart(false);renderDe
 function renderDetail(){
   const c=C.find(x=>x.name===S.sel);
   if(!c){document.getElementById('detail').innerHTML='<p class="label">Character</p><p class="none">Click a character on the chart or in the list to see their details. Click them again to unselect.</p>';return;}
-  const cur=sc(c), base=c.s.base, same=false;
+  const cur=sc(c), base=T(c).s.base, same=false, tc=T(c);
   const tags=(arr,cls)=>arr.length?`<div class="tags">${arr.map(t=>`<span class="tag ${cls}">${esc(t)}</span>`).join('')}</div>`:`<p class="none">None</p>`;
   const cell=(v,r,on)=>`<td class="${on?'on':'dimcol'}">${fmt(v)}<small>#${r}</small></td>`;
   const row=(label,b,br,v,vr)=>`<tr><td>${label}</td>${cell(b,br,same)}${same?'':cell(v,vr,true)}</tr>`;
-  const a=c.active, isCreed=c.name==='Castellan Creed', cr=c.creed;
+  const a=c.active, isCreed=c.name==='Castellan Creed', cr=tc.creed;
   const kindLabel={damage:'deals damage',summon:'summons',heal:'heals',defence:'defensive',support:'support'}[a.kind]||a.kind;
   const L=S.level;
-  const counted=(a.counted[L]?`<p class="act-line">Attack: <b>${esc(a.counted[L])}</b></p>`:'')
-               +(a.defence&&a.defence[L]?`<p class="act-line">Defence: <b>${esc(a.defence[L])}</b></p>`:'');
-  const pa=c.passive, pTxt=(S.traits==='trig'?pa.triggered[L]:pa.counted[L]);
+  const counted=(tc.active.counted[L]?`<p class="act-line">Attack: <b>${esc(tc.active.counted[L])}</b></p>`:'')
+               +(tc.active.defence[L]?`<p class="act-line">Defence: <b>${esc(tc.active.defence[L])}</b></p>`:'');
+  const pa=c.passive, pTxt=(S.traits==='trig'?tc.passive.triggered[L]:tc.passive.counted[L]);
+  const rl=c.relic, relicSect=(S.tier==='mythic'&&rl.name)?`<div class="sect">
+      <p class="label">Relic · level 10 · ${S.gear?'on':'needs Gear: Standard'}</p>
+      <p class="act-name">${esc(rl.name)}${rl.review?'<span class="tag flag">Needs your review</span>':''}</p>
+      ${tc.relic?`<p class="act-line"><b>${esc(tc.relic)}</b></p>`:'<p class="act-line">Only its item stats count.</p>'}
+      ${rl.notes?`<p class="act-note">${esc(rl.notes)}</p>`:''}
+    </div>`:'';
   document.getElementById('detail').innerHTML=`
     <h3>${esc(c.name)}</h3>
     <div class="fac"><i style="background:${ALLY[c.alliance]}"></i>${esc(c.faction)} · ${c.alliance}</div>
-    <div class="stats"><div><small>Health</small><b>${c.hp.toLocaleString()}</b></div><div><small>Damage</small><b>${c.dmg.toLocaleString()}</b></div><div><small>Armour</small><b>${c.arm.toLocaleString()}</b></div></div>
+    <div class="stats"><div><small>Health</small><b>${tc.hp.toLocaleString()}</b></div><div><small>Damage</small><b>${tc.dmg.toLocaleString()}</b></div><div><small>Armour</small><b>${tc.arm.toLocaleString()}</b></div></div>
     <p class="weap">${c.weapons.map(esc).join(' · ')}</p>
     <table class="scores"><thead><tr><th>Attacks to kill</th><th>Stat line</th><th>This view</th></tr></thead><tbody>
       ${row('Damage',base.d,base.rd,cur.d,cur.rd)}
@@ -479,9 +499,10 @@ function renderDetail(){
     </div>
     <div class="sect">
       <p class="label">Standard gear · ${S.gear?'on':'off'}</p>
-      ${c.gear.items.map(i=>`<p class="act-line">${esc(i)}</p>`).join('')}
-      ${(S.traits==='trig'?c.gear.kit_trig[L]:c.gear.kit[L])?`<p class="act-line">Kit with gear: <b>${esc(S.traits==='trig'?c.gear.kit_trig[L]:c.gear.kit[L])}</b></p>`:''}
+      ${tc.gear.items.map(i=>`<p class="act-line">${esc(i)}</p>`).join('')}
+      ${(S.traits==='trig'?tc.gear.kit_trig[L]:tc.gear.kit[L])?`<p class="act-line">Kit with gear: <b>${esc(S.traits==='trig'?tc.gear.kit_trig[L]:tc.gear.kit[L])}</b></p>`:''}
     </div>
+    ${relicSect}
     <p class="label">Always-on traits counted</p>${tags(c.counted,'')}
     <p class="label">Situational traits · only when triggered</p>${tags(c.situational,'sit')}
     <div class="sect creed"><p class="label" style="margin:0">${isCreed?'Creed against himself':'Sparring Creed'} · always-on traits, level ${LV[0]} passives</p>
@@ -491,12 +512,12 @@ function renderDetail(){
 
 /* ---------- table ---------- */
 const SORTS={name:'Character',faction:'Faction',k:'Best attack',d:'Damage',t:'Toughness',ds:'Damage rank change',ts:'Toughness rank change'};
-function val(c,k){const p=sc(c);return k==='name'?c.name:k==='faction'?c.faction:k==='k'?p.k:k==='d'?p.d:k==='t'?-p.t:k==='ds'?-(c.s.base.rd-p.rd):-(c.s.base.rt-p.rt);}
+function val(c,k){const p=sc(c),b=T(c).s.base;return k==='name'?c.name:k==='faction'?c.faction:k==='k'?p.k:k==='d'?p.d:k==='t'?-p.t:k==='ds'?-(b.rd-p.rd):-(b.rt-p.rt);}
 function change(a,b){const d=a-b;return d>0?`<span class="up">▲${d}</span>`:d<0?`<span class="down">▼${-d}</span>`:`<span class="down">–</span>`;}
 function renderTable(){
   const rows=C.filter(c=>visible(c)&&(S.q.trim()===''||matches(c)));
   rows.sort((a,b)=>{const x=val(a,S.sort.k),y=val(b,S.sort.k);return (x<y?-1:x>y?1:0)*S.sort.dir;});
-  document.querySelector('#tbl tbody').innerHTML=rows.map(c=>{const p=sc(c),b=c.s.base;return `<tr class="${c.name===S.sel?'sel':''}">
+  document.querySelector('#tbl tbody').innerHTML=rows.map(c=>{const p=sc(c),b=T(c).s.base;return `<tr class="${c.name===S.sel?'sel':''}">
     <td><button class="nm" data-n="${esc(c.name)}"><i style="background:${ALLY[c.alliance]}"></i>${esc(c.name)}</button></td>
     <td>${esc(c.faction)}</td><td>${p.k==='ranged'?'Ranged':'Melee'}</td>
     <td>${fmt(p.d)}<span class="rk">#${p.rd}</span></td><td>${fmt(p.t)}<span class="rk">#${p.rt}</span></td>
@@ -510,6 +531,7 @@ document.querySelectorAll('th button').forEach(b=>b.addEventListener('click',()=
 function seg(id,apply){const g=document.getElementById(id);g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));apply(b.dataset.v);renderChart();renderDetail();renderTable();});}
 seg('segView',v=>S.view=v);
 seg('segTraits',v=>S.traits=v);
+seg('segTier',v=>{S.tier=v;LV=TIERS.find(t=>t.key===v).levels;S.level=LV[0];renderLevels();renderSetup();});
 seg('segLevel',v=>S.level=+v);
 seg('segActive',v=>S.active=+v);
 seg('segGear',v=>S.gear=+v);

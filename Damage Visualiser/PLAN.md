@@ -22,7 +22,7 @@ rules behind it are in `DAMAGE_MODEL.md`.
 | Alliance colours | From the in-game alliance icons: Imperial gold, Chaos red, Xenos light blue (owner) |
 | Reference characters | Long-standing characters that players already have a picture of (not recent releases like Nubari). Different characters for attack and defence |
 | Data | Separate file `tacticus_stats.csv`. `tacticus_characters.csv` and `le_analysis.py` are untouched |
-| Mythic | A later step: Mythic 14★ A2, level 60 abilities, relic effects |
+| Progression | **Gold / Diamond III / Mythic** switch (owner). Gold = Epic 8★ Gold I, abilities 26/35, Epic gear. Mythic = 14★ Adamantine II, abilities 50/60, Mythic gear + relic at level 10. Every character can be Mythic |
 
 ### Why not one reference character
 
@@ -118,7 +118,7 @@ too (build step 5).
 4. **Video version:** 1920×1080, Space/click reveals like the LE template,
    featured character highlighted, reference characters labelled.
 5. ~~Defensive actives~~ Done: the `Defence` column in `active_abilities.csv`.
-6. **Later:** the Mythic view with relics.
+6. ~~Mythic view with relics~~ Done, as the Progression switch (with Gold too).
 
 ---
 
