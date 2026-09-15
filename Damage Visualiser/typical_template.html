@@ -22,8 +22,10 @@ header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
 .eyebrow{font-family:var(--data);font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 h1{font-family:var(--display);font-weight:700;font-size:40px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em}
 .setting{font-family:var(--data);font-weight:600;font-size:16px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:4px 12px;border-radius:3px;white-space:nowrap}
-.caption{min-height:92px}
-.caption b{display:block;font-family:var(--data);font-weight:700;font-size:38px;line-height:1.15;letter-spacing:.01em}
+.caption{min-height:84px}
+.mods{display:flex;align-items:center;gap:14px 26px;flex-wrap:wrap}
+.mods .seg button{font-size:16px;padding:7px 14px}
+.caption b{display:block;font-family:var(--data);font-weight:700;font-size:36px;line-height:1.15;letter-spacing:.01em}
 .caption span{display:block;font-size:19px;color:var(--ink-2);margin-top:6px}
 .chart{position:relative;flex:1;min-height:0}
 svg{display:block;width:100%;height:100%;font-family:var(--data)}
@@ -70,6 +72,14 @@ select{font:600 18px var(--data);color:var(--ink);background:var(--panel-2);bord
     <div class="setting" id="setting"></div>
   </header>
 
+  <div class="mods">
+    <div><span class="label">Progression</span><span class="seg" id="segTier"></span></div>
+    <div><span class="label">Traits</span><span class="seg" id="segTraits"><button data-v="base">Always-on</button><button data-v="trig">All triggered</button></span></div>
+    <div><span class="label">Ability level</span><span class="seg" id="segLevel"></span></div>
+    <div><span class="label">Gear</span><span class="seg" id="segGear"><button data-v="0">None</button><button data-v="1">Standard</button></span></div>
+    <div><span class="label">Active ability</span><span class="seg" id="segActive"><button data-v="0">Off</button><button data-v="1">On</button></span></div>
+  </div>
+
   <div class="caption" aria-live="polite"><b id="capBig"></b><span id="capSmall"></span></div>
 
   <div class="chart">
@@ -94,9 +104,13 @@ select{font:600 18px var(--data);color:var(--ink);background:var(--panel-2);bord
 
 <script>
 const DATA = /*DATA*/;
-const C = DATA.chars, K = DATA.k, N = C.length, MID = (N - 1) >> 1;   // 117 answers: the 59th is the middle
+const C = DATA.chars, TIERS = DATA.tiers, N = C.length, MID = (N - 1) >> 1;   // 117 answers: the 59th is the middle
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
-const S = {step:1, dir:'dmg', who:Math.max(0, C.findIndex(c => c.n === DATA.start))};
+/* the same settings as the Roster Battle Map, opening on its default view */
+const S = {step:1, dir:'dmg', who:Math.max(0, C.findIndex(c => c.n === DATA.start)),
+           tier:TIERS[1].key, traits:'base', level:TIERS[1].levels[0], active:0, gear:0};
+const key = () => `${S.traits}_l${S.level}${S.active ? '_a' : ''}${S.gear ? '_g' : ''}`;
+const tier = () => TIERS.find(t => t.key === S.tier);
 const NS = 'http://www.w3.org/2000/svg';
 const W = 1512, H = 540, M = {l:64, r:8, t:92, b:66};
 const PW = W - M.l - M.r, PH = H - M.t - M.b, SLOT = PW / N, BW = SLOT * 0.72;
@@ -105,7 +119,8 @@ const el = (tag, attrs = {}, parent = svg) => { const e = document.createElement
 const f1 = v => v.toFixed(1);
 const ord = n => n + (['th','st','nd','rd'][(n % 100 - 20) % 10] || ['th','st','nd','rd'][n % 100] || 'th');
 
-document.getElementById('setting').textContent = DATA.setting;
+function segButtons(id, items) { document.getElementById(id).innerHTML = items.map(([v, label]) => `<button data-v="${v}">${label}</button>`).join(''); }
+segButtons('segTier', TIERS.map(t => [t.key, t.label]));
 const sel = document.getElementById('who');
 [...C.keys()].sort((a, b) => C[a].n.localeCompare(C[b].n)).forEach(i => { const o = document.createElement('option'); o.value = i; o.textContent = C[i].n; sel.appendChild(o); });
 sel.value = S.who;
@@ -128,7 +143,11 @@ const coStem = el('line', {stroke:'#fff', 'stroke-width':1.5}, callout), coBox =
 const brL = el('path', {class:'bracket reveal'}, gOver), brR = el('path', {class:'bracket reveal'}, gOver);
 const brLt = el('text', {class:'bracket-t reveal', 'text-anchor':'middle'}, gOver), brRt = el('text', {class:'bracket-t reveal', 'text-anchor':'middle'}, gOver);
 
-function values() { const w = S.who; return S.dir === 'dmg' ? K[w] : K.map(row => row[w]); }
+/* DATA.k[tier][scenario] is every matchup, attacks x 100, attacker by attacker */
+function values() {
+  const arr = DATA.k[S.tier][key()], w = S.who;
+  return Array.from({length:N}, (_, j) => (S.dir === 'dmg' ? arr[w * N + j] : arr[j * N + w]) / 100);
+}
 function niceMax(v) { const steps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]; const p = Math.pow(10, Math.floor(Math.log10(v))); for (const s of steps) if (s * p >= v) return s * p; return 10 * p; }
 
 function render() {
@@ -194,7 +213,11 @@ function render() {
   ];
   document.getElementById('capBig').textContent = cap[S.step - 1][0];
   document.getElementById('capSmall').textContent = cap[S.step - 1][1];
-  pressed('segStep', S.step); pressed('segDir', S.dir);
+  segButtons('segLevel', tier().levels.map(l => [l, l]));
+  pressed('segStep', S.step); pressed('segDir', S.dir); pressed('segTier', S.tier); pressed('segTraits', S.traits);
+  pressed('segLevel', S.level); pressed('segGear', S.gear); pressed('segActive', S.active);
+  document.getElementById('setting').textContent = [tier().label, S.traits === 'base' ? 'always-on traits' : 'all triggered',
+    `abilities ${S.level}`, S.active ? 'active on' : 'active off', S.gear ? 'standard gear' : 'no gear'].join(' · ');
   render.vals = vals;
 }
 
@@ -211,6 +234,17 @@ function pressed(id, v) { document.querySelectorAll(`#${id} button`).forEach(b =
 document.querySelectorAll('#segStep button').forEach(b => b.onclick = () => { S.step = +b.dataset.v; render(); });
 document.querySelectorAll('#segDir button').forEach(b => b.onclick = () => { S.dir = b.dataset.v; render(); });
 sel.onchange = () => { S.who = +sel.value; render(); };
+/* the modifiers: event delegation, because the level buttons are rebuilt for each tier */
+document.querySelector('.mods').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const id = b.parentElement.id, v = b.dataset.v;
+  if (id === 'segTier') { S.tier = v; if (!tier().levels.includes(S.level)) S.level = tier().levels[0]; }
+  else if (id === 'segTraits') S.traits = v;
+  else if (id === 'segLevel') S.level = +v;
+  else if (id === 'segGear') S.gear = +v;
+  else if (id === 'segActive') S.active = +v;
+  render();
+});
 
 /* zoom the 1600x900 stage to fit the window, as big as it will go */
 const stage = document.getElementById('stage');

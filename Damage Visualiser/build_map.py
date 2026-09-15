@@ -15,7 +15,8 @@ Steps:
      ability level (ABILITY_LEVELS) x active ability off / on. Passives are always on. The plain
      stat line ('base': no abilities, always-on traits) is kept as the reference.
      Rules are in DAMAGE_MODEL.md; the token formats are in INSTRUCTIONS.md.
-  4. Writes ../LRE Script/tacticus_stats.csv and roster-battle-map.html.
+  4. Writes ../LRE Script/tacticus_stats.csv, roster-battle-map.html and typical-character.html
+     (every matchup table, for the "what is a typical character?" graphic).
 See INSTRUCTIONS.md.
 """
 import argparse, csv, json, os, re, statistics as st, sys, unicodedata
@@ -31,6 +32,8 @@ RELICS_CSV = os.path.join(HERE, 'relic_abilities.csv')
 RELIC_OWNERS_CSV = os.path.join(HERE, 'relic_owners.csv')
 TEMPLATE = os.path.join(HERE, 'map_template.html')
 OUT_HTML = os.path.join(HERE, 'roster-battle-map.html')
+TYPICAL_TEMPLATE = os.path.join(HERE, 'typical_template.html')
+OUT_TYPICAL = os.path.join(HERE, 'typical-character.html')   # the "what is a typical character?" graphic
 
 # ---- Progression tiers (DAMAGE_MODEL.md "Standard setup"). set_tier() applies one. ----
 # rank: the rank row in the game data (MYTHIC I/II = Adamantine I/II). stars: rank stats are stored at
@@ -919,9 +922,10 @@ def scenario_keys():
     return keys
 
 
-def run_scenarios(units, specs):
+def run_scenarios(units, specs, keep=None):
     """specs[(level, trig, gear)] = dict(active=, active_def=, active_gdef=, passive=, passive_def=,
-    passive_goff=, passive_gdef=) keyed by name"""
+    passive_goff=, passive_gdef=) keyed by name. keep: a dict that receives every scenario's full
+    matchup table (attacks x 100, attacker-major, in units order) for the typical-character page."""
     out = {}
     for key, trig, lv, act, gear in scenario_keys():
         sp = specs.get((lv, trig, gear)) if lv else None
@@ -939,6 +943,8 @@ def run_scenarios(units, specs):
         K = {a['name']: {d['name']: attacks_to_kill(a, d, trig, sp['active'].get(a['name']) if (sp and act) else None,
                                                     rnd[d['name']], rest[d['name']]) for d in U}
              for a in U}
+        if keep is not None and lv:
+            keep[key] = [round(K[a['name']][d['name']][0] * 100) for a in U for d in U]
         dmg = {a: st.median(v[0] for v in K[a].values()) for a in K}
         tough = {d['name']: st.median(K[a['name']][d['name']][0] for a in U) for d in U}
         kinds = {a: max(('melee', 'ranged'), key=lambda k: sum(1 for v in K[a].values() if v[1] == k)) for a in K}
@@ -1066,6 +1072,19 @@ def write_html(units, per_tier, actives, passives, relics, version):
         f.write(html.replace('/*DATA*/', json.dumps(data, ensure_ascii=False)))
 
 
+def write_typical(units, tables, version):
+    """typical-character.html: every matchup table, so the page can show any character's 117 answers
+    under any of the map's settings. tables[tier key][scenario key] = flat list from run_scenarios(keep=)."""
+    data = dict(version=version, tiers=[dict(key=t['key'], label=t['label'], levels=list(t['levels'])) for t in TIERS],
+                chars=[dict(n=u['name'], a=u['alliance'], f=u['faction']) for u in units], k=tables, start='Kharn')
+    with open(TYPICAL_TEMPLATE, encoding='utf-8') as f:
+        html = f.read()
+    if '/*DATA*/' not in html:
+        sys.exit('typical_template.html is missing its /*DATA*/ placeholder.')
+    with open(OUT_TYPICAL, 'w', encoding='utf-8') as f:
+        f.write(html.replace('/*DATA*/', json.dumps(data, ensure_ascii=False, separators=(',', ':'))))
+
+
 def creed_check(path, units):
     """compare the plain stat line against the owner's Creed test numbers. Those numbers include
     Rapid Assault and Ranged Specialist (the game shows them), so this check adds them back.
@@ -1158,18 +1177,20 @@ def main():
     actives = sync_rows(ACTIVES_CSV, ACTIVE_COLS, 'Active', units, draft_active, 'active_abilities.csv')
     passives = sync_rows(PASSIVES_CSV, PASSIVE_COLS, 'Passive', units, draft_passive, 'passive_abilities.csv')
     relics = sync_relics(g, units)
-    per_tier, rows = {}, []
+    per_tier, rows, tables = {}, [], {}
     for t in TIERS:
         set_tier(t)
         g, units = load()
         specs = build_specs(units, actives, passives, relics)
-        res = run_scenarios(units, specs)
+        tables[t['key']] = {}
+        res = run_scenarios(units, specs, tables[t['key']])
         per_tier[t['key']] = tier_html(units, res, specs)
         rows += tier_rows(units, res, actives, passives, specs)
         print(f"  {t['label']}: done")
     write_stats(rows, g['version'])
     write_html(units, per_tier, actives, passives, relics, g['version'])
-    print(f'Built roster-battle-map.html and tacticus_stats.csv: {len(units)} characters x {len(TIERS)} tiers, '
+    write_typical(units, tables, g['version'])
+    print(f'Built roster-battle-map.html, typical-character.html and tacticus_stats.csv: {len(units)} characters x {len(TIERS)} tiers, '
           f'game version {g["version"]}.')
     if args.creed:
         set_tier(TIERS[1])
