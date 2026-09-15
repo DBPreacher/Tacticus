@@ -280,6 +280,164 @@ def run(units, specs, rows, tier_key, lv, trig, act, gear, only=None):
     return out
 
 
+# ---------------------------------------------------------------- Defence side
+ROUND_ONLY = ('1 round', 'until his next turn', 'until their next turn', '2 rounds', 'once')
+
+
+def dvalue(sup, ab, var, level, relic=False):
+    """a Defence value: 'healaction' = the support's Damage x their most hits (Healer / Mechanic trait),
+    'a-b' = the middle of two variables, else a game variable (value())"""
+    if var == 'healaction':
+        return sup['dmg'] * max(w['hits'] for w in sup['weapons'])
+    if '-' in var:
+        a, b = var.split('-')
+        return (dvalue(sup, ab, a, level, relic) + dvalue(sup, ab, b, level, relic)) / 2
+    return value(ab or {}, var, level, relic)
+
+
+def defence_for(r, sup, ally, ab, relic, level, trig):
+    """(ds for the first enemy turn, ds for later turns, regen dict, attacker filter) from one Defence row.
+    Actives and short effects only cover the first enemy turn, like defensive actives on the roster map."""
+    first, later, regen = bm.new_ds(), bm.new_ds(), dict(turn=0.0, hit=0.0, shield=0.0, shield_first=0.0)
+    round_only = r['Source'] == 'Active' or r['Lasts'] in ROUND_ONLY
+    scopes, vs_list, any_tok = [], [], False
+    for raw in [x.strip() for x in r['Effect'].split(';') if x.strip()]:
+        tk = parse(raw)
+        if tk['trig'] and not trig:
+            continue
+        o = tk['opts']
+        if not matches(ally, o.get('who', 'all')):
+            continue
+        any_tok = True
+        k, arg = tk['kind'], tk['arg']
+        scope = tk['scope']
+        vs = set(o['vs'].split('|')) if 'vs' in o else None
+        scopes.append(scope)
+        vs_list.append(vs)
+        mult = 1.0
+        if 'avg' in o and not trig:
+            a_, b_ = o['avg'].split('/')
+            mult *= float(a_) / float(b_)
+        if 'chance' in o:
+            mult *= dvalue(sup, ab, o['chance'], level, relic) / 100
+        v = lambda x: dvalue(sup, ab, x, level, relic) * mult
+        targets = [first] if round_only else [first, later]
+        if k == 'suppress':
+            for ds in targets:
+                ds['enemy'].append((bm.SUPPRESSED, arg or 'all', vs))
+        elif k == 'pct':
+            for ds in targets:
+                ds['pct'].append((1 - min(v(arg), 95) / 100, scope, vs))
+        elif k == 'epct':
+            for ds in targets:
+                ds['enemy'].append((1 - min(v(arg), 95) / 100, scope, vs))
+        elif k == 'flat':
+            for ds in targets:
+                ds['flat'].append((v(arg), scope, vs))
+        elif k == 'hitsless':
+            for ds in targets:
+                ds['hitsless'].append((v(arg), scope, vs))
+        elif k == 'pctcap':
+            pv, cv = arg.split('/')
+            for ds in targets:
+                ds['pctcap'].append((v(pv) / 100, dvalue(sup, ab, cv, level, relic), scope, vs))
+        elif k == 'armour':
+            for ds in targets:
+                ds['armour'] += v(arg)
+        elif k == 'armourpass':
+            for ds in targets:
+                ds['pass2'] += v(arg)
+        elif k == 'blockchance':
+            for ds in targets:
+                ds['bc'] += v(arg) / 100
+        elif k == 'blockdmg':
+            for ds in targets:
+                ds['bd'] += v(arg)
+        elif k in ('heal', 'revive'):
+            first['heal'] += v(arg)
+        elif k == 'revivepct':
+            first['heal'] += ally['hp'] * v(arg) / 100
+        elif k == 'healdmg':
+            m = re.fullmatch(r'(\w+)\((\w+)-(\w+)\)', arg)
+            first['heal'] += v(m.group(1)) / 100 * dvalue(sup, ab, m.group(2) + '-' + m.group(3), level, relic)
+        elif k == 'setpct':
+            first['hpmult'] *= v(arg) / 100
+        elif k == 'regen':
+            regen['turn'] += v(arg)
+        elif k == 'regenhit':
+            regen['hit'] += v(arg)
+        elif k == 'shield':
+            regen['shield_first' if round_only else 'shield'] += v(arg)
+        else:
+            sys.exit(f'support_abilities.csv: unknown Defence token kind {k!r}')
+        first['text'].append(k); later['text'].append(k)
+    if not any_tok:
+        return None
+    # a buff that only works against some attackers (Psychic ones, or Chaos) is measured against those
+    if scopes and all(x == 'psychic' for x in scopes):
+        attackers = ('psychic', None)
+    elif vs_list and all(vs_list):
+        attackers = ('vs', set().union(*vs_list))
+    else:
+        attackers = (None, None)
+    return first, later, (regen if any(regen.values()) else None), attackers
+
+
+def toughness_score(ally, U, trig, act, specs_active, rnd, rest, regen=None, pool=None):
+    ks = []
+    for a in (pool or U):
+        spec = specs_active.get(a['name']) if act else None
+        ks.append(bm.attacks_to_kill(a, ally, trig, spec, rnd, rest, regen)[0])
+    return st.median(ks)
+
+
+def run_defence(units, specs, rows, tier_key, lv, trig, act, gear, only=None):
+    """{row index: [(ally, protection against the attackers it works on, share of the roster they are)]}.
+    Protection = how many more attacks a typical enemy needs to kill the ally: k_with / k_without - 1.
+    Unlike the Attack side, allies it makes easier to kill are kept (Nicodemus's Blood Chalice)."""
+    U, sp, rnd, rest = setting_units(units, specs, lv, trig, act, gear)
+    UA = {u['name']: u for u in units}
+    SU = {u['name']: u for u in U}
+    base, out = {}, {}
+    for ri, r in enumerate(rows):
+        if only and r['Name'] not in only:
+            continue
+        if (r['Source'] == 'Active' or r['Condition'] == 'active') and not act:
+            continue
+        if r['Condition'] == 'trig' and not trig:
+            continue
+        if r['Source'] == 'Relic' and not (tier_key == 'mythic' and gear):
+            continue
+        ab, relic = (None, False) if r['Source'] == 'Trait' else row_ability(UA, r)
+        sup = SU[r['Name']]
+        res = []
+        for ally in U:
+            if ally['name'] == r['Name'] or not matches(ally, r['Receives']):
+                continue
+            got = defence_for(r, sup, ally, ab, relic, lv, trig)
+            if not got:
+                continue
+            ds1, ds2, regen, (flt, vs) = got
+            if flt == 'psychic':
+                pool = [a for a in U if any(w['type'] in ('Psychic', 'Direct') for w in a['weapons'])]
+            elif flt == 'vs':
+                pool = [a for a in U if vs & (a['traits'] | {a['alliance']})]
+            else:
+                pool = None
+            key = (ally['name'], flt, tuple(sorted(vs)) if vs else None)
+            if key not in base:
+                base[key] = toughness_score(ally, U, trig, act, sp['active'], rnd[ally['name']], rest[ally['name']], None, pool)
+            r1 = bm.merge_defence(rnd[ally['name']], ds1)
+            r2 = bm.merge_defence(rest[ally['name']], ds2)
+            k1 = toughness_score(ally, U, trig, act, sp['active'], r1, r2, regen, pool)
+            boost = k1 / base[key] - 1
+            if abs(boost) > 0.005:
+                res.append((ally['name'], boost, (len(pool) / len(U)) if pool else 1.0))
+        if res:
+            out[ri] = res
+    return out
+
+
 def summarize(row, allies, spacing='typical'):
     """the page's numbers for one support. A buff that only works against some enemies is scored across
     the whole roster (boost x the share of enemies it works on, owner, September 2026); the team figure
@@ -355,6 +513,7 @@ def main():
     ap.add_argument('--active', action='store_true')
     ap.add_argument('--gear', action='store_true')
     ap.add_argument('--level', type=int, default=36)
+    ap.add_argument('--defence', action='store_true', help='the Defence side')
     args = ap.parse_args()
     bm.set_tier(bm.TIERS[1])
     g, units = bm.load()
@@ -362,8 +521,9 @@ def main():
     passives = bm.sync_rows(bm.PASSIVES_CSV, bm.PASSIVE_COLS, 'Passive', units, bm.draft_passive, 'passive_abilities.csv')
     relics = bm.sync_relics(g, units)
     specs = bm.build_specs(units, actives, passives, relics)
-    rows = load_rows()
-    res = run(units, specs, rows, 'd3', args.level, args.trig, args.active, args.gear)
+    rows = load_rows('Defence' if args.defence else 'Attack')
+    res = (run_defence if args.defence else run)(units, specs, rows, 'd3', args.level, args.trig, args.active, args.gear)
+    print('DEFENCE side' if args.defence else 'ATTACK side')
     print(f"Diamond III, abilities {args.level}, {'all triggered' if args.trig else 'always-on'}, "
           f"active {'on' if args.active else 'off'}, {'standard gear' if args.gear else 'no gear'}")
     print(f"{'support':<34}{'per ally':>9}{'reach':>15}{'team':>8}{'can use':>9}  best allies")

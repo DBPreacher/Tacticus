@@ -853,12 +853,17 @@ def opener(a, d, trig, spec, ds):
     return attacks
 
 
-def kill_count(first, early, turn_first, later, d, hp, cap_first=None):
+def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=None):
     """attacks to kill, one attack at a time. An enemy turn is ATTACKS_PER_TURN attacks.
     first = list of (damage, ignores_TA) making up attack 1 (several parts for an active);
     early = damage of attacks 2..ATTACKS_PER_TURN (inside the first enemy turn);
     turn_first = (damage, ignores_TA) of the first attack of each later turn; later = the rest.
-    Terminator Armour and cap_first (Judh) apply to the first attack of every turn."""
+    Terminator Armour and cap_first (Judh) apply to the first attack of every turn.
+    regen (support_model.py only; the roster map never passes it): dict(turn=health back before each later
+    enemy turn, hit=health back after each attack, shield=a shield at the start of every enemy turn,
+    shield_first=a shield for the first enemy turn only). Healing never goes above hp."""
+    if regen:
+        return _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen)
     ta = 'TerminatorArmour' in d['traits']
     left = hp
     for i in range(5000):
@@ -879,13 +884,41 @@ def kill_count(first, early, turn_first, later, d, hp, cap_first=None):
     return 5000.0
 
 
+def _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen):
+    """kill_count with healing between and during enemy turns, and shields (support_model.py)"""
+    ta = 'TerminatorArmour' in d['traits']
+    left, shield = hp, 0.0
+    for i in range(5000):
+        if i % ATTACKS_PER_TURN == 0:
+            if i:
+                left = min(hp, left + regen.get('turn', 0.0))
+            shield = regen.get('shield', 0.0) + (regen.get('shield_first', 0.0) if i == 0 else 0.0)
+        if i == 0:
+            dmg = sum(x * (0.25 if (j == 0 and ta and not p) else 1) for j, (x, p) in enumerate(first))
+        elif i % ATTACKS_PER_TURN == 0:
+            dmg = turn_first[0] * (0.25 if (ta and not turn_first[1]) else 1)
+        elif i < ATTACKS_PER_TURN:
+            dmg = early
+        else:
+            dmg = later
+        if cap_first is not None and i % ATTACKS_PER_TURN == 0:
+            dmg = min(dmg, cap_first * left)
+        dmg = max(dmg, 1.0)
+        soak = min(shield, dmg)
+        shield -= soak
+        if dmg - soak >= left:
+            return i + (left + soak) / dmg
+        left = min(hp, left - (dmg - soak) + regen.get('hit', 0.0))
+    return 5000.0
+
+
 def _with_defence(d, ds):
     if ds and (ds['armour'] or ds['pass2']):
         return dict(d, arm=d['arm'] + ds['armour'], pass2=ds['pass2'])
     return d
 
 
-def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None):
+def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None, regen=None):
     """(attacks, best attack kind, normal attack damage, used the active).
     spec = the attacker's active (offence); a['ps'] = the attacker's passive.
     ds_round = the defender's defence during the first enemy turn (active + passive);
@@ -897,10 +930,10 @@ def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None):
     early = best_attack(a, d1, trig, ds_round, False, False)[0]
     tf = best_attack(a, d2, trig, ds_rest, False, True)
     later_dmg, _, later_w = best_attack(a, d2, trig, ds_rest, False, False)
-    k = kill_count([a1[:2]], early, tf[:2], later_dmg, d, hp, cap)
+    k = kill_count([a1[:2]], early, tf[:2], later_dmg, d, hp, cap, regen)
     used = False
     if spec:
-        k_act = kill_count(opener(a, d1, trig, spec, ds_round), early, tf[:2], later_dmg, d, hp, cap)
+        k_act = kill_count(opener(a, d1, trig, spec, ds_round), early, tf[:2], later_dmg, d, hp, cap, regen)
         if k_act < k:
             k, used = k_act, True
     guard = (ds_round or {}).get('guard') or (ds_rest or {}).get('guard')
