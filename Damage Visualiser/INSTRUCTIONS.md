@@ -31,7 +31,7 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
-| `typical_template.html` | The "what is a typical character?" graphic's design; `build_map.py` fills it (see below). `build_typical.py` just runs `build_map.py` | Yes, for design changes |
+| `typical_template.html` | The "what is a typical character?" graphic's design; `build_map.py` fills it (see below) | Yes, for design changes |
 | `typical-character.html` | That graphic, built | **Never.** It's overwritten |
 | `cache/gameinfo.json` | The downloaded game data (about 11 MB), ignored by git | No |
 | `../LRE Script/tacticus_stats.csv` | Output: the stats "second tab" (stats, weapons, active ability, all scenario scores) | **Never.** It's overwritten |
@@ -506,7 +506,7 @@ The **Mythic tier** is built in (September 2026).
 
 | Date | Change |
 |---|---|
-| September 2026 | The typical-character page gets the map's switches (Progression, Traits, Ability level, Gear, Active); `build_map.py` now writes it |
+| September 2026 | The typical-character page gets the map's switches (Progression, Traits, Ability level, Gear, Active); `build_map.py` now writes it and `build_typical.py` is gone |
 | September 2026 | `build_typical.py` and `typical-character.html`: the "what is a typical character?" graphic (one character's 117 answers, lined up, middle picked out) |
 | September 2026 | OBS broadcast mode removed (owner prefers to record the normal page and press the buttons on camera). The page now zooms up to fill wide screens. Layout is chart | character card | controls side by side (owner), with the alliance and melee/ranged key under the chart ("Ranged is their best attack") and "Reading the chart" below; the chart is 1000×670 |
 | September 2026 | Broadcast mode for OBS (1920×1080 stage scaling to any 16:9 size, keyboard shortcuts, URL settings, `roster-battle-map-obs.html`); Attack/Defence views spread so most names fit; no reference characters (owner) |
