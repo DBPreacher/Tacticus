@@ -87,10 +87,11 @@ Earlier ideas that were replaced:
   extra hits (Vitruvius, Thoread, Gulgortz) and extra attacks (Actus,
   Anuphet, Mephiston); flat Damage is modest (Calgar about +20%); small
   armour reductions barely matter at Diamond III because most attacks are
-  already on their pierce floor. Open: how to weigh buffs that only work
-  against some enemies (only 2 Daemons, 12 Psykers in the roster) and
-  whether the team figure assumes a team built for the buff. Then the page,
-  then the Defence side.
+  already on their pierce floor. Owner decisions: buffs that only work
+  against some enemies are scored across the whole roster, and the team
+  figure assumes a team built for the buff. Step 3 done: `support-map.html`
+  (Map, Ranking, For one; all tiers and settings; built in parallel by
+  `build_support.py`). Next: the Defence side.
 - **Support value page, first notes** (owner's idea; notes in his "Boosting champions"
   sheet). Proposed method: measure each ally buff / enemy debuff with the
   same model, as how much faster each eligible ally kills a typical enemy,

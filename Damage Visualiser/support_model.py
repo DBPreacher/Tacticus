@@ -234,14 +234,16 @@ def damage_score(a, U, trig, spec, rnd, rest, armour=0.0):
     return st.median(ks)
 
 
-def run(units, specs, rows, tier_key, lv, trig, act, gear, spacing='typical', only=None):
-    """{support label: dict(boost=median boost per ally, allies=[(name, boost)], eligible, reach, team)}"""
+def run(units, specs, rows, tier_key, lv, trig, act, gear, only=None):
+    """{row index: [(ally name, boost against the enemies it works on, share of the roster those enemies are)]}
+    for every support row that counts at this setting and helps at least one ally. summarize() turns it
+    into the page's numbers."""
     U, sp, rnd, rest = setting_units(units, specs, lv, trig, act, gear)
     byname = {u['name']: u for u in U}
     UA = {u['name']: u for u in units}
     base = {}
     out = {}
-    for r in rows:
+    for ri, r in enumerate(rows):
         if only and r['Name'] not in only:
             continue
         if (r['Source'] == 'Active' or r['Condition'] == 'active') and not act:
@@ -251,8 +253,7 @@ def run(units, specs, rows, tier_key, lv, trig, act, gear, spacing='typical', on
         if r['Source'] == 'Relic' and not (tier_key == 'mythic' and gear):
             continue
         ab, relic = row_ability(UA, r)
-        label = f"{r['Name']} ({r['Source'].lower()})"
-        res, only_vs = [], set()
+        res = []
         for ally in U:
             if ally['name'] == r['Name'] or not matches(ally, r['Receives']):
                 continue
@@ -271,17 +272,80 @@ def run(units, specs, rows, tier_key, lv, trig, act, gear, spacing='typical', on
             k1 = damage_score(a2, pool, trig, spec2, rnd, rest, armour)
             boost = base[key] / k1 - 1
             if boost > 0.005:                          # only allies it actually helps
-                res.append((ally['name'], boost))
-                only_vs |= vs or set()
-        if not res:
-            continue
-        res.sort(key=lambda x: -x[1])
-        reach = r['Reach']
-        n = FIXED_REACH.get(reach) or SPACING[spacing].get(reach, 1)
-        boost = st.median(b for _, b in res)
-        out[label] = dict(boost=boost, allies=res, eligible=len(res), reach=reach, n=n, team=boost * n,
-                          vs=' vs ' + '/'.join(sorted(only_vs)) if only_vs else '')
+                share = sum(1 for d in pool if not d.get('_skip')) / len(pool)
+                res.append((ally['name'], boost, share))
+        if res:
+            out[ri] = res
     return out
+
+
+def summarize(row, allies, spacing='typical'):
+    """the page's numbers for one support. A buff that only works against some enemies is scored across
+    the whole roster (boost x the share of enemies it works on, owner, September 2026); the team figure
+    assumes a team built to use the buff (owner)."""
+    per = sorted((b * s for _, b, s in allies), reverse=True)
+    boost = st.median(per)
+    n = FIXED_REACH.get(row['Reach']) or SPACING[spacing].get(row['Reach'], 1)
+    vs_only = any(s < 1 for _, _, s in allies)
+    return dict(boost=boost, n=n, team=boost * n, eligible=len(allies),
+                vs_boost=st.median(b for _, b, _ in allies) if vs_only else None)
+
+
+WORDS = {'flat': '+{:,.0f} Damage', 'pct': '+{:.0f}% damage', 'hits': '+{:.0f} hit', 'pierce': '+{:.0f}% pierce',
+         'critchance': '+{:.0f}% crit chance', 'critdmg': '+{:,.0f} Crit Damage', 'armignore': 'ignore {:,.0f} Armour',
+         'ramp': 'each hit +{:,.0f} more than the last', 'attack': 'an extra attack at {:.0f}% Damage',
+         'armour': 'enemy Armour -{:,.0f}', 'taken': 'enemy takes +{:,.0f} Damage a hit',
+         'takenpct': 'enemy takes +{:.0f}% damage', 'dmgfromblock': '+{:.0f}% of Block Damage as Damage'}
+SCOPES = {'normal': 'normal attacks', 'normal-melee': 'normal melee', 'normal-ranged': 'normal ranged', 'ability': 'actives'}
+
+
+def _who(x):
+    x = x.replace('|', '/')
+    return 'not ' + x[1:] if x.startswith('!') else x
+
+
+def describe(effect, ab, relic, level):
+    """a token list in words, with the values at this level (for the page and for checking)"""
+    out = []
+    for tok in [x.strip() for x in effect.split(';') if x.strip()]:
+        tk = parse(tok)
+        o = tk['opts']
+        m = re.fullmatch(r'(\d+)x(\w+)\((\w+)(?:-(\w+))?\)', tk['arg'])
+        if m:
+            n, typ, a, b = m.groups()
+            lo = value(ab, a, level, relic)
+            hi = value(ab, b, level, relic) if b else lo
+            s = f'+{n}\u00d7 {typ} {(lo + hi) / 2:,.0f}' + (' on each of their attacks' if tk['kind'] == 'partner' else ' hit')
+        elif tk['kind'] in ('follow', 'reuse'):
+            s = {'follow': 'a free ranged attack after each melee attack', 'reuse': 'uses their active a second time'}[tk['kind']]
+        else:
+            v = value(ab, tk['arg'], level, relic) * float(o.get('mult', 1))
+            s = WORDS[tk['kind']].format(v)
+            if 'trig' in o:
+                s += f' (up to {value(ab, o["trig"], level, relic):,.0f})'
+            if 'cap' in o:
+                s += f' (max {value(ab, o["cap"], level, relic):,.0f} a hit)'
+            if 'chance' in o:
+                s += f' ({value(ab, o["chance"], level, relic):.0f}% chance a round)'
+            if 'avg' in o:
+                s += ' (every third round)'
+            if 'trigmult' in o:
+                s += f' (x{o["trigmult"]} over a battle)'
+        bits = []
+        if tk['scope'] != 'all':
+            bits.append(SCOPES.get(tk['scope'], tk['scope']))
+        if 'who' in o:
+            bits.append(_who(o['who']))
+        if 'vs' in o:
+            bits.append('vs ' + _who(o['vs']))
+        if 'type' in o:
+            bits.append(o['type'].replace('|', '/'))
+        if 'notype' in o:
+            bits.append('not ' + o['notype'])
+        if tk['trig']:
+            bits.append('All triggered')
+        out.append(s + (f" ({', '.join(bits)})" if bits else ''))
+    return '; '.join(out)
 
 
 def main():
@@ -297,13 +361,18 @@ def main():
     passives = bm.sync_rows(bm.PASSIVES_CSV, bm.PASSIVE_COLS, 'Passive', units, bm.draft_passive, 'passive_abilities.csv')
     relics = bm.sync_relics(g, units)
     specs = bm.build_specs(units, actives, passives, relics)
-    res = run(units, specs, load_rows(), 'd3', args.level, args.trig, args.active, args.gear)
+    rows = load_rows()
+    res = run(units, specs, rows, 'd3', args.level, args.trig, args.active, args.gear)
     print(f"Diamond III, abilities {args.level}, {'all triggered' if args.trig else 'always-on'}, "
           f"active {'on' if args.active else 'off'}, {'standard gear' if args.gear else 'no gear'}")
-    print(f"{'support':<34}{'per ally':>9}{'reach':>14}{'team':>8}{'can use':>9}  best allies")
-    for label, x in sorted(res.items(), key=lambda kv: -kv[1]['team']):
-        best = ', '.join(f'{n} +{b * 100:.0f}%' for n, b in x['allies'][:3])
-        print(f"{label:<34}{x['boost'] * 100:>8.0f}%{x['reach'] + ' (' + str(x['n']) + ')':>15}{x['team'] * 100:>7.0f}%{x['eligible']:>9}  {best}{x['vs']}")
+    print(f"{'support':<34}{'per ally':>9}{'reach':>15}{'team':>8}{'can use':>9}  best allies")
+    table = sorted(((ri, summarize(rows[ri], al)) for ri, al in res.items()), key=lambda x: -x[1]['team'])
+    for ri, x in table:
+        r = rows[ri]
+        best = ', '.join(f'{n} +{b * s * 100:.0f}%' for n, b, s in sorted(res[ri], key=lambda y: -y[1] * y[2])[:3])
+        vs = f" (+{x['vs_boost'] * 100:.0f}% vs the enemies it works on)" if x['vs_boost'] else ''
+        print(f"{r['Name'] + ' (' + r['Source'].lower() + ')':<34}{x['boost'] * 100:>8.0f}%{r['Reach'] + ' (' + str(x['n']) + ')':>15}"
+              f"{x['team'] * 100:>7.0f}%{x['eligible']:>9}  {best}{vs}")
 
 
 if __name__ == '__main__':

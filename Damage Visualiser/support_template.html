@@ -1,0 +1,552 @@
+<meta charset="utf-8">
+<title>Support Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<!-- Built by build_support.py: edit this template, never support-map.html. /*DATA*/ is replaced with the model output.
+     The CSS down to "Support Map additions" is copied from map_template.html so the two pages match. -->
+<style>
+:root{
+  --ground:#0a0a0a; --panel:#0f1318; --panel-2:#141a21; --rule:#232b35; --rule-soft:#1a2029;
+  --ink:#e8eaf0; --ink-2:#a3aab8; --ink-3:#6e7686; --guide:#4a5363;
+  --imperial:#d9ad3f; --chaos:#dc4638; --xenos:#5cbfe0;
+  --flag:#e0a84a;
+  --display:'Cinzel',Georgia,'Times New Roman',serif;
+  --data:'Rajdhani','Arial Narrow',Arial,sans-serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;margin:0}
+.wrap{max-width:1440px;margin:0 auto;padding:28px 28px 48px;display:flex;flex-direction:column;gap:22px}
+/* on windows wider than 1440px, fitPage() lays the page out at 1440px and zooms it up to fill the screen */
+.wrap.fit{width:1440px;max-width:none}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;border-bottom:1px solid var(--rule);padding-bottom:18px}
+.eyebrow{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
+.setup{display:flex;flex-wrap:wrap;gap:6px}
+.setup span{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:3px 9px;border-radius:3px;font-variant-numeric:tabular-nums}
+/* chart | character card | controls. The two side panels take the chart's height (contain:size stops
+   them stretching the row) and scroll inside if they're longer. Narrower windows stack them under the chart. */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 316px 232px;gap:16px;align-items:stretch}
+.main>.controls,.main>.detail{contain:size;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+@media (max-width:1280px){.main{grid-template-columns:1fr 1fr}.main>.chart-card{grid-column:1/-1}.main>.controls,.main>.detail{contain:none;overflow:visible}}
+@media (max-width:760px){.main{grid-template-columns:1fr}}
+.chart-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px 14px 8px;position:relative}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 6px 6px;flex-wrap:wrap}
+/* the title stays on one line and the hint always gets its own, so the chart never shifts when the settings change */
+.chart-head h2{font-family:var(--display);font-size:16px;font-weight:600;margin:0;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 100%}
+.hint{font-size:12.5px;color:var(--ink-3)}
+.chart-head .hint{flex:1 1 100%}
+svg{display:block;width:100%;height:auto;font-family:var(--data)}
+.grid line{stroke:var(--rule-soft);stroke-width:1}
+.tick{fill:var(--ink-3);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.axis-title{fill:var(--ink-2);font-size:13.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.off{display:none}
+.median{stroke:var(--guide);stroke-width:1;stroke-dasharray:4 5}
+.median-label{paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round;fill:var(--ink-3);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.quad{fill:#343b47;font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.dot{cursor:pointer;transition:transform .6s cubic-bezier(.22,.9,.32,1),opacity .25s}
+.dot .mark{stroke:var(--panel);stroke-width:1.6}
+.dot .hit{fill:transparent}
+.dot.dim{opacity:.12}
+.dot.dim .hit{pointer-events:none}
+.ring{fill:none;stroke:var(--ink);stroke-width:2}
+.ring.find{stroke-dasharray:3 3}
+.lbl{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round;fill:var(--ink-2);font-size:12px;font-weight:600;pointer-events:none}
+.lbl.sel{fill:var(--ink);font-size:14px;font-weight:700}
+.lbl.find{fill:var(--ink)}
+#labels{transition:opacity .2s}
+.arrow{stroke:#c9ced8;stroke-width:1.2;opacity:.5;fill:none}
+.arrow.sel{opacity:1;stroke-width:2;stroke:#fff}
+.tip{position:absolute;pointer-events:none;background:#06080b;border:1px solid var(--rule);border-radius:4px;padding:8px 11px;font-size:12.5px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:opacity .12s;z-index:5}
+.tip b{font-family:var(--data);font-size:15px;font-weight:700;display:block;color:var(--ink)}
+.tip .f{color:var(--ink-3);font-size:12px;margin-bottom:5px}
+.tip .r{display:flex;justify-content:space-between;gap:14px;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.tip .r span:last-child{color:var(--ink);font-family:var(--data);font-weight:600;font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:16px}
+.label{font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.controls{display:flex;flex-direction:column;gap:12px;padding:14px}
+.controls .label{margin-bottom:6px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;text-align:center;font-family:var(--data);font-weight:600;font-size:14.5px;padding:6px 3px;white-space:nowrap;color:var(--ink-2);background:var(--panel-2)}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#0a0a0a}
+.seg button:focus-visible,.chip:focus-visible,.check input:focus-visible+span,.tbl button:focus-visible,th button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.check{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13.5px;color:var(--ink)}
+.check input{position:absolute;opacity:0}
+.check span.box{width:32px;height:18px;border-radius:9px;background:var(--rule);position:relative;flex:none;transition:background .2s}
+.check span.box::after{content:"";position:absolute;top:3px;left:3px;width:12px;height:12px;border-radius:50%;background:var(--ink-2);transition:transform .2s,background .2s}
+.check input:checked+span.box{background:#6e7686}
+.check input:checked+span.box::after{transform:translateX(14px);background:#fff}
+.search{width:100%;background:var(--ground);border:1px solid var(--rule);border-radius:4px;color:var(--ink);font:inherit;padding:8px 10px}
+.search:focus{outline:2px solid var(--ink);outline-offset:0;border-color:transparent}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.chip{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:var(--data);font-weight:600;font-size:14px;padding:4px 10px;border:1px solid var(--rule);border-radius:3px;color:var(--ink)}
+.chip i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.chip[aria-pressed="false"]{color:var(--ink-3);text-decoration:line-through}
+.chip[aria-pressed="false"] i{opacity:.25}
+.chart-key{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 20px;margin:6px 6px 4px;padding-top:10px;border-top:1px solid var(--rule-soft)}
+.shapes{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink-2)}
+.shapes svg{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:5px}
+dl.defs{margin:0;font-size:12.5px;color:var(--ink-2);columns:3 300px;column-gap:32px}
+dl.defs dt{break-after:avoid}
+dl.defs dd{margin:0 0 10px;break-inside:avoid}
+dl.defs dt{font-family:var(--data);font-weight:700;font-size:13.5px;color:var(--ink)}
+ul.tl{margin:4px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:2px}
+ul.tl li{line-height:1.4}
+.detail h3{font-family:var(--display);font-size:22px;font-weight:700;margin:0;line-height:1.15;text-wrap:balance}
+.detail .fac{color:var(--ink-3);font-size:13px;margin:2px 0 12px;display:flex;align-items:center;gap:7px}
+.detail .fac i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:3px;overflow:hidden;margin-bottom:12px}
+.stats div{background:var(--panel-2);padding:6px 8px}
+.stats small{display:block;font-family:var(--data);font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.stats b{font-family:var(--data);font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.weap{font-size:13px;color:var(--ink-2);margin:0 0 12px}
+.scores{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin-bottom:14px}
+.scores th{white-space:nowrap;font-family:var(--data);font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);text-align:right;padding:0 0 4px}
+.scores th:first-child{text-align:left}
+.scores td{padding:5px 0;border-top:1px solid var(--rule-soft);text-align:right;font-family:var(--data);font-weight:600;font-size:15px}
+.scores td:first-child{text-align:left;font-family:var(--body);font-weight:500;font-size:13px;color:var(--ink-2)}
+.scores td small{color:var(--ink-3);font-size:12px;margin-left:4px}
+.scores td.on{color:var(--ink)}
+.scores td.dimcol{color:var(--ink-3)}
+.sect{border-top:1px solid var(--rule);padding-top:12px;margin-top:2px;margin-bottom:12px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 12px}
+.tag{font-family:var(--data);font-weight:600;font-size:13px;padding:2px 8px;border-radius:3px;border:1px solid var(--rule);color:var(--ink)}
+.tag.sit{border-style:dashed;color:var(--ink-2)}
+.tag.flag{border-color:rgba(224,168,74,.6);color:var(--flag)}
+.none{font-size:12.5px;color:var(--ink-3);margin:0 0 12px}
+.act-name{font-family:var(--data);font-weight:700;font-size:16px;margin:0 0 6px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.act-line{font-size:12.5px;color:var(--ink-2);margin:0 0 4px}
+.act-line b{font-family:var(--data);font-weight:700;color:var(--ink);font-size:13.5px}
+.act-note{font-size:12px;color:var(--ink-3);margin:6px 0 0}
+.creed{font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;gap:4px}
+.creed b{color:var(--ink);font-family:var(--data);font-size:15px;font-variant-numeric:tabular-nums}
+.table-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px}
+.table-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;padding:14px 18px 10px}
+.table-head h2{font-family:var(--display);font-size:18px;font-weight:600;margin:0}
+.tbl-scroll{max-height:560px;overflow:auto;border-top:1px solid var(--rule)}
+table.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:760px}
+.tbl thead th{position:sticky;top:0;background:var(--panel-2);z-index:1;text-align:right;padding:0;border-bottom:1px solid var(--rule)}
+.tbl thead th:nth-child(-n+3){text-align:left}
+th button{all:unset;cursor:pointer;display:block;width:100%;box-sizing:border-box;padding:9px 14px;font-family:var(--data);font-weight:700;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-align:inherit}
+th button[aria-sort]{color:var(--ink)}
+.tbl td{padding:6px 14px;border-bottom:1px solid var(--rule-soft);text-align:right;font-family:var(--data);font-weight:600;font-size:15px}
+.tbl td:nth-child(-n+3){text-align:left}
+.tbl td:nth-child(2),.tbl td:nth-child(3){font-family:var(--body);font-weight:400;font-size:13px;color:var(--ink-2)}
+.tbl td .rk{color:var(--ink-3);font-size:13px;margin-left:6px;display:inline-block;min-width:34px;text-align:left}
+.tbl tr.sel td{background:rgba(232,234,240,.06)}
+.tbl button.nm{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-family:var(--data);font-weight:700;font-size:15px;color:var(--ink)}
+.tbl button.nm i{width:8px;height:8px;border-radius:2px;display:inline-block;flex:none}
+.up{color:var(--ink)}.down{color:var(--ink-3)}
+footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
+@media (prefers-reduced-motion:reduce){.dot,#labels,.check span.box,.check span.box::after{transition:none}}
+/* ---------- Support Map additions ---------- */
+.controls{gap:9px}
+.rank{display:none;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;padding:4px 6px 0}
+.chart-card.list .rank{display:block;aspect-ratio:1000/670}
+.chart-card.list #map{display:none}
+.rk-row{display:grid;grid-template-columns:230px minmax(0,1fr) 150px;align-items:center;gap:12px;padding:3px 4px;border-radius:3px;cursor:pointer}
+.rk-row:hover{background:var(--panel-2)}
+.rk-row.sel{background:rgba(232,234,240,.08)}
+.rk-name{font-family:var(--data);font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-name small{font-weight:600;color:var(--ink-3);font-size:12.5px;margin-left:5px}
+.rk-bar{height:14px;border-radius:0 3px 3px 0;min-width:2px}
+.rk-val{font-family:var(--data);font-weight:600;font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rk-val b{color:var(--ink);font-size:15px}
+.rk-head{font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:2px 4px 8px}
+.who{width:100%;background:var(--ground);border:1px solid var(--rule);border-radius:4px;color:var(--ink);font:600 14.5px var(--data);padding:7px 8px}
+.allies{display:flex;flex-direction:column;gap:3px;margin:0 0 12px}
+.al{display:grid;grid-template-columns:minmax(0,1fr) 70px 46px;align-items:center;gap:8px;font-size:13px}
+.al span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al i{display:block;height:8px;border-radius:0 2px 2px 0}
+.al b{font-family:var(--data);font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.gives{font-size:13px;color:var(--ink);margin:0 0 12px;line-height:1.45}
+.vsnote{font-size:12.5px;color:var(--ink-2);margin:0 0 12px;border-left:2px solid var(--rule);padding-left:8px}
+.abtext{font-size:12px;color:var(--ink-3);margin:0 0 8px;line-height:1.45}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">DB Preacher Plays · Damage Visualiser</div>
+      <h1>Support Map</h1>
+    </div>
+    <div class="setup" id="setup"></div>
+  </header>
+
+  <div class="main">
+    <section class="chart-card" id="chartCard" aria-label="Support chart">
+      <div class="chart-head">
+        <h2 id="chartTitle">Every support</h2>
+        <span class="hint" id="chartHint">Hover a mark for numbers · click to pin it in the panel</span>
+      </div>
+      <svg id="map" viewBox="0 0 1000 670" role="img" aria-label="Chart of every support by how many allies it helps and how much"></svg>
+      <div class="rank" id="rank"></div>
+      <div class="chart-key">
+        <div class="legend" id="legend" role="group" aria-label="Alliances (click to hide or show)"></div>
+        <div class="shapes">
+          <span><svg viewBox="-7 -7 14 14"><circle r="5.5" fill="#a3aab8"/></svg>Passive</span>
+          <span><svg viewBox="-7 -7 14 14"><path d="M0,-6.5L6.5,0L0,6.5L-6.5,0Z" fill="#a3aab8"/></svg>Active</span>
+          <span><svg viewBox="-7 -7 14 14"><rect x="-5" y="-5" width="10" height="10" fill="#a3aab8"/></svg>Relic (Mythic)</span>
+        </div>
+      </div>
+      <div class="tip" id="tip" role="status"></div>
+    </section>
+
+    <div class="panel detail" id="detail" aria-live="polite"></div>
+
+    <div class="panel controls">
+      <div>
+        <p class="label">View</p>
+        <div class="seg" role="group" aria-label="View" id="segView">
+          <button data-v="map" aria-pressed="true">Map</button>
+          <button data-v="rank" aria-pressed="false">Ranking</button>
+          <button data-v="char" aria-pressed="false">For one</button>
+        </div>
+      </div>
+      <div>
+        <p class="label">Progression</p>
+        <div class="seg" role="group" aria-label="Progression" id="segTier"></div>
+      </div>
+      <div>
+        <p class="label">Traits</p>
+        <div class="seg" role="group" aria-label="Traits" id="segTraits">
+          <button data-v="base" aria-pressed="true">Always-on</button>
+          <button data-v="trig" aria-pressed="false">All triggered</button>
+        </div>
+      </div>
+      <div>
+        <p class="label">Ability level</p>
+        <div class="seg" role="group" aria-label="Ability level" id="segLevel"></div>
+      </div>
+      <div>
+        <p class="label">Gear</p>
+        <div class="seg" role="group" aria-label="Gear" id="segGear">
+          <button data-v="0" aria-pressed="true">None</button>
+          <button data-v="1" aria-pressed="false">Standard</button>
+        </div>
+      </div>
+      <div>
+        <p class="label">Active ability</p>
+        <div class="seg" role="group" aria-label="Active ability" id="segActive">
+          <button data-v="0" aria-pressed="false">Off</button>
+          <button data-v="1" aria-pressed="true">On</button>
+        </div>
+      </div>
+      <div>
+        <p class="label">Team spacing</p>
+        <div class="seg" role="group" aria-label="Team spacing" id="segSpacing">
+          <button data-v="tight" aria-pressed="false">Tight</button>
+          <button data-v="typical" aria-pressed="true">Typical</button>
+          <button data-v="spread" aria-pressed="false">Spread</button>
+        </div>
+      </div>
+      <div>
+        <p class="label">Find a support</p>
+        <input class="search" id="q" type="search" placeholder="Name or faction" autocomplete="off">
+      </div>
+      <div>
+        <p class="label">For one character</p>
+        <select class="who" id="who" aria-label="Character for the For one view"></select>
+      </div>
+    </div>
+  </div>
+
+  <section class="panel reading" aria-label="Reading the Support Map">
+    <p class="label">Reading the Support Map</p>
+    <dl class="defs">
+      <dt>What it measures</dt>
+      <dd>For every ally who can use a buff, how much faster they kill a typical character with it: the same model and settings as the Roster Battle Map. +50% means they do half as much again.</dd>
+      <dt>Boost per ally: higher is better</dt>
+      <dd>The middle of those boosts, among the allies it actually helps.</dd>
+      <dt>Allies it helps: further right is wider</dt>
+      <dd>How many of the other <span id="allyCount">116</span> characters it improves at all. A Blood Angels-only buff can be big but narrow.</dd>
+      <dt>Team boost</dt>
+      <dd>Boost per ally × the allies it reaches in one turn. 100% is like having one more typical ally hitting. It assumes a team built to use the buff; "allies it helps" shows how narrow that team is.</dd>
+      <dt>Team spacing</dt>
+      <dd>How many teammates an aura reaches. Typical: adjacent 2, within 2 hexes 3. Tight: 3 and 4. Spread: 1 and 2. Team-wide buffs and debuffs on the enemy reach all 4; one-ally and next-attack buffs reach 1.</dd>
+      <dt>Against some enemies only</dt>
+      <dd>Buffs that only work against Psykers, Daemons or Chaos are scored across the whole roster: +50% against 2 Daemons out of 117 counts as about +1%. The panel shows the full figure too.</dd>
+      <dt>What counts</dt>
+      <dd>Conditional parts follow the Traits switch, actives the Active switch, relics Mythic with gear. +Damage buffs work on normal attacks (ability damage doesn't use the Damage stat); debuffs on the enemy reach actives too. Not counted: summons, Overwatch, movement, and the support's own damage (that's on the Roster Battle Map).</dd>
+      <dt>Coming next</dt>
+      <dd>The Defence side: heals, damage reduction, taunts and control.</dd>
+    </dl>
+  </section>
+
+  <section class="table-card" aria-label="Every support">
+    <div class="table-head">
+      <h2>Every support</h2>
+      <span class="hint" id="tableHint"></span>
+    </div>
+    <div class="tbl-scroll">
+      <table class="tbl" id="tbl">
+        <thead><tr>
+          <th><button data-k="name">Support</button></th>
+          <th><button data-k="src">Ability</button></th>
+          <th><button data-k="gives">Gives</button></th>
+          <th><button data-k="per">Per ally</button></th>
+          <th><button data-k="n">Allies helped</button></th>
+          <th><button data-k="team">Team boost</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Built from the Roster Battle Map's damage model and <em>Damage Visualiser/support_abilities.csv</em> (how each buff is counted). Game data from tacticustable.com. The numbers are for comparing supports, not predicting an exact fight.</footer>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+const C = DATA.chars, SUP = DATA.supports, TIERS = DATA.tiers;
+const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
+const S = {view:'map', tier:TIERS[1].key, traits:'base', level:TIERS[1].levels[0], active:1, gear:0, spacing:'typical',
+           sel:SUP.findIndex(s => s.name === 'Marneus Calgar'), who:C.findIndex(c => c.n === 'Kharn'), q:'', hidden:new Set(), sort:{k:'team', dir:-1}, hover:null};
+const NS = 'http://www.w3.org/2000/svg';
+const W = 1000, H = 670, M = {l:74, r:26, t:22, b:64};
+const XD = [0, 120], YD = [0.01, 2.5];
+const X = v => M.l + (Math.min(Math.max(v, XD[0]), XD[1]) - XD[0]) / (XD[1] - XD[0]) * (W - M.l - M.r);
+const Y = v => M.t + (1 - (Math.log(Math.min(Math.max(v, YD[0]), YD[1])) - Math.log(YD[0])) / (Math.log(YD[1]) - Math.log(YD[0]))) * (H - M.t - M.b);
+const pc = v => (v * 100 >= 10 ? Math.round(v * 100) : (v * 100).toFixed(1).replace(/\.0$/, '')) + '%';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const median = a => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length ? (s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2) : 0; };
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const key = () => `${S.traits}_l${S.level}${S.active ? '_a' : ''}${S.gear ? '_g' : ''}`;
+const tier = () => TIERS.find(t => t.key === S.tier);
+const label = s => s.name + (s.src === 'Passive' ? '' : ` (${s.src.toLowerCase()})`);
+const reachN = s => DATA.fixed[s.reach] || DATA.spacing[S.spacing][s.reach] || 1;
+
+/* this setting's numbers for one support, or null if it doesn't count here */
+function stats(i) {
+  const raw = (DATA.s[S.tier][key()] || {})[i];
+  if (!raw) return null;
+  const s = SUP[i], allies = raw.map(([a, b, sh]) => ({a, b: b / 1000, sh: sh / 1000, w: b * sh / 1e6})).sort((x, y) => y.w - x.w);
+  const per = median(allies.map(x => x.w)), n = reachN(s);
+  const vsOnly = allies.some(x => x.sh < 1);
+  return {per, n, team: per * n, count: allies.length, allies, vs: vsOnly ? median(allies.map(x => x.b)) : null,
+          share: vsOnly ? median(allies.map(x => x.sh)) : 1};
+}
+const shown = i => !S.hidden.has(SUP[i].alliance);
+const found = i => { const q = S.q.trim().toLowerCase(); return q && (SUP[i].name.toLowerCase().includes(q) || SUP[i].faction.toLowerCase().includes(q)); };
+
+function renderSetup() {
+  document.getElementById('setup').innerHTML = [`Patch ${DATA.version.split('.').slice(0, 3).join('.')}`, 'Attack side',
+    `Team spacing: ${S.spacing}`, `${SUP.length} support abilities`].map(x => `<span>${esc(x)}</span>`).join('');
+}
+function segButtons(id, items, cur) { document.getElementById(id).innerHTML = items.map(([v, l]) => `<button data-v="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); }
+segButtons('segTier', TIERS.map(t => [t.key, t.label]), S.tier);
+function renderLevels() { segButtons('segLevel', tier().levels.map(l => [l, `Level ${l}`]), S.level); }
+renderLevels();
+document.getElementById('allyCount').textContent = C.length - 1;
+const whoSel = document.getElementById('who');
+whoSel.innerHTML = [...C.keys()].sort((a, b) => C[a].n.localeCompare(C[b].n)).map(i => `<option value="${i}">${esc(C[i].n)}</option>`).join('');
+whoSel.value = S.who;
+
+/* ---------- chart furniture ---------- */
+const svg = document.getElementById('map');
+const gGrid = el('g', {}, svg);
+[0, 20, 40, 60, 80, 100, 120].forEach(v => { el('line', {x1:X(v), x2:X(v), y1:M.t, y2:H - M.b}, gGrid).style.stroke = 'var(--rule-soft)'; el('text', {x:X(v), y:H - M.b + 20, 'text-anchor':'middle', class:'tick'}, gGrid).textContent = v; });
+el('text', {x:(M.l + W - M.r) / 2, y:H - 14, 'text-anchor':'middle', class:'axis-title'}, gGrid).textContent = 'Allies it helps → how many of the other characters';
+[0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2].forEach(v => { el('line', {x1:M.l, x2:W - M.r, y1:Y(v), y2:Y(v)}, gGrid).style.stroke = 'var(--rule-soft)'; el('text', {x:M.l - 10, y:Y(v) + 4.5, 'text-anchor':'end', class:'tick'}, gGrid).textContent = pc(v); });
+el('text', {transform:`translate(20 ${(M.t + H - M.b) / 2}) rotate(-90)`, 'text-anchor':'middle', class:'axis-title'}, gGrid).textContent = 'Boost per ally ↑ how much harder they hit';
+const gQuad = el('g', {}, svg);
+[['Big boost · few allies', M.l + 14, M.t + 26, 'start'], ['Big boost · many allies', W - M.r - 14, M.t + 26, 'end'],
+ ['Niche', M.l + 14, H - M.b - 14, 'start'], ['Small boost · everyone', W - M.r - 14, H - M.b - 14, 'end']]
+  .forEach(([t, x, y, a]) => { el('text', {x, y, 'text-anchor':a, class:'quad'}, gQuad).textContent = t; });
+const gDots = el('g', {}, svg), gLabels = el('g', {id:'labels'}, svg);
+
+const dotEl = SUP.map((s, i) => {
+  const g = el('g', {class:'dot'}, gDots);
+  el('circle', {class:'hit', r:11}, g);
+  const mark = s.src === 'Active' ? el('path', {d:'M0,-7L7,0L0,7L-7,0Z', class:'mark'}) : s.src === 'Relic' ? el('rect', {x:-5.5, y:-5.5, width:11, height:11, class:'mark'}) : el('circle', {r:5.8, class:'mark'});
+  mark.setAttribute('fill', ALLY[s.alliance]); g.insertBefore(mark, g.firstChild.nextSibling);
+  g.addEventListener('mouseenter', () => { S.hover = i; showTip(i); renderLabels(); });
+  g.addEventListener('mouseleave', () => { S.hover = null; hideTip(); renderLabels(); });
+  g.addEventListener('click', () => select(i));
+  return g;
+});
+let POS = {}, ST = {};
+
+function renderChart(animate = true) {
+  ST = {}; SUP.forEach((s, i) => { const x = stats(i); if (x) ST[i] = x; });
+  const card = document.getElementById('chartCard');
+  card.classList.toggle('list', S.view !== 'map');
+  const anyQ = S.q.trim() !== '';
+  SUP.forEach((s, i) => {
+    const g = dotEl[i], x = ST[i];
+    g.style.display = x ? '' : 'none';
+    if (!x) return;
+    POS[i] = [X(x.count), Y(x.per)];
+    g.style.transition = (animate && !reduce) ? '' : 'none';
+    g.style.transform = `translate(${POS[i][0]}px,${POS[i][1]}px)`;
+    g.classList.toggle('dim', !shown(i) || (anyQ && !found(i)));
+    if (g._ring) { g._ring.remove(); g._ring = null; }
+    if (i === S.sel || (anyQ && found(i) && shown(i))) g._ring = el('circle', {r:10.5, class:'ring' + (i === S.sel ? '' : ' find')}, g);
+    if (i === S.sel) gDots.appendChild(g);
+  });
+  const view = {map:'Map', rank:'Ranking', char:`For ${C[S.who].n}`}[S.view];
+  document.getElementById('chartTitle').textContent = [view, tier().label, S.traits === 'base' ? 'always-on traits' : 'all triggered',
+    `abilities ${S.level}`, S.active ? 'active on' : 'active off', S.gear ? 'standard gear' : 'no gear'].join(' · ');
+  document.getElementById('chartHint').textContent = S.view === 'map' ? 'Hover a mark for numbers · click to pin it in the panel'
+    : S.view === 'rank' ? 'Sorted by team boost · click a row to pin it' : `Each support's boost for ${C[S.who].n} · click a row to pin it`;
+  if (S.view === 'map') {
+    if (animate && !reduce) { gLabels.style.opacity = 0; clearTimeout(renderChart._t); renderChart._t = setTimeout(() => { renderLabels(); gLabels.style.opacity = 1; }, 560); }
+    else renderLabels();
+  } else renderList();
+}
+
+/* greedy label placement, as on the Roster Battle Map */
+function renderLabels() {
+  gLabels.innerHTML = '';
+  const boxes = [], anyQ = S.q.trim() !== '';
+  const pts = Object.keys(ST).map(Number).filter(shown).map(i => ({i, x:POS[i][0], y:POS[i][1]}));
+  const dotBoxes = pts.map(p => [p.x - 6.5, p.y - 6.5, p.x + 6.5, p.y + 6.5]);
+  const pr = p => p.i === S.sel ? 0 : p.i === S.hover ? 1 : (anyQ && found(p.i)) ? 2 : 3;
+  for (const p of [...pts].sort((a, b) => pr(a) - pr(b) || ST[b.i].team - ST[a.i].team)) {
+    const force = pr(p) < 3;
+    if (!force && anyQ) continue;
+    const big = p.i === S.sel, text = label(SUP[p.i]);
+    const w = text.length * (big ? 7.4 : 6.1) + 4, h = big ? 15 : 13;
+    const cand = [[p.x + 10, p.y + 4, 'start', [p.x + 8, p.y - h / 2, p.x + 8 + w, p.y + h / 2]], [p.x - 10, p.y + 4, 'end', [p.x - 8 - w, p.y - h / 2, p.x - 8, p.y + h / 2]],
+                  [p.x, p.y - 11, 'middle', [p.x - w / 2, p.y - 11 - h + 3, p.x + w / 2, p.y - 8]], [p.x, p.y + 19, 'middle', [p.x - w / 2, p.y + 8, p.x + w / 2, p.y + 8 + h]]];
+    const hit = b => boxes.concat(dotBoxes).some(o => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1]);
+    let placed = null;
+    for (const c of cand) { const b = c[3]; if (b[0] < M.l + 2 || b[2] > W - M.r - 2 || b[1] < M.t || b[3] > H - M.b) continue; if (!hit(b)) { placed = c; break; } }
+    if (!placed && force) placed = cand[0];
+    if (!placed) continue;
+    boxes.push(placed[3]);
+    el('text', {x:placed[0], y:placed[1], 'text-anchor':placed[2], class:'lbl' + (big ? ' sel' : (pr(p) === 2 ? ' find' : ''))}, gLabels).textContent = text;
+  }
+}
+
+/* Ranking and For one: bar lists */
+function renderList() {
+  const box = document.getElementById('rank');
+  let items, maxv, head;
+  if (S.view === 'rank') {
+    items = Object.keys(ST).map(Number).filter(shown).map(i => ({i, v:ST[i].team, txt:`<b>${pc(ST[i].team)}</b> · ${pc(ST[i].per)} × ${ST[i].n}`}));
+    head = 'Team boost · boost per ally × allies reached';
+  } else {
+    items = Object.keys(ST).map(Number).filter(shown).map(i => { const a = ST[i].allies.find(x => x.a === S.who); return a ? {i, v:a.w, txt:`<b>${pc(a.w)}</b>${a.sh < 1 ? ` · ${pc(a.b)} vs some` : ''}`} : null; }).filter(Boolean);
+    head = `How much harder ${C[S.who].n} hits with each support`;
+  }
+  items.sort((a, b) => b.v - a.v);
+  maxv = Math.max(...items.map(x => x.v), 0.01);
+  box.innerHTML = `<div class="rk-head">${esc(head)}</div>` + (items.length ? items.map(x => {
+    const s = SUP[x.i];
+    return `<div class="rk-row${x.i === S.sel ? ' sel' : ''}" data-i="${x.i}"><span class="rk-name">${esc(s.name)}${s.src === 'Passive' ? '' : `<small>${s.src.toLowerCase()}</small>`}</span>
+      <span class="rk-bar" style="width:${Math.max(x.v / maxv * 100, 0.5)}%;background:${ALLY[s.alliance]}"></span><span class="rk-val">${x.txt}</span></div>`;
+  }).join('') : `<p class="none">No support helps ${esc(C[S.who].n)} at this setting.</p>`);
+  box.querySelectorAll('.rk-row').forEach(r => r.onclick = () => select(+r.dataset.i));
+}
+
+/* ---------- tooltip ---------- */
+const tip = document.getElementById('tip'), card = tip.parentElement;
+function showTip(i) {
+  const s = SUP[i], x = ST[i]; if (!x) return;
+  tip.innerHTML = `<b>${esc(label(s))}</b><div class="f">${esc(s.faction)} · reach ${esc(s.reach)}</div>
+  <div class="r"><span>Boost per ally</span><span>${pc(x.per)}</span></div>
+  <div class="r"><span>Allies it helps</span><span>${x.count}</span></div>
+  <div class="r"><span>Team boost</span><span>${pc(x.team)}</span></div>`;
+  const g = dotEl[i].getBoundingClientRect(), cr = card.getBoundingClientRect();
+  const z = cr.width / card.offsetWidth || 1;
+  let left = (g.left - cr.left) / z + 18; if (left + 230 > cr.width / z) left = (g.left - cr.left) / z - 232;
+  tip.style.left = left + 'px'; tip.style.top = Math.max(8, (g.top - cr.top) / z - 10) + 'px'; tip.style.opacity = 1;
+}
+function hideTip() { tip.style.opacity = 0; }
+
+/* ---------- detail panel ---------- */
+function select(i) { S.sel = (S.sel === i) ? null : i; renderChart(false); renderDetail(); renderTable(); document.getElementById('detail').scrollTop = 0; }
+function renderDetail() {
+  const box = document.getElementById('detail');
+  if (S.sel === null || S.sel < 0) { box.innerHTML = '<p class="label">Support</p><p class="none">Click a support on the chart or in the list to see who it helps. Click it again to unselect.</p>'; return; }
+  const s = SUP[S.sel], x = ST[S.sel];
+  const gives = (s.vals[S.tier] || {})[S.level];
+  let body;
+  if (!x) {
+    const why = (s.src === 'Active' || s.cond === 'active') && !S.active ? 'It only counts with the Active switch on.'
+      : s.cond === 'trig' && S.traits === 'base' ? 'It only counts with All triggered.'
+      : s.src === 'Relic' && !(S.tier === 'mythic' && S.gear) ? 'Relics only count at Mythic with gear on.' : 'It helps no one at this setting.';
+    body = `<p class="none">${why}</p>`;
+  } else {
+    const top = x.allies.slice(0, 10), maxw = Math.max(top[0].w, 0.01);
+    body = `<div class="stats">
+        <div><small>Per ally</small><b>${pc(x.per)}</b></div>
+        <div><small>Allies helped</small><b>${x.count}</b></div>
+        <div><small>Team boost</small><b>${pc(x.team)}</b></div></div>
+      <p class="act-line">Reach: <b>${esc(s.reach)}</b> → ${x.n} ${x.n === 1 ? 'ally' : 'allies'}${DATA.fixed[s.reach] ? '' : ` (${S.spacing} spacing)`} · lasts ${esc(s.lasts)}</p>
+      ${x.vs !== null ? `<p class="vsnote">Only works against some enemies: <b>+${pc(x.vs).replace('%', '')}%</b> against them (${Math.round(x.share * C.length)} of ${C.length}), so ${pc(x.per)} across the roster.</p>` : ''}
+      <p class="label">Helps most</p>
+      <div class="allies">${top.map(a => `<div class="al"><span>${esc(C[a.a].n)}</span><i style="width:${Math.max(a.w / maxw * 100, 3)}%;background:${ALLY[C[a.a].a]}"></i><b>${pc(a.w)}</b></div>`).join('')}</div>`;
+  }
+  box.innerHTML = `<h3>${esc(s.name)}</h3>
+    <p class="fac"><i style="background:${ALLY[s.alliance]}"></i>${esc(s.faction)} · ${esc(s.src)}: ${esc(s.ability)}</p>
+    ${body}
+    <div class="sect"><p class="label">What it gives${gives ? ` · level ${S.level}` : ''}</p>
+      <p class="gives">${gives ? esc(gives) : '<span class="none">Not at this tier.</span>'}</p>
+      <p class="act-line">Who can use it: <b>${esc(s.receives === 'all' ? 'anyone' : s.receives.replace('|', ' or ').replace('has:ranged', 'characters with a ranged attack').replace('no:ranged', 'characters with no ranged attack'))}</b></p>
+      ${s.notes ? `<p class="act-note">${esc(s.notes)}</p>` : ''}</div>
+    <div class="sect"><p class="label">In the game</p><p class="abtext">${esc(s.text)}</p></div>`;
+}
+
+/* ---------- table ---------- */
+const SORTS = {name:'Support', src:'Ability', gives:'Gives', per:'Per ally', n:'Allies helped', team:'Team boost'};
+function renderTable() {
+  const rows = Object.keys(ST).map(Number).filter(shown).map(i => ({i, s:SUP[i], x:ST[i], gives:(SUP[i].vals[S.tier] || {})[S.level] || ''}));
+  const val = r => ({name:r.s.name, src:r.s.src, gives:r.gives, per:r.x.per, n:r.x.count, team:r.x.team})[S.sort.k];
+  rows.sort((a, b) => { const va = val(a), vb = val(b); return (typeof va === 'string' ? va.localeCompare(vb) : va - vb) * S.sort.dir; });
+  document.querySelector('#tbl tbody').innerHTML = rows.map(r => `<tr class="${r.i === S.sel ? 'sel' : ''}">
+    <td><button class="nm" data-i="${r.i}"><i style="background:${ALLY[r.s.alliance]}"></i>${esc(r.s.name)}</button></td>
+    <td>${esc(r.s.src)}</td><td>${esc(r.gives)}</td><td>${pc(r.x.per)}</td><td>${r.x.count}</td><td>${pc(r.x.team)}</td></tr>`).join('');
+  document.querySelectorAll('#tbl button.nm').forEach(b => b.onclick = () => select(+b.dataset.i));
+  document.querySelectorAll('#tbl th button').forEach(b => b.setAttribute('aria-sort', b.dataset.k === S.sort.k ? (S.sort.dir > 0 ? 'ascending' : 'descending') : 'none'));
+  document.getElementById('tableHint').textContent = `${rows.length} supports count at this setting · sorted by ${SORTS[S.sort.k].toLowerCase()}`;
+}
+document.querySelectorAll('#tbl th button').forEach(b => b.onclick = () => { const k = b.dataset.k; S.sort = {k, dir:S.sort.k === k ? -S.sort.dir : (['name', 'src', 'gives'].includes(k) ? 1 : -1)}; renderTable(); });
+
+/* ---------- controls ---------- */
+function refresh(animate = true) { renderSetup(); renderChart(animate); renderDetail(); renderTable(); }
+document.querySelector('.controls').addEventListener('click', e => {
+  const b = e.target.closest('.seg button'); if (!b) return;
+  const id = b.parentElement.id, v = b.dataset.v;
+  if (id === 'segView') S.view = v;
+  else if (id === 'segTier') { S.tier = v; if (!tier().levels.includes(S.level)) S.level = tier().levels[0]; renderLevels(); }
+  else if (id === 'segTraits') S.traits = v;
+  else if (id === 'segLevel') S.level = +v;
+  else if (id === 'segGear') S.gear = +v;
+  else if (id === 'segActive') S.active = +v;
+  else if (id === 'segSpacing') S.spacing = v;
+  b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  refresh(id !== 'segView');
+});
+document.getElementById('q').addEventListener('input', e => { S.q = e.target.value; renderChart(false); });
+whoSel.onchange = () => { S.who = +whoSel.value; if (S.view !== 'char') { S.view = 'char'; document.querySelectorAll('#segView button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === 'char'))); } refresh(false); };
+const legend = document.getElementById('legend');
+Object.entries(ALLY).forEach(([a, col]) => { const b = document.createElement('button'); b.className = 'chip'; b.setAttribute('aria-pressed', 'true');
+  b.innerHTML = `<i style="background:${col}"></i>${a} <span style="color:var(--ink-3)">${SUP.filter(s => s.alliance === a).length}</span>`;
+  b.onclick = () => { S.hidden.has(a) ? S.hidden.delete(a) : S.hidden.add(a); b.setAttribute('aria-pressed', !S.hidden.has(a)); renderChart(false); renderTable(); }; legend.appendChild(b); });
+
+refresh(false);
+
+/* ---------- fill the screen (as on the Roster Battle Map) ---------- */
+const wrapEl = document.querySelector('.wrap'), chartCard = document.querySelector('.chart-card');
+function fitPage() {
+  wrapEl.style.zoom = ''; wrapEl.classList.remove('fit');
+  const w = document.documentElement.clientWidth;
+  if (w > 1440) {
+    wrapEl.classList.add('fit');
+    const bottom = chartCard.getBoundingClientRect().bottom + scrollY + 16;
+    const z = Math.min(w / 1440, innerHeight / bottom);
+    if (z > 1) wrapEl.style.zoom = z; else wrapEl.classList.remove('fit');
+  }
+}
+let fitSize = '';
+function refit() { const s = document.documentElement.clientWidth + 'x' + innerHeight; if (s !== fitSize) { fitSize = s; fitPage(); } }
+addEventListener('resize', refit);
+if (window.ResizeObserver) new ResizeObserver(refit).observe(document.documentElement);
+fitPage();
+if (document.fonts) document.fonts.ready.then(fitPage);
+</script>
