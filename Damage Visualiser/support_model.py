@@ -71,9 +71,10 @@ def value(ab, var, level, relic=False):
     raise KeyError(f"{ab.get('name')}: no variable {var!r}")
 
 
-def load_rows():
+def load_rows(side='Attack'):
+    """the counted rows of one side ('Attack' or 'Defence')"""
     with open(SUPPORT_CSV, newline='', encoding='utf-8') as f:
-        return [r for r in csv.DictReader(f) if r['Effect'].strip()]
+        return [r for r in csv.DictReader(f) if r['Effect'].strip() and (r.get('Side') or 'Attack') == side]
 
 
 def row_ability(U, r):

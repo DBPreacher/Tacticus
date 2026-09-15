@@ -206,9 +206,15 @@ The page shows one character's 117 answers as bars.
 
 ### Support abilities
 
-`support_abilities.csv` is the data. It covers the **Attack side**: abilities
-that make allies hit harder, or make an enemy take more. The Defence side
-(heals, damage reduction, taunts, control) comes later. New characters need
+`support_abilities.csv` is the data, one row per ability and side. `Side` is
+**Attack** (abilities that make allies hit harder, or make an enemy take
+more) or **Defence** (heals, shields, revives, damage reduction, armour,
+blocks, and weakening or suppressing enemies; drafted September 2026, not
+used by the page yet). `Source` is Passive, Active, Relic or **Trait**:
+every Healer and Mechanic gets a Heal / Repair action row (their Damage x
+their most hits, on one ally every turn, from the game's trait text), and
+every Big Target a row for its trait (adjacent allies take one hit fewer
+from ranged attacks). New characters need
 a row adding by hand (the build doesn't draft support rows yet).
 
 Columns:
@@ -248,6 +254,21 @@ game-data variable names, so they follow the ability level and rarity.
   a buff that only works every third round), `gearonly` (only helps
   allies who already have a crit chance).
 - `@trig` on a token: that part only counts with All triggered.
+- **Defence tokens** use the same grammar as the Defence column of the other
+  ability files (`pct`, `epct`, `flat`, `hitsless`, `pctcap`, `armour`,
+  `armourpass`, `heal`, `setpct`, `suppress:one|all`; scopes `melee`,
+  `ranged`, `one` = the first attack of each enemy turn, `psychic`), plus:
+  `blockchance`, `blockdmg` (an added block, gear or not), `regen` (health
+  every enemy turn), `regenhit` (health after each attack), `shield` (a
+  shield every turn), `revive` (extra health once, owner decision),
+  `revivepct` (a share of the ally's own health, once), `healdmg:pct(min-max)`
+  (a share of an ability's damage as health). `healaction` = the support's
+  Damage x their most hits. `vs=` on a Defence token means the attacker.
+  Owner decisions (September 2026): heals that repeat count every enemy turn;
+  revives count as extra health once; suppress, stun and -damage count as
+  weaker enemy attacks (a Suppressed enemy deals 30% less, Stunned 50% less,
+  as on the roster map); area effects cover the enemy turn, single-target
+  ones one attack.
 
 ---
 

@@ -91,7 +91,11 @@ Earlier ideas that were replaced:
   against some enemies are scored across the whole roster, and the team
   figure assumes a team built for the buff. Step 3 done: `support-map.html`
   (Map, Ranking, For one; all tiers and settings; built in parallel by
-  `build_support.py`). Next: the Defence side.
+  `build_support.py`). Next: the Defence side, on the same page with a Side switch (owner).
+  Step 1 done: Defence rows drafted in `support_abilities.csv` (62 counted,
+  incl. every Healer/Mechanic heal action and Big Target), 3 owner
+  questions. Measure: Toughness boost (how many more enemy attacks the
+  protected ally survives), per ally x allies reached, as on the Attack side.
 - **Support value page, first notes** (owner's idea; notes in his "Boosting champions"
   sheet). Proposed method: measure each ally buff / enemy debuff with the
   same model, as how much faster each eligible ally kills a typical enemy,
