@@ -70,6 +70,28 @@ Earlier ideas that were replaced:
 
 ---
 
+## Ideas under discussion (September 2026)
+
+- **Support value page** (owner's idea; notes in his "Boosting champions"
+  sheet). Proposed method: measure each ally buff / enemy debuff with the
+  same model, as how much faster each eligible ally kills a typical enemy,
+  plus how many characters can use it and for how long. Worked example:
+  Calgar at level 36 (+437 Damage to adjacent Imperials, +304 to others)
+  gives Imperial allies a median +23% damage per attack; many-hit, low-pierce
+  characters gain most (Titus +60%), high-pierce one-hitters least (Incisus,
+  Vitruvius about +10%). Needs a reviewed `support_abilities.csv` and owner
+  decisions (allies in range, buff duration, whether healing belongs here).
+- **Teammate-powered damage:** Laviscus's Outrage (+120% of the highest hit a
+  friend lands on an enemy next to him, +Crit Damage per Chaos friend) isn't
+  counted. Alone he's 101st for damage at defaults; with one 1,500 hit from a
+  Chaos friend he'd be about 15th; with 3,000 and two Chaos friends, 3rd.
+- **Guild raid boss chart:** the game data has `guildBossSeasons`,
+  `guildRaidUnits` and `bossDebuffs`, so damage per attack against each boss
+  could be mapped, then best teams once support buffs exist.
+- Cheaper views from data we already have: upgrade priority (who gains most
+  from ability levels, gear, Mythic), faction strength, counters (who kills a
+  given character fastest), and power creep over release dates.
+
 ## Open questions
 
 - **Havyr's passive (owner checking, September 2026).** Fury from the Dêlve
