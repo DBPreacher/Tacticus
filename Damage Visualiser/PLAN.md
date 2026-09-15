@@ -99,6 +99,9 @@ Earlier ideas that were replaced:
   horizon. Finding: with Focused enemies, damage reduction and suppress
   lead (Thothmek, Darkstrider, Thoread, Uthar); with Spread, heal actions
   lead by a distance (Gibbascrapz, Vynn, Aleph-Null, Baldr, Nicodemus).
+  Then (owner): a Whole character switch (Isabella's three rows add up to
+  #9 on Defence, Tyrant Guard #10), and Aun'Shi's cycle fixed to a third in
+  both settings (All triggered had put him #3 by counting -43% as always on).
 - **Support value page, first notes** (owner's idea; notes in his "Boosting champions"
   sheet). Proposed method: measure each ally buff / enemy debuff with the
   same model, as how much faster each eligible ally kills a typical enemy,

@@ -111,7 +111,7 @@ def tokens_for(r, ally, ab, relic, level, trig):
                 v *= float(o['mult'])
             if 'trigmult' in o and trig:
                 v *= float(o['trigmult'])
-            if 'avg' in o and not trig:
+            if 'avg' in o:                            # a cycle (Aun'Shi): a share in both settings (owner)
                 a, b = o['avg'].split('/')
                 v *= float(a) / float(b)
             if 'chance' in o:
@@ -315,7 +315,7 @@ def defence_for(r, sup, ally, ab, relic, level, trig):
         scopes.append(scope)
         vs_list.append(vs)
         mult = 1.0
-        if 'avg' in o and not trig:
+        if 'avg' in o:
             a_, b_ = o['avg'].split('/')
             mult *= float(a_) / float(b_)
         if 'chance' in o:

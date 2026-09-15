@@ -200,6 +200,12 @@ sides picked by the **Attack / Defence** switch at the top.
     show a "+" ("10+ turns").
   - Supports that cost health (Nicodemus's Blood Chalice) score below zero:
     in the Ranking and card, not on the map (log scale).
+- **Each ability / Whole character** switch (header, owner, September 2026):
+  whole character adds up a support's rows on that side. Team = the sum of
+  the rows' team figures; per ally = the sum of their per-ally figures (a
+  typical ally getting all of it); across = team ÷ per ally (between 1 and
+  4, so the team curves still hold); "can use it" = allies any row helps.
+  Worked out in the page from the row numbers, so nothing extra is built.
 - **The page**: Map (boost or protection per ally up, log scale), Ranking (team)
   and For one (the best supports for one character). The Map's **Across**
   switch (above the chart): **Allies reached** (default: 1-4 teammates a
@@ -262,10 +268,10 @@ game-data variable names, so they follow the ability level and rarity.
   `normal-ranged`, `ability` (attacks that aren't normal attacks).
 - **Options:** `who=` (only these allies; `!` = everyone else), `vs=` (only
   against enemies with this trait), `type=` / `notype=` (the ally's damage
-  type), `cap=` (maximum per hit), `reach=` (overrides the row's Reach),
+  type), `cap=` (maximum per hit), `reach=` (for the reader: the team figure uses the row's Reach),
   `chance=` (a % chance), `trig=` (a different value with All triggered),
-  `trigmult=`, `mult=`, `avg=` (a share of the value in Always-on, e.g.
-  a buff that only works every third round), `gearonly` (only helps
+  `trigmult=`, `mult=`, `avg=` (a share of the value in both settings, for a
+  buff that cycles, e.g. Aun'Shi's one round in three; owner, September 2026), `gearonly` (only helps
   allies who already have a crit chance).
 - `@trig` on a token: that part only counts with All triggered.
 - **Defence tokens** use the same grammar as the Defence column of the other
@@ -635,6 +641,7 @@ The **Mythic tier** is built in (September 2026).
 
 | Date | Change |
 |---|---|
+| September 2026 | Support Map: Each ability / Whole character switch; Aun'Shi's cycle counts a third in both settings (it read as always on with All triggered) |
 | September 2026 | Support Map Defence side: Attack / Defence switch, Enemy focus (Focused / Spread), heal actions from the Healer and Mechanic traits, 10-turn horizon, compact data |
 | September 2026 | Support Map: Across switch, allies reached (default, with team-boost curves) or can use it; `build_support.py --page-only` |
 | September 2026 | Support Map (Attack side): `support_model.py`, `build_support.py`, `support-map.html`. Owner decisions: enemy-specific buffs scored across the roster, team boost assumes a team built for the buff |

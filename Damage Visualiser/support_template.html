@@ -161,6 +161,11 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
 .focus-pick.hide{visibility:hidden}
 .al b.cap::after{content:"+";color:var(--ink-3)}
 .neg{color:var(--ink-3)}
+.ab-line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;padding:4px 6px;margin:0 -6px;border-radius:3px;cursor:pointer}
+.ab-line:hover{background:var(--panel-2)}
+.ab-line.off{color:var(--ink-3)}
+.ab-line b{font-family:var(--data);font-weight:700;font-variant-numeric:tabular-nums}
+.ab-line small{color:var(--ink-3)}
 .rank{display:none;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;padding:4px 6px 0}
 .chart-card.list .rank{display:block;aspect-ratio:1000/670}
 .chart-card.list #map{display:none}
@@ -193,6 +198,8 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
     <div class="sides">
       <span class="focus-pick hide" id="focusPick"><span class="label">Enemy focus</span><span class="seg" role="group" aria-label="Enemy focus" id="segFocus">
         <button data-v="focused" aria-pressed="true">Focused</button><button data-v="spread" aria-pressed="false">Spread</button></span></span>
+      <span class="seg" role="group" aria-label="Show" id="segWhole">
+        <button data-v="ability" aria-pressed="true">Each ability</button><button data-v="whole" aria-pressed="false">Whole character</button></span>
       <span class="seg big" role="group" aria-label="Side" id="segSide">
         <button data-v="attack" aria-pressed="true">Attack</button><button data-v="defence" aria-pressed="false">Defence</button></span>
     </div>
@@ -291,6 +298,8 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
       <dd>For every ally a support protects, how many more attacks a typical enemy needs to kill them: the roster map's Toughness, with and without it. Heals, shields, revives, damage reduction, Armour, blocks, and weakening or suppressing enemies all count. A Healer's or Mechanic's heal action heals one ally every turn for their Damage × their most hits.</dd>
       <dt>Enemy focus (Defence)</dt>
       <dd>Focused: the whole enemy team (5 attacks) goes for one ally each turn, as on the Roster Battle Map. Most characters die inside that first turn, so heals between turns rarely land. Spread: 2 attacks a turn, so allies live into later turns and heals show their value.</dd>
+      <dt>Each ability or whole character</dt>
+      <dd>Each ability ranks every passive, active, relic and trait on its own. Whole character adds up everything a support does on that side: the team figures are added, per ally is a typical ally getting all of it, and across is where that puts them between 1 and 4 allies reached (the dashed team curves still hold).</dd>
       <dt>10+ turns and below zero</dt>
       <dd>Counting stops after <span id="horizon">10</span> enemy turns: an ally who lasts that long shows a + after their number. Some supports cost health (Nicodemus's Blood Chalice) and make allies easier to kill: they score below zero, so they show in the Ranking and the card but not on the map.</dd>
       <dt>Boost per ally: higher is better</dt>
@@ -338,10 +347,11 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
 <script>
 const DATA = /*DATA*/;
 const C = DATA.chars, TIERS = DATA.tiers;
-let SUP = DATA.supports;
+let ROWS = DATA.supports;   // this side's ability rows
+let SUP = [];               // what the page shows: the rows (each ability) or one entry per character (whole character)
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
-const S = {side:'attack', focus:'focused', view:'map', axis:'reach', tier:TIERS[1].key, traits:'base', level:TIERS[1].levels[0], active:1, gear:0, spacing:'typical',
-           sel:SUP.findIndex(s => s.name === 'Marneus Calgar'), who:C.findIndex(c => c.n === 'Kharn'), q:'', hidden:new Set(), sort:{k:'team', dir:-1}, hover:null};
+const S = {side:'attack', focus:'focused', whole:false, view:'map', axis:'reach', tier:TIERS[1].key, traits:'base', level:TIERS[1].levels[0], active:1, gear:0, spacing:'typical',
+           sel:null, who:C.findIndex(c => c.n === 'Kharn'), q:'', hidden:new Set(), sort:{k:'team', dir:-1}, hover:null};
 const NS = 'http://www.w3.org/2000/svg';
 const W = 1000, H = 670, M = {l:74, r:26, t:22, b:64};
 let YD = [0.01, 2.5];                   // up to 250% (Attack); Defence goes to 800% (heals with Spread enemies)
@@ -355,17 +365,34 @@ const median = a => { const s = [...a].sort((x, y) => x - y), m = s.length >> 1;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const key = () => `${S.traits}_l${S.level}${S.active ? '_a' : ''}${S.gear ? '_g' : ''}`;
 const tier = () => TIERS.find(t => t.key === S.tier);
-const label = s => s.name + (s.src === 'Passive' ? '' : ` (${s.src.toLowerCase()})`);
+const label = s => s.name + (s.src === 'Passive' || s.src === 'Character' ? '' : ` (${s.src.toLowerCase()})`);
 const reachN = s => DATA.fixed[s.reach] || DATA.spacing[S.spacing][s.reach] || 1;
-S.selBy = {attack:S.sel, defence:DATA.dsupports.findIndex(s => s.name === 'Isabella' && s.src === 'Trait')};
+const fmtN = n => Number.isInteger(n) ? n : n.toFixed(1);
+const ekey = e => `${e.name}|${e.src}`;
+S.selKey = {attack:'Marneus Calgar|Passive', defence:'Isabella|Trait'};
+function buildEntries() {
+  if (!S.whole) SUP = ROWS.map((r, i) => Object.assign({}, r, {rows:[i]}));
+  else {
+    const by = new Map();
+    ROWS.forEach((r, i) => {
+      if (!by.has(r.name)) by.set(r.name, {name:r.name, src:'Character', alliance:r.alliance, faction:r.faction, rows:[]});
+      by.get(r.name).rows.push(i);
+    });
+    SUP = [...by.values()];
+  }
+  const k = S.selKey[S.side];
+  S.sel = k ? SUP.findIndex(e => ekey(e) === k) : -1;
+  if (S.sel < 0 && k) S.sel = SUP.findIndex(e => e.name === k.split('|')[0]);   // switching mode keeps the character
+  if (S.sel < 0) S.sel = null;
+}
 const WORD = () => S.side === 'attack'
   ? {per:'Boost per ally', team:'Team boost', y:'Boost per ally ↑ how much harder they hit', big:'Big boost', small:'Small boost',
      helps:'Helps most', one:n => `How much harder ${n} hits with each support`, what:'boost', none:'It helps no one at this setting.', foes:'enemies'}
   : {per:'Protection per ally', team:'Team protection', y:'Protection per ally ↑ how much longer they survive', big:'Big protection', small:'Small protection',
      helps:'Protects most', one:n => `How much longer ${n} survives with each support`, what:'protection', none:'It protects no one at this setting.', foes:'attackers'};
 
-/* this setting's numbers for one support, or null if it doesn't count here */
-function stats(i) {
+/* this setting's numbers for one ability row, or null if it doesn't count here */
+function rowStats(i) {
   const raw = S.side === 'attack' ? (DATA.s[S.tier][key()] || {})[i] : ((DATA.d[S.tier][key()] || {})[S.focus] || {})[i];
   if (!raw) return null;
   // packed by build_support.py: v = [ally, boost x 1000, ...], s = share x 1000 (number or list), c = capped positions
@@ -375,12 +402,29 @@ function stats(i) {
     allies.push({a:raw.v[2 * k], b, sh, w:b * sh, cap:!!(raw.c && raw.c.includes(k))});
   }
   allies.sort((x, y) => y.w - x.w);
-  const s = SUP[i];
+  const s = ROWS[i];
   const per = median(allies.map(x => x.w)), n = reachN(s);
   const vsOnly = allies.some(x => x.sh < 1);
   return {per, n, team: per * n, count: allies.length, allies, vs: vsOnly ? median(allies.map(x => x.b)) : null,
           share: vsOnly ? median(allies.map(x => x.sh)) : 1};
 }
+/* an entry's numbers: one row as it is, or a whole character with its rows added up */
+function stats(ei) {
+  const e = SUP[ei];
+  if (e.rows.length === 1) return rowStats(e.rows[0]);
+  const parts = e.rows.map(r => ({r, x:rowStats(r)})).filter(p => p.x);
+  if (!parts.length) return null;
+  const team = parts.reduce((t, p) => t + p.x.team, 0), per = parts.reduce((t, p) => t + p.x.per, 0);
+  const m = new Map();
+  parts.forEach(p => p.x.allies.forEach(a => {
+    const o = m.get(a.a) || {a:a.a, w:0, b:0, sh:1, cap:false};
+    o.w += a.w; o.b += a.w; o.cap = o.cap || a.cap; m.set(a.a, o);
+  }));
+  const allies = [...m.values()].sort((x, y) => y.w - x.w);
+  const n = per > 0 ? Math.min(Math.max(team / per, 1), 4) : Math.max(...parts.map(p => p.x.n));
+  return {per, n, team, count:allies.length, allies, vs:null, share:1, parts};
+}
+buildEntries();
 const shown = i => !S.hidden.has(SUP[i].alliance);
 const found = i => { const q = S.q.trim().toLowerCase(); return q && (SUP[i].name.toLowerCase().includes(q) || SUP[i].faction.toLowerCase().includes(q)); };
 
@@ -436,7 +480,8 @@ function buildDots() { gDots.innerHTML = ''; gLabels.innerHTML = ''; dotEl = SUP
 function makeDot(s, i) {
   const g = el('g', {class:'dot'}, gDots);
   el('circle', {class:'hit', r:11}, g);
-  const mark = s.src === 'Active' ? el('path', {d:'M0,-7L7,0L0,7L-7,0Z', class:'mark'}) : s.src === 'Relic' ? el('rect', {x:-5.5, y:-5.5, width:11, height:11, class:'mark'}) : el('circle', {r:5.8, class:'mark'});
+  const mark = s.src === 'Active' ? el('path', {d:'M0,-7L7,0L0,7L-7,0Z', class:'mark'}) : s.src === 'Relic' ? el('rect', {x:-5.5, y:-5.5, width:11, height:11, class:'mark'})
+    : s.src === 'Character' ? el('path', {d:'M0,-7.5L6.5,-3.75L6.5,3.75L0,7.5L-6.5,3.75L-6.5,-3.75Z', class:'mark'}) : el('circle', {r:5.8, class:'mark'});
   mark.setAttribute('fill', ALLY[s.alliance]); g.insertBefore(mark, g.firstChild.nextSibling);
   g.addEventListener('mouseenter', () => { S.hover = i; showTip(i); renderLabels(); });
   g.addEventListener('mouseleave', () => { S.hover = null; hideTip(); renderLabels(); });
@@ -530,7 +575,7 @@ function renderList() {
   const box = document.getElementById('rank');
   let items, maxv, head;
   if (S.view === 'rank') {
-    items = Object.keys(ST).map(Number).filter(shown).map(i => ({i, v:ST[i].team, txt:`<b>${pc(ST[i].team)}</b> · ${pc(ST[i].per)} × ${ST[i].n}`}));
+    items = Object.keys(ST).map(Number).filter(shown).map(i => ({i, v:ST[i].team, txt:`<b>${pc(ST[i].team)}</b> · ${pc(ST[i].per)} × ${fmtN(ST[i].n)}`}));
     head = `${WORD().team} · ${WORD().per.toLowerCase()} × allies reached`;
   } else {
     items = Object.keys(ST).map(Number).filter(shown).map(i => { const a = ST[i].allies.find(x => x.a === S.who); return a ? {i, v:a.w, txt:`<b>${pc(a.w)}</b>${a.cap ? ' · 10+ turns' : ''}${a.sh < 1 ? ` · ${pc(a.b)} vs some` : ''}`} : null; }).filter(Boolean);
@@ -540,7 +585,8 @@ function renderList() {
   maxv = Math.max(...items.map(x => Math.abs(x.v)), 0.01);
   box.innerHTML = `<div class="rk-head">${esc(head)}</div>` + (items.length ? items.map(x => {
     const s = SUP[x.i];
-    return `<div class="rk-row${x.i === S.sel ? ' sel' : ''}" data-i="${x.i}"><span class="rk-name">${esc(s.name)}${s.src === 'Passive' ? '' : `<small>${s.src.toLowerCase()}</small>`}</span>
+    const tag = s.src === 'Character' ? (s.rows.length > 1 ? `${s.rows.length} abilities` : '') : s.src === 'Passive' ? '' : s.src.toLowerCase();
+    return `<div class="rk-row${x.i === S.sel ? ' sel' : ''}" data-i="${x.i}"><span class="rk-name">${esc(s.name)}${tag ? `<small>${tag}</small>` : ''}</span>
       <span class="rk-bar" style="width:${Math.max(Math.abs(x.v) / maxv * 100, 0.5)}%;background:${x.v < 0 ? 'var(--ink-3)' : ALLY[s.alliance]}"></span><span class="rk-val${x.v < 0 ? ' neg' : ''}">${x.txt}${x.v < 0 ? ' · a cost' : ''}</span></div>`;
   }).join('') : `<p class="none">No support ${S.side === 'attack' ? 'helps' : 'protects'} ${esc(C[S.who].n)} at this setting.</p>`);
   box.querySelectorAll('.rk-row').forEach(r => r.onclick = () => select(+r.dataset.i));
@@ -550,9 +596,9 @@ function renderList() {
 const tip = document.getElementById('tip'), card = tip.parentElement;
 function showTip(i) {
   const s = SUP[i], x = ST[i]; if (!x) return;
-  tip.innerHTML = `<b>${esc(label(s))}</b><div class="f">${esc(s.faction)} · reach ${esc(s.reach)}</div>
+  tip.innerHTML = `<b>${esc(label(s))}</b><div class="f">${esc(s.faction)} · ${s.src === 'Character' ? `${s.rows.length} abilit${s.rows.length === 1 ? 'y' : 'ies'}` : `reach ${esc(s.reach)}`}</div>
   <div class="r"><span>${WORD().per}</span><span>${pc(x.per)}</span></div>
-  <div class="r"><span>Allies reached</span><span>${x.n}</span></div>
+  <div class="r"><span>Allies reached</span><span>${fmtN(x.n)}</span></div>
   <div class="r"><span>Can use it</span><span>${x.count}</span></div>
   <div class="r"><span>${WORD().team}</span><span>${pc(x.team)}</span></div>`;
   const g = dotEl[i].getBoundingClientRect(), cr = card.getBoundingClientRect();
@@ -563,11 +609,12 @@ function showTip(i) {
 function hideTip() { tip.style.opacity = 0; }
 
 /* ---------- detail panel ---------- */
-function select(i) { S.sel = (S.sel === i) ? null : i; S.selBy[S.side] = S.sel; renderChart(false); renderDetail(); renderTable(); document.getElementById('detail').scrollTop = 0; }
+function select(i) { S.sel = (S.sel === i) ? null : i; S.selKey[S.side] = S.sel === null ? null : ekey(SUP[S.sel]); renderChart(false); renderDetail(); renderTable(); document.getElementById('detail').scrollTop = 0; }
 function renderDetail() {
   const box = document.getElementById('detail');
   if (S.sel === null || S.sel < 0) { box.innerHTML = '<p class="label">Support</p><p class="none">Click a support on the chart or in the list to see who it helps. Click it again to unselect.</p>'; return; }
   const s = SUP[S.sel], x = ST[S.sel];
+  if (s.src === 'Character') { renderCharacter(box, s, x); return; }
   const gives = (s.vals[S.tier] || {})[S.level];
   let body;
   if (!x) {
@@ -598,6 +645,36 @@ function renderDetail() {
     <div class="sect"><p class="label">In the game</p><p class="abtext">${esc(s.text)}</p></div>`;
 }
 
+/* whole character: its abilities on this side, each with its team figure, and who it helps most overall */
+function renderCharacter(box, s, x) {
+  const lines = s.rows.map(r => ({r, row:ROWS[r], x:rowStats(r)})).map(p => `<div class="ab-line${p.x ? '' : ' off'}" data-row="${p.r}">
+      <span>${esc(p.row.src === 'Trait' ? p.row.ability : p.row.src)}${p.row.src === 'Trait' ? '' : `: ${esc(p.row.ability)}`}</span>
+      <b>${p.x ? `${pc(p.x.team)}` : '<small>not at this setting</small>'}</b></div>`).join('');
+  let body;
+  if (!x) body = `<p class="none">${WORD().none}</p>`;
+  else {
+    const top = x.allies.slice(0, 10), maxw = Math.max(...top.map(a => Math.abs(a.w)), 0.01);
+    body = `<div class="stats">
+        <div><small>Per ally</small><b>${pc(x.per)}</b></div>
+        <div><small>Can use it</small><b>${x.count}</b></div>
+        <div><small>${S.side === 'attack' ? 'Team boost' : 'Team'}</small><b>${pc(x.team)}</b></div></div>
+      <p class="label">${WORD().helps}</p>
+      <div class="allies">${top.map(a => `<div class="al"><span>${esc(C[a.a].n)}</span><i style="width:${Math.max(Math.abs(a.w) / maxw * 100, 3)}%;background:${a.w < 0 ? 'var(--ink-3)' : ALLY[C[a.a].a]}"></i><b class="${a.cap ? 'cap' : ''}">${pc(a.w)}</b></div>`).join('')}</div>
+      ${top.some(a => a.cap) ? `<p class="act-note">+ lasts ${DATA.horizon}+ enemy turns: the count stops there.</p>` : ''}`;
+  }
+  box.innerHTML = `<h3>${esc(s.name)}</h3>
+    <p class="fac"><i style="background:${ALLY[s.alliance]}"></i>${esc(s.faction)} · whole character, ${S.side}</p>
+    ${body}
+    <div class="sect"><p class="label">Its ${S.side} abilities · team ${WORD().what}</p>${lines}
+      <p class="act-note">Click one to see it on its own.</p></div>`;
+  box.querySelectorAll('.ab-line').forEach(l => l.onclick = () => {
+    const row = ROWS[+l.dataset.row];
+    S.whole = false; S.selKey[S.side] = `${row.name}|${row.src}`;
+    document.querySelectorAll('#segWhole button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === 'ability')));
+    buildEntries(); buildDots(); buildLegend(); refresh(false);
+  });
+}
+
 function whoText(r) {
   const named = {'all':'anyone', '!Mechanical|LivingMetal':'anyone but Mechanical units', 'Mechanical|LivingMetal':'Mechanical units',
                  'has:ranged':'characters with a ranged attack', 'no:ranged':'characters with no ranged attack'};
@@ -610,12 +687,14 @@ function whoText(r) {
 const SORTS = {name:'Support', src:'Ability', gives:'Gives', per:'Per ally', n:'Can use it', team:'Team boost'};
 function renderTable() {
   document.querySelector('#tbl th button[data-k="team"]').textContent = WORD().team;
-  const rows = Object.keys(ST).map(Number).filter(shown).map(i => ({i, s:SUP[i], x:ST[i], gives:(SUP[i].vals[S.tier] || {})[S.level] || ''}));
+  const gives = e => e.src === 'Character' ? e.rows.filter(r => rowStats(r)).map(r => ROWS[r].src === 'Trait' ? ROWS[r].ability : ROWS[r].src).join(' + ')
+                                             : ((e.vals || {})[S.tier] || {})[S.level] || '';
+  const rows = Object.keys(ST).map(Number).filter(shown).map(i => ({i, s:SUP[i], x:ST[i], gives:gives(SUP[i])}));
   const val = r => ({name:r.s.name, src:r.s.src, gives:r.gives, per:r.x.per, n:r.x.count, team:r.x.team})[S.sort.k];
   rows.sort((a, b) => { const va = val(a), vb = val(b); return (typeof va === 'string' ? va.localeCompare(vb) : va - vb) * S.sort.dir; });
   document.querySelector('#tbl tbody').innerHTML = rows.map(r => `<tr class="${r.i === S.sel ? 'sel' : ''}">
     <td><button class="nm" data-i="${r.i}"><i style="background:${ALLY[r.s.alliance]}"></i>${esc(r.s.name)}</button></td>
-    <td>${esc(r.s.src)}</td><td>${esc(r.gives)}</td><td>${pc(r.x.per)}</td><td>${r.x.count}</td><td>${pc(r.x.team)}</td></tr>`).join('');
+    <td>${esc(r.s.src === 'Character' ? 'Whole' : r.s.src)}</td><td>${esc(r.gives)}</td><td>${pc(r.x.per)}</td><td>${r.x.count}</td><td>${pc(r.x.team)}</td></tr>`).join('');
   document.querySelectorAll('#tbl button.nm').forEach(b => b.onclick = () => select(+b.dataset.i));
   document.querySelectorAll('#tbl th button').forEach(b => b.setAttribute('aria-sort', b.dataset.k === S.sort.k ? (S.sort.dir > 0 ? 'ascending' : 'descending') : 'none'));
   document.getElementById('tableHint').textContent = `${rows.length} supports count at this setting · sorted by ${SORTS[S.sort.k].toLowerCase()}`;
@@ -627,9 +706,14 @@ function refresh(animate = true) { renderChart(animate); renderDetail(); renderT
 function pressedIn(b) { b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); }
 document.getElementById('segSide').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.dataset.v === S.side) return;
-  S.side = b.dataset.v; SUP = S.side === 'attack' ? DATA.supports : DATA.dsupports; S.sel = S.selBy[S.side];
+  S.side = b.dataset.v; ROWS = S.side === 'attack' ? DATA.supports : DATA.dsupports;
   pressedIn(b); document.getElementById('focusPick').classList.toggle('hide', S.side !== 'defence');
-  buildDots(); buildLegend(); refresh(false);
+  buildEntries(); buildDots(); buildLegend(); refresh(false);
+});
+document.getElementById('segWhole').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || (b.dataset.v === 'whole') === S.whole) return;
+  S.whole = b.dataset.v === 'whole'; pressedIn(b);
+  buildEntries(); buildDots(); buildLegend(); refresh(false);
 });
 document.getElementById('segFocus').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
