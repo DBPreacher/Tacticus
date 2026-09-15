@@ -72,6 +72,14 @@ Earlier ideas that were replaced:
 
 ## Open questions
 
+- **Havyr's passive (owner checking, September 2026).** Fury from the Dêlve
+  adds a 2-hit Eviscerating attack after a normal attack against an enemy at
+  or below 50% health. It isn't counted in either traits setting. If the game
+  checks the 50% *after* the attack lands, it finishes a typical kill: his
+  Damage would go from 2.37 to about 2.0 (1.33 to 1.0 with All triggered). If
+  it checks *before*, it barely matters. Leave it uncounted until the owner
+  confirms how it works; he may revisit after the video's feedback.
+
 - Optional: 5–6 fresh Creed test numbers at the current patch (e.g. Jain Zar,
   Morvenn Vahl, one Terminator Armour character). They would confirm that the
   leftover mismatches in the Creed check are passives and old data, not a
