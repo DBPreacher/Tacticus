@@ -30,7 +30,7 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `relic_abilities.csv` | One row per relic: its effect as `Attack` / `Defence` / `Gear` tokens (Mythic tier, gear on) | **Yes** |
 | `support_abilities.csv` | One row per ability that helps allies attack (buffs) or weakens enemies (debuffs), for the Support Map. Reviewed by the owner (September 2026). See "Support Map" | **Yes** |
 | `support_model.py` | Runs `support_abilities.csv` through the damage model: how much each buff helps every ally who can use it. `python -X utf8 support_model.py [--active] [--gear] [--trig] [--level 50]` prints the Diamond III rankings | Only to change the rules |
-| `build_support.py` | Builds `support-map.html`: every tier and setting, in parallel (about 1.5 minutes) | No |
+| `build_support.py` | Builds `support-map.html`: every tier and setting, in parallel (about 1.5 minutes). `--page-only` rebuilds just the page from the template with the last numbers (for design changes) | No |
 | `support_template.html` | The Support Map's design (its CSS starts as a copy of `map_template.html`'s) | Yes, for design changes |
 | `support-map.html` | The built Support Map | **Never.** It's overwritten |
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
@@ -186,8 +186,13 @@ The page shows one character's 117 answers as bars.
     debuffs and `ability` buffs also reach the ally's active. The support
     never buffs itself here. Conditional parts follow Traits, actives the
     Active switch, relics Mythic with gear.
-- **The page**: Map (allies helped across, boost per ally up, log scale),
-  Ranking (team boost) and For one (the best supports for one character),
+- **The page**: Map (boost per ally up, log scale), Ranking (team boost)
+  and For one (the best supports for one character). The Map's **Across**
+  switch (above the chart): **Allies reached** (default: 1-4 teammates a
+  turn from Reach and Team spacing, dots spread sideways in each column,
+  dashed curves of equal team boost) or **Can use it** (how many of the
+  other characters it helps: the roster-building view; owner's choice,
+  September 2026).
   a support card (numbers, who it helps most, what it gives at this level,
   the notes and game text) and a table. Same switches as the map, plus Team
   spacing. The Active switch starts **on** here, since many supports are
@@ -595,6 +600,7 @@ The **Mythic tier** is built in (September 2026).
 
 | Date | Change |
 |---|---|
+| September 2026 | Support Map: Across switch, allies reached (default, with team-boost curves) or can use it; `build_support.py --page-only` |
 | September 2026 | Support Map (Attack side): `support_model.py`, `build_support.py`, `support-map.html`. Owner decisions: enemy-specific buffs scored across the roster, team boost assumes a team built for the buff |
 | September 2026 | `support_abilities.csv` drafted: Attack-side support for the planned Support Map (55 abilities counted, 22 owner questions) |
 | September 2026 | The typical-character page gets the map's switches (Progression, Traits, Ability level, Gear, Active); `build_map.py` now writes it and `build_typical.py` is gone |

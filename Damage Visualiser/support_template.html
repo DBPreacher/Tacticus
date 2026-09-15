@@ -143,6 +143,16 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
 @media (prefers-reduced-motion:reduce){.dot,#labels,.check span.box,.check span.box::after{transition:none}}
 /* ---------- Support Map additions ---------- */
 .controls{gap:9px}
+.head-row{flex:1 1 100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:30px}
+.seg.mini{display:inline-grid}
+.seg.mini button{font-size:13.5px;padding:4px 12px}
+.head-row .hint{flex:1 1 auto;min-width:0}
+.axis-pick{display:flex;align-items:center;gap:8px;flex:none}
+.axis-pick .label{margin:0}
+.axis-pick.hide{visibility:hidden}
+.contour{fill:none;stroke:var(--guide);stroke-width:1;stroke-dasharray:3 5}
+.contour-label{paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round;fill:var(--ink-3);font-size:12px;font-weight:600;letter-spacing:.06em}
+.col-sep{stroke:var(--rule-soft);stroke-width:1}
 .rank{display:none;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;padding:4px 6px 0}
 .chart-card.list .rank{display:block;aspect-ratio:1000/670}
 .chart-card.list #map{display:none}
@@ -179,7 +189,13 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
     <section class="chart-card" id="chartCard" aria-label="Support chart">
       <div class="chart-head">
         <h2 id="chartTitle">Every support</h2>
-        <span class="hint" id="chartHint">Hover a mark for numbers · click to pin it in the panel</span>
+        <div class="head-row">
+          <span class="hint" id="chartHint">Hover a mark for numbers · click to pin it in the panel</span>
+          <span class="axis-pick" id="axisPick"><span class="label">Across</span><span class="seg mini" role="group" aria-label="Across the map" id="segAxis">
+            <button data-v="reach" aria-pressed="true">Allies reached</button>
+            <button data-v="use" aria-pressed="false">Can use it</button>
+          </span></span>
+        </div>
       </div>
       <svg id="map" viewBox="0 0 1000 670" role="img" aria-label="Chart of every support by how many allies it helps and how much"></svg>
       <div class="rank" id="rank"></div>
@@ -260,10 +276,12 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
       <dd>For every ally who can use a buff, how much faster they kill a typical character with it: the same model and settings as the Roster Battle Map. +50% means they do half as much again.</dd>
       <dt>Boost per ally: higher is better</dt>
       <dd>The middle of those boosts, among the allies it actually helps.</dd>
-      <dt>Allies it helps: further right is wider</dt>
-      <dd>How many of the other <span id="allyCount">116</span> characters it improves at all. A Blood Angels-only buff can be big but narrow.</dd>
+      <dt>Across: allies reached (the default)</dt>
+      <dd>How many of your four teammates it reaches in one turn, from its range and the Team spacing switch. Dots in a column are spread sideways so their names fit. The dashed curves are team boost: anything on the same curve is worth the same to your team.</dd>
+      <dt>Across: can use it</dt>
+      <dd>How many of the other <span id="allyCount">116</span> characters it improves at all: a roster-building view. A Blood Angels-only buff can be big but narrow.</dd>
       <dt>Team boost</dt>
-      <dd>Boost per ally × the allies it reaches in one turn. 100% is like having one more typical ally hitting. It assumes a team built to use the buff; "allies it helps" shows how narrow that team is.</dd>
+      <dd>Boost per ally × allies reached. 100% is like having one more typical ally hitting. It assumes a team built to use the buff; "can use it" shows how narrow that team is.</dd>
       <dt>Team spacing</dt>
       <dd>How many teammates an aura reaches. Typical: adjacent 2, within 2 hexes 3. Tight: 3 and 4. Spread: 1 and 2. Team-wide buffs and debuffs on the enemy reach all 4; one-ally and next-attack buffs reach 1.</dd>
       <dt>Against some enemies only</dt>
@@ -287,7 +305,7 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
           <th><button data-k="src">Ability</button></th>
           <th><button data-k="gives">Gives</button></th>
           <th><button data-k="per">Per ally</button></th>
-          <th><button data-k="n">Allies helped</button></th>
+          <th><button data-k="n">Can use it</button></th>
           <th><button data-k="team">Team boost</button></th>
         </tr></thead>
         <tbody></tbody>
@@ -302,12 +320,13 @@ footer{font-size:12.5px;color:var(--ink-3);max-width:90ch}
 const DATA = /*DATA*/;
 const C = DATA.chars, SUP = DATA.supports, TIERS = DATA.tiers;
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
-const S = {view:'map', tier:TIERS[1].key, traits:'base', level:TIERS[1].levels[0], active:1, gear:0, spacing:'typical',
+const S = {view:'map', axis:'reach', tier:TIERS[1].key, traits:'base', level:TIERS[1].levels[0], active:1, gear:0, spacing:'typical',
            sel:SUP.findIndex(s => s.name === 'Marneus Calgar'), who:C.findIndex(c => c.n === 'Kharn'), q:'', hidden:new Set(), sort:{k:'team', dir:-1}, hover:null};
 const NS = 'http://www.w3.org/2000/svg';
 const W = 1000, H = 670, M = {l:74, r:26, t:22, b:64};
-const XD = [0, 120], YD = [0.01, 2.5];
-const X = v => M.l + (Math.min(Math.max(v, XD[0]), XD[1]) - XD[0]) / (XD[1] - XD[0]) * (W - M.l - M.r);
+const YD = [0.01, 2.5];
+const XDOM = {use:[0, 120], reach:[0.5, 4.5]};
+const X = v => { const d = XDOM[S.axis]; return M.l + (Math.min(Math.max(v, d[0]), d[1]) - d[0]) / (d[1] - d[0]) * (W - M.l - M.r); };
 const Y = v => M.t + (1 - (Math.log(Math.min(Math.max(v, YD[0]), YD[1])) - Math.log(YD[0])) / (Math.log(YD[1]) - Math.log(YD[0]))) * (H - M.t - M.b);
 const pc = v => (v * 100 >= 10 ? Math.round(v * 100) : (v * 100).toFixed(1).replace(/\.0$/, '')) + '%';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -347,15 +366,36 @@ whoSel.value = S.who;
 
 /* ---------- chart furniture ---------- */
 const svg = document.getElementById('map');
-const gGrid = el('g', {}, svg);
-[0, 20, 40, 60, 80, 100, 120].forEach(v => { el('line', {x1:X(v), x2:X(v), y1:M.t, y2:H - M.b}, gGrid).style.stroke = 'var(--rule-soft)'; el('text', {x:X(v), y:H - M.b + 20, 'text-anchor':'middle', class:'tick'}, gGrid).textContent = v; });
-el('text', {x:(M.l + W - M.r) / 2, y:H - 14, 'text-anchor':'middle', class:'axis-title'}, gGrid).textContent = 'Allies it helps → how many of the other characters';
-[0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2].forEach(v => { el('line', {x1:M.l, x2:W - M.r, y1:Y(v), y2:Y(v)}, gGrid).style.stroke = 'var(--rule-soft)'; el('text', {x:M.l - 10, y:Y(v) + 4.5, 'text-anchor':'end', class:'tick'}, gGrid).textContent = pc(v); });
-el('text', {transform:`translate(20 ${(M.t + H - M.b) / 2}) rotate(-90)`, 'text-anchor':'middle', class:'axis-title'}, gGrid).textContent = 'Boost per ally ↑ how much harder they hit';
-const gQuad = el('g', {}, svg);
-[['Big boost · few allies', M.l + 14, M.t + 26, 'start'], ['Big boost · many allies', W - M.r - 14, M.t + 26, 'end'],
- ['Niche', M.l + 14, H - M.b - 14, 'start'], ['Small boost · everyone', W - M.r - 14, H - M.b - 14, 'end']]
-  .forEach(([t, x, y, a]) => { el('text', {x, y, 'text-anchor':a, class:'quad'}, gQuad).textContent = t; });
+const gGrid = el('g', {}, svg), gQuad = el('g', {}, svg);
+function renderAxes() {
+  gGrid.innerHTML = ''; gQuad.innerHTML = '';
+  if (S.axis === 'use') {
+    [0, 20, 40, 60, 80, 100, 120].forEach(v => { el('line', {x1:X(v), x2:X(v), y1:M.t, y2:H - M.b}, gGrid).style.stroke = 'var(--rule-soft)'; el('text', {x:X(v), y:H - M.b + 20, 'text-anchor':'middle', class:'tick'}, gGrid).textContent = v; });
+    el('text', {x:(M.l + W - M.r) / 2, y:H - 14, 'text-anchor':'middle', class:'axis-title'}, gGrid).textContent = 'Can use it → how many of the other characters it helps';
+  } else {
+    [1.5, 2.5, 3.5].forEach(v => el('line', {x1:X(v), x2:X(v), y1:M.t, y2:H - M.b, class:'col-sep'}, gGrid));
+    [1, 2, 3, 4].forEach(v => { el('text', {x:X(v), y:H - M.b + 20, 'text-anchor':'middle', class:'tick'}, gGrid).textContent = v === 1 ? '1 ally' : `${v} allies`; });
+    el('text', {x:(M.l + W - M.r) / 2, y:H - 14, 'text-anchor':'middle', class:'axis-title'}, gGrid).textContent = `Allies reached in a turn → with ${S.spacing} spacing`;
+  }
+  [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2].forEach(v => { el('line', {x1:M.l, x2:W - M.r, y1:Y(v), y2:Y(v)}, gGrid).style.stroke = 'var(--rule-soft)'; el('text', {x:M.l - 10, y:Y(v) + 4.5, 'text-anchor':'end', class:'tick'}, gGrid).textContent = pc(v); });
+  el('text', {transform:`translate(20 ${(M.t + H - M.b) / 2}) rotate(-90)`, 'text-anchor':'middle', class:'axis-title'}, gGrid).textContent = 'Boost per ally ↑ how much harder they hit';
+  if (S.axis === 'reach') {
+    // team boost curves: per ally x allies reached = constant
+    [0.25, 0.5, 1, 2].forEach(tb => {
+      const pts = [];
+      for (let v = 0.55; v <= 4.45; v += 0.05) { const y = tb / v; if (y >= YD[0] && y <= YD[1]) pts.push(`${X(v).toFixed(1)},${Y(y).toFixed(1)}`); }
+      if (pts.length > 1) el('polyline', {points:pts.join(' '), class:'contour'}, gGrid);
+      const lx = 4.42, ly = tb / lx;
+      if (ly >= YD[0] && ly <= YD[1]) el('text', {x:X(lx), y:Y(ly) - 6, 'text-anchor':'end', class:'contour-label'}, gGrid).textContent = `${pc(tb)} team`;
+    });
+  }
+  const q = S.axis === 'use'
+    ? [['Big boost · few can use it', 'Big boost · many can use it', 'Niche', 'Small boost · everyone']]
+    : [['Big boost · one ally', 'Big boost · whole team', 'Small boost · one ally', 'Small boost · whole team']];
+  [[q[0][0], M.l + 14, M.t + 26, 'start'], [q[0][1], W - M.r - 14, M.t + 26, 'end'],
+   [q[0][2], M.l + 14, H - M.b - 14, 'start'], [q[0][3], W - M.r - 14, H - M.b - 14, 'end']]
+    .forEach(([tx, x, y, a]) => { el('text', {x, y, 'text-anchor':a, class:'quad'}, gQuad).textContent = tx; });
+}
 const gDots = el('g', {}, svg), gLabels = el('g', {id:'labels'}, svg);
 
 const dotEl = SUP.map((s, i) => {
@@ -369,17 +409,42 @@ const dotEl = SUP.map((s, i) => {
   return g;
 });
 let POS = {}, ST = {};
+/* Allies reached: four columns. Dots keep their exact height and spread sideways inside their column,
+   each reserving room for its name, like the Roster Battle Map's Attack view. */
+function reachPositions(ids) {
+  const out = {}, placed = [];
+  const clash = r => placed.some(o => r[0] < o[2] && r[2] > o[0] && r[1] < o[3] && r[3] > o[1]);
+  const items = ids.map(i => ({i, y:Y(ST[i].per), n:ST[i].n, w:label(SUP[i]).length * 6.1 + 4})).sort((a, b) => a.y - b.y);
+  for (const it of items) {
+    const lo = X(it.n - 0.5) + 8, hi = X(it.n + 0.5) - 8, c = X(it.n);
+    let done = false;
+    for (const withLabel of [true, false]) {
+      for (let k = 0; k < 120 && !done; k++) {
+        const x = c + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 5;
+        const right = withLabel ? 12 + it.w : 7;
+        const r = [x - 7, it.y - 7, x + right, it.y + 7];
+        if (x < lo || x + (withLabel ? right : 7) > hi + (withLabel ? 0 : 8)) continue;
+        if (!clash(r)) { placed.push(r); out[it.i] = [x, it.y]; done = true; }
+      }
+      if (done) break;
+    }
+    if (!done) out[it.i] = [c, it.y];
+  }
+  return out;
+}
 
 function renderChart(animate = true) {
   ST = {}; SUP.forEach((s, i) => { const x = stats(i); if (x) ST[i] = x; });
   const card = document.getElementById('chartCard');
   card.classList.toggle('list', S.view !== 'map');
   const anyQ = S.q.trim() !== '';
+  renderAxes();
+  POS = S.axis === 'reach' ? reachPositions(Object.keys(ST).map(Number).filter(shown)) : {};
   SUP.forEach((s, i) => {
     const g = dotEl[i], x = ST[i];
     g.style.display = x ? '' : 'none';
     if (!x) return;
-    POS[i] = [X(x.count), Y(x.per)];
+    if (!POS[i]) POS[i] = [S.axis === 'reach' ? X(x.n) : X(x.count), Y(x.per)];
     g.style.transition = (animate && !reduce) ? '' : 'none';
     g.style.transform = `translate(${POS[i][0]}px,${POS[i][1]}px)`;
     g.classList.toggle('dim', !shown(i) || (anyQ && !found(i)));
@@ -390,6 +455,7 @@ function renderChart(animate = true) {
   const view = {map:'Map', rank:'Ranking', char:`For ${C[S.who].n}`}[S.view];
   document.getElementById('chartTitle').textContent = [view, tier().label, S.traits === 'base' ? 'always-on traits' : 'all triggered',
     `abilities ${S.level}`, S.active ? 'active on' : 'active off', S.gear ? 'standard gear' : 'no gear'].join(' · ');
+  document.getElementById('axisPick').classList.toggle('hide', S.view !== 'map');
   document.getElementById('chartHint').textContent = S.view === 'map' ? 'Hover a mark for numbers · click to pin it in the panel'
     : S.view === 'rank' ? 'Sorted by team boost · click a row to pin it' : `Each support's boost for ${C[S.who].n} · click a row to pin it`;
   if (S.view === 'map') {
@@ -449,7 +515,8 @@ function showTip(i) {
   const s = SUP[i], x = ST[i]; if (!x) return;
   tip.innerHTML = `<b>${esc(label(s))}</b><div class="f">${esc(s.faction)} · reach ${esc(s.reach)}</div>
   <div class="r"><span>Boost per ally</span><span>${pc(x.per)}</span></div>
-  <div class="r"><span>Allies it helps</span><span>${x.count}</span></div>
+  <div class="r"><span>Allies reached</span><span>${x.n}</span></div>
+  <div class="r"><span>Can use it</span><span>${x.count}</span></div>
   <div class="r"><span>Team boost</span><span>${pc(x.team)}</span></div>`;
   const g = dotEl[i].getBoundingClientRect(), cr = card.getBoundingClientRect();
   const z = cr.width / card.offsetWidth || 1;
@@ -475,7 +542,7 @@ function renderDetail() {
     const top = x.allies.slice(0, 10), maxw = Math.max(top[0].w, 0.01);
     body = `<div class="stats">
         <div><small>Per ally</small><b>${pc(x.per)}</b></div>
-        <div><small>Allies helped</small><b>${x.count}</b></div>
+        <div><small>Can use it</small><b>${x.count}</b></div>
         <div><small>Team boost</small><b>${pc(x.team)}</b></div></div>
       <p class="act-line">Reach: <b>${esc(s.reach)}</b> → ${x.n} ${x.n === 1 ? 'ally' : 'allies'}${DATA.fixed[s.reach] ? '' : ` (${S.spacing} spacing)`} · lasts ${esc(s.lasts)}</p>
       ${x.vs !== null ? `<p class="vsnote">Only works against some enemies: <b>+${pc(x.vs).replace('%', '')}%</b> against them (${Math.round(x.share * C.length)} of ${C.length}), so ${pc(x.per)} across the roster.</p>` : ''}
@@ -493,7 +560,7 @@ function renderDetail() {
 }
 
 /* ---------- table ---------- */
-const SORTS = {name:'Support', src:'Ability', gives:'Gives', per:'Per ally', n:'Allies helped', team:'Team boost'};
+const SORTS = {name:'Support', src:'Ability', gives:'Gives', per:'Per ally', n:'Can use it', team:'Team boost'};
 function renderTable() {
   const rows = Object.keys(ST).map(Number).filter(shown).map(i => ({i, s:SUP[i], x:ST[i], gives:(SUP[i].vals[S.tier] || {})[S.level] || ''}));
   const val = r => ({name:r.s.name, src:r.s.src, gives:r.gives, per:r.x.per, n:r.x.count, team:r.x.team})[S.sort.k];
@@ -523,6 +590,12 @@ document.querySelector('.controls').addEventListener('click', e => {
   refresh(id !== 'segView');
 });
 document.getElementById('q').addEventListener('input', e => { S.q = e.target.value; renderChart(false); });
+document.getElementById('segAxis').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  S.axis = b.dataset.v;
+  b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  renderChart(true);
+});
 whoSel.onchange = () => { S.who = +whoSel.value; if (S.view !== 'char') { S.view = 'char'; document.querySelectorAll('#segView button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === 'char'))); } refresh(false); };
 const legend = document.getElementById('legend');
 Object.entries(ALLY).forEach(([a, col]) => { const b = document.createElement('button'); b.className = 'chip'; b.setAttribute('aria-pressed', 'true');

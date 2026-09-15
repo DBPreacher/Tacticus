@@ -5,10 +5,11 @@ Runs support_model.py for every tier and switch combination (the same 48 setting
 Map), in parallel, and writes the page from support_template.html. Run it after build_map.py:
 
     python -X utf8 build_support.py
+    python -X utf8 build_support.py --page-only   # design changes: reuse the last build's numbers
 
 See INSTRUCTIONS.md ("Support Map").
 """
-import csv, json, os, sys, time
+import argparse, csv, json, os, re, sys, time
 from multiprocessing import Pool
 import build_map as bm
 import support_model as sm
@@ -45,7 +46,26 @@ def job(args):
     return tier_key, key, {ri: [[idx[n], round(b * 1000), round(s * 1000)] for n, b, s in al] for ri, al in res.items()}
 
 
+def write_page(data):
+    with open(TEMPLATE, encoding='utf-8') as f:
+        html = f.read()
+    if '/*DATA*/' not in html:
+        sys.exit('support_template.html is missing its /*DATA*/ placeholder.')
+    with open(OUT, 'w', encoding='utf-8') as f:
+        f.write(html.replace('/*DATA*/', json.dumps(data, ensure_ascii=False, separators=(',', ':'))))
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--page-only', action='store_true', help="rebuild the page from the template with the last build's numbers")
+    if ap.parse_args().page_only:
+        with open(OUT, encoding='utf-8') as f:
+            m = re.search(r'const DATA = (\{.*?\});\n', f.read(), re.S)
+        if not m:
+            sys.exit('No numbers in support-map.html yet: run a full build first.')
+        write_page(json.loads(m.group(1)))
+        print('Rebuilt support-map.html from the template (numbers unchanged).')
+        return
     start = time.time()
     rows = sm.load_rows()
     jobs, tiers, vals = [], [], {}
@@ -73,12 +93,7 @@ def main():
     with Pool(min(len(jobs), os.cpu_count() or 4)) as pool:
         for tier_key, key, res in pool.imap_unordered(job, jobs):
             data['s'][tier_key][key] = res
-    with open(TEMPLATE, encoding='utf-8') as f:
-        html = f.read()
-    if '/*DATA*/' not in html:
-        sys.exit('support_template.html is missing its /*DATA*/ placeholder.')
-    with open(OUT, 'w', encoding='utf-8') as f:
-        f.write(html.replace('/*DATA*/', json.dumps(data, ensure_ascii=False, separators=(',', ':'))))
+    write_page(data)
     print(f'Built support-map.html: {len(rows)} support abilities, {len(jobs)} settings, '
           f'game version {g["version"]}, {time.time() - start:.0f}s.')
 
