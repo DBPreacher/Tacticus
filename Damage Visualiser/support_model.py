@@ -383,12 +383,20 @@ def defence_for(r, sup, ally, ab, relic, level, trig):
     return first, later, (regen if any(regen.values()) else None), attackers
 
 
+FOCUS = {'focused': 5, 'spread': 2}      # enemy attacks on one ally per enemy turn (owner: a switch, Focused first)
+HORIZON_TURNS = 10                       # stop counting after 10 enemy turns: "survives 10+ turns" (owner)
+
+
 def toughness_score(ally, U, trig, act, specs_active, rnd, rest, regen=None, pool=None):
+    """(the middle attacks-to-kill over the attackers, whether that reached the 10-turn horizon)"""
+    cap = HORIZON_TURNS * bm.ATTACKS_PER_TURN
+    reg = dict(regen or {}, limit=cap)          # the counting stops at the horizon (fast, and the same answer)
     ks = []
     for a in (pool or U):
         spec = specs_active.get(a['name']) if act else None
-        ks.append(bm.attacks_to_kill(a, ally, trig, spec, rnd, rest, regen)[0])
-    return st.median(ks)
+        ks.append(min(bm.attacks_to_kill(a, ally, trig, spec, rnd, rest, reg)[0], cap))
+    m = st.median(ks)
+    return m, m >= cap - 1e-9
 
 
 def run_defence(units, specs, rows, tier_key, lv, trig, act, gear, only=None):
@@ -426,13 +434,13 @@ def run_defence(units, specs, rows, tier_key, lv, trig, act, gear, only=None):
                 pool = None
             key = (ally['name'], flt, tuple(sorted(vs)) if vs else None)
             if key not in base:
-                base[key] = toughness_score(ally, U, trig, act, sp['active'], rnd[ally['name']], rest[ally['name']], None, pool)
+                base[key] = toughness_score(ally, U, trig, act, sp['active'], rnd[ally['name']], rest[ally['name']], None, pool)[0]
             r1 = bm.merge_defence(rnd[ally['name']], ds1)
             r2 = bm.merge_defence(rest[ally['name']], ds2)
-            k1 = toughness_score(ally, U, trig, act, sp['active'], r1, r2, regen, pool)
+            k1, capped = toughness_score(ally, U, trig, act, sp['active'], r1, r2, regen, pool)
             boost = k1 / base[key] - 1
             if abs(boost) > 0.005:
-                res.append((ally['name'], boost, (len(pool) / len(U)) if pool else 1.0))
+                res.append((ally['name'], boost, (len(pool) / len(U)) if pool else 1.0, capped))
         if res:
             out[ri] = res
     return out
@@ -442,12 +450,12 @@ def summarize(row, allies, spacing='typical'):
     """the page's numbers for one support. A buff that only works against some enemies is scored across
     the whole roster (boost x the share of enemies it works on, owner, September 2026); the team figure
     assumes a team built to use the buff (owner)."""
-    per = sorted((b * s for _, b, s in allies), reverse=True)
+    per = sorted((x[1] * x[2] for x in allies), reverse=True)
     boost = st.median(per)
     n = FIXED_REACH.get(row['Reach']) or SPACING[spacing].get(row['Reach'], 1)
-    vs_only = any(s < 1 for _, _, s in allies)
+    vs_only = any(x[2] < 1 for x in allies)
     return dict(boost=boost, n=n, team=boost * n, eligible=len(allies),
-                vs_boost=st.median(b for _, b, _ in allies) if vs_only else None)
+                vs_boost=st.median(x[1] for x in allies) if vs_only else None)
 
 
 WORDS = {'flat': '+{:,.0f} Damage', 'pct': '+{:.0f}% damage', 'hits': '+{:.0f} hit', 'pierce': '+{:.0f}% pierce',
@@ -456,6 +464,46 @@ WORDS = {'flat': '+{:,.0f} Damage', 'pct': '+{:.0f}% damage', 'hits': '+{:.0f} h
          'armour': 'enemy Armour -{:,.0f}', 'taken': 'enemy takes +{:,.0f} Damage a hit',
          'takenpct': 'enemy takes +{:.0f}% damage', 'dmgfromblock': '+{:.0f}% of Block Damage as Damage'}
 SCOPES = {'normal': 'normal attacks', 'normal-melee': 'normal melee', 'normal-ranged': 'normal ranged', 'ability': 'actives'}
+
+
+DWORDS = {'heal': '+{:,.0f} health once', 'regen': '+{:,.0f} health every turn', 'regenhit': '+{:,.0f} health after each attack',
+          'shield': 'a {:,.0f} shield', 'revive': 'back with {:,.0f} health once', 'revivepct': '{:.0f}% of their health back once',
+          'pct': '-{:.0f}% damage taken', 'epct': 'enemies deal -{:.0f}% damage', 'flat': '-{:,.0f} damage a hit',
+          'hitsless': 'attackers score -{:.0f} hit', 'armour': '+{:,.0f} Armour', 'armourpass': 'attacks go through {:,.0f} Armour again',
+          'blockchance': '+{:.0f}% block chance', 'blockdmg': '+{:,.0f} Block Damage', 'setpct': 'set to {:.0f}% health'}
+DSCOPES = {'melee': 'from melee', 'ranged': 'from ranged', 'one': 'first attack each turn', 'psychic': 'from Psychic'}
+
+
+def describe_defence(effect, sup, ab, relic, level):
+    """a Defence token list in words, with the values at this level"""
+    out = []
+    for tok in [x.strip() for x in effect.split(';') if x.strip()]:
+        tk = parse(tok)
+        o, k, arg = tk['opts'], tk['kind'], tk['arg']
+        if k == 'suppress':
+            s = 'suppresses ' + ('one enemy' if arg == 'one' else 'the enemies around')
+        elif k == 'pctcap':
+            a, b = arg.split('/')
+            s = f'-{dvalue(sup, ab, a, level, relic):.0f}% damage taken (max -{dvalue(sup, ab, b, level, relic):,.0f} a hit)'
+        elif k == 'healdmg':
+            m = re.fullmatch(r'(\w+)\((\w+)-(\w+)\)', arg)
+            s = f'+{dvalue(sup, ab, m.group(1), level, relic) / 100 * dvalue(sup, ab, m.group(2) + "-" + m.group(3), level, relic):,.0f} health once'
+        else:
+            v = dvalue(sup, ab, arg, level, relic)
+            if 'chance' in o:
+                v *= dvalue(sup, ab, o['chance'], level, relic) / 100
+            s = DWORDS[k].format(v)
+            if 'avg' in o:
+                s += ' (every third round)'
+        bits = [DSCOPES.get(tk['scope'], tk['scope'])] if tk['scope'] != 'all' else []
+        if 'who' in o:
+            bits.append(_who(o['who']))
+        if 'vs' in o:
+            bits.append('vs ' + _who(o['vs']))
+        if tk['trig']:
+            bits.append('All triggered')
+        out.append(s + (f" ({', '.join(bits)})" if bits else ''))
+    return '; '.join(out)
 
 
 def _who(x):
@@ -514,7 +562,9 @@ def main():
     ap.add_argument('--gear', action='store_true')
     ap.add_argument('--level', type=int, default=36)
     ap.add_argument('--defence', action='store_true', help='the Defence side')
+    ap.add_argument('--spread', action='store_true', help='Defence: enemies spread their attacks (2 a turn on one ally)')
     args = ap.parse_args()
+    bm.ATTACKS_PER_TURN = FOCUS['spread' if args.spread else 'focused']
     bm.set_tier(bm.TIERS[1])
     g, units = bm.load()
     actives = bm.sync_rows(bm.ACTIVES_CSV, bm.ACTIVE_COLS, 'Active', units, bm.draft_active, 'active_abilities.csv')
@@ -530,7 +580,8 @@ def main():
     table = sorted(((ri, summarize(rows[ri], al)) for ri, al in res.items()), key=lambda x: -x[1]['team'])
     for ri, x in table:
         r = rows[ri]
-        best = ', '.join(f'{n} +{b * s * 100:.0f}%' for n, b, s in sorted(res[ri], key=lambda y: -y[1] * y[2])[:3])
+        best = ', '.join(f'{y[0]} {y[1] * y[2] * 100:+.0f}%' + (' (10+ turns)' if len(y) > 3 and y[3] else '')
+                         for y in sorted(res[ri], key=lambda y: -y[1] * y[2])[:3])
         vs = f" (+{x['vs_boost'] * 100:.0f}% vs the enemies it works on)" if x['vs_boost'] else ''
         print(f"{r['Name'] + ' (' + r['Source'].lower() + ')':<34}{x['boost'] * 100:>8.0f}%{r['Reach'] + ' (' + str(x['n']) + ')':>15}"
               f"{x['team'] * 100:>7.0f}%{x['eligible']:>9}  {best}{vs}")

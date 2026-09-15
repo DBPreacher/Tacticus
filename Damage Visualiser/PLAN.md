@@ -92,10 +92,13 @@ Earlier ideas that were replaced:
   figure assumes a team built for the buff. Step 3 done: `support-map.html`
   (Map, Ranking, For one; all tiers and settings; built in parallel by
   `build_support.py`). Next: the Defence side, on the same page with a Side switch (owner).
-  Step 1 done: Defence rows drafted in `support_abilities.csv` (62 counted,
-  incl. every Healer/Mechanic heal action and Big Target), 3 owner
-  questions. Measure: Toughness boost (how many more enemy attacks the
-  protected ally survives), per ally x allies reached, as on the Attack side.
+  Done (September 2026): Defence rows in `support_abilities.csv` (62,
+  incl. every Healer/Mechanic heal action and Big Target, owner-reviewed),
+  `run_defence` (Toughness boost), and the page's Attack / Defence switch
+  with an Enemy focus switch (Focused default, Spread) and a 10-turn
+  horizon. Finding: with Focused enemies, damage reduction and suppress
+  lead (Thothmek, Darkstrider, Thoread, Uthar); with Spread, heal actions
+  lead by a distance (Gibbascrapz, Vynn, Aleph-Null, Baldr, Nicodemus).
 - **Support value page, first notes** (owner's idea; notes in his "Boosting champions"
   sheet). Proposed method: measure each ally buff / enemy debuff with the
   same model, as how much faster each eligible ally kills a typical enemy,

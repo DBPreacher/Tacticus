@@ -1,8 +1,9 @@
 """
-build_support.py - builds support-map.html, the Support Map (Attack side).
+build_support.py - builds support-map.html, the Support Map (Attack and Defence sides).
 
 Runs support_model.py for every tier and switch combination (the same 48 settings as the Roster Battle
-Map), in parallel, and writes the page from support_template.html. Run it after build_map.py:
+Map; the Defence side for both Enemy focus settings), in parallel, and writes the page from
+support_template.html. Run it after build_map.py:
 
     python -X utf8 build_support.py
     python -X utf8 build_support.py --page-only   # design changes: reuse the last build's numbers
@@ -39,11 +40,30 @@ def _tier(tier_key):
 
 
 def job(args):
-    tier_key, key, lv, trig, act, gear = args
+    side, focus, tier_key, key, lv, trig, act, gear = args
     units, specs = _tier(tier_key)
     idx = {u['name']: i for i, u in enumerate(units)}
-    res = sm.run(units, specs, sm.load_rows(), tier_key, lv, trig, act, gear)
-    return tier_key, key, {ri: [[idx[n], round(b * 1000), round(s * 1000)] for n, b, s in al] for ri, al in res.items()}
+    if side == 'attack':
+        bm.ATTACKS_PER_TURN = 5
+        res = sm.run(units, specs, sm.load_rows('Attack'), tier_key, lv, trig, act, gear)
+    else:
+        bm.ATTACKS_PER_TURN = sm.FOCUS[focus]
+        res = sm.run_defence(units, specs, sm.load_rows('Defence'), tier_key, lv, trig, act, gear)
+    bm.ATTACKS_PER_TURN = 5
+    return side, focus, tier_key, key, {ri: pack(al, idx) for ri, al in res.items()}
+
+
+def pack(allies, idx):
+    """one support's allies, compactly: v = [ally, boost x 1000, ...]; s = the share of the roster its enemies
+    are, x 1000 (left out when 1000, a list when it differs by ally); c = positions that reached the horizon"""
+    out = dict(v=[x for al in allies for x in (idx[al[0]], round(al[1] * 1000))])
+    shares = [round(al[2] * 1000) for al in allies]
+    if any(s != 1000 for s in shares):
+        out['s'] = shares[0] if len(set(shares)) == 1 else shares
+    capped = [i for i, al in enumerate(allies) if len(al) > 3 and al[3]]
+    if capped:
+        out['c'] = capped
+    return out
 
 
 def write_page(data):
@@ -67,8 +87,8 @@ def main():
         print('Rebuilt support-map.html from the template (numbers unchanged).')
         return
     start = time.time()
-    rows = sm.load_rows()
-    jobs, tiers, vals = [], [], {}
+    rows, drows = sm.load_rows('Attack'), sm.load_rows('Defence')
+    jobs, tiers, vals, dvals = [], [], {}, {}
     for t in bm.TIERS:
         bm.set_tier(t)
         g, units = bm.load()
@@ -76,25 +96,37 @@ def main():
         tiers.append(dict(key=t['key'], label=t['label'], levels=list(t['levels'])))
         for key, trig, lv, act, gear in bm.scenario_keys():
             if lv:
-                jobs.append((t['key'], key, lv, trig, act, gear))
+                jobs.append(('attack', None, t['key'], key, lv, trig, act, gear))
+                for focus in sm.FOCUS:
+                    jobs.append(('defence', focus, t['key'], key, lv, trig, act, gear))
         for ri, r in enumerate(rows):
             ab, relic = sm.row_ability(U, r)
             if relic and t['key'] != 'mythic':
                 continue
             vals.setdefault(ri, {})[t['key']] = {lv: sm.describe(r['Effect'], ab, relic, lv) for lv in t['levels']}
+        for ri, r in enumerate(drows):
+            ab, relic = (None, False) if r['Source'] == 'Trait' else sm.row_ability(U, r)
+            if relic and t['key'] != 'mythic':
+                continue
+            dvals.setdefault(ri, {})[t['key']] = {lv: sm.describe_defence(r['Effect'], U[r['Name']], ab, relic, lv) for lv in t['levels']}
     chars = [dict(n=u['name'], a=u['alliance'], f=u['faction']) for u in units]
     first = {u['name']: u for u in units}
-    supports = [dict(name=r['Name'], src=r['Source'], ability=r['Ability'], alliance=first[r['Name']]['alliance'],
-                     faction=first[r['Name']]['faction'], receives=r['Receives'], reach=r['Reach'], lasts=r['Lasts'],
-                     cond=r['Condition'], notes=r['Notes'], text=r['Ability_Text'], vals=vals.get(ri, {}))
-                for ri, r in enumerate(rows)]
-    data = dict(version=g['version'], tiers=tiers, chars=chars, supports=supports, spacing=sm.SPACING,
-                fixed=sm.FIXED_REACH, s={t['key']: {} for t in tiers})
+    card = lambda r, v: dict(name=r['Name'], src=r['Source'], ability=r['Ability'], alliance=first[r['Name']]['alliance'],
+                             faction=first[r['Name']]['faction'], receives=r['Receives'], reach=r['Reach'], lasts=r['Lasts'],
+                             cond=r['Condition'], notes=r['Notes'], text=r['Ability_Text'], vals=v)
+    data = dict(version=g['version'], tiers=tiers, chars=chars, spacing=sm.SPACING, fixed=sm.FIXED_REACH,
+                focus=sm.FOCUS, horizon=sm.HORIZON_TURNS,
+                supports=[card(r, vals.get(ri, {})) for ri, r in enumerate(rows)],
+                dsupports=[card(r, dvals.get(ri, {})) for ri, r in enumerate(drows)],
+                s={t['key']: {} for t in tiers}, d={t['key']: {} for t in tiers})
     with Pool(min(len(jobs), os.cpu_count() or 4)) as pool:
-        for tier_key, key, res in pool.imap_unordered(job, jobs):
-            data['s'][tier_key][key] = res
+        for side, focus, tier_key, key, res in pool.imap_unordered(job, jobs):
+            if side == 'attack':
+                data['s'][tier_key][key] = res
+            else:
+                data['d'][tier_key].setdefault(key, {})[focus] = res
     write_page(data)
-    print(f'Built support-map.html: {len(rows)} support abilities, {len(jobs)} settings, '
+    print(f'Built support-map.html: {len(rows)} Attack and {len(drows)} Defence support abilities, {len(jobs)} runs, '
           f'game version {g["version"]}, {time.time() - start:.0f}s.')
 
 

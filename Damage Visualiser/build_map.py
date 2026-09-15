@@ -888,7 +888,8 @@ def _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen):
     """kill_count with healing between and during enemy turns, and shields (support_model.py)"""
     ta = 'TerminatorArmour' in d['traits']
     left, shield = hp, 0.0
-    for i in range(5000):
+    limit = int(regen.get('limit', 5000))        # support_model stops at its 10-turn horizon
+    for i in range(limit):
         if i % ATTACKS_PER_TURN == 0:
             if i:
                 left = min(hp, left + regen.get('turn', 0.0))
@@ -909,7 +910,7 @@ def _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen):
         if dmg - soak >= left:
             return i + (left + soak) / dmg
         left = min(hp, left - (dmg - soak) + regen.get('hit', 0.0))
-    return 5000.0
+    return float(limit)
 
 
 def _with_defence(d, ds):
