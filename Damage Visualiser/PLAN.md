@@ -72,7 +72,17 @@ Earlier ideas that were replaced:
 
 ## Ideas under discussion (September 2026)
 
-- **Support value page** (owner's idea; notes in his "Boosting champions"
+- **Support Map (in progress).** Attack and Defence assessed separately, like
+  the roster map. Owner decisions (September 2026): conditional buffs follow
+  the Traits switch, support actives follow the Active switch, and the owner's
+  old sheet is not to sway the choices. Proposed: "boost per ally" is the
+  main score (doesn't depend on range); range only affects the team total,
+  through a "Team spacing" switch (Typical: adjacent 2 allies, 2 hexes 3,
+  team 4; Tight 3/4/4; Spread 1/2/4); single-target buffs always 1. Step 1
+  done: `support_abilities.csv` drafted (Attack side), waiting for the
+  owner's review of the flagged rows. Then: the calculation, then the page,
+  then the Defence side.
+- **Support value page, first notes** (owner's idea; notes in his "Boosting champions"
   sheet). Proposed method: measure each ally buff / enemy debuff with the
   same model, as how much faster each eligible ally kills a typical enemy,
   plus how many characters can use it and for how long. Worked example:

@@ -28,6 +28,7 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `active_abilities.csv` | One row per character: how their active ability is counted. **Reviewed data**: the script adds rows but never overwrites your decisions | **Yes** |
 | `passive_abilities.csv` | The same, for passive abilities: `Attack`, `Defence` and `Gear` tokens | **Yes** |
 | `relic_abilities.csv` | One row per relic: its effect as `Attack` / `Defence` / `Gear` tokens (Mythic tier, gear on) | **Yes** |
+| `support_abilities.csv` | **Draft (September 2026), not used by any page yet.** One row per ability that helps allies attack (buffs) or weakens enemies (debuffs), for the planned Support Map. See "Support abilities (draft)" | **Yes** |
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
@@ -154,6 +155,53 @@ The page shows one character's 117 answers as bars.
   screen. Hover a bar for that matchup.
 - **Live page (private):** https://claude.ai/code/artifact/cc647bac-9f07-40ac-af58-ce3572c44933
   (republish `typical-character.html` to it the same way as the map).
+
+---
+
+## Support abilities (draft)
+
+`support_abilities.csv` is the data for the planned **Support Map** (see
+PLAN.md). Nothing reads it yet. It covers the **Attack side**: abilities
+that make allies hit harder, or make an enemy take more. The Defence side
+(heals, damage reduction, taunts, control) comes later.
+
+Columns:
+
+| Column | Meaning |
+|---|---|
+| `Name`, `Source`, `Ability` | The support, and whether it's their Passive, Active or Relic (Mythic only) |
+| `Effect` | Tokens, `;`-separated (below). Empty = considered but not counted (the note says why) |
+| `Receives` | Who can get it: `all`, an alliance, a faction, a trait (e.g. `TerminatorArmour`), `has:ranged` or `no:ranged`; `|` means "or" |
+| `Reach` | `adjacent`, `2 hexes`, `team` (every friendly unit), `one` (one ally), `target` (everyone attacking the enemy it's on), `next attack` |
+| `Lasts` | For the reader: battle, turn, 2 rounds, next attack… |
+| `Condition` | `always`, `trig` (All triggered only) or `active` (Active switch on) |
+| `Values_D3` | What the tokens come to at Diamond III, ability levels 36 and 50 (relics: Mythic). Written by the draft, for checking; don't edit |
+| `Needs_Review`, `Notes` | As in the other files; `OWNER:` marks a question for the owner |
+| `Ability_Text` | The game's text |
+
+Effect tokens, `kind:value[:scope][:option=value…][@trig]`. Values are
+game-data variable names, so they follow the ability level and rarity.
+
+- **Ally buffs:** `flat` (+Damage a hit), `pct` (+% damage), `hits` (extra
+  hits), `pierce` (+% pierce), `critchance`, `critdmg`, `armignore` (ignore
+  Armour), `ramp` (each hit +X more than the last), `extra:1xType(min-max)`
+  (an extra hit of that type), `attack` (an extra normal attack at X% of the
+  ally's Damage), `follow` (a free ranged attack after melee), `reuse` (the
+  ally uses their active again), `partner:NxType(min-max)` (the support's own
+  hits, set off by each ally attack), `dmgfromblock` (a share of the ally's
+  Block Damage as Damage).
+- **Enemy debuffs:** `armour` (enemy Armour lowered), `taken` (enemy takes
+  +X Damage a hit), `takenpct` (enemy takes +X% damage).
+- **Scopes:** `all`, `melee`, `ranged`, `normal`, `normal-melee`,
+  `normal-ranged`, `ability` (attacks that aren't normal attacks).
+- **Options:** `who=` (only these allies; `!` = everyone else), `vs=` (only
+  against enemies with this trait), `type=` / `notype=` (the ally's damage
+  type), `cap=` (maximum per hit), `reach=` (overrides the row's Reach),
+  `chance=` (a % chance), `trig=` (a different value with All triggered),
+  `trigmult=`, `mult=`, `avg=` (a share of the value in Always-on, e.g.
+  a buff that only works every third round), `gearonly` (only helps
+  allies who already have a crit chance).
+- `@trig` on a token: that part only counts with All triggered.
 
 ---
 
@@ -506,6 +554,7 @@ The **Mythic tier** is built in (September 2026).
 
 | Date | Change |
 |---|---|
+| September 2026 | `support_abilities.csv` drafted: Attack-side support for the planned Support Map (55 abilities counted, 22 owner questions) |
 | September 2026 | The typical-character page gets the map's switches (Progression, Traits, Ability level, Gear, Active); `build_map.py` now writes it and `build_typical.py` is gone |
 | September 2026 | `build_typical.py` and `typical-character.html`: the "what is a typical character?" graphic (one character's 117 answers, lined up, middle picked out) |
 | September 2026 | OBS broadcast mode removed (owner prefers to record the normal page and press the buttons on camera). The page now zooms up to fill wide screens. Layout is chart | character card | controls side by side (owner), with the alliance and melee/ranged key under the chart ("Ranged is their best attack") and "Reading the chart" below; the chart is 1000×670 |
