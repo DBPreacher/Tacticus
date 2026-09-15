@@ -29,6 +29,7 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `passive_abilities.csv` | The same, for passive abilities: `Attack`, `Defence` and `Gear` tokens | **Yes** |
 | `relic_abilities.csv` | One row per relic: its effect as `Attack` / `Defence` / `Gear` tokens (Mythic tier, gear on) | **Yes** |
 | `support_abilities.csv` | **Draft (September 2026), not used by any page yet.** One row per ability that helps allies attack (buffs) or weakens enemies (debuffs), for the planned Support Map. See "Support abilities (draft)" | **Yes** |
+| `support_model.py` | **In progress.** Runs `support_abilities.csv` through the damage model: how much each support's buffs help every ally who can use them. `python -X utf8 support_model.py [--active] [--gear] [--trig] [--level 50]` prints the rankings | Yes |
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
@@ -161,7 +162,7 @@ The page shows one character's 117 answers as bars.
 ## Support abilities (draft)
 
 `support_abilities.csv` is the data for the planned **Support Map** (see
-PLAN.md). Nothing reads it yet. It covers the **Attack side**: abilities
+PLAN.md). `support_model.py` reads it (no page yet). It covers the **Attack side**: abilities
 that make allies hit harder, or make an enemy take more. The Defence side
 (heals, damage reduction, taunts, control) comes later.
 

@@ -646,7 +646,9 @@ def hit_value(D, A, p, gravis, pass2=0.0):
 def _applies(e, kind, first, d):
     sc = e['scope']
     ok = sc == 'all' or sc == kind or (sc == 'after' and not first) or (sc == 'one' and first)
-    return ok and (e['vs'] is None or bool(e['vs'] & (d['traits'] | {d.get('alliance')})))
+    tags = d['traits'] | {d.get('alliance')}
+    # vsnot: support buffs that apply to every enemy except these (support_model.py)
+    return ok and (e['vs'] is None or bool(e['vs'] & tags)) and not (e.get('vsnot') and e['vsnot'] & tags)
 
 
 def _chain(c, n):

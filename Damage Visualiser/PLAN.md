@@ -79,8 +79,17 @@ Earlier ideas that were replaced:
   main score (doesn't depend on range); range only affects the team total,
   through a "Team spacing" switch (Typical: adjacent 2 allies, 2 hexes 3,
   team 4; Tight 3/4/4; Spread 1/2/4); single-target buffs always 1. Step 1
-  done: `support_abilities.csv` drafted (Attack side), waiting for the
-  owner's review of the flagged rows. Then: the calculation, then the page,
+  done: `support_abilities.csv` (Attack side), all 22 owner questions
+  answered (A-G, September 2026). Step 2 done: `support_model.py` works out
+  each support's boost for every ally who benefits (per ally = the middle
+  boost among allies it helps; team = per ally x allies reached). Findings:
+  pierce buffs are strongest (Helbrecht's active, Nicodemus's active), then
+  extra hits (Vitruvius, Thoread, Gulgortz) and extra attacks (Actus,
+  Anuphet, Mephiston); flat Damage is modest (Calgar about +20%); small
+  armour reductions barely matter at Diamond III because most attacks are
+  already on their pierce floor. Open: how to weigh buffs that only work
+  against some enemies (only 2 Daemons, 12 Psykers in the roster) and
+  whether the team figure assumes a team built for the buff. Then the page,
   then the Defence side.
 - **Support value page, first notes** (owner's idea; notes in his "Boosting champions"
   sheet). Proposed method: measure each ally buff / enemy debuff with the
