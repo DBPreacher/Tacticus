@@ -359,6 +359,24 @@ Run `python -X utf8 check_guild.py` after each one. It scores the owner's real
 runs in half a second, and every fix above should move those numbers toward the
 video, not away.
 
+## The Biovore (September 2026)
+
+The owner's round-by-round had it doing 42,825 where the model said 19,013. Two
+things, and the per-mine damage was not one of them:
+
+- **A Machine of War takes the rarity bonus.** Its abilities are rarity-boosted
+  in the data exactly like a character's, and a Mythic machine doubles them. The
+  model was building its parts with the boss helper, which deliberately skips the
+  bonus - right for a boss, which is not a unit you levelled, wrong for a machine.
+  A Spore Mine went from 3,948 to 7,896, which matches the 6,128-8,300 a mine on
+  screen.
+- **Bio-Minefield sends three mines at once.** The machine acts once a round: most
+  rounds it launches one mine, and when Bio-Minefield is off cooldown it gathers
+  every mine on the board and sends them in. Over five fighting rounds that is
+  four launches and one Bio-Minefield, about seven mines - the video's count.
+
+It now reads 44,290 against 42,825.
+
 ## Known gaps found in the calibration hunt (September 2026)
 
 Going through every "not counted" note in the ability CSVs with a Guild Raid in

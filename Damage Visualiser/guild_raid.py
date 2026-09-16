@@ -576,11 +576,14 @@ def bossval(ab, key, lv):
     return float(v[min(int(lv), len(v)) - 1])
 
 
-def _part(ab, lv, s='', dtype=None):
+def _part(ab, lv, s='', dtype=None, rarity=False):
     """one damage part of a boss or Machine of War ability: its average damage, its hits and its damage
-    type. dtype: for the few abilities whose type is only in their text (the Biovore's Spore Mines)"""
+    type. dtype: for the few abilities whose type is only in their text (the Biovore's Spore Mines).
+    rarity: a Machine of War is a Mythic unit and its abilities take the rarity bonus, the way a
+    character's do. A boss does not - it is not a unit you levelled."""
     suf = '' if s in ('', '1') else '_' + s
-    lo, hi = bossval(ab, 'minDmg' + suf, lv), bossval(ab, 'maxDmg' + suf, lv)
+    val = bm.ability_value if rarity else bossval
+    lo, hi = val(ab, 'minDmg' + suf, lv), val(ab, 'maxDmg' + suf, lv)
     c = ab.get('constants') or {}
     return dict(dmg=(lo + hi) / 2, hits=int(float(c.get('nrOfHits' + suf) or c.get('nrOfHits') or 1)),
                 type=bm.dtype(dtype or c.get('damageProfile' + suf) or c.get('damageProfile') or 'Physical'),
@@ -710,7 +713,10 @@ MOW_BUFF = {
     'Galatian': None, 'Exorcist': None, 'Forgefiend': None, "Tson'ji": None, 'Storm Speeder': None,
 }
 MOW_SHOTS = {      # what it can fire at a boss, how often, and its damage type when the data leaves it out
-    'Biovore': [('SporeMineLauncher', 1.0, 'Toxic')],   # a Spore Mine every turn, walked into the boss
+    # The machine acts once a round. Most rounds it launches one Spore Mine; when Bio-Minefield is off
+    # cooldown it sends three in together instead. Over five fighting rounds that is four launches and one
+    # Bio-Minefield - about seven mines, which is what the owner's video shows.
+    'Biovore': [('SporeMineLauncher', 0.8, 'Toxic'), ('BioMinefield', 0.6, 'Toxic')],
     'Galatian': [('MacroPlasmaIncinerator', 0.5)],
     'Exorcist': [('DevastatingRefrain', 0.5)],
     'Reanimator': [],                                   # repairs and summons, no attack of its own
@@ -763,7 +769,7 @@ def mow_damage(g, mow, boss, ds, lv, rules=None):
         ab = _ability(g, ab_id)
         if not ab or 'minDmg' not in (ab.get('variables') or {}):
             continue
-        part = _part(ab, min(lv, MOW_LEVELS), '', dt)
+        part = _part(ab, min(lv, MOW_LEVELS), '', dt, rarity=True)
         tot += bm.part_vs_defence(part, boss, ds, False)[0] * rate * FIGHTING
     return tot
 
