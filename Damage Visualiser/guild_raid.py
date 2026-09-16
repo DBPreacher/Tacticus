@@ -188,7 +188,7 @@ def buff_turns(r, ab):
     An active starts on turn 1 and comes back whenever its cooldown allows, so a 2-round buff on a 2-turn
     cooldown covers 4 of the 6 turns."""
     lasts = (r['Lasts'] or '').strip().lower()
-    active = r['Source'] == 'Active' or r['Condition'] == 'active'
+    active = r['Source'] == 'Active'          # the Condition column is a switch, not a duration
     if lasts == 'battle':
         return TURNS
     if lasts == 'once':
@@ -239,6 +239,27 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
     return toks
 
 
+# the ramp on an active that grows with every turn its owner has attacked (Kariyan's Martial Inspiration)
+RAMP = {'Kariyan': 'extraDmgPct'}
+
+
+def active_turns(member, turns):
+    """the turns a character gets its active off. Nearly every active is once a battle: only the few with a
+    cooldownTurns in the data come back (Baraqiel, Ramus, Aesoth, Tyrith, Kariyan)."""
+    c = ((member.get('ability') or {}).get('constants') or {}).get('cooldownTurns')
+    if c in (None, ''):
+        return {1}
+    return set(range(1, turns + 1, int(float(c)) + 1))
+
+
+def ramp_at(member, turn, lv):
+    """what an active that grows each turn is worth on this turn: +pct for every turn already fought"""
+    var = RAMP.get(member['name'])
+    if not var or turn <= 1:
+        return 1.0
+    return 1 + sm.value(member['ability'] or {}, var, lv) / 100 * (turn - 1)
+
+
 def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=TURNS,
                   mow=None):
     """one character's damage over the 6 turns: the active turn plus normal attacks.
@@ -250,11 +271,18 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])
     spec = sp['active'].get(member['name']) if act else None
 
+    chaos = sum(1 for m in mates if m['alliance'] == 'Chaos') if member['name'] == 'Laviscus' else 0
+
     def attack(live):
-        """(the damage of one normal attack, the opener, the character with these buffs on)"""
+        """(the damage of one normal attack, the damage of a turn it gets its active off)"""
         a, spec2, _ = sm.buffed(member, live, spec, gear) if live else (member, spec, 0.0)
         if extra:
             a = dict(a, dmg=a['dmg'] + extra)
+        if chaos:                                       # Refusal to be Outdone's other half
+            cd = sm.value(member['passive'] or {}, 'extraCritDmg', lv) * chaos
+            a = dict(a, pg=list(a.get('pg') or []) +
+                     [dict(kind='critdmg', value=cd, scope='all', vs=None, vsnot=None)])
+
         dmg, _, w = bm.best_attack(a, boss, trig, ds, False, False)
         f = rule_factor(a, w, rules, member)
         if mow and mow['kind'] == 'taken' and (not mow['only'] or mow['only'] == w['kind']):
@@ -263,15 +291,16 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
         return dmg * f, first
     # the turns fall into blocks: as each short buff runs out, work out the attack again
     ups = sorted({min(up, turns) for _, up in toks} | {turns})
-    total, done, live = 0.0, 0, [t for t, _ in toks]
-    for i, up in enumerate(ups):
+    actives = active_turns(member, turns) if act else set()
+    total, done = 0.0, 0
+    for up in ups:
         live = [t for t, n in toks if n > done]
         normal, first = attack(live)
-        block = up - done
-        if done == 0:                                   # the active lands on the first turn
-            total += max(first, normal) + normal * (block - 1)
-        else:
-            total += normal * block
+        for turn in range(done + 1, up + 1):
+            if first and turn in actives:
+                total += max(first * ramp_at(member, turn, lv), normal)
+            else:
+                total += normal
         done = up
     return total
 
@@ -670,7 +699,10 @@ def main():
         b = mow['buff']
         print(f"  Machine of War: {mow['name']} - {mow['own']:,.0f} damage of its own"
               + (f", and {b['name']} ({'the boss takes' if b['kind'] == 'taken' else 'your characters deal'} "
-                 f"+{b['pct']:.0f}% - {b['note']})" if b else ' (its Mythic ability does nothing for a damage run)'))
+                 f"+{b['pct']:.0f}% - {b['note']})" if b else
+                 (' (its Mythic ability only works on a Mythic roster)' if args.tier != 'mythic' else
+                  ' (its Mythic ability needs All triggered)' if (MOW_BUFF.get(mow['name']) or {}).get('trig')
+                  else ' (its Mythic ability is defensive: nothing for a damage run)')))
     alive = team_turns(team, surv, args.ability, args.trig, act, args.gear, args.tier)
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]

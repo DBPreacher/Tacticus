@@ -54,6 +54,11 @@ def slot_name(f):
     return TIER_NAMES[f['tier']] + ' ' + str(f['set'] + 1)
 
 
+def season_names(g):
+    """{season id: the boss it finishes on} - a season's last Mythic fight is the one players name it after"""
+    return {f['season']: f['name'] for f in gr.fights(g) if f['tier'] == 5 and f['set'] == 2}
+
+
 def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names):
     """the best five for one boss at one setting"""
     boss, ds, dbf = gr.boss_defender(g, fight, debuffs)
@@ -144,16 +149,18 @@ def main():
             if lv:
                 jobs.append((t['key'], key, lv, trig, act, gear))
     chars = [dict(n=u['name'], a=u['alliance'], f=u['faction']) for u in units]
-    mows = [dict(n=m['name'], f=m['factionId'],
+    mows = [dict(n=m['name'], f=m['factionId'], trig=bool((gr.MOW_BUFF.get(m['name']) or {}).get('trig')),
                  b=(lambda b: dict(name=b['name'], pct=b['pct'], kind=b['kind'], only=b['only'] or '',
                                    who=b['who'], note=b['note']) if b else None)(gr.mow_buff(g, m, 50, 'mythic', True)))
             for m in gr.machines(g)]
+    seasons = season_names(g)
     fl = []
     for f in fights:
         boss, ds, dbf = gr.boss_defender(g, f, False)
         _, _, dbf2 = gr.boss_defender(g, f, True)
         rules2 = gr.boss_rules(g, f, dbf2)['notes']
         fl.append(dict(n=f['name'], t=f['tier'], l=f['level'], hp=f['hp'], r=f['rarity'], slot=slot_name(f),
+                       season=seasons.get(f['season'], f['season']),
                        ban=gr.FACTION_ID.get(f['faction'], f['faction']), arm=round(boss['arm']),
                        bc=round(ds['bc'] * 100), bd=round(ds['bd']),
                        dbf=[round(dbf2['armour']), round(dbf2['block'])],

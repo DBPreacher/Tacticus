@@ -141,8 +141,11 @@ the boss's own faction is banned.
   two debuff chains to the boss (mostly -30% Armour, -15% block chance).
 - The boss picker lists every fight a boss appears in, named the way the game
   names it: Mythic 1, Mythic 2 and Mythic 3 are three different fights (levels
-  23, 24 and 25), not one Mythic tier. Where a boss has two fights with the same
-  name in different seasons, the page adds the level.
+  23, 24 and 25), not one Mythic tier. **A boss only appears in the slots its
+  seasons give it** - Mortarion is Mythic 1 in the Lion El'Jonson season and
+  Mythic 3 in his own, and he is never Mythic 2 - so the page names the season
+  next to the slot. Where a boss has two fights with the same name in different
+  seasons, the page adds the level.
 - **Machine of War.** Every machine has a Mythic ability that works on friendly
   Mythic characters, and it is usually worth more than the machine's own damage:
   the Biovore's Hyper Corrosive Acid (+20% damage taken, anything a Spore Mine
@@ -152,7 +155,12 @@ the boss's own faction is banned.
   Blighted Land (+20% Damage, but you have to stand on its contaminated hexes,
   so it follows the All triggered switch). The rest are defensive and do nothing
   for a damage run. The page brings the best machine for the five it picked, and
-  the boss's faction is banned here too. A machine's **own** damage is a rough
+  the boss's faction is banned here too (the owner confirmed in game, September
+  2026, that a banned-faction machine can't be brought).
+  **+20% damage taken beats +20% Damage**, because Armour is taken off each hit
+  before the multiplier: that is why the Rukkatrukk wins over the Plagueburst
+  Crawler even though its version only works on normal melee attacks, and it is
+  worth saying out loud on camera. A machine's **own** damage is a rough
   estimate - its damaging abilities at their cooldown, aimed at the boss - and it
   is small next to its Mythic ability either way. The Biovore's Spore Mines are
   Toxic, which only the ability text says, so `MOW_SHOTS` carries the type.
@@ -172,6 +180,27 @@ the boss's own faction is banned.
   Taunted.
 - **Not counted:** the boss killing your characters (`--deaths` on the command
   line, see PLAN.md), terrain height, bombs and summons.
+
+### What the Guild Raid work changed in the other pages
+
+A Guild Raid is six fixed turns against something that cannot die, so several
+things matter there that do not matter in a one-on-one fight. When a rule is
+about the *character*, it belongs in `build_map.py` and reaches every page; when
+it is about the *fight*, it stays in `guild_raid.py`.
+
+| Learning | Where it lives | Does it change the Roster Battle Map or the Support Map? |
+|---|---|---|
+| Kariyan's Legacy of Combat has a Big Target branch (1x Piercing instead of 3x Power) | `passive_abilities.csv` as `extra:1|2:melee`, handled in `normal_attack` | **Yes** - 9 characters are Big Targets (Aesoth, Boss Gulgortz, Commander Farsight, Kut Skoden, Morvenn Vahl, Re'vas, Snappawrecka, Tyrant Guard, Volk) |
+| Havyr's Fury from the Dêlve, counted as written | `extrahalf:` in `passive_abilities.csv`, handled in `kill_count` | **Yes** - 2.37 to 2.28 attacks |
+| A character re-uses its active when its cooldown allows | `guild_raid.py` only | **No.** Measured: of 580 matchups on the map, one lasts long enough for a repeatable active to come back (median kill is under three attacks, an enemy turn is five) |
+| Kariyan's active ramps with every turn he has fought | `guild_raid.py` only | **No** - it starts from turn 2 and a map kill is over inside turn 1 |
+| Laviscus's +Crit Damage per Chaos ally | `guild_raid.py` only | **No** - it needs team-mates feeding his Outrage, and the map is one-on-one |
+| A buff only counts for the turns it is up | `guild_raid.py` only | **No** - the Support Map measures a buff's boost to *one attack*, so how long it lasts isn't part of that question (the Defence side already handles round-only effects) |
+| Boss rules, side-battle debuffs, the Machine of War slot | `guild_raid.py` only | **No** - there are no bosses or machines on the other pages |
+
+The one finding worth saying on camera rather than coding: **+20% damage taken is
+worth more than +20% Damage**, because Armour comes off every hit before the
+multiplier.
 
 To rebuild after a game update: `python -X utf8 build_map.py`, then
 `python -X utf8 build_guild.py`, then republish the artifact.

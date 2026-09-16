@@ -159,6 +159,7 @@ const DATA = /*DATA*/;
 
 const ALLIANCE = {Imperial:'var(--imperial)', Chaos:'var(--chaos)', Xenos:'var(--xenos)'};
 const n = x => x.toLocaleString('en-GB', {maximumFractionDigits:0});
+const DOT = '·';
 const el = id => document.getElementById(id);
 
 const state = {tier:'mythic', lv:null, gear:true, trig:false, act:true, dbf:true, boss:null, slot:null};
@@ -236,7 +237,7 @@ function draw() {
     state.dbf ? 'Side battles cleared' : 'Side battles not cleared'
   ].map(s => '<span>' + s + '</span>').join('');
 
-  el('chartTitle').textContent = f.n + ' · ' + f.slot + ', level ' + f.l;
+  el('chartTitle').textContent = f.n + ' · ' + f.slot + ', level ' + f.l + (f.season ? '   ·   the ' + f.season + ' season' : '');
   el('chartHint').innerHTML = '<span class="total"><b>' + n(res.s) + '</b><em>damage in ' + DATA.turns +
     ' turns · ' + (res.s / f.hp * 100).toFixed(2) + '% of the boss</em></span>';
 
@@ -256,7 +257,9 @@ function draw() {
       (res.m.length > 2
         ? ' · ' + (mow.b ? mow.b.name + ': ' : '') + (res.m[3] === 'taken' ? 'the boss takes' : 'your characters deal') +
           ' +' + res.m[2] + '%' + (mow.b && mow.b.note ? ' (' + mow.b.note + ')' : '')
-        : ' · its Mythic ability needs a Mythic roster') + '</span>'
+        : ' · ' + (state.tier !== 'mythic' ? 'its Mythic ability only works on a Mythic roster'
+            : mow.trig ? 'its Mythic ability needs All triggered'
+            : 'its Mythic ability is defensive, so it adds nothing to a damage run')) + '</span>'
     : '<span class="tag">Machine of War</span><span>none allowed against this boss</span>';
 
   const off = state.dbf ? f.dbf : [0, 0];
@@ -265,7 +268,8 @@ function draw() {
     ['Health', n(f.hp)],
     ['Armour', n(arm) + (off[0] ? ' · was ' + n(f.arm) : '')],
     ['Blocks', bc ? bc + '% for ' + n(f.bd) : 'never'],
-    ['Banned', 'no ' + f.ban]
+    ['Banned', 'no ' + f.ban],
+    ['Season', f.season || '-']
   ].map(r => '<div><span>' + r[0] + '</span><span>' + r[1] + '</span></div>').join('');
 
   /* clearing the side battles weakens some of the boss's own rules, so show that set instead */

@@ -154,6 +154,29 @@ would help - anchoring the Neurothrope against Szarekh beats the free search by
 about 1.5%. If that starts to matter, seed the search from a second starting
 five and keep the better run.
 
+**Two things the first cut got wrong, found by the owner (2026-09-16) noticing
+that Trajann and Kariyan never appeared:**
+- The `Condition` column in `support_abilities.csv` says whether a row follows
+  the Actives switch. It does *not* say the row is an active ability. Trajann's
+  Legendary Commander is a passive that needs *someone* to have used an active
+  this turn, which in a five-character team is every turn - it was being counted
+  for two turns in six.
+- A character gets its active off again whenever the cooldown allows, not once a
+  battle: turn 1, then every `cooldownTurns + 1` turns.
+- Kariyan's Legacy of Combat hits a **Big Target** with 1x Piercing instead of
+  3x Power to everything adjacent, and every boss is a Big Target. That branch is
+  worth about 2.7x the other one against Mortarion.
+Both are counted now (owner, 2026-09-16): Kariyan's Martial Inspiration ramps
++33% for every turn he has already fought (so his turn-4 use is worth double),
+and Laviscus gets +1,044 Crit Damage for every friendly Chaos character feeding
+his Outrage, which is worth about +12% a Chaos ally on his own attack and needs
+gear, because crits do.
+
+**Only five actives come back.** Baraqiel (cooldown 1), Ramus (3), Aesoth (2),
+Tyrith (2) and Kariyan (2) are the only characters whose active declares a
+`cooldownTurns`; every other active is once a battle. The first cut let every
+character re-use its active every third turn, which flattered everybody.
+
 **Buffs only count while they are up.** A support ability that lasts the battle
 counts for all six turns; one that lasts a round or two counts for that long,
 and an active comes back whenever its cooldown allows (a 2-round buff on a

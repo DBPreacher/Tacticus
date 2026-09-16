@@ -443,9 +443,14 @@ def attack_spec(u, row, level, trig, ab=None):
             continue
         e = dict(kind=kind, scope=scope, vs=vs)
         if kind in ('extra', 'extrahalf'):
-            e['part'] = build_part(ab, text, arg, level)
+            # 'extra:1|2' = part 1 normally, part 2 against a Big Target (Kariyan's Legacy of Combat)
+            first_part, _, big = arg.partition('|')
+            e['part'] = build_part(ab, text, first_part, level)
+            if big:
+                e['part_big'] = build_part(ab, text, big, level)
             when = ' once the target is at or below half health' if kind == 'extrahalf' else ''
-            desc.append(f"+{part_text(e['part'])} on each attack{WHERE[scope]}{vs_text(vs)}{when}")
+            desc.append(f"+{part_text(e['part'])} on each attack{WHERE[scope]}{vs_text(vs)}{when}"
+                        + (f" (+{part_text(e['part_big'])} against a Big Target)" if big else ''))
         elif kind == 'follow':
             desc.append('melee attacks are followed by a normal ranged attack')
         elif kind in ('flat', 'pct', 'pierce', 'hits', 'armignore', 'ramp', 'armpct'):
@@ -753,7 +758,8 @@ def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, f
                 total -= _chain(chance, n) * min(block, per_hit)
     for e in eff:                                         # passive: extra hits after each attack
         if e['kind'] == 'extra' or (half and e['kind'] == 'extrahalf'):
-            total += ability_hits(e['part'], d, 0.0, cr, dblk)[0]
+            part = e['part_big'] if (e.get('part_big') and 'BigTarget' in d['traits']) else e['part']
+            total += ability_hits(part, d, 0.0, cr, dblk)[0]
     if follow and melee and any(e['kind'] == 'follow' for e in eff):
         rw = next((x for x in a['weapons'] if x['kind'] == 'ranged'), None)
         if rw:
