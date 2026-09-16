@@ -369,8 +369,11 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
                 out.append(e)
             return dict(x, ps=(out, desc))
 
-        ramp = ramp_at(member, turn, lv) if member['name'] in RAMP else 1.0
-        if ramp != 1.0:      # Kariyan: the ramp is on "this attack and attacks from Legacy of Combat"
+        # "This attack and attacks from Legacy of Combat *this turn*": the ramp only lifts the extra
+        # attack on a turn its owner gets the active off. The owner's round 3 and round 6 confirm it.
+        ramp = (ramp_at(member, turn, lv)
+                if (member['name'] in RAMP and act and turn in active_turns(member, turns)) else 1.0)
+        if ramp != 1.0:
             a, plain_a = scale_parts(a, ramp), scale_parts(plain_a, ramp)
 
         def dressed(x):

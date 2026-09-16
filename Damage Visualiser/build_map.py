@@ -766,7 +766,9 @@ def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, f
     for e in eff:                                         # passive: extra hits after each attack
         if e['kind'] == 'extra' or (half and e['kind'] == 'extrahalf'):
             part = e['part_big'] if (e.get('part_big') and 'BigTarget' in d['traits']) else e['part']
-            total += ability_hits(part, d, 0.0, cr, dblk)[0]
+            # these are attacks the character performs, so the traits that lift an attack lift them too
+            # (Rapid Assault, Beast Slayer against a Big Target, Crushing Strike...) - m, worked out above
+            total += ability_hits(part, d, 0.0, cr, dblk)[0] * m
     if follow and melee and any(e['kind'] == 'follow' for e in eff):
         rw = next((x for x in a['weapons'] if x['kind'] == 'ranged'), None)
         if rw:
