@@ -113,6 +113,8 @@ def support_rows(U, lv, trig):
     for r in sm.load_rows('Attack'):
         if r['Name'] not in lookup:
             continue
+        if r['Source'] == 'Relic' and not gr.relic_live(lookup[r['Name']], r, SETTING[4]):
+            continue                      # nobody is carrying it at this setting
         ab, relic = (None, False) if r['Source'] == 'Trait' else sm.row_ability(lookup, r)
         toks = []
         for t in sm.tokens_for(r, None, ab, relic, lv, trig):   # who it helps travels with the token
@@ -129,6 +131,7 @@ def support_rows(U, lv, trig):
         if not toks:
             continue
         out.append(dict(n=r['Name'], src=r['Source'], ab=r['Ability'], rec=r['Receives'], reach=r['Reach'],
+                        rel=r['Ability'] if r['Source'] == 'Relic' else None,
                         up=gr.buff_turns(r, ab), cond=r['Condition'], self=bool(gr.helps_itself(r)),
                         # kinds the caster already gets from its own ability file, so they aren't doubled
                         own=sorted(gr.own_side_kinds().get((r['Name'], r['Ability']), ())) or None, t=toks))

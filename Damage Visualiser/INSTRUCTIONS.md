@@ -240,6 +240,7 @@ it is about the *fight*, it stays in `guild_raid.py`.
 | "+Damage taken" and "not a normal attack" buffs reach the hits a passive adds | `support_model.py`, so both pages | **Yes** - it makes those buffs worth more on the Support Map |
 | Buffs land in a fixed order, so a team's score doesn't depend on the order its five are listed in | `support_model._tok_order`, so both pages | **Yes** - see below |
 | A buff is not counted twice on the character casting it | `guild_raid.own_side_kinds`, Guild Raid only | **No** - the Support Map already measures a buff on its *allies*, never on the caster |
+| A relic that buffs allies reaches them | `guild_raid.relic_live`, Guild Raid only | **No** - the Support Map already ranks relic rows |
 
 **The order buffs land in.** A buff that lifts damage only lifts the parts that
 exist when it lands: "+60% damage taken" applied before a team-mate's extra

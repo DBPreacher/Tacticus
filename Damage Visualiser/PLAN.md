@@ -587,10 +587,24 @@ text gives to *other* characters. `armignore` is off that list now ("your attack
 ignore X Armour" is a buff on the attacker, not something on the enemy), and
 `helps_itself` judges one token at a time.
 
-**Still uncounted, the other way:** a relic that buffs allies never reaches them
-in the Guild Raid model, because `buffs_for` skips every `Source = Relic` row.
-Nicodemus's Chalice of Baal is the one that matters; the Norn Crown is already
-handled by name.
+**Counted now (September 2026):** a relic that buffs allies used to reach nobody,
+because `buffs_for` skipped every `Source = Relic` row. It no longer does -
+`relic_live()` checks that the character is actually carrying that relic and that
+the setting has one (Mythic, gear on), and the row then behaves like any other
+buff, reach and duration included. Two relics do this on the Attack side:
+
+- **Norn Crown** (Neurothrope): +1,308 Damage to other Psykers within Synapse
+  range. It was already written out by hand inside `parasite()`, which gave it to
+  *every* Psyker on the team with no reach limit and no All-triggered gate. That
+  copy is gone; the row is the authority now, so it reaches the three biggest
+  hitters and only with All triggered. `summon_damage` keeps its own copy,
+  because summons are not team members and no support row can describe them.
+- **Chalice of Baal** (Nicodemus): +728 Damage on normal melee attacks to the two
+  biggest hitters next to him. Worth knowing before it goes on camera: it only
+  fires after a unit next to Nicodemus dies, so it rides on the All triggered
+  switch, and in a raid where your five are not dying that is generous. He is
+  still nowhere near worth a slot - swapping him for Boss Gulgortz on Mortarion
+  is 1,319,702 against 1,528,669.
 
 ## Open questions
 

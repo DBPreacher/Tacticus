@@ -179,7 +179,8 @@ function buffsFor(member, mates, D, immune) {
   const toks = [], everyone = mates.concat([member]);
   for (const s of everyone) {
     for (const r of D.rows) {
-      if (r.n !== s.n || r.src === 'Relic') continue;
+      if (r.n !== s.n) continue;
+      if (r.rel && s.rel !== r.rel) continue;             /* nobody is carrying it */
       if (s.n === member.n && !r.t.some(x => x.self)) continue;
       if (!matches(member, r.rec)) continue;
       /* Mind Control needs the Taunt to land, and a Boss is immune to Taunt */
@@ -526,11 +527,10 @@ function outrage(D, member, team, boss, high) {
 function memberExtra(D, m, team, boss, buff, high, teamUses) {
   const out = (m.n === 'Laviscus') ? outrage(D, m, team, boss, high) : new Array(D.turns).fill(0);
   let flat = 0;
+  /* the Neuroparasite at its cap. The Norn Crown's bonus for the other Psykers is a buff like any
+     other, so it arrives through its own row in support_abilities.csv, not from here */
   const neuro = team.find(x => x.n === 'Neurothrope');
-  if (neuro) {
-    if (m.n === 'Neurothrope') flat += neuro.parasite[0] * neuro.parasite[1];
-    else if (m.tr.includes('Psyker') && neuro.crown) flat += neuro.crown;
-  }
+  if (neuro && m.n === 'Neurothrope') flat += neuro.parasite[0] * neuro.parasite[1];
   if (buff && buff.k === 'dmg' && matches(m, buff.who)) flat += m.dmg * buff.pct / 100;
   const res = out.map(x => x + flat);
   if (m.rampTeam !== undefined)                      /* a stack for every active the team has used */

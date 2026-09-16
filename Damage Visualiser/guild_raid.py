@@ -271,7 +271,12 @@ def helps_itself(r, kind=None):
     return not re.search(r'other friendly', text, re.I)
 
 
-def buffs_for(member, mates, rows, lv, trig, act, immune):
+def relic_live(s, r, gear):
+    """a relic only exists on a Mythic roster with gear on, and only for whoever is carrying it"""
+    return bool(bm.RELICS and gear and (s.get('relic') or {}).get('name') == r['Ability'])
+
+
+def buffs_for(member, mates, rows, lv, trig, act, immune, gear=False):
     """the Attack-side tokens this member picks up from its team-mates, each with how many of the 6 turns
     it is up. Each buff goes to the team-mates it helps most (biggest Damage first), as far as its reach
     allows."""
@@ -280,8 +285,10 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
     lookup = {u['name']: u for u in everyone}
     for s in everyone:
         for r in rows:
-            if r['Name'] != s['name'] or r['Source'] == 'Relic':
+            if r['Name'] != s['name']:
                 continue
+            if r['Source'] == 'Relic' and not relic_live(s, r, gear):
+                continue      # nobody is carrying it at this setting
             mine = s['name'] == member['name']
             if mine and not helps_itself(r):
                 continue                                  # "other friendly units": not the one casting it
@@ -409,7 +416,7 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     if turns <= 0:
         return 0.0
     member = guild_unit(member, 'Immune' in boss['traits'])
-    toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])
+    toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'], gear)
     spec = sp['active'].get(member['name']) if act else None
 
     chaos = sum(1 for m in mates if m['alliance'] == 'Chaos') if member['name'] == 'Laviscus' else 0
@@ -507,7 +514,7 @@ def _biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear, opener=
     Legacy of Combat lands one big Piercing hit on a Big Target) and so do the parts of an active on the
     turn it is used (opener=True)."""
     member = guild_unit(member, 'Immune' in boss['traits'])
-    toks = [t for t, _ in buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])]
+    toks = [t for t, _ in buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'], gear)]
     spec = sp['active'].get(member['name']) if (act and opener) else None
     if spec:            # the turn it goes off, an active that grows is at its biggest
         spec = tweak_spec(member, spec, [member] + mates, boss, turn, lv, len(mates))
@@ -595,9 +602,8 @@ def parasite(member, team, boss, lv, gear, tier_key):
     cap = float((ab.get('constants') or {}).get('buffMaxLevel') or (ab.get('variables') or {}).get('buffMaxLevel', [15])[0])
     if member['name'] == 'Neurothrope':
         return sm.value(ab, 'extraDmg', lv) * cap
-    # Norn Crown (Mythic, gear on): the other Psykers also hit an infected enemy harder
-    if 'Psyker' in member['traits'] and tier_key == 'mythic' and gear and (neuro.get('relic') or {}).get('name') == 'Norn Crown':
-        return sm.value(neuro['relic']['ability'], 'extraDmg', bm.RELIC_LEVEL, True)
+    # the Norn Crown's bonus for the other Psykers is a buff like any other, so it arrives through its own
+    # row in support_abilities.csv (reach and duration included) rather than being written out here
     return 0.0
 
 
