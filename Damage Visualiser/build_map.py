@@ -776,11 +776,24 @@ def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, f
     return max(total, 1.0), psychic
 
 
+def mods_for(part, d):
+    """'+damage taken' that only applies to some enemies (Roswitha against Daemons, Atlacoya against
+    Psykers) can't be folded into a part's damage when the buff lands, because the part is worked out
+    before the defender is known. support_model.buffed hangs the condition on the part instead, and this
+    settles it against the enemy in front of it. Flat first, then the percentages, as everywhere else."""
+    dmg = part['dmg']
+    for m in part.get('mods') or ():
+        tags = d['traits'] | {d.get('alliance')}
+        if (m['vs'] is None or m['vs'] & tags) and not (m.get('vsnot') and m['vsnot'] & tags):
+            dmg = dmg + m['value'] if m['kind'] == 'taken' else dmg * (1 + m['value'] / 100)
+    return dmg
+
+
 def ability_hits(part, d, flat_red=0.0, crit=None, block=None):
     """ability damage: armour, pierce and Mk X Gravis (abilities aren't 'normal attacks'),
     plus crits (unless the ability 'cannot Crit') and the defender's blocks when there is gear"""
     p = PIERCE.get(part['type'], .2)
-    D = max(part['dmg'] - flat_red, 0)
+    D = max(mods_for(part, d) - flat_red, 0)
     psychic = part['type'] in ('Psychic', 'Direct')
     y = hit_value(D, d['arm'], p, 'MkXGravis' in d['traits'], d.get('pass2', 0))
     total = y * part['hits']

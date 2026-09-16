@@ -62,9 +62,24 @@ function critOf(a, kind, first, boss, trig, gearx) {
   return [Math.min(Math.max(cc, 0), 1), Math.max(cd, 0)];
 }
 
+/* "+damage taken" that only applies to some enemies (Roswitha against Daemons, Atlacoya against
+   Psykers) can't be folded into a part when the buff lands, because the part is worked out before the
+   defender is known: buffed() hangs the condition on the part and this settles it (build_map.mods_for) */
+function modsFor(part, boss) {
+  let d = part.d;
+  if (!part.mods) return d;
+  const tags = new Set(boss.tr);
+  for (const m of part.mods) {
+    if (m.vs && !m.vs.some(x => tags.has(x))) continue;
+    if (m.vsnot && m.vsnot.some(x => tags.has(x))) continue;
+    d = m.k === 'taken' ? d + m.v : d * (1 + m.v / 100);
+  }
+  return d;
+}
+
 function abilityHits(part, boss, crit) {
   const p = PIERCE[part.t] === undefined ? .2 : PIERCE[part.t];
-  const D = Math.max(part.d, 0);
+  const D = Math.max(modsFor(part, boss), 0);
   const psychic = part.t === 'Psychic' || part.t === 'Direct';
   const gravis = boss.tr.includes('MkXGravis');
   const y = hitValue(D, boss.arm, p, gravis);
@@ -250,12 +265,15 @@ function buffed(ally, toks, spec) {
     } else if (k === 'taken' || k === 'takenpct') {
       add(k === 'taken' ? 'flat' : 'pct', {v});
       if (tok.s === 'all') {
-        const bump = x => (k === 'taken' ? x + v : x * (1 + v / 100));
-        if (spec) for (const p of spec.p) p.d = bump(p.d);
+        const cond = (vs || vsnot) ? {k: k, v: v, vs: vs, vsnot: vsnot} : null;
+        const hit = cond
+          ? p => Object.assign({}, p, {mods: (p.mods || []).concat([cond])})
+          : p => Object.assign({}, p, {d: k === 'taken' ? p.d + v : p.d * (1 + v / 100)});
+        if (spec) spec.p = spec.p.map(hit);
         a.ps = a.ps.map(e => {
           if (e.k !== 'extra' && e.k !== 'extrahalf') return e;
-          const n = Object.assign({}, e, {p: Object.assign({}, e.p, {d: bump(e.p.d)})});
-          if (e.pb) n.pb = Object.assign({}, e.pb, {d: bump(e.pb.d)});
+          const n = Object.assign({}, e, {p: hit(e.p)});
+          if (e.pb) n.pb = hit(e.pb);
           return n;
         });
       }

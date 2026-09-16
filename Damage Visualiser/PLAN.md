@@ -527,6 +527,32 @@ On Ghazghkull Mythic 2 the old best five falls 20.8%: Ragnar -34.8%, Vitruvius
 calibration runs do not move at all - none of the nine is in the owner's teams -
 which is the sign that the fix is aimed at the right thing.
 
+## A conditional debuff applied to every enemy (September 2026)
+
+Found in the same sitting, by asking why Roswitha kept turning up. Her Brazier of
+Holy Fire is "+60% damage taken" **against Daemons**, and `support_model.buffed`
+was applying it to everything.
+
+The reason is structural. `buffed()` runs before the enemy is known, so a
+"+damage taken" token is folded straight into the character's numbers. For the
+normal attack that is fine - the condition rides along on the effect and
+`_applies` settles it later - but the same branch also bumps the **ability parts
+and the hits a passive adds**, and that bump ignored the condition. Kariyan's
+Legacy of Combat is exactly such a part, so on Ghazghkull - an Ork, no Daemon
+anywhere - his attack read 86,392 instead of 59,672. 45% of thin air.
+
+Two rows were affected, and both matter: Roswitha (vs Daemon) and **Atlacoya (vs
+Psyker), who is in the owner's own team**. On Mortarion, a Psyker and a Daemon,
+both conditions are true, which is why the calibration runs never showed it.
+
+**The rule now:** a conditional "+damage taken" hangs the condition on the part
+(`mods`), and `build_map.mods_for` settles it against the enemy actually in front
+of it - flat first, then percentages, like everywhere else. Ghazghkull now reads
+the same with Roswitha on the team as without; Mortarion still gets the full
++60%. `support_model.buffed` also stops outright if a conditional token ever
+turns up on an ability scope, which no row needs today and which would leak the
+same way.
+
 ## Open questions
 
 - **Havyr's passive: settled (owner, 2026-09-16) - count it as written.** Fury

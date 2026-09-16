@@ -170,6 +170,10 @@ def buffed(ally, toks, spec, gear_on):
             for wk in kinds:
                 ps_eff.append(dict(kind=kind, scope=wk, vs=vs, vsnot=vsnot, **extra))
         if scope == 'ability':
+            if vs or vsnot:
+                # No row needs this yet. It would have to hang the condition on the part the way the
+                # taken/takenpct branch does, so stop rather than silently apply it to every enemy.
+                sys.exit(f"support_abilities.csv: {t['kind']} on an ability scope can't take a vs= yet")
             # "attacks that are not normal attacks": the character's active, and also the extra attack a
             # passive adds (Kariyan's Legacy of Combat, Kharn's second attack). +hits lands on one of them.
             if k == 'pct':
@@ -216,17 +220,21 @@ def buffed(ally, toks, spec, gear_on):
         elif k in ('taken', 'takenpct'):               # on the enemy: every kind of damage it takes
             add('flat' if k == 'taken' else 'pct', value=v)
             if t['scope'] == 'all':
+                # A buff that only applies to some enemies (Roswitha against Daemons) can't be folded in
+                # here, because the enemy isn't known yet: hang the condition on the part and let
+                # build_map.mods_for settle it. Everything else is added straight away.
+                cond = dict(kind=k, value=v, vs=vs, vsnot=vsnot) if (vs or vsnot) else None
                 bump = (lambda x: x + v) if k == 'taken' else (lambda x: x * (1 + v / 100))
+                hit = (lambda p: dict(p, mods=list(p.get('mods') or []) + [cond])) if cond                     else (lambda p: dict(p, dmg=bump(p['dmg'])))
                 if spec:
-                    for p in spec['parts']:
-                        p['dmg'] = bump(p['dmg'])
+                    spec['parts'] = [hit(p) for p in spec['parts']]
                 # the hits a passive adds are damage the enemy takes too (Kariyan's Legacy of Combat,
                 # Kharn's second attack): copy the part rather than change the cached character
                 for i, e in enumerate(ps_eff):
                     if e['kind'] in ('extra', 'extrahalf'):
-                        new = dict(e, part=dict(e['part'], dmg=bump(e['part']['dmg'])))
+                        new = dict(e, part=hit(e['part']))
                         if e.get('part_big'):
-                            new['part_big'] = dict(e['part_big'], dmg=bump(e['part_big']['dmg']))
+                            new['part_big'] = hit(e['part_big'])
                         ps_eff[i] = new
         elif k == 'armour':
             armour += v
