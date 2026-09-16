@@ -425,10 +425,30 @@ switch.
 and the machines struck off, the leading candidate is **round 1**. The model
 gives it zero: `MOVING = 1`, so only five of the six rounds fight. The owner's
 words were "we barely get any damage in round 1" - and *barely any* is not
-*none*. A character that starts in range swings; on a six-round fight one
-character swinging in round 1 is worth about 3-4% of the run, which is the
-right size for the gap. That is one constant to try (`MOVING` as a fraction
-rather than a whole round) and `check_guild.py` scores it in half a second.
+*none*.
+
+Measured, by scoring each calibration team over six fighting rounds instead of
+five and asking how much of that extra round the gap is worth:
+
+| Run | Model, 5 rounds | Real | Short by | A 6th round is worth | The gap is |
+|---|---:|---:|---:|---:|---:|
+| Mortarion M3 | 1,528,669 | 1,632,137 | 103,468 (+6.8%) | 316,823 | **0.33 of a round** |
+| Szarekh M2 | 2,445,414 | 2,620,000 | 174,586 (+7.1%) | 458,665 | **0.38 of a round** |
+
+Two different bosses, two different teams, and both want about a third of a
+round. That is the signature of one missing partial round rather than scattered
+per-character errors - if the model were wrong about characters, the two runs
+would not agree this closely.
+
+The caveat: a *sixth* round is the model's strongest (every ramp at maximum),
+while round 1 would be its weakest (no buffs up, no stacks). So in round-1 terms
+the gap is worth more than a third of a round - closer to half the team getting
+a swing in, which is more than "barely any". So either round 1 gives more than it
+looks like on camera, or a few per cent of the gap is somewhere else.
+
+**Not changed without the owner's say-so**, because `MOVING` sets every number on
+the page and the "damage in 5 fighting rounds" line under the total. The question
+to answer from a video: in round 1, does anyone actually swing?
 
 After that it is luck and terrain: two or three runs is a small sample for crit
 and block chains, and the model only knows about terrain through the high-ground
