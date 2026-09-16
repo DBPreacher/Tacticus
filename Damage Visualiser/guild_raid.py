@@ -137,13 +137,13 @@ def boss_rules(g, fight, dbf=None):
 
 
 def hits_of(a, w):
-    """how many hits an attack scores, for the boss rules that count hits"""
+    """how many hits one attack scores, for the boss rules that count hits. The hits a passive adds come
+    in a separate attack (Kharn's second attack, Kariyan's Legacy of Combat), so a rule like Mortarion's
+    'only the first hits land in full' starts again for those and they are not counted here."""
     n = w['hits']
     for e in (a.get('ps') or ([], []))[0]:
         if e['kind'] == 'hits' and e['scope'] in ('all', w['kind']):
             n += e['value']
-        if e['kind'] == 'extra' and e['scope'] in ('all', w['kind']):
-            n += e['part']['hits']
     return max(n, 1)
 
 
@@ -239,17 +239,25 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
     return toks
 
 
-# the ramp on an active that grows with every turn its owner has attacked (Kariyan's Martial Inspiration)
+# actives that grow as the battle goes on. RAMP: +pct for every turn its owner has already fought
+# (Kariyan's Martial Inspiration). RAMP_FLAT: +Damage for every active the team has used so far
+# (Atlacoya's Talons Of The Emperor). Both are worth more the later they go off, so the model holds them.
 RAMP = {'Kariyan': 'extraDmgPct'}
+RAMP_FLAT = {'Atlacoya': 'extraDmg'}
+# Talons Of The Emperor is Direct Damage - no Armour at all - against a Psyker, or next to a Custodes
+DIRECT = {'Atlacoya': ('Psyker', 'Adeptus Custodes')}
 
 
 def active_turns(member, turns):
     """the turns a character gets its active off. Nearly every active is once a battle: only the few with a
-    cooldownTurns in the data come back (Baraqiel, Ramus, Aesoth, Tyrith, Kariyan)."""
+    cooldownTurns in the data come back (Baraqiel, Ramus, Aesoth, Tyrith, Kariyan). An active that grows
+    is held back as late as it can be without losing a use."""
     c = ((member.get('ability') or {}).get('constants') or {}).get('cooldownTurns')
+    late = member['name'] in RAMP or member['name'] in RAMP_FLAT
     if c in (None, ''):
-        return {1}
-    return set(range(1, turns + 1, int(float(c)) + 1))
+        return {turns if late else 1}
+    step = int(float(c)) + 1
+    return set(range(turns, 0, -step)) if late else set(range(1, turns + 1, step))
 
 
 def ramp_at(member, turn, lv):
@@ -260,11 +268,33 @@ def ramp_at(member, turn, lv):
     return 1 + sm.value(member['ability'] or {}, var, lv) / 100 * (turn - 1)
 
 
+def tweak_spec(member, spec, team, boss, turn, lv, used):
+    """the parts of an active that change with the battle: Atlacoya's grows with every active the team has
+    used and turns Direct next to a Custodes or against a Psyker"""
+    if not spec or not spec.get('parts'):
+        return spec
+    var, direct = RAMP_FLAT.get(member['name']), DIRECT.get(member['name'])
+    if not var and not direct:
+        return spec
+    parts = [dict(p) for p in spec['parts']]
+    if var:
+        add = sm.value(member['ability'] or {}, var, lv) * used
+        for p in parts:
+            p['dmg'] += add
+    if direct:
+        trait, faction = direct
+        if trait in boss['traits'] or any(m['faction'] == faction for m in team if m['name'] != member['name']):
+            for p in parts:
+                p['type'] = 'Direct'
+    return dict(spec, parts=parts)
+
+
 def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=TURNS,
-                  mow=None):
+                  mow=None, team_uses=()):
     """one character's damage over the 6 turns: the active turn plus normal attacks.
     extra: flat Damage added to this character's stat (Laviscus's Outrage, the Neurothrope's parasite).
-    turns: how many of the 6 it is alive for, when the deaths switch is on."""
+    turns: how many of the 6 it is alive for, when the deaths switch is on.
+    extra: flat Damage, or (first turn, later turns) when it changes after the opening turn."""
     rules = rules or dict(diminish=None, psyker_pct=0.0, block_ramp=0.0, charge_hits=0, notes=[])
     if turns <= 0:
         return 0.0
@@ -273,11 +303,13 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
 
     chaos = sum(1 for m in mates if m['alliance'] == 'Chaos') if member['name'] == 'Laviscus' else 0
 
-    def attack(live):
+    def attack(live, xtra, turn=1):
         """(the damage of one normal attack, the damage of a turn it gets its active off)"""
-        a, spec2, _ = sm.buffed(member, live, spec, gear) if live else (member, spec, 0.0)
-        if extra:
-            a = dict(a, dmg=a['dmg'] + extra)
+        used = sum(1 for x in team_uses if x < turn)
+        spec1 = tweak_spec(member, spec, [member] + mates, boss, turn, lv, used)
+        a, spec2, _ = sm.buffed(member, live, spec1, gear) if live else (member, spec1, 0.0)
+        if xtra:
+            a = dict(a, dmg=a['dmg'] + xtra)
         if chaos:                                       # Refusal to be Outdone's other half
             cd = sm.value(member['passive'] or {}, 'extraCritDmg', lv) * chaos
             a = dict(a, pg=list(a.get('pg') or []) +
@@ -292,40 +324,84 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     # the turns fall into blocks: as each short buff runs out, work out the attack again
     ups = sorted({min(up, turns) for _, up in toks} | {turns})
     actives = active_turns(member, turns) if act else set()
+    x1, x2 = extra if isinstance(extra, tuple) else (extra, extra)
     total, done = 0.0, 0
     for up in ups:
         live = [t for t, n in toks if n > done]
-        normal, first = attack(live)
+        normal, first = attack(live, x2)
+        n1, f1 = attack(live, x1) if x1 != x2 else (normal, first)
+        grows = member['name'] in RAMP or member['name'] in RAMP_FLAT
         for turn in range(done + 1, up + 1):
-            if first and turn in actives:
-                total += max(first * ramp_at(member, turn, lv), normal)
+            nm, fs = (n1, f1) if turn == 1 else (normal, first)
+            if fs and turn in actives:
+                if grows:                               # work the opener out again for this turn
+                    nm2, fs = attack(live, x1 if turn == 1 else x2, turn)
+                    nm = nm2 if turn == 1 else nm
+                total += max(fs * ramp_at(member, turn, lv), nm)
             else:
-                total += normal
+                total += nm
         done = up
     return total
 
 
-def biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear):
-    """this character's biggest single hit on the boss (what Laviscus's Outrage feeds on)"""
+def biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear, opener=False):
+    """this character's biggest single non-Psychic hit on the boss in a turn - what Laviscus's Outrage
+    feeds on. It is the biggest *hit*, not the biggest attack, so the hits a passive adds count (Kariyan's
+    Legacy of Combat lands one big Piercing hit on a Big Target) and so do the parts of an active on the
+    turn it is used (opener=True)."""
     toks = [t for t, _ in buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])]
-    a, _, _ = sm.buffed(member, toks, None, gear) if toks else (member, None, 0.0)
+    spec = sp['active'].get(member['name']) if (act and opener) else None
+    if spec:            # the turn it goes off, an active that grows is at its biggest
+        spec = tweak_spec(member, spec, [member] + mates, boss, TURNS, lv, len(mates))
+    a, spec2, _ = sm.buffed(member, toks, spec, gear) if toks else (member, spec, 0.0)
     best = 0.0
+    # "the highest damage dealt by any of their non-Psychic hits": across an attack's hits that is usually
+    # a crit, so this weighs the crit hit by the chance at least one of the hits crits (wiki, HDTW Outdone)
+    crit = (a.get('g') or {}).get('cc') or 0.0
     for w in a['weapons']:
         if w['type'] in ('Psychic',):              # Outrage only counts non-Psychic hits
             continue
-        tot = bm.best_attack(a, boss, trig, ds, False, False, w['kind'])[0]
-        best = max(best, tot / max(hits_of(a, w), 1))
+        n = max(hits_of(a, w), 1)
+        avg = bm.best_attack(a, boss, trig, ds, False, False, w['kind'])[0] / n
+        if crit:
+            ac = dict(a, g=dict(a['g'], cc=1.0))
+            hot = bm.best_attack(ac, boss, trig, ds, False, False, w['kind'])[0] / n
+            p = 1 - (1 - crit) ** n                # the chance at least one hit crits
+            avg = p * hot + (1 - p) * avg
+        best = max(best, avg)
+    parts = [(e['part_big'] if (e.get('part_big') and 'BigTarget' in boss['traits']) else e['part'])
+             for e in (a.get('ps') or ([], []))[0] if e['kind'] in ('extra', 'extrahalf')]
+    if spec2:
+        parts += spec2.get('parts') or []
+    for p in parts:
+        if p['type'] in ('Psychic',):
+            continue
+        # the same way the model works out ability damage anywhere else: the boss's defence and crits
+        best = max(best, bm.part_vs_defence(p, boss, ds, False, a, trig)[0] / max(p['hits'], 1))
     return best
+
+
+def ability_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear):
+    """the biggest hit of this character's own active, for the turn it uses it"""
+    spec = sp['active'].get(member['name'])
+    if not spec or not spec.get('parts'):
+        return 0.0
+    return max((bm.part_vs_defence(p, boss, ds, False, member, trig)[0] / max(p['hits'], 1)
+                for p in spec['parts'] if p['type'] not in ('Psychic',)), default=0.0)
 
 
 def outrage(member, team, boss, ds, rows, sp, lv, trig, act, gear):
     """Laviscus, at face value: every friendly character attacking the boss next to him adds its biggest
     non-Psychic hit to his Outrage, and his Damage goes up by 120% of it. It resets when he attacks, so
-    this is what he has each turn."""
+    this is what he has each turn. (the first turn, when the others get their actives off, then the rest)"""
     mates = [x for x in team if x['name'] != member['name']]
     pct = sm.value(member['passive'], 'extraDmgPct', lv) / 100
-    return pct * sum(biggest_hit(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp, lv, trig, act, gear)
-                     for m in mates)
+    each = lambda opener: pct * sum(
+        biggest_hit(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp, lv, trig, act, gear, opener)
+        for m in mates)
+    # his own Euphoric Strikes doesn't end his turn, so it feeds his Outrage before he attacks (wiki)
+    own = pct * ability_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear) if act else 0.0
+    return (each(True) + own, each(False))
 
 
 def parasite(member, team, boss, lv, gear, tier_key):
@@ -585,15 +661,16 @@ def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_
     total = mow['own'] if mow else 0.0
     buff = mow['buff'] if mow else None
     alive = team_turns(team, surv, lv, trig, act, gear, tier_key)
+    uses = sorted(x for m in team for x in (active_turns(m, TURNS) if act else ()))
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
-        extra = 0.0
-        if m['name'] == 'Laviscus':
-            extra += outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear)
-        extra += parasite(m, team, boss, lv, gear, tier_key)
+        extra = outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear) if m['name'] == 'Laviscus' else (0.0, 0.0)
+        flat = parasite(m, team, boss, lv, gear, tier_key)
         if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
-            extra += m['dmg'] * buff['pct'] / 100
-        total += member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, alive[m['name']], buff)
+            flat += m['dmg'] * buff['pct'] / 100
+        extra = (extra[0] + flat, extra[1] + flat)
+        total += member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, alive[m['name']],
+                               buff, uses)
     return total
 
 
@@ -706,15 +783,18 @@ def main():
     alive = team_turns(team, surv, args.ability, args.trig, act, args.gear, args.tier)
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
-        extra = (outrage(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear) if m['name'] == 'Laviscus' else 0.0)
-        extra += parasite(m, team, boss, args.ability, args.gear, args.tier)
+        extra = (outrage(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear)
+                 if m['name'] == 'Laviscus' else (0.0, 0.0))
+        flat = parasite(m, team, boss, args.ability, args.gear, args.tier)
         buff = mow['buff'] if mow else None
         if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
-            extra += m['dmg'] * buff['pct'] / 100
+            flat += m['dmg'] * buff['pct'] / 100
+        extra = (extra[0] + flat, extra[1] + flat)
         alone = member_damage(m, [], boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules)
+        uses = sorted(x for u in team for x in (active_turns(u, TURNS) if act else ()))
         withteam = member_damage(m, mates, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, extra,
-                                 alive[m['name']], buff)
-        tag = f'  (+{extra:,.0f} Damage from the team)' if extra else ''
+                                 alive[m['name']], buff, uses)
+        tag = f'  (+{max(extra):,.0f} Damage from the team)' if max(extra) else ''
         if alive[m['name']] < TURNS:
             tag += f"  [dies on turn {alive[m['name']]}]"
         print(f"  {m['name']:<24}{withteam:>11,.0f}   (alone {alone:>9,.0f}, buffs +{withteam - alone:>9,.0f}){tag}")

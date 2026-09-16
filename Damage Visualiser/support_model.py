@@ -157,11 +157,29 @@ def buffed(ally, toks, spec, gear_on):
             for wk in kinds:
                 ps_eff.append(dict(kind=kind, scope=wk, vs=vs, vsnot=vsnot, **extra))
         if scope == 'ability':
-            if spec and k == 'pct':
-                for p in spec['parts']:
-                    p['dmg'] *= 1 + v / 100
-            elif spec and k == 'hits' and spec['parts']:
-                spec['parts'][0]['hits'] += int(v)
+            # "attacks that are not normal attacks": the character's active, and also the extra attack a
+            # passive adds (Kariyan's Legacy of Combat, Kharn's second attack). +hits lands on one of them.
+            if k == 'pct':
+                if spec:
+                    for p in spec['parts']:
+                        p['dmg'] *= 1 + v / 100
+                for i, e in enumerate(ps_eff):
+                    if e['kind'] in ('extra', 'extrahalf'):
+                        new = dict(e, part=dict(e['part'], dmg=e['part']['dmg'] * (1 + v / 100)))
+                        if e.get('part_big'):
+                            new['part_big'] = dict(e['part_big'], dmg=e['part_big']['dmg'] * (1 + v / 100))
+                        ps_eff[i] = new
+            elif k == 'hits':
+                if spec and spec['parts']:
+                    spec['parts'][0]['hits'] += int(v)
+                else:
+                    for i, e in enumerate(ps_eff):
+                        if e['kind'] in ('extra', 'extrahalf'):
+                            new = dict(e, part=dict(e['part'], hits=e['part']['hits'] + int(v)))
+                            if e.get('part_big'):
+                                new['part_big'] = dict(e['part_big'], hits=e['part_big']['hits'] + int(v))
+                            ps_eff[i] = new
+                            break
             continue
         if k == 'hits' and 'cap' not in t and v != int(v):
             # a chance of an extra hit (Shadowsun): the expected share of a hit, as extra damage
@@ -182,14 +200,21 @@ def buffed(ally, toks, spec, gear_on):
                 ps_eff.append(dict(kind='extra', scope='all', vs=vs, vsnot=vsnot, part=part))
         elif k == 'follow':
             add('follow')
-        elif k in ('taken', 'takenpct'):               # on the enemy: normal attacks and the active
+        elif k in ('taken', 'takenpct'):               # on the enemy: every kind of damage it takes
             add('flat' if k == 'taken' else 'pct', value=v)
-            if spec and t['scope'] == 'all':
-                for p in spec['parts']:
-                    if k == 'taken':
-                        p['dmg'] += v
-                    else:
-                        p['dmg'] *= 1 + v / 100
+            if t['scope'] == 'all':
+                bump = (lambda x: x + v) if k == 'taken' else (lambda x: x * (1 + v / 100))
+                if spec:
+                    for p in spec['parts']:
+                        p['dmg'] = bump(p['dmg'])
+                # the hits a passive adds are damage the enemy takes too (Kariyan's Legacy of Combat,
+                # Kharn's second attack): copy the part rather than change the cached character
+                for i, e in enumerate(ps_eff):
+                    if e['kind'] in ('extra', 'extrahalf'):
+                        new = dict(e, part=dict(e['part'], dmg=bump(e['part']['dmg'])))
+                        if e.get('part_big'):
+                            new['part_big'] = dict(e['part_big'], dmg=bump(e['part_big']['dmg']))
+                        ps_eff[i] = new
         elif k == 'armour':
             armour += v
         elif k in ('critchance', 'critdmg'):

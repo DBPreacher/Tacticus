@@ -81,12 +81,14 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
     five = []
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
-        extra = gr.outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear) if m['name'] == 'Laviscus' else 0.0
-        extra += gr.parasite(m, team, boss, lv, gear, tier_key)
+        extra = gr.outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear) if m['name'] == 'Laviscus' else (0.0, 0.0)
+        flat = gr.parasite(m, team, boss, lv, gear, tier_key)
         if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
-            extra += m['dmg'] * buff['pct'] / 100
+            flat += m['dmg'] * buff['pct'] / 100
+        extra = (extra[0] + flat, extra[1] + flat)
         alone = gr.member_damage(m, [], boss, ds, rows, sp, lv, trig, act, gear, rules)
-        with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, gr.TURNS, buff)
+        with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, gr.TURNS, buff,
+                                     sorted(x for u in team for x in (gr.active_turns(u, gr.TURNS) if act else ())))
         five.append([idx[m['name']], round(with_team), round(alone)])
     # who else would fit: the best swap each character outside the five could make
     names = {m['name'] for m in team}
