@@ -443,11 +443,18 @@ def attack_spec(u, row, level, trig, ab=None):
             continue
         e = dict(kind=kind, scope=scope, vs=vs)
         if kind in ('extra', 'extrahalf'):
-            # 'extra:1|2' = part 1 normally, part 2 against a Big Target (Kariyan's Legacy of Combat)
+            # 'extra:1|2' = part 1 normally, part 2 against a Big Target (Kariyan's Legacy of Combat).
+            # 'A' in front of a part means the numbers come from the character's ACTIVE ability, for the
+            # passives an active hands out for the rest of the battle (Abaddon's Drach'nyen).
+            def part_of(tok):
+                if tok[:1] == 'A':
+                    act = u.get('ability') or {}
+                    return build_part(act, act.get('description', ''), tok[1:], level)
+                return build_part(ab, text, tok, level)
             first_part, _, big = arg.partition('|')
-            e['part'] = build_part(ab, text, first_part, level)
+            e['part'] = part_of(first_part)
             if big:
-                e['part_big'] = build_part(ab, text, big, level)
+                e['part_big'] = part_of(big)
             when = ' once the target is at or below half health' if kind == 'extrahalf' else ''
             desc.append(f"+{part_text(e['part'])} on each attack{WHERE[scope]}{vs_text(vs)}{when}"
                         + (f" (+{part_text(e['part_big'])} against a Big Target)" if big else ''))

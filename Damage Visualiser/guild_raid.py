@@ -249,6 +249,8 @@ RAMP = {'Kariyan': 'extraDmgPct'}
 RAMP_FLAT = {'Atlacoya': 'extraDmg'}
 # Talons Of The Emperor is Direct Damage - no Armour at all - against a Psyker, or next to a Custodes
 DIRECT = {'Atlacoya': ('Psyker', 'Adeptus Custodes')}
+# an active that scores a hit for every Psychic attack the team makes that turn (Sekhetar's Warpflamer)
+PSYCHIC_HITS = {'Sekhetar': 'maxNrOfHits'}
 
 
 def active_turns(member, turns):
@@ -277,9 +279,17 @@ def tweak_spec(member, spec, team, boss, turn, lv, used):
     if not spec or not spec.get('parts'):
         return spec
     var, direct = RAMP_FLAT.get(member['name']), DIRECT.get(member['name'])
-    if not var and not direct:
+    psy = PSYCHIC_HITS.get(member['name'])
+    if not var and not direct and not psy:
         return spec
     parts = [dict(p) for p in spec['parts']]
+    if psy:
+        # one more hit for each team-mate whose attack deals Psychic damage, up to the ability's cap
+        n = sum(1 for m in team if m['name'] != member['name']
+                and any(w['type'] in ('Psychic', 'Direct') for w in m['weapons']))
+        cap = float(((member['ability'] or {}).get('constants') or {}).get(psy) or 99)
+        for p in parts:
+            p['hits'] = int(min(p['hits'] + n, cap))
     if var:
         add = sm.value(member['ability'] or {}, var, lv) * used
         for p in parts:
@@ -349,7 +359,21 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     return total
 
 
+_BIG = {}                 # biggest_hit is the hot path in a search, and the same five come round again
+
+
 def biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear, opener=False):
+    key = (member['name'], tuple(sorted(m['name'] for m in mates)), opener, boss['name'], round(boss['arm']),
+           round(ds['bc'] * 100) if ds else 0, lv, trig, act, gear)
+    if key in _BIG:
+        return _BIG[key]
+    _BIG[key] = v = _biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear, opener)
+    if len(_BIG) > 400000:
+        _BIG.clear()
+    return v
+
+
+def _biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear, opener=False):
     """this character's biggest single non-Psychic hit on the boss in a turn - what Laviscus's Outrage
     feeds on. It is the biggest *hit*, not the biggest attack, so the hits a passive adds count (Kariyan's
     Legacy of Combat lands one big Piercing hit on a Big Target) and so do the parts of an active on the

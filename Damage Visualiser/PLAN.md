@@ -228,6 +228,25 @@ adjacent to five characters at the start of each of its turns. Needs the owner:
 in a real Mortarion run, how often does a melee character actually eat
 Arch-Contaminator?
 
+## Known gaps found in the calibration hunt (September 2026)
+
+Going through every "not counted" note in the ability CSVs with a Guild Raid in
+mind - six turns, a Big Target that never dies - these are the ones that matter
+there and are still missing:
+
+- **Abaddon's Drach'nyen.** After the active, *every* later melee attack is
+  followed by a free 3x Piercing attack for the rest of the battle. Five extra
+  attacks in a raid, and it matters on the map too. The block is grammatical:
+  the numbers live in his **active** ability but the effect belongs in
+  `passive_abilities.csv`, which always reads the passive. It needs an `ab=`
+  option on the token (then `extra:1:after` does the rest, because 'after'
+  already means "not the first attack").
+- **Cyrus's Strike from the Shadows** makes every ranged attack against the
+  target ignore 392 Armour until his next turn. That is a support effect and it
+  has no row in `support_abilities.csv` at all.
+- **Sekhetar's Heavy Warpflamer** adds a hit for every Psychic attack the team
+  has made this turn, up to 9. In a Psyker team that doubles it.
+
 ## Open questions
 
 - **Havyr's passive: settled (owner, 2026-09-16) - count it as written.** Fury
