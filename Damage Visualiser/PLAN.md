@@ -139,6 +139,81 @@ Earlier ideas that were replaced:
   from ability levels, gear, Mythic), faction strength, counters (who kills a
   given character fastest), and power creep over release dates.
 
+## Video idea: the chart shows the floor, not the ceiling (owner, 2026-09-16)
+
+Came out of three community questions in a row that were all really the same
+question. Every conditional in the model is pinned at its worst case, on
+purpose, because the alternative is inventing a battle and a team. That is the
+right rule - but it means a whole category of character reads low, and they are
+all characters who reward playing them properly. The episode is "who is this
+chart most unfair to, and why that is the point".
+
+The cast, with the numbers already worked out (Diamond III, all triggered,
+gear on):
+
+- **Titus** - Fuelled by Fury, +84.6 Damage per ally active used this battle,
+  counted as zero. Damage 91st at no stacks, 25th at 8, 9th at 12. Realistic
+  for a five-turn fight with four allies. The largest single gap in the roster.
+- **Forcas** - +20% Damage per adjacent unit (counted as one, the target he is
+  hitting) and +135/+400 Damage per adjacent Dark Angel (counted as zero).
+  Alone he is 54th at level 36 and 75th at level 50; surrounded by four Dark
+  Angels and five enemies he is **3rd at either level**.
+- **Laviscus** - Outrage, teammate-powered; see the note above. 101st alone.
+- **Wrask** - the shield he only gets after a melee kill or a Deep Strike
+  arrival, which is why he reads tougher than Angrax on the median while losing
+  105 of 117 individual matchups.
+- **Lucien, as the counterpoint.** He is the one the chart is hardest on and
+  most right about: Black Rage sets him to 50% Health, so with Active: On he is
+  **dead last of 53 Imperials** (1.27) and 116th of 117 overall, while sitting
+  10th-12th for Damage. Active: Off puts him 17th of 53 and 47th overall. It is
+  not a bug and he is not being double-counted - his active is used against 112
+  of the 117 defenders, so he really is paying for what he gets. The purest
+  glass cannon in the game, and a good way to end on "the chart is doing its
+  job".
+
+Pairs naturally with the parked "this one ramps" note in Ideas above; widen
+that note to cover positional conditions (Forcas) as well as build-up over a
+battle (Titus), because they look identical to a viewer.
+
+## Video idea: the best and worst factions (owner, 2026-09-16)
+
+Every faction ranked on both axes at once - who actually has the best roster,
+rather than the best single character. The page already has a faction filter,
+so it can be driven live on camera.
+
+First pass (Diamond III, all triggered, abilities 36, active on, standard gear;
+each faction's **median rank** among the 117, so lower is better):
+
+| Faction | n | Attack | Toughness | Combined |
+|---|---|---|---|---|
+| Adeptus Astartes | 3 | 14 | 27 | 20.5 |
+| Adeptus Custodes | 5 | 53 | 15 | 29.0 |
+| Leagues of Votann | 5 | 25 | 44 | 29.5 |
+| Black Legion | 5 | 33 | 37 | 38.5 |
+| Black Templars | 5 | 65 | 12 | 38.5 |
+| ... | | | | |
+| Adepta Sororitas | 5 | 85 | 74 | 79.0 |
+| Adeptus Mechanicus | 5 | 87 | 70 | 79.5 |
+| Genestealer Cults | 5 | 66 | 110 | 91.5 |
+
+The story is in the splits, not the combined column:
+
+- **Black Templars 65th attack / 12th toughness** and **Death Guard 97th / 21st**
+  are the anvils - they do not kill anyone, nobody kills them.
+- **Aeldari 33rd / 94th** and **Thousand Sons 45th / 100th** are the opposite:
+  hit hard, fold.
+- **Genestealer Cults, 110th for toughness**, are the worst defensive faction in
+  the game by a distance. Good hook for the bottom of the episode.
+- By alliance: Xenos have the best attack (median 56) and the worst defence
+  (76); Imperials are the most balanced (58/49); Chaos sit behind on attack (68)
+  with defence in the middle (54).
+
+Caveats before recording: Adeptus Astartes is only 3 characters, so its top spot
+is a small-sample artefact - either say so or set the cut at 5. The numbers are
+one scenario; check Always-on too, because factions built on triggered kit
+(World Eaters, Black Legion) move. And the median-vs-matchups caveat from the
+Wrask discussion applies to faction medians just as much.
+
 ## Guild Raid (built, September 2026)
 
 `guild_raid.py`: the best 5 for a boss. A raid attack is 6 turns, 5 characters,
