@@ -122,6 +122,20 @@ Earlier ideas that were replaced:
   from ability levels, gear, Mythic), faction strength, counters (who kills a
   given character fastest), and power creep over release dates.
 
+## Guild Raid (in progress, September 2026)
+
+`guild_raid.py`: the best 5 for a boss. A raid attack is 6 turns, 5 characters,
+and the boss's own faction is banned. Rules read from the game data: 25 boss
+fights per season (6 tiers, Common to Mythic, 27,000 up to 52.5M health), every
+boss is **Immune** (no Armour/hits/Movement/Range reduction, no Stun, Suppress or
+Taunt), bosses block, and two side battles apply a chain of debuffs (a switch:
+mostly -30% Armour and -15% block chance).
+
+Owner decisions: start with "best 5 for this boss", assume a full 6-turn run and
+as much real support as possible, and a side-battle debuff switch. Terrain height
+matters in the game but isn't modelled. Not counted yet: the boss killing your
+characters, summons, bombs.
+
 ## Open questions
 
 - **Havyr's passive (owner checking, September 2026).** Fury from the Dêlve

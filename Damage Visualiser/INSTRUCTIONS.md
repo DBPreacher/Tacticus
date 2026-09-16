@@ -39,6 +39,7 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `passive_abilities.csv` | The same, for passive abilities: `Attack`, `Defence` and `Gear` tokens | **Yes** |
 | `relic_abilities.csv` | One row per relic: its effect as `Attack` / `Defence` / `Gear` tokens (Mythic tier, gear on) | **Yes** |
 | `support_abilities.csv` | One row per ability that helps allies attack (buffs) or weakens enemies (debuffs), for the Support Map. Reviewed by the owner (September 2026). See "Support Map" | **Yes** |
+| `guild_raid.py` | **In progress.** The best 5 characters for a Guild Raid boss over its 6 turns, with team buffs and a side-battle debuff switch: `python -X utf8 guild_raid.py --boss "Belisarius" [--debuffs] [--gear] [--tier mythic] [--ability 60]`. See PLAN.md | Yes |
 | `support_model.py` | Runs `support_abilities.csv` through the damage model: how much each buff helps every ally who can use it. `python -X utf8 support_model.py [--defence [--spread]] [--active] [--gear] [--trig] [--level 50]` prints the Diamond III rankings | Only to change the rules |
 | `build_support.py` | Builds `support-map.html`: every tier and setting, both sides and both Enemy focus settings, in parallel (about 5 minutes on this PC). `--page-only` rebuilds just the page from the template with the last numbers (for design changes) | No |
 | `support_template.html` | The Support Map's design (its CSS starts as a copy of `map_template.html`'s) | Yes, for design changes |
