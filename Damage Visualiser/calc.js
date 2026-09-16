@@ -180,7 +180,7 @@ function buffsFor(member, mates, D, immune) {
   for (const s of everyone) {
     for (const r of D.rows) {
       if (r.n !== s.n || r.src === 'Relic') continue;
-      if (s.n === member.n && !r.self) continue;
+      if (s.n === member.n && !r.t.some(x => x.self)) continue;
       if (!matches(member, r.rec)) continue;
       /* Mind Control needs the Taunt to land, and a Boss is immune to Taunt */
       if (immune && r.n === 'Xybia' && r.ab === 'Mind Control') continue;
@@ -193,6 +193,7 @@ function buffsFor(member, mates, D, immune) {
         if (immune && tok.k === 'armour') continue;          /* a Boss's Armour can't be reduced */
         if (tok.o && tok.o.who && !matches(member, tok.o.who)) continue;
         if (own && own.indexOf(tok.k) >= 0) continue;        /* already counted on the character itself */
+        if (s.n === member.n && !tok.self) continue;         /* this half of it is for the others only */
         toks.push({t: tok, up: r.up});
       }
     }
@@ -378,12 +379,18 @@ function tweakSpec(c, spec, team, boss, turn, used) {
   return Object.assign({}, spec, {p: parts});
 }
 
+/* the character as the Guild Raid model sees it: without the effects it counts elsewhere (the
+   Neuroparasite's cap), and without its own Armour reduction when the boss is Immune */
+function guildUnit(member, immune) {
+  const drop = (member.drop || []).concat(immune ? ['armignore', 'armpct'] : []);
+  if (!drop.length || !(member.ps || []).some(e => drop.indexOf(e.k) >= 0)) return member;
+  return Object.assign({}, member, {ps: member.ps.filter(e => drop.indexOf(e.k) < 0)});
+}
+
 /* one character's damage over the fighting rounds: the active turn plus normal attacks */
 function memberDamage(D, member, mates, boss, extra, buff, teamUses, high) {
   const turns = D.turns, trig = D.setting.trig, immune = boss.tr.includes('Immune');
-  let m = member;
-  if (immune && (member.ps || []).some(e => e.k === 'armignore' || e.k === 'armpct'))
-    m = Object.assign({}, member, {ps: member.ps.filter(e => e.k !== 'armignore' && e.k !== 'armpct')});
+  const m = guildUnit(member, immune);
   const toks = buffsFor(m, mates, D, immune);
   const spec0 = m.sp || null, all = [m].concat(mates);
   const chaos = m.n === 'Laviscus' ? mates.filter(x => x.a === 'Chaos').length : 0;
@@ -449,8 +456,9 @@ function biggestHit(D, member, mates, boss, opener, turn, high) {
   return v;
 }
 
-function _biggestHit(D, member, mates, boss, opener, turn, high) {
+function _biggestHit(D, member0, mates, boss, opener, turn, high) {
   const trig = D.setting.trig, immune = boss.tr.includes('Immune');
+  const member = guildUnit(member0, immune);
   const toks = buffsFor(member, mates, D, immune).map(x => x.t);
   let spec = opener ? (member.sp || null) : null;
   if (spec) spec = tweakSpec(member, spec, [member].concat(mates), boss, turn, mates.length);

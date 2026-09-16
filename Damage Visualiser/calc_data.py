@@ -63,6 +63,8 @@ def characters(U, sp, g, lv):
                            cap=spec.get('cap'), flat=spec.get('flat'),
                            bonus=_part(spec['bonus']) if spec.get('bonus') else None,
                            gx=[_effect(e) for e in (spec.get('gear') or [])] or None)
+        if gr.MODEL_OWN.get(u['name']):
+            c['drop'] = sorted(gr.MODEL_OWN[u['name']])    # counted elsewhere (the Neuroparasite's cap)
         if (u.get('relic') or {}).get('name'):
             c['rel'] = u['relic']['name']
         act = ((u.get('ability') or {}).get('constants') or {}).get('cooldownTurns')
@@ -114,7 +116,9 @@ def support_rows(U, lv, trig):
         ab, relic = (None, False) if r['Source'] == 'Trait' else sm.row_ability(lookup, r)
         toks = []
         for t in sm.tokens_for(r, None, ab, relic, lv, trig):   # who it helps travels with the token
-            tok = dict(k=t['kind'], s=t['scope'], o=t.get('opts') or {})
+            tok = dict(k=t['kind'], s=t['scope'], o=t.get('opts') or {},
+                       # per token, not per row: one ability can buff the others and the caster too
+                       self=bool(gr.helps_itself(r, t['kind'])))
             if t.get('value') is not None:
                 tok['v'] = round(t['value'], 2)
             if t.get('part'):

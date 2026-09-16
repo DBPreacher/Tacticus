@@ -553,6 +553,45 @@ the same with Roswitha on the team as without; Mortarion still gets the full
 turns up on an ability scope, which no row needs today and which would leak the
 same way.
 
+## The sweep for other double counts (September 2026)
+
+After Ragnar, the owner asked whether there were more. The sweep looked at every
+way the same effect could be recorded twice, and found two more:
+
+| Checked | Result |
+|---|---|
+| A support row's self-token against the character's own ability file | **9 characters** - fixed, see above |
+| A conditional debuff applied to every enemy | **2 rows** - fixed, see above |
+| Variables `guild_raid.py` reads directly (the ramps, Outrage, the parasite) against the same character's CSV rows | **1: the Neurothrope** |
+| `helps_itself` handing a whole row to its caster when only half of it lands on the enemy | **1: Commander Farsight** |
+| The same ability written twice in `support_abilities.csv` | none |
+| An ability that is both a passive and an active | none |
+| A trait the model hardcodes that is also written as a token | none |
+| Relic rows on the support side | none - `buffs_for` skips `Source = Relic` outright |
+
+**The Neurothrope.** `passive_abilities.csv` counts one Neuroparasite level
+(`flat:extraDmg:after`), which is all the Roster Battle Map can know, while
+`member_extra` counts the parasite at its cap. He was getting cap + 1 levels.
+`MODEL_OWN` now names the kinds the Guild Raid model works out for itself, and
+`guild_unit()` takes the character's own copy out. That helper also does the
+Immune Armour-reduction strip, which `member_damage` did and `biggest_hit`
+did not - so a character's own Armour reduction used to inflate what it fed
+Laviscus's Outrage against a Boss.
+
+**Commander Farsight.** His Way of the Short Blade does two things: *other*
+friendly characters' ranged attacks ignore Armour and hit harder, and he and
+other T'au perform a free ranged attack after a melee one. `helps_itself()`
+judged the whole row at once, and because `armignore` was on the debuff list it
+returned "yes, it helps him too" - so he handed himself a buff his own ability
+text gives to *other* characters. `armignore` is off that list now ("your attacks
+ignore X Armour" is a buff on the attacker, not something on the enemy), and
+`helps_itself` judges one token at a time.
+
+**Still uncounted, the other way:** a relic that buffs allies never reaches them
+in the Guild Raid model, because `buffs_for` skips every `Source = Relic` row.
+Nicodemus's Chalice of Baal is the one that matters; the Norn Crown is already
+handled by name.
+
 ## Open questions
 
 - **Havyr's passive: settled (owner, 2026-09-16) - count it as written.** Fury

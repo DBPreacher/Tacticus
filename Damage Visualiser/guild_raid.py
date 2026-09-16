@@ -220,7 +220,11 @@ def buff_turns(r, ab):
     return min(FIGHTING, rounds * uses)
 
 
-DEBUFF_KINDS = ('taken', 'takenpct', 'armour', 'armignore')   # these land on the enemy, so they help everyone
+# These land on the enemy, so they help whoever cast them as well. `armignore` is deliberately not one of
+# them: "your attacks ignore X Armour" is a buff on the attacker, so it obeys the "other friendly" wording
+# like any other buff. Counting it as a debuff let Commander Farsight give himself a buff his own ability
+# text hands to *other* friendly characters.
+DEBUFF_KINDS = ('taken', 'takenpct', 'armour')
 
 
 _OWN_SIDE = None
@@ -251,10 +255,14 @@ def already_own(r, name):
     return own_side_kinds().get((r['Name'], r['Ability']), set()) if r['Name'] == name else set()
 
 
-def helps_itself(r):
+def helps_itself(r, kind=None):
     """does this ability help the character casting it, as well as the rest of the team? Anything that
-    lands on the enemy does. A buff on your own side only skips you when it says "other friendly"."""
-    kinds = {x.split(':')[0].strip() for x in (r['Effect'] or '').split(';') if x.strip()}
+    lands on the enemy does. A buff on your own side only skips you when it says "other friendly".
+
+    kind: judge a single token instead of the whole row. One ability can do both - Commander Farsight's
+    Way of the Short Blade buffs *other* characters' ranged attacks, and his own melee attacks too - so
+    one token landing on the enemy must not carry the rest of the row with it."""
+    kinds = {kind} if kind else {x.split(':')[0].strip() for x in (r['Effect'] or '').split(';') if x.strip()}
     if kinds & set(DEBUFF_KINDS):
         return True
     text = r.get('Ability_Text') or ''
@@ -274,7 +282,8 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
         for r in rows:
             if r['Name'] != s['name'] or r['Source'] == 'Relic':
                 continue
-            if s['name'] == member['name'] and not helps_itself(r):
+            mine = s['name'] == member['name']
+            if mine and not helps_itself(r):
                 continue                                  # "other friendly units": not the one casting it
             if (r['Source'] == 'Active' or r['Condition'] == 'active') and not act:
                 continue
@@ -296,6 +305,8 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
                 if immune and t['kind'] == 'armour':          # a Boss's Armour can't be reduced
                     continue
                 if t['kind'] in own:                          # already counted on the character itself
+                    continue
+                if mine and not helps_itself(r, t['kind']):   # this half of it is for the others only
                     continue
                 toks.append((t, up))
     return toks
@@ -370,6 +381,24 @@ def tweak_spec(member, spec, team, boss, turn, lv, used):
     return dict(spec, parts=parts)
 
 
+# Effects the Guild Raid model works out for itself, so the character's own copy has to come out or it is
+# counted twice. The Neuroparasite is the case: passive_abilities.csv counts one level (that is all the
+# Roster Battle Map can know), while member_extra counts it at its cap.
+MODEL_OWN = {'Neurothrope': ('flat',)}
+
+
+def guild_unit(member, immune):
+    """the character as the Guild Raid model sees it: without the effects it counts elsewhere, and
+    without its own Armour reduction when the boss is Immune (Godswyl, Havyr, Snappawrecka)"""
+    eff, desc = member.get('ps') or ([], [])
+    drop = set(MODEL_OWN.get(member['name'], ()))
+    if immune:
+        drop |= {'armignore', 'armpct'}
+    if not drop or not any(e['kind'] in drop for e in eff):
+        return member
+    return dict(member, ps=([e for e in eff if e['kind'] not in drop], desc))
+
+
 def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=FIGHTING,
                   mow=None, team_uses=(), high=False):
     """one character's damage over the 6 turns: the active turn plus normal attacks.
@@ -379,11 +408,7 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     rules = rules or dict(diminish=None, psyker_pct=0.0, block_ramp=0.0, charge_hits=0, notes=[])
     if turns <= 0:
         return 0.0
-    if 'Immune' in boss['traits'] and member.get('ps'):
-        # its own Armour reduction is no good against a Boss either (Godswyl, Havyr, Snappawrecka)
-        eff_, desc_ = member['ps']
-        if any(e['kind'] in ('armignore', 'armpct') for e in eff_):
-            member = dict(member, ps=([e for e in eff_ if e['kind'] not in ('armignore', 'armpct')], desc_))
+    member = guild_unit(member, 'Immune' in boss['traits'])
     toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])
     spec = sp['active'].get(member['name']) if act else None
 
@@ -481,6 +506,7 @@ def _biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear, opener=
     feeds on. It is the biggest *hit*, not the biggest attack, so the hits a passive adds count (Kariyan's
     Legacy of Combat lands one big Piercing hit on a Big Target) and so do the parts of an active on the
     turn it is used (opener=True)."""
+    member = guild_unit(member, 'Immune' in boss['traits'])
     toks = [t for t, _ in buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])]
     spec = sp['active'].get(member['name']) if (act and opener) else None
     if spec:            # the turn it goes off, an active that grows is at its biggest
