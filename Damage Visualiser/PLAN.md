@@ -377,24 +377,36 @@ things, and the per-mine damage was not one of them:
 
 It now reads 44,290 against 42,825.
 
-## Known gaps found in the calibration hunt (September 2026)
+## What is left (September 2026, after the calibration)
 
-Going through every "not counted" note in the ability CSVs with a Guild Raid in
-mind - six turns, a Big Target that never dies - these are the ones that matter
-there and are still missing:
+All three of the owner's real runs land 8-10% under. The model is short of
+something, not over-counting, and these are the candidates in the order they are
+worth chasing:
 
-- **Abaddon's Drach'nyen.** After the active, *every* later melee attack is
-  followed by a free 3x Piercing attack for the rest of the battle. Five extra
-  attacks in a raid, and it matters on the map too. The block is grammatical:
-  the numbers live in his **active** ability but the effect belongs in
-  `passive_abilities.csv`, which always reads the passive. It needs an `ab=`
-  option on the token (then `extra:1:after` does the rest, because 'after'
-  already means "not the first attack").
-- **Cyrus's Strike from the Shadows** makes every ranged attack against the
-  target ignore 392 Armour until his next turn. That is a support effect and it
-  has no row in `support_abilities.csv` at all.
-- **Sekhetar's Heavy Warpflamer** adds a hit for every Psychic attack the team
-  has made this turn, up to 9. In a Psyker team that doubles it.
+1. **Summons.** Boss Gulgortz's Waaagh! puts two Ork Boyz on the board and they
+   attack for the rest of the fight. Nothing on the player's side of the model
+   summons anything - the Patermine's Genestealers, Marshal Dreir's Death Riders
+   and Re'vas's Shield Drones are all uncounted too. Against a boss with low
+   Armour like Szarekh, two Ork Boyz for five rounds is real damage.
+2. **Bombs.** A raid feature the tool knows nothing about.
+3. **Overwatch and reaction attacks.**
+4. **The other ten Machines of War.** Only the Biovore has been checked against a
+   video. The rarity fix doubled all of them at once, and how often each one
+   fires is still an estimate in `MOW_SHOTS`. When the page recommends a machine,
+   that recommendation rests on a guess for ten of the eleven.
+
+Smaller, and structural rather than numeric:
+
+- **Havyr's active** takes 653 Armour off for the rest of the battle. The `A`
+  prefix on a token can read an active's numbers, but only for `extra:`; this
+  needs the same for `armignore:`.
+- **The search is greedy** and can stop about 1.5% short of the best five.
+- **Xybia** is assumed not to work on a boss, because Mind Control needs a Taunt
+  to land and a Boss is immune. The owner was going to check in game.
+
+And the things that would need the board simulated, which this tool does not try
+to do: the partial second round, positioning, and terrain beyond the high-ground
+switch.
 
 ## Open questions
 
