@@ -161,8 +161,8 @@ def setting(tier_key, lv, trig, act, gear):
         with open(path, newline='', encoding='utf-8') as f:
             return {r[k]: r for r in csv.DictReader(f)}
     specs = bm.build_specs(units, rd(bm.ACTIVES_CSV, 'Name'), rd(bm.PASSIVES_CSV, 'Name'), rd(bm.RELICS_CSV, 'Relic'))
-    U, sp, _, _ = sm.setting_units(units, specs, lv, trig, act, gear)
-    return U, sp
+    U, sp, rnd, rest = sm.setting_units(units, specs, lv, trig, act, gear)
+    return U, sp, rnd, rest
 
 
 def buffs_for(member, mates, rows, lv, trig, act, immune):
@@ -195,9 +195,10 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
     return toks
 
 
-def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None):
+def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=TURNS):
     """one character's damage over the 6 turns: the active turn plus normal attacks.
-    extra: flat Damage added to this character's stat (Laviscus's Outrage, the Neurothrope's parasite)."""
+    extra: flat Damage added to this character's stat (Laviscus's Outrage, the Neurothrope's parasite).
+    turns: how many of the 6 it is alive for, when the deaths switch is on."""
     rules = rules or dict(diminish=None, psyker_pct=0.0, block_ramp=0.0, charge_hits=0, notes=[])
     toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])
     spec = sp['active'].get(member['name']) if act else None
@@ -207,10 +208,12 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     dmg, _, w = bm.best_attack(a, boss, trig, ds, False, False)
     f = rule_factor(a, w, rules, member)
     normal = dmg * f
+    if turns <= 0:
+        return 0.0
     if spec2:
         first = sum(x[0] for x in bm.opener(a, boss, trig, spec2, ds)) * f
-        return max(first, normal) + normal * (TURNS - 1)
-    return normal * TURNS
+        return max(first, normal) + normal * (turns - 1)
+    return normal * turns
 
 
 def biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear):
@@ -253,24 +256,183 @@ def parasite(member, team, boss, lv, gear, tier_key):
     return 0.0
 
 
-def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_key='d3'):
+# ---------------------------------------------------------------- what the boss does back
+# What each boss puts on your characters in an enemy turn, read from its own abilities. 'front' = every
+# character standing next to it (it is a Big Target, so that is everyone attacking in melee), 'one' = a
+# single attack shared over the front line. rate = how often it comes round (1 / (cooldown + 1)).
+# Telegraphed attacks you can walk out of (Szarekh's Annihilator Beam, the Lion's Instruments of
+# Vengeance) are left out, and so are the summons.
+PRESSURE = {
+    'GuildBoss5Boss1DeathMortarion': [
+        dict(ab='ArchContaminator', where='front', rate=1.0, hp_pct=('extraDmgPct', 'extraDmgPct_2')),
+        dict(ab='ReapingScythe', where='front', rate=0.5),
+        dict(weapon='melee', where='one', rate=0.5),
+    ],
+    'GuildBoss3Boss1NecroSilentKing': [
+        dict(weapon='melee', where='one', rate=1.0),
+    ],
+    'GuildBoss12Boss1DarkaLion': [
+        dict(ab='Fealty', where='front', rate=1.0),
+        dict(ab='MartialExemplar', where='front', rate=1.0 / 3),
+        dict(ab='TheLionsWrath', where='one', rate=0.5, parts=('1', '2')),
+        dict(weapon='melee', where='one', rate=1.0),
+    ],
+}
+
+
+def bossval(ab, key, lv):
+    """a boss ability value. Not bm.ability_value: that adds the roster's rarity bonus, which is a
+    character thing - a boss's numbers are what the data says."""
+    v = (ab.get('variables') or {}).get(key)
+    if v is None:
+        c = (ab.get('constants') or {}).get(key)
+        return float(c) if c not in (None, '') else None
+    return float(v[min(int(lv), len(v)) - 1])
+
+
+def _part(ab, lv, s=''):
+    """one damage part of a boss ability: its average damage, its hits and its damage type"""
+    suf = '' if s in ('', '1') else '_' + s
+    lo, hi = bossval(ab, 'minDmg' + suf, lv), bossval(ab, 'maxDmg' + suf, lv)
+    c = ab.get('constants') or {}
+    return dict(dmg=(lo + hi) / 2, hits=int(float(c.get('nrOfHits' + suf) or c.get('nrOfHits') or 1)),
+                type=bm.dtype(c.get('damageProfile' + suf) or c.get('damageProfile') or 'Physical'), crit=False)
+
+
+def pressure(g, fight):
+    """the terms of one enemy turn: what the boss puts out and who stands in it"""
+    u = g['guildRaidUnits'][fight['uid']]
+    st = u['stats'][min(fight['level'], len(u['stats']) - 1)]
+    lv = int(st.get('abilityLevel') or 50)
+    out = []
+    for spec in PRESSURE.get(fight['uid'], [dict(weapon='melee', where='one', rate=1.0)]):
+        if spec.get('weapon'):
+            w = u['meleeWeapon'] if spec['weapon'] == 'melee' else u['rangeWeapon']
+            parts = [dict(dmg=st['damage'], hits=w['hits'], type=bm.dtype(w['damageProfile']), crit=False)]
+            name = 'normal ' + spec['weapon'] + ' attack'
+        else:
+            ab = g['abilities'][spec['ab']]
+            parts = [_part(ab, lv, s) for s in spec.get('parts', ('1',))]
+            name = ab.get('name') or spec['ab']
+        hp_pct = 0.0
+        if spec.get('hp_pct'):
+            vals = [bossval(g['abilities'][spec['ab']], k, lv) for k in spec['hp_pct']]
+            hp_pct = sum(vals) / len(vals)
+        for i, p in enumerate(parts):
+            out.append(dict(part=p, hp_pct=hp_pct if i == 0 else 0.0, where=spec['where'],
+                            rate=spec['rate'], name=name))
+    return out
+
+
+def team_defence(member, mates, drows, lv, trig, act, gear, tier_key):
+    """the Defence-side buffs this character picks up from its team-mates: (first enemy turn, later, regen)"""
+    first, later = bm.new_ds(), bm.new_ds()
+    regen = dict(turn=0.0, hit=0.0, shield=0.0, shield_first=0.0)
+    everyone = mates + [member]
+    lookup = {u['name']: u for u in everyone}
+    for s in mates:
+        for r in drows:
+            if r['Name'] != s['name']:
+                continue
+            if (r['Source'] == 'Active' or r['Condition'] == 'active') and not act:
+                continue
+            if r['Condition'] == 'trig' and not trig:
+                continue
+            if r['Source'] == 'Relic' and not (tier_key == 'mythic' and gear):
+                continue
+            if not sm.matches(member, r['Receives']):
+                continue
+            eligible = [m for m in everyone if m['name'] != s['name'] and sm.matches(m, r['Receives'])]
+            eligible.sort(key=lambda m: -m['dmg'])          # the team stands around its damage dealers
+            if member['name'] not in [m['name'] for m in eligible[:TEAM_REACH.get(r['Reach'], 1)]]:
+                continue
+            ab, relic = (None, False) if r['Source'] == 'Trait' else sm.row_ability(lookup, r)
+            got = sm.defence_for(r, s, member, ab, relic, lv, trig)
+            if not got:
+                continue
+            ds1, ds2, rg, _ = got
+            first, later = bm.merge_defence(first, ds1), bm.merge_defence(later, ds2)
+            for k in regen:
+                regen[k] += (rg or {}).get(k, 0.0)
+    return first, later, regen
+
+
+def in_melee(m):
+    """does this character have to stand next to the boss to do its damage?"""
+    return (max(m['weapons'], key=lambda w: w['hits'])['kind'] == 'melee'
+            or all(w['kind'] == 'melee' for w in m['weapons']))
+
+
+def front_line(team):
+    """how many of the five stand next to the boss"""
+    return max(sum(1 for m in team if in_melee(m)), 1)
+
+
+_SURV = {}
+
+
+def survives(member, mates, terms, front, drows, lv, trig, act, gear, tier_key, own=(None, None)):
+    """how many of the 6 turns this character gets to attack in before the boss kills it. Characters that
+    fight in melee stand next to the boss and take everything it puts out there; the rest keep their
+    distance and only take its single attacks."""
+    key = (member['name'], tuple(sorted(m['name'] for m in mates)), front)
+    if key in _SURV:
+        return _SURV[key]
+    ds1, ds2, regen = team_defence(member, mates, drows, lv, trig, act, gear, tier_key)
+    ds1 = bm.merge_defence(own[0], ds1) or ds1                  # its own defensive passives and actives
+    ds2 = bm.merge_defence(own[1], ds2) or ds2
+    d1, d2 = bm._with_defence(member, ds1), bm._with_defence(member, ds2)
+    pool = member['hp'] * ds1['hpmult'] + ds1['heal'] + regen['shield_first'] + regen['shield']
+    melee = in_melee(member)
+    turns = TURNS
+    for turn in range(1, TURNS + 1):
+        d, dsx = (d1, ds1) if turn == 1 else (d2, ds2)
+        took = 0.0
+        for t in terms:
+            if t['where'] == 'front' and not melee:
+                continue
+            share = 1.0 / max(front, 1) if t['where'] == 'one' else 1.0
+            took += bm.part_vs_defence(t['part'], d, dsx, turn == 1)[0] * t['rate'] * share
+            took += member['hp'] * t['hp_pct'] / 100 * t['rate'] * share
+        pool -= took
+        pool += regen['turn'] + (regen['shield'] if turn > 1 else 0.0)
+        if pool <= 0:
+            turns = turn                                    # it attacked this turn, then died
+            break
+    _SURV[key] = turns
+    return turns
+
+
+def team_turns(team, surv, lv, trig, act, gear, tier_key):
+    """{name: turns alive} for a team, or 6 each when the deaths switch is off"""
+    if not surv:
+        return {m['name']: TURNS for m in team}
+    front = front_line(team)
+    return {m['name']: survives(m, [x for x in team if x['name'] != m['name']], surv['terms'], front,
+                                surv['drows'], lv, trig, act, gear, tier_key,
+                                (surv['rnd'].get(m['name']), surv['rest'].get(m['name']))) for m in team}
+
+
+def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_key='d3', surv=None):
     total = 0.0
+    alive = team_turns(team, surv, lv, trig, act, gear, tier_key)
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
         extra = 0.0
         if m['name'] == 'Laviscus':
             extra += outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear)
         extra += parasite(m, team, boss, lv, gear, tier_key)
-        total += member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra)
+        total += member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, alive[m['name']])
     return total
 
 
-def best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules=None, anchors=(), passes=3):
+def best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules=None, anchors=(), passes=3,
+              tier_key='d3', surv=None):
     """greedy five, then swap each slot for anything better until it stops improving.
     anchors: characters that must be in the team (the team styles the owner plays)."""
     pool = [u for u in U if u['faction'] != banned]
     names = lambda team: {u['name'] for u in team}
-    score_of = lambda team: team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules)
+    score_of = lambda team: team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, surv)
     team = [u for u in U if u['name'] in anchors]
     while len(team) < TEAM:
         team.append(max((u for u in pool if u['name'] not in names(team)), key=lambda u: score_of(team + [u])))
@@ -304,6 +466,7 @@ def main():
     ap.add_argument('--debuffs', action='store_true', help='both side battles cleared')
     ap.add_argument('--anchor', action='append', default=[], help='a character the team must include (repeatable)')
     ap.add_argument('--team', help='score this team instead of searching: comma-separated names')
+    ap.add_argument('--deaths', action='store_true', help='count the boss killing your characters')
     args = ap.parse_args()
     g = game()
     fs = [f for f in fights(g) if f['name'].lower().startswith(args.boss.lower())]
@@ -311,8 +474,9 @@ def main():
     boss, ds, dbf = boss_defender(g, fight, args.debuffs)
     rules = boss_rules(g, fight)
     act = not args.no_active
-    U, sp = setting(args.tier, args.ability, args.trig, act, args.gear)
+    U, sp, rnd, rest = setting(args.tier, args.ability, args.trig, act, args.gear)
     rows = sm.load_rows('Attack')
+    surv = dict(terms=pressure(g, fight), drows=sm.load_rows('Defence'), rnd=rnd, rest=rest) if args.deaths else None
     banned = FACTION_ID.get(fight['faction'], fight['faction'])
     print(f"{fight['name']} L{fight['level']} ({fight['rarity']}, tier {fight['tier']}): {fight['hp']:,} health, "
           f"{boss['arm']:,.0f} Armour, blocks {ds['bc'] * 100:.0f}% for {ds['bd']:,.0f}"
@@ -325,17 +489,22 @@ def main():
     if args.team:
         want = [x.strip().lower() for x in args.team.split(',')]
         team = [u for u in U if u['name'].lower() in want]
-        score = team_damage(team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules)
+        score = team_damage(team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier, surv)
     else:
-        team, score = best_team(U, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, banned, rules, tuple(args.anchor))
+        team, score = best_team(U, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, banned, rules,
+                                tuple(args.anchor), tier_key=args.tier, surv=surv)
     print(f"\nBest five: {score:,.0f} damage in {TURNS} turns ({score / fight['hp'] * 100:.2f}% of the boss)")
+    alive = team_turns(team, surv, args.ability, args.trig, act, args.gear, args.tier)
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
         extra = (outrage(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear) if m['name'] == 'Laviscus' else 0.0)
         extra += parasite(m, team, boss, args.ability, args.gear, args.tier)
         alone = member_damage(m, [], boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules)
-        withteam = member_damage(m, mates, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, extra)
+        withteam = member_damage(m, mates, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, extra,
+                                 alive[m['name']])
         tag = f'  (+{extra:,.0f} Damage from the team)' if extra else ''
+        if alive[m['name']] < TURNS:
+            tag += f"  [dies on turn {alive[m['name']]}]"
         print(f"  {m['name']:<24}{withteam:>11,.0f}   (alone {alone:>9,.0f}, buffs +{withteam - alone:>9,.0f}){tag}")
     solo = sorted(((member_damage(u, [], boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules), u['name'])
                    for u in U if u['faction'] != banned), reverse=True)

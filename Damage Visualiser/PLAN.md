@@ -133,8 +133,37 @@ mostly -30% Armour and -15% block chance).
 
 Owner decisions: start with "best 5 for this boss", assume a full 6-turn run and
 as much real support as possible, and a side-battle debuff switch. Terrain height
-matters in the game but isn't modelled. Not counted yet: the boss killing your
-characters, summons, bombs.
+matters in the game but isn't modelled. Not counted yet: summons, bombs, the
+Machine of War slot (the real teams all run the Biovore).
+
+Each boss brings its own rules: Mortarion's Revoltingly Resilient (only the first
+hit of an attack lands in full, each one after that half the last), Szarekh's
+Noctilith Beacons (-40% from Psykers) and Obeisance Generators (-2 hits for
+charging), the Lion's Emperor's Shield (his block chance climbs with each melee
+hit). Laviscus's Outrage reads the team's biggest hits at face value, and the
+Neurothrope's Neuroparasite and Norn Crown are counted. Xybia's Mind Control
+isn't: it needs a Taunt to land and a Boss is immune to Taunt.
+
+**`--deaths` (the boss killing your characters), in progress.** Off by default,
+because the owner asked for a full 6-turn run. On, it reads what the boss puts
+out in an enemy turn from its own abilities (Mortarion's Arch-Contaminator, the
+Lion's Fealty and Martial Exemplar, each boss's normal attack), stands every
+character that fights in melee next to it (a Big Target, so everything adjacent
+is in range), shares the single-target attacks over that front line, counts the
+character's own defensive passives and the team's Defence-side buffs, and stops a
+character's damage on the turn it dies. Telegraphed attacks you can walk out of
+(Szarekh's Annihilator Beam, the Lion's Instruments of Vengeance) and the summons
+are left out.
+
+It says: nobody dies to Szarekh, the Lion kills the front line around turn 4
+(451k -> 336k for the owner's team), and **Mortarion kills everything next to him
+on enemy turn 1** - Arch-Contaminator alone is 7 hits of ~2,000 Toxic plus a fifth
+of the character's health, against Mythic characters with about 12,000 health.
+That can't be what happens in a real run, and the likely reason is the boss's
+GuildBossRunAway passive: the boss walks away from your team, so it isn't
+adjacent to five characters at the start of each of its turns. Needs the owner:
+in a real Mortarion run, how often does a melee character actually eat
+Arch-Contaminator?
 
 ## Open questions
 
