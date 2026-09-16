@@ -214,6 +214,21 @@ def buff_turns(r, ab):
     return min(TURNS, rounds * uses)
 
 
+DEBUFF_KINDS = ('taken', 'takenpct', 'armour', 'armignore')   # these land on the enemy, so they help everyone
+
+
+def helps_itself(r):
+    """does this ability help the character casting it, as well as the rest of the team? Anything that
+    lands on the enemy does. A buff on your own side only skips you when it says "other friendly"."""
+    kinds = {x.split(':')[0].strip() for x in (r['Effect'] or '').split(';') if x.strip()}
+    if kinds & set(DEBUFF_KINDS):
+        return True
+    text = r.get('Ability_Text') or ''
+    if re.search(r'(?:and|,)\s*all other friendly', text, re.I):
+        return True                                       # "X and all other friendly characters"
+    return not re.search(r'other friendly', text, re.I)
+
+
 def buffs_for(member, mates, rows, lv, trig, act, immune):
     """the Attack-side tokens this member picks up from its team-mates, each with how many of the 6 turns
     it is up. Each buff goes to the team-mates it helps most (biggest Damage first), as far as its reach
@@ -221,10 +236,12 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
     toks = []
     everyone = mates + [member]
     lookup = {u['name']: u for u in everyone}
-    for s in mates:
+    for s in everyone:
         for r in rows:
             if r['Name'] != s['name'] or r['Source'] == 'Relic':
                 continue
+            if s['name'] == member['name'] and not helps_itself(r):
+                continue                                  # "other friendly units": not the one casting it
             if (r['Source'] == 'Active' or r['Condition'] == 'active') and not act:
                 continue
             if r['Condition'] == 'trig' and not trig:
@@ -233,10 +250,11 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
                 continue      # Mind Control needs the Taunt to land, and a Boss is immune to Taunt
             if not sm.matches(member, r['Receives']):
                 continue
-            eligible = [m for m in everyone if m['name'] != s['name'] and sm.matches(m, r['Receives'])]
-            eligible.sort(key=lambda m: -m['dmg'])
-            if member['name'] not in [m['name'] for m in eligible[:TEAM_REACH.get(r['Reach'], 1)]]:
-                continue
+            if s['name'] != member['name']:           # you are always within reach of yourself
+                eligible = [m for m in everyone if m['name'] != s['name'] and sm.matches(m, r['Receives'])]
+                eligible.sort(key=lambda m: -m['dmg'])
+                if member['name'] not in [m['name'] for m in eligible[:TEAM_REACH.get(r['Reach'], 1)]]:
+                    continue
             ab, relic = (None, False) if r['Source'] == 'Trait' else sm.row_ability(lookup, r)
             up = buff_turns(r, ab)
             for t in sm.tokens_for(r, member, ab, relic, lv, trig):
@@ -328,17 +346,25 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
         used = sum(1 for x in team_uses if x < turn)
         spec1 = tweak_spec(member, spec, [member] + mates, boss, turn, lv, used)
         a, spec2, _ = sm.buffed(member, live, spec1, gear) if live else (member, spec1, 0.0)
-        if xtra:
-            a = dict(a, dmg=a['dmg'] + xtra)
-        if high:                                     # high ground lifts the whole Damage stat, Outrage and all
-            a = dict(a, dmg=a['dmg'] * (1 + HIGH_GROUND_PCT / 100))
-        if chaos:                                       # Refusal to be Outdone's other half
-            cd = sm.value(member['passive'] or {}, 'extraCritDmg', lv) * chaos
-            a = dict(a, pg=list(a.get('pg') or []) +
-                     [dict(kind='critdmg', value=cd, scope='all', vs=None, vsnot=None)])
+        # On a turn with no active, "the first attack that is not a normal attack" is the one a passive
+        # adds (Kariyan's Legacy of Combat), so the ability-side buffs land there instead. Everything
+        # else about the character is the same, so both versions take the same Damage.
+        plain_a = sm.buffed(member, live, None, gear)[0] if (live and spec1) else a
 
-        dmg, _, w = bm.best_attack(a, boss, trig, ds, False, False)
-        f = rule_factor(a, w, rules, member)
+        def dressed(x):
+            if xtra:
+                x = dict(x, dmg=x['dmg'] + xtra)
+            if high:                                 # high ground lifts the whole Damage stat, Outrage and all
+                x = dict(x, dmg=x['dmg'] * (1 + HIGH_GROUND_PCT / 100))
+            if chaos:                                # Refusal to be Outdone's other half
+                cd = sm.value(member['passive'] or {}, 'extraCritDmg', lv) * chaos
+                x = dict(x, pg=list(x.get('pg') or []) +
+                         [dict(kind='critdmg', value=cd, scope='all', vs=None, vsnot=None)])
+            return x
+        a, plain_a = dressed(a), dressed(plain_a)
+
+        dmg, _, w = bm.best_attack(plain_a, boss, trig, ds, False, False)
+        f = rule_factor(plain_a, w, rules, member)
         if mow and mow['kind'] == 'taken' and (not mow['only'] or mow['only'] == w['kind']):
             f *= 1 + mow['pct'] / 100                   # the boss takes more damage from these attacks
         first = sum(x[0] for x in bm.opener(a, boss, trig, spec2, ds)) * f if spec2 else 0.0
