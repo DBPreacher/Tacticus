@@ -122,7 +122,7 @@ Earlier ideas that were replaced:
   from ability levels, gear, Mythic), faction strength, counters (who kills a
   given character fastest), and power creep over release dates.
 
-## Guild Raid (in progress, September 2026)
+## Guild Raid (built, September 2026)
 
 `guild_raid.py`: the best 5 for a boss. A raid attack is 6 turns, 5 characters,
 and the boss's own faction is banned. Rules read from the game data: 25 boss
@@ -160,7 +160,7 @@ and an active comes back whenever its cooldown allows (a 2-round buff on a
 2-turn cooldown covers four of the six turns). Before this was counted, teams
 of short-lived actives looked far better than they are.
 
-`build_guild.py` builds **guild-raid.html** from these numbers: every boss and
+`build_guild.py` builds **guild-raid.html** (https://claude.ai/artifact/UD8MrdUc4q5NfWPAnG8Ejz) from these numbers: every boss and
 tier, every roster setting, the side battles on and off, with the five, the
 machine, and the eight characters who came closest to making the team.
 

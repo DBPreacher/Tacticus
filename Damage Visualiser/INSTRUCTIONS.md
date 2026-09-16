@@ -10,7 +10,7 @@ conversation's history.
 | `roster-battle-map.html` | `build_map.py` | https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8 |
 | `typical-character.html` | `build_map.py` (same run) | https://claude.ai/artifact/SEssFu6qK5qQyXgUAmGjrz |
 | `support-map.html` | `build_support.py` (after `build_map.py`) | https://claude.ai/artifact/MBWNzAY2cDkcJetmmCJp3y |
-| `guild-raid.html` | `build_guild.py` (after `build_map.py`) | (published after the first build) |
+| `guild-raid.html` | `build_guild.py` (after `build_map.py`) | https://claude.ai/artifact/UD8MrdUc4q5NfWPAnG8Ejz |
 
 Republish each to its own link after a rebuild (read it first with the
 Artifact tool, then publish with `url`).
@@ -139,8 +139,10 @@ the boss's own faction is banned.
 - The page's switches are the Roster Battle Map's (roster tier, ability level,
   gear, All triggered, actives) plus **Side battles cleared**, which applies the
   two debuff chains to the boss (mostly -30% Armour, -15% block chance).
-- The boss picker lists every boss and every tier it appears in; the numbers use
-  the hardest level of that tier.
+- The boss picker lists every fight a boss appears in, named the way the game
+  names it: Mythic 1, Mythic 2 and Mythic 3 are three different fights (levels
+  23, 24 and 25), not one Mythic tier. Where a boss has two fights with the same
+  name in different seasons, the page adds the level.
 - **Machine of War.** Every machine has a Mythic ability that works on friendly
   Mythic characters, and it is usually worth more than the machine's own damage:
   the Biovore's Hyper Corrosive Acid (+20% damage taken, anything a Spore Mine
@@ -150,7 +152,10 @@ the boss's own faction is banned.
   Blighted Land (+20% Damage, but you have to stand on its contaminated hexes,
   so it follows the All triggered switch). The rest are defensive and do nothing
   for a damage run. The page brings the best machine for the five it picked, and
-  the boss's faction is banned here too.
+  the boss's faction is banned here too. A machine's **own** damage is a rough
+  estimate - its damaging abilities at their cooldown, aimed at the boss - and it
+  is small next to its Mythic ability either way. The Biovore's Spore Mines are
+  Toxic, which only the ability text says, so `MOW_SHOTS` carries the type.
 - **Boss rules** are read from each boss's own abilities: Mortarion's Revoltingly
   Resilient, Szarekh's Noctilith Beacons and Obeisance Generators, the Lion's
   Emperor's Shield. Laviscus's Outrage, the Neurothrope's Neuroparasite and the

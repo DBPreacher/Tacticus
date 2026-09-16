@@ -215,9 +215,12 @@ function buildControls() {
     };
     list.appendChild(btn);
   });
-  el('bosstier').className = slotsOf(state.boss).length > 5 ? 'seg wrapseg' : 'seg';
-  seg(el('bosstier'), slotsOf(state.boss).map(x => ({label:x.f.slot, value:x.i})), state.slot,
-      v => state.slot = v);
+  /* the same slot name can turn up twice for one boss (different seasons, different levels): show the level */
+  const rows = slotsOf(state.boss), seen = {};
+  rows.forEach(x => seen[x.f.slot] = (seen[x.f.slot] || 0) + 1);
+  el('bosstier').className = rows.length > 5 ? 'seg wrapseg' : 'seg';
+  seg(el('bosstier'), rows.map(x => ({label:x.f.slot + (seen[x.f.slot] > 1 ? ' L' + x.f.l : ''), value:x.i})),
+      state.slot, v => state.slot = v);
   ['gear','trig','act','dbf'].forEach(k => { el(k).checked = state[k]; el(k).onchange = () => { state[k] = el(k).checked; draw(); }; });
 }
 

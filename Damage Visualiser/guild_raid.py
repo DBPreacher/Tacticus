@@ -333,13 +333,15 @@ def bossval(ab, key, lv):
     return float(v[min(int(lv), len(v)) - 1])
 
 
-def _part(ab, lv, s=''):
-    """one damage part of a boss ability: its average damage, its hits and its damage type"""
+def _part(ab, lv, s='', dtype=None):
+    """one damage part of a boss or Machine of War ability: its average damage, its hits and its damage
+    type. dtype: for the few abilities whose type is only in their text (the Biovore's Spore Mines)"""
     suf = '' if s in ('', '1') else '_' + s
     lo, hi = bossval(ab, 'minDmg' + suf, lv), bossval(ab, 'maxDmg' + suf, lv)
     c = ab.get('constants') or {}
     return dict(dmg=(lo + hi) / 2, hits=int(float(c.get('nrOfHits' + suf) or c.get('nrOfHits') or 1)),
-                type=bm.dtype(c.get('damageProfile' + suf) or c.get('damageProfile') or 'Physical'), crit=False)
+                type=bm.dtype(dtype or c.get('damageProfile' + suf) or c.get('damageProfile') or 'Physical'),
+                crit=False)
 
 
 def pressure(g, fight):
@@ -464,8 +466,8 @@ MOW_BUFF = {
     # the rest are defensive (less damage taken, shields): nothing for a damage run
     'Galatian': None, 'Exorcist': None, 'Forgefiend': None, "Tson'ji": None, 'Storm Speeder': None,
 }
-MOW_SHOTS = {                     # what it can fire at a boss, and how often ('' = every other turn)
-    'Biovore': [('SporeMineLauncher', 1.0)],            # a Spore Mine every turn, walked into the boss
+MOW_SHOTS = {      # what it can fire at a boss, how often, and its damage type when the data leaves it out
+    'Biovore': [('SporeMineLauncher', 1.0, 'Toxic')],   # a Spore Mine every turn, walked into the boss
     'Galatian': [('MacroPlasmaIncinerator', 0.5)],
     'Exorcist': [('DevastatingRefrain', 0.5)],
     'Reanimator': [],                                   # repairs and summons, no attack of its own
@@ -513,11 +515,12 @@ def mow_buff(g, mow, lv, tier_key, trig=False):
 def mow_damage(g, mow, boss, ds, lv, rules=None):
     """the Machine of War's own damage on the boss over the 6 turns"""
     tot = 0.0
-    for ab_id, rate in MOW_SHOTS.get(mow['name'], []):
+    for shot in MOW_SHOTS.get(mow['name'], []):
+        ab_id, rate, dt = (list(shot) + [None])[:3]
         ab = _ability(g, ab_id)
         if not ab or 'minDmg' not in (ab.get('variables') or {}):
             continue
-        part = _part(ab, min(lv, MOW_LEVELS))
+        part = _part(ab, min(lv, MOW_LEVELS), '', dt)
         tot += bm.part_vs_defence(part, boss, ds, False)[0] * rate * TURNS
     return tot
 
