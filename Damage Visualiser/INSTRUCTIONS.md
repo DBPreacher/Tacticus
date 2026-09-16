@@ -46,6 +46,8 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `support_template.html` | The Support Map's design (its CSS starts as a copy of `map_template.html`'s) | Yes, for design changes |
 | `build_guild.py` | Builds `guild-raid.html`: the best five for every boss and tier at every setting, with the side battles on and off, in parallel (about 10 minutes on this PC). `--page-only` rebuilds just the page from the template | No |
 | `guild_template.html` | The Guild Raid page's design | Yes, for design changes |
+| `calc_data.py` | Everything the page's Calculate button needs: every character with its abilities already resolved to numbers, the buffs they hand each other, each boss twice (side battles cleared or not) with what every Machine of War does to it, and 50 exact scores from `guild_raid.py` for the page to check itself against. `build_guild.py` embeds it | Only to add something the model learned |
+| `calc.js` | The arithmetic half of `guild_raid.py`, in JavaScript, so the page can score a five it has never seen. Run it under node against the check scores before trusting it (see "The Calculate button") | Yes, but only alongside the Python it mirrors |
 | `guild-raid.html` | The built Guild Raid page | **Never.** It's overwritten |
 | `support-map.html` | The built Support Map | **Never.** It's overwritten |
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
@@ -267,6 +269,42 @@ search dearer, so re-measure rather than trusting an old figure. As of September
   roster is not attacking a raid boss. Every tier dropped halves the build, so
   `TIERS = ['mythic']` takes it to about 14 minutes if Diamond III stops being
   useful too.
+
+### The Calculate button
+
+The page ships the best five for every boss, but "score *these* five" cannot be
+precomputed: 117 characters make 138 million teams, and a team's damage does not
+come apart into per-character pieces. Adding or multiplying per-character values
+was measured at 39-113% out, so the page runs the model itself.
+
+The split is: **Python resolves, JavaScript adds up.** `calc_data.py` exports
+each character with its weapons, traits, gear, the effects of its passive, the
+parts of its active and its summons - all already numbers at Mythic, abilities
+60, standard gear, all triggered - plus the buff rows, the bosses and the
+machines. `calc.js` is `guild_raid.py`'s arithmetic: `normalAttack`,
+`openerDamage`, `memberDamage`, `outrage`, `summonDamage`, `teamTotal`,
+`scoreTeam`. `build_guild.py` inlines both into the page.
+
+The two have to agree, so `calc_data.py` also ships `N_VECTORS` exact scores for
+random fives, and the page runs them before it shows a number. To check a change
+headlessly (node is on this PC):
+
+    python -c "import json,guild_raid as gr,calc_data as cd; g=gr.game();       open('calc.json','w').write(json.dumps(cd.build(g, gr.fights(g))))"
+    node -e "const c=require('./calc.js'), D=c.load(require('./calc.json'));       console.log(c.check(D).length + ' of ' + D.vec.length + ' disagree')"
+
+Raise `cd.N_VECTORS` to a few hundred for a real sweep - 400 fives take about
+two seconds to score in Python and a third of a second in the browser. They
+agree to 0.002%, which is the rounding in the export.
+
+**Anything the model learns has to be taught twice.** If a change touches
+`build_map.normal_attack`, `support_model.buffed` or the team maths in
+`guild_raid.py`, mirror it in `calc.js` and re-run the sweep. Things the port
+had to be told, all found this way: an active with no damage parts is still an
+active; a buff's `who` is resolved against the character receiving it; Mind
+Control needs a Taunt, so it is out against a Boss; an active can carry gear
+effects of its own; a boss can take crit chance off its attackers; a melee swing
+that also fires the ranged weapon; and a summon's weapon has a damage profile
+that has to be read as one.
 
 ---
 

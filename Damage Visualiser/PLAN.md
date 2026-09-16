@@ -383,11 +383,14 @@ All three of the owner's real runs land 8-10% under. The model is short of
 something, not over-counting, and these are the candidates in the order they are
 worth chasing:
 
-1. **Summons.** Boss Gulgortz's Waaagh! puts two Ork Boyz on the board and they
-   attack for the rest of the fight. Nothing on the player's side of the model
-   summons anything - the Patermine's Genestealers, Marshal Dreir's Death Riders
-   and Re'vas's Shield Drones are all uncounted too. Against a boss with low
-   Armour like Szarekh, two Ork Boyz for five rounds is real damage.
+1. **Summons - counted now (September 2026).** Every ability with a `summonDmg`
+   and a `unitId` puts its npc on the board and attacks for the rest of the
+   fight: Boss Gulgortz's Ork Boyz, the Patermine's Genestealers, Anuphet's
+   Scarabs, Marshal Dreir's Death Riders, Re'vas's Shield Drones. The Norn Crown
+   names friendly Summons, so it lifts them too. It was worth about +0.6% on the
+   Mortarion runs, which is less than hoped - the gap is mostly elsewhere. What
+   is still uncounted: summons that arrive from something other than a
+   `summonDmg` variable, and anything a summon does besides attack.
 2. **Bombs.** A raid feature the tool knows nothing about.
 3. **Overwatch and reaction attacks.**
 4. **The other ten Machines of War.** Only the Biovore has been checked against a
@@ -407,6 +410,32 @@ Smaller, and structural rather than numeric:
 And the things that would need the board simulated, which this tool does not try
 to do: the partial second round, positioning, and terrain beyond the high-ground
 switch.
+
+## The Calculate button (September 2026)
+
+The page's five are the best the search could find. "Score the five *I* picked"
+is a different problem: 117 characters make 138 million teams, so it cannot be
+precomputed, and it cannot be composed either - per-character values added came
+out 39-56% low and multiplied 29-113% out on Laviscus teams, because Outrage and
+the buffs compound.
+
+**Settled: the page runs the model.** Python resolves every ability to numbers
+(`calc_data.py`), JavaScript does the arithmetic (`calc.js`), and 50 exact
+scores from `guild_raid.py` ship with the page so it can prove the two agree
+before it shows a number. A five scores in about 4 ms, which includes trying all
+eleven Machines of War the way the model picks one.
+
+The calculator is fixed at the setting the videos use - Mythic, abilities 60,
+standard gear, all triggered, actives on - and follows the page's boss, side
+battles and high-ground switches. Offering every setting would mean shipping
+every setting's resolved roster; if that is ever wanted, `calc_data.SETTING`
+becomes a list and the page picks one.
+
+The port had to be taught six things the Python already knew (listed in
+INSTRUCTIONS.md, "The Calculate button"). Every one of them was a real rule the
+JS was silently missing, which is the argument for keeping the check scores: a
+model change that is not mirrored shows up as a failing vector, not as a wrong
+number on camera.
 
 ## Open questions
 

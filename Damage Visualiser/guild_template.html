@@ -95,6 +95,26 @@ footer{border-top:1px solid var(--rule);padding-top:14px;color:var(--ink-3);font
   border:1px solid var(--rule);border-radius:3px;padding:3px 9px;background:var(--panel-2)}
 .alts li b{font-family:var(--data);font-weight:600;font-size:14.5px}
 .alts li span{color:var(--ink-3);font-family:var(--data);font-weight:600}
+/* the Calculate card: pick any five and the page scores them itself */
+.calc .picker{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+@media (max-width:860px){.calc .picker{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.calc .picker input{font-family:var(--data);font-weight:600;font-size:15px;color:var(--ink);background:var(--panel-2);
+  border:1px solid var(--rule);border-left:3px solid var(--rule);border-radius:3px;padding:7px 9px;width:100%;min-width:0}
+.calc .picker input::placeholder{color:var(--ink-3);font-weight:500}
+.calc .picker input:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.calc .picker input.bad{border-color:var(--chaos);border-left-color:var(--chaos)}
+.calcbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.calcbar button{all:unset;cursor:pointer;font-family:var(--data);font-weight:700;font-size:15px;letter-spacing:.04em;
+  padding:7px 18px;border-radius:3px;background:var(--ink);color:#0a0a0a}
+.calcbar button.ghost{background:var(--panel-2);color:var(--ink-2);border:1px solid var(--rule);font-weight:600;padding:6px 13px}
+.calcbar button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.calcbar .warn{color:var(--chaos)}
+.calc .five{margin-top:14px}
+.calc .row{grid-template-columns:182px minmax(0,1fr) 104px}
+.verdict{display:flex;align-items:baseline;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule-soft);
+  font-family:var(--data);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.verdict b{font-size:26px;font-weight:700;line-height:1}
+.verdict em{font-style:normal;font-size:14px;color:var(--ink-2);font-family:var(--body)}
 </style>
 
 <div class="wrap">
@@ -151,14 +171,34 @@ footer{border-top:1px solid var(--rule);padding-top:14px;color:var(--ink-3);font
     </div>
   </div>
 
+  <div class="chart-card calc" id="calcCard">
+    <div class="chart-head">
+      <h2>Try your own five</h2>
+      <div class="hint" id="calcHint"></div>
+    </div>
+    <div class="picker" id="picker"></div>
+    <div class="calcbar">
+      <button id="go">Calculate</button>
+      <button class="ghost" id="useBest">Use the best five</button>
+      <button class="ghost" id="clearFive">Clear</button>
+      <span class="hint" id="calcNote"></span>
+    </div>
+    <div class="five" id="calcFive"></div>
+    <div class="mow" id="calcMow" hidden></div>
+    <div class="verdict" id="verdict" hidden></div>
+  </div>
+  <datalist id="allchars"></datalist>
+
   <footer>
     <div id="foot"></div>
     <div id="foot2"></div>
   </footer>
 </div>
 
+<script>/*CALCJS*/</script>
 <script>
 const DATA = /*DATA*/;
+const CALC = CalcLib.load(/*CALC*/);
 
 const ALLIANCE = {Imperial:'var(--imperial)', Chaos:'var(--chaos)', Xenos:'var(--xenos)'};
 const n = x => x.toLocaleString('en-GB', {maximumFractionDigits:0});
@@ -291,8 +331,157 @@ function draw() {
     'The first round goes on getting into position, so ' + (DATA.fighting || DATA.turns) + ' of them are spent fighting. ' +
     'Bosses are Immune, so nothing reduces their Armour and they cannot be Stunned, Suppressed or Taunted.';
   el('foot2').textContent = 'Game data version ' + DATA.version;
+  drawCalc();
   fitPage();
 }
+
+/* ---------------------------------------------------------------- try your own five
+   The five above are the best the search could find. Any other five cannot be precomputed - 117
+   characters make 138 million teams, and a team's damage does not come apart into per-character pieces -
+   so the page runs the model itself. CALC carries every ability already resolved to numbers by
+   calc_data.py, calc.js does the same arithmetic guild_raid.py does, and check() proves the two agree on
+   exact scores before any number from it is shown. */
+const FIVE = ['', '', '', '', ''];
+let selfCheck = null;
+
+const calcByName = {};
+CALC.chars.forEach(c => calcByName[c.n.toLowerCase()] = c);
+const calcChar = s => calcByName[(s || '').trim().toLowerCase()] || null;
+const calcSetting = () => [
+  DATA.tiers.find(t => t.key === CALC.setting.tier).label, 'abilities ' + CALC.setting.lv,
+  CALC.setting.gear ? 'standard gear' : 'no gear', CALC.setting.trig ? 'all triggered' : 'always-on only',
+  CALC.setting.act ? 'actives on' : 'actives off'
+].join(', ');
+
+/* the best five the search found at the calculator's own setting, to measure a pick against */
+function bestHere() {
+  const k = (CALC.setting.trig ? 'trig' : 'base') + '_l' + CALC.setting.lv +
+            (CALC.setting.act ? '_a' : '') + (CALC.setting.gear ? '_g' : '');
+  const set = (DATA.r[CALC.setting.tier] || {})[k];
+  if (!set || !set[fightIndex()]) return null;
+  const at = set[fightIndex()][state.dbf ? 1 : 0];
+  return Array.isArray(at) ? at[state.high ? 1 : 0] : at;
+}
+
+function buildPicker() {
+  const host = el('picker');
+  if (host.childElementCount) {
+    [...host.children].forEach((inp, i) => inp.value = FIVE[i]);
+    return paintPicker();
+  }
+  el('allchars').innerHTML = CALC.chars.map(c => c.n).sort()
+    .map(x => '<option value="' + x.replace(/"/g, '&quot;') + '">').join('');
+  for (let i = 0; i < 5; i++) {
+    const inp = document.createElement('input');
+    inp.setAttribute('list', 'allchars');
+    inp.placeholder = 'Character ' + (i + 1);
+    inp.autocomplete = 'off';
+    inp.spellcheck = false;
+    inp.oninput = () => { FIVE[i] = inp.value; paintPicker(); };
+    inp.onkeydown = e => { if (e.key === 'Enter') runCalc(); };
+    host.appendChild(inp);
+  }
+  paintPicker();
+}
+
+/* each box takes the alliance colour of whoever is in it, and turns red on a name the model has never
+   heard of or one the boss's faction ban keeps out */
+function paintPicker() {
+  const banned = DATA.fights[fightIndex()].ban;
+  [...el('picker').children].forEach((inp, i) => {
+    const c = calcChar(FIVE[i]);
+    const bad = (FIVE[i].trim() && !c) || (c && c.f === banned);
+    inp.classList.toggle('bad', !!bad);
+    inp.style.borderLeftColor = c && !bad ? (ALLIANCE[c.a] || 'var(--rule)') : '';
+  });
+}
+
+function runCalc() {
+  const note = el('calcNote');
+  const picked = FIVE.map(calcChar);
+  const typed = FIVE.filter(x => x.trim());
+  const unknown = FIVE.filter((x, i) => x.trim() && !picked[i]);
+  const banned = DATA.fights[fightIndex()].ban;
+  const barred = picked.filter(c => c && c.f === banned);
+  const names = picked.filter(Boolean).map(c => c.n);
+  let problem = '';
+  if (unknown.length) problem = 'No character called ' + unknown.map(x => '"' + x.trim() + '"').join(' or ') + '.';
+  else if (barred.length) problem = banned + ' are banned against this boss: leave out ' + barred.map(c => c.n).join(' and ') + '.';
+  else if (new Set(names).size < names.length) problem = 'The same character twice.';
+  else if (typed.length < 5) problem = 'Pick five characters.';
+  if (problem) {
+    note.className = 'hint warn';
+    note.textContent = problem;
+    el('calcFive').innerHTML = ''; el('calcMow').hidden = true; el('verdict').hidden = true;
+    return;
+  }
+  if (selfCheck === null) selfCheck = CalcLib.check(CALC).length;   /* once, before anything is shown */
+  const t0 = performance.now();
+  const got = CalcLib.scoreTeam(CALC, names, fightIndex(), {dbf: state.dbf, high: state.high});
+  const ms = Math.round(performance.now() - t0);
+  note.className = 'hint' + (selfCheck ? ' warn' : '');
+  note.textContent = selfCheck
+    ? '⚠ ' + selfCheck + ' of ' + CALC.vec.length + ' check scores disagree with the model - treat this as a guess'
+    : 'scored in ' + ms + ' ms · agrees with the model on all ' + CALC.vec.length + ' check scores';
+  lastCalc = {key: calcKey(), got: got, note: note.textContent, warn: !!selfCheck};
+  paintCalc(got);
+}
+
+function paintCalc(got) {
+  const f = DATA.fights[fightIndex()];
+  const rows = Object.keys(got.each).map(k => [k, got.each[k]]).sort((a, b) => b[1] - a[1]);
+  const max = Math.max.apply(null, rows.map(r => r[1]));
+  el('calcFive').innerHTML = rows.map(r => {
+    const c = calcChar(r[0]), col = ALLIANCE[c.a] || 'var(--ink-3)';
+    return '<div class="row"><div class="who"><b>' + c.n +
+      (got.on.indexOf(c.n) >= 0 ? ' <i class="hg" title="on high ground">▲</i>' : '') +
+      '</b><span>' + c.f + '</span></div>' +
+      '<div class="bar"><i class="solo" style="width:' + (r[1] / max * 100) + '%;background:' + col + '"></i></div>' +
+      '<div class="num">' + n(r[1]) + '</div></div>';
+  }).join('');
+
+  const mow = got.mow ? CALC.mows.find(m => m.n === got.mow) : null;
+  const own = mow ? CALC.bosses[fightIndex()][state.dbf ? 1 : 0].mow[mow.n] : 0;
+  el('calcMow').hidden = false;
+  el('calcMow').innerHTML = mow
+    ? '<span class="tag">Machine of War</span><b>' + mow.n + '</b><span>' + n(own) + ' damage of its own' +
+      (mow.b ? ' · ' + (mow.b.k === 'taken' ? 'the boss takes' : 'your characters deal') + ' +' + mow.b.pct + '%' : '') + '</span>'
+    : '<span class="tag">Machine of War</span><span>none allowed against this boss</span>';
+
+  const best = bestHere();
+  el('verdict').hidden = false;
+  el('verdict').innerHTML = '<b>' + n(got.total) + '</b><em>damage in ' + CALC.turns + ' fighting rounds · ' +
+    (got.total / f.hp * 100).toFixed(2) + '% of the boss' +
+    (best ? ' · ' + (got.total / best.s * 100).toFixed(0) + '% of what the best five do here' : '') + '</em>';
+}
+
+/* what a score depends on: changing the roster switches above doesn't make this one stale */
+const calcKey = () => fightIndex() + '|' + (state.dbf ? 1 : 0) + '|' + (state.high ? 1 : 0);
+let lastCalc = null;
+
+function drawCalc() {
+  buildPicker();
+  el('calcHint').textContent = 'Scored against ' + DATA.fights[fightIndex()].n + ' ' + DATA.fights[fightIndex()].slot +
+    ' with the side battles and high ground as you have them set, at ' + calcSetting() + '.';
+  if (lastCalc && lastCalc.key === calcKey()) {
+    el('calcNote').className = 'hint' + (lastCalc.warn ? ' warn' : '');
+    el('calcNote').textContent = lastCalc.note;
+    return paintCalc(lastCalc.got);
+  }
+  lastCalc = null;
+  el('calcFive').innerHTML = ''; el('calcMow').hidden = true; el('verdict').hidden = true;
+  el('calcNote').className = 'hint'; el('calcNote').textContent = '';
+}
+
+el('go').onclick = runCalc;
+el('clearFive').onclick = () => { FIVE.fill(''); lastCalc = null; buildPicker(); drawCalc(); };
+el('useBest').onclick = () => {
+  const b = bestHere();
+  if (!b) return;
+  b.f.slice().sort((a, c) => c[1] - a[1]).forEach((r, i) => FIVE[i] = DATA.chars[r[0]].n);
+  buildPicker();
+  runCalc();
+};
 
 /* ---------------------------------------------------------------- fit the page to the window */
 const wrapEl = document.querySelector('.wrap'), chartCard = el('chartCard');

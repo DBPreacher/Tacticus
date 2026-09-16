@@ -18,12 +18,14 @@ See INSTRUCTIONS.md ("Guild Raid").
 import argparse, csv, json, os, re, sys, time
 from multiprocessing import Pool
 import build_map as bm
+import calc_data
 import support_model as sm
 import guild_raid as gr
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE = os.path.join(HERE, 'guild_template.html')
 OUT = os.path.join(HERE, 'guild-raid.html')
+CALC_JS = os.path.join(HERE, 'calc.js')
 ALTS = 8                      # how many characters just outside the five the page lists
 
 _cache = {}
@@ -160,10 +162,17 @@ def job(args):
 def write_page(data):
     with open(TEMPLATE, encoding='utf-8') as f:
         html = f.read()
-    if '/*DATA*/' not in html:
-        sys.exit('guild_template.html is missing its /*DATA*/ placeholder.')
+    for ph in ('/*DATA*/', '/*CALC*/', '/*CALCJS*/'):
+        if ph not in html:
+            sys.exit(f'guild_template.html is missing its {ph} placeholder.')
+    g = gr.game()
+    # the Calculate button: calc.js runs the model in the browser, calc_data.py hands it the numbers
+    with open(CALC_JS, encoding='utf-8') as f:
+        js = '(function(){' + chr(10) + f.read() + chr(10) + '})();'
+    dump = lambda x: json.dumps(x, ensure_ascii=False, separators=(',', ':'))
+    html = html.replace('/*CALCJS*/', js).replace('/*CALC*/', dump(calc_data.build(g, fight_list(g))))
     with open(OUT, 'w', encoding='utf-8') as f:
-        f.write(html.replace('/*DATA*/', json.dumps(data, ensure_ascii=False, separators=(',', ':'))))
+        f.write(html.replace('/*DATA*/', dump(data)))
 
 
 def main():
