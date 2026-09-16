@@ -387,13 +387,17 @@ def _biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear, opener=
     # "the highest damage dealt by any of their non-Psychic hits": across an attack's hits that is usually
     # a crit, so this weighs the crit hit by the chance at least one of the hits crits (wiki, HDTW Outdone)
     crit = (a.get('g') or {}).get('cc') or 0.0
-    for w in a['weapons']:
+    # the weapon attack on its own: the hits a passive adds come in their own attack and are weighed below,
+    # so they must not be mixed into this average
+    eff, desc = (a.get('ps') or ([], []))
+    plain = dict(a, ps=([e for e in eff if e['kind'] not in ('extra', 'extrahalf')], desc))
+    for w in plain['weapons']:
         if w['type'] in ('Psychic',):              # Outrage only counts non-Psychic hits
             continue
-        n = max(hits_of(a, w), 1)
-        avg = bm.best_attack(a, boss, trig, ds, False, False, w['kind'])[0] / n
+        n = max(hits_of(plain, w), 1)
+        avg = bm.best_attack(plain, boss, trig, ds, False, False, w['kind'])[0] / n
         if crit:
-            ac = dict(a, g=dict(a['g'], cc=1.0))
+            ac = dict(plain, g=dict(plain['g'], cc=1.0))
             hot = bm.best_attack(ac, boss, trig, ds, False, False, w['kind'])[0] / n
             p = 1 - (1 - crit) ** n                # the chance at least one hit crits
             avg = p * hot + (1 - p) * avg
@@ -686,6 +690,21 @@ def team_turns(team, surv, lv, trig, act, gear, tier_key):
                                 (surv['rnd'].get(m['name']), surv['rest'].get(m['name']))) for m in team}
 
 
+def member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buff):
+    """the flat Damage a character brings into this team: Laviscus's Outrage, the Neuroparasite and the
+    Norn Crown, a Machine of War's +Damage. (the first turn, then the rest)"""
+    extra = outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear) if m['name'] == 'Laviscus' else (0.0, 0.0)
+    flat = parasite(m, team, boss, lv, gear, tier_key)
+    if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
+        flat += m['dmg'] * buff['pct'] / 100
+    return (extra[0] + flat, extra[1] + flat)
+
+
+def high_ground(per_member):
+    """who takes the high ground: the ones already doing the most damage, Outrage and all"""
+    return set(sorted(per_member, key=per_member.get, reverse=True)[:HIGH_GROUND])
+
+
 def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_key='d3', surv=None, mow=None,
                 high=False):
     total = mow['own'] if mow else 0.0
@@ -695,17 +714,13 @@ def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_
     each, args = {}, {}
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
-        extra = outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear) if m['name'] == 'Laviscus' else (0.0, 0.0)
-        flat = parasite(m, team, boss, lv, gear, tier_key)
-        if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
-            flat += m['dmg'] * buff['pct'] / 100
-        extra = (extra[0] + flat, extra[1] + flat)
+        extra = member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buff)
         each[m['name']] = member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra,
                                         alive[m['name']], buff, uses)
         args[m['name']] = (m, mates, extra)
     if high:
-        # the ones who gain most take it, which is what the teams in the videos do
-        for n in sorted(each, key=each.get, reverse=True)[:HIGH_GROUND]:
+        # the ones already doing the most damage take it, which is what the teams in the videos do
+        for n in high_ground(each):
             m, mates, extra = args[n]
             each[n] = member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra,
                                     alive[n], buff, uses, True)
@@ -823,26 +838,22 @@ def main():
                   ' (its Mythic ability needs All triggered)' if (MOW_BUFF.get(mow['name']) or {}).get('trig')
                   else ' (its Mythic ability is defensive: nothing for a damage run)')))
     alive = team_turns(team, surv, args.ability, args.trig, act, args.gear, args.tier)
+    buff0 = mow['buff'] if mow else None
+    uses0 = sorted(x for u in team for x in (active_turns(u, TURNS) if act else ()))
+    extras = {m['name']: member_extra(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear,
+                                      args.tier, buff0) for m in team}
     on_high = set()
     if args.high:
-        uses0 = sorted(x for u in team for x in (active_turns(u, TURNS) if act else ()))
         plain = {m['name']: member_damage(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp,
-                                          args.ability, args.trig, act, args.gear, rules, None,
-                                          alive[m['name']], mow['buff'] if mow else None, uses0) for m in team}
-        on_high = set(sorted(plain, key=plain.get, reverse=True)[:HIGH_GROUND])
+                                          args.ability, args.trig, act, args.gear, rules, extras[m['name']],
+                                          alive[m['name']], buff0, uses0) for m in team}
+        on_high = high_ground(plain)
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
-        extra = (outrage(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear)
-                 if m['name'] == 'Laviscus' else (0.0, 0.0))
-        flat = parasite(m, team, boss, args.ability, args.gear, args.tier)
-        buff = mow['buff'] if mow else None
-        if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
-            flat += m['dmg'] * buff['pct'] / 100
-        extra = (extra[0] + flat, extra[1] + flat)
+        extra, buff = extras[m['name']], buff0
         alone = member_damage(m, [], boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules)
-        uses = sorted(x for u in team for x in (active_turns(u, TURNS) if act else ()))
         withteam = member_damage(m, mates, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, extra,
-                                 alive[m['name']], buff, uses, args.high and m['name'] in on_high)
+                                 alive[m['name']], buff, uses0, args.high and m['name'] in on_high)
         tag = f'  (+{max(extra):,.0f} Damage from the team)' if max(extra) else ''
         if args.high and m['name'] in on_high:
             tag += '  [high ground]'

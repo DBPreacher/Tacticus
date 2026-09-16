@@ -80,17 +80,16 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
     score_of = lambda t: gr.team_damage(t, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None, mow, high)
     buff = mow['buff'] if mow else None
     uses = sorted(x for u in team for x in (gr.active_turns(u, gr.TURNS) if act else ()))
+    extras = {m['name']: gr.member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buff)
+              for m in team}
     plain = {m['name']: gr.member_damage(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp, lv,
-                                         trig, act, gear, rules, None, gr.TURNS, buff, uses) for m in team}
-    on_high = set(sorted(plain, key=plain.get, reverse=True)[:gr.HIGH_GROUND]) if high else set()
+                                         trig, act, gear, rules, extras[m['name']], gr.TURNS, buff, uses)
+             for m in team}
+    on_high = gr.high_ground(plain) if high else set()
     five = []
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
-        extra = gr.outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear) if m['name'] == 'Laviscus' else (0.0, 0.0)
-        flat = gr.parasite(m, team, boss, lv, gear, tier_key)
-        if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
-            flat += m['dmg'] * buff['pct'] / 100
-        extra = (extra[0] + flat, extra[1] + flat)
+        extra = extras[m['name']]
         alone = gr.member_damage(m, [], boss, ds, rows, sp, lv, trig, act, gear, rules)
         with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, gr.TURNS,
                                      buff, uses, m['name'] in on_high)
