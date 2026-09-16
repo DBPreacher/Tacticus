@@ -379,9 +379,10 @@ It now reads 44,290 against 42,825.
 
 ## What is left (September 2026, after the calibration)
 
-All three of the owner's real runs land 8-10% under. The model is short of
-something, not over-counting, and these are the candidates in the order they are
-worth chasing:
+All three of the owner's real runs land 6-8% under (worst miss 7.9% after the
+buff-order fix). The model is short of something, not over-counting. Most of the
+original candidate list has since been ruled out by the owner, so what remains is
+below - and after item 1 the list is thin, which is itself the finding:
 
 1. **Summons - counted now (September 2026).** Every ability with a `summonDmg`
    and a `unitId` puts its npc on the board and attacks for the rest of the
@@ -391,12 +392,20 @@ worth chasing:
    Mortarion runs, which is less than hoped - the gap is mostly elsewhere. What
    is still uncounted: summons that arrive from something other than a
    `summonDmg` variable, and anything a summon does besides attack.
-2. **Bombs.** A raid feature the tool knows nothing about.
-3. **Overwatch and reaction attacks.**
-4. **The other ten Machines of War.** Only the Biovore has been checked against a
-   video. The rarity fix doubled all of them at once, and how often each one
-   fires is still an estimate in `MOW_SHOTS`. When the page recommends a machine,
-   that recommendation rests on a guess for ten of the eleven.
+2. **Bombs: not a candidate (owner, 2026-09-16).** They don't count towards the
+   raid score in game.
+3. **Overwatch: not a candidate (owner, 2026-09-16).** Nobody uses it.
+4. **The other ten Machines of War: a much smaller worry than it looked.** Across
+   the whole build the model only ever picks two of the eleven - the **Biovore**,
+   the one checked against a video, or the **Rukkatrukk** when the Biovore is
+   banned (Tyranid bosses, 31 of the 81 fights). The other nine never win
+   anywhere. Where both are allowed and the Rukkatrukk still wins, it wins by a
+   hair: on Szarekh Mythic 2 with the side battles cleared it is 2,445,414
+   against 2,441,722, 0.15%, because its +20% is melee-only and every other
+   machine's third place is 14% back. So what rests on a guess is narrow: how
+   often the Rukkatrukk fires, and only against Tyranid bosses. The owner reports
+   that in game it is mostly the Biovore that gets picked, which is what the
+   model does wherever it is allowed and the fight is not a coin-flip.
 
 Smaller, and structural rather than numeric:
 
@@ -404,11 +413,25 @@ Smaller, and structural rather than numeric:
   prefix on a token can read an active's numbers, but only for `extra:`; this
   needs the same for `armignore:`.
 - **The search is greedy** and can stop about 1.5% short of the best five.
-- **Xybia** is assumed not to work on a boss, because Mind Control needs a Taunt
-  to land and a Boss is immune. The owner was going to check in game.
+- **Xybia: settled (owner, 2026-09-16) - she does not work on a boss.** Proved in
+  game: Mind Control needs the Taunt to land and a Boss cannot be Taunted. The
+  model already drops it, so nothing to change.
 
 And the things that would need the board simulated, which this tool does not try
 to do: the partial second round, positioning, and terrain beyond the high-ground
+switch.
+
+**Where the remaining 6-8% is most likely to be.** With bombs, Overwatch, Xybia
+and the machines struck off, the leading candidate is **round 1**. The model
+gives it zero: `MOVING = 1`, so only five of the six rounds fight. The owner's
+words were "we barely get any damage in round 1" - and *barely any* is not
+*none*. A character that starts in range swings; on a six-round fight one
+character swinging in round 1 is worth about 3-4% of the run, which is the
+right size for the gap. That is one constant to try (`MOVING` as a fraction
+rather than a whole round) and `check_guild.py` scores it in half a second.
+
+After that it is luck and terrain: two or three runs is a small sample for crit
+and block chains, and the model only knows about terrain through the high-ground
 switch.
 
 ## The Calculate button (September 2026)

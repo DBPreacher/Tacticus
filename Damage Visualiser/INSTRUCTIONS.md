@@ -190,10 +190,15 @@ the boss's own faction is banned.
   Belisarius Cawl's `SelfRepairMechanism`, so his numbers assume you have cleared
   the side battles that stop him repairing himself. Magnus is the one Mythic boss
   whose chains take no Armour off at all. Laviscus's Outrage, the Neurothrope's Neuroparasite and the
-  Norn Crown are counted; Xybia's Mind Control is not, because a Boss cannot be
+  Norn Crown are counted; Xybia's Mind Control is not - proved in game (owner,
+  September 2026): it needs the Taunt to land and a Boss cannot be
   Taunted.
 - **Not counted:** the boss killing your characters (`--deaths` on the command
-  line, see PLAN.md), terrain height, bombs and summons.
+  line, see PLAN.md), and the movement round - the model fights five of the six.
+  Terrain height and summons *are* counted now (the High ground switch, and every
+  ability with a `summonDmg`). Bombs and Overwatch are not counted and do not
+  need to be: bombs don't count towards the raid score and nobody uses Overwatch
+  (owner, September 2026).
 
 ### Calibration (September 2026)
 
