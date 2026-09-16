@@ -79,7 +79,7 @@ Traits that are left off are talked about on camera, not charted.
 | Terminator Armour | First attack each turn against it: −75% on every hit of that attack. Psychic and Direct hits excluded. (Changed from "first hit" to "first attack" in September 2024.) In the Toughness number, only the first enemy attack each turn is reduced |
 | Mk X Gravis | Incoming damage goes through armour twice (see formula). The game skips this on crits, but there are no crits here |
 | Parry | Incoming melee multi-hit attacks −1 hit (min 1) |
-| Terrifying | −30% damage from melee attacks. It does nothing against ranged attacks, which is why it rarely feels defensive in practice (Jain Zar) |
+| Terrifying | −30% damage from melee attacks. It does nothing against ranged attacks, and each attacker picks its better weapon *after* it applies, so it often just pushes them into shooting instead. Across its 11 holders it is worth an effective −25% (−20% Atlacoya to −31% Azkor), not −30%. Jain Zar's melee reduction is not this trait: it is her passive, Terror's Lament |
 | Martial Ka'tah | Normal attacks against it deal −20% |
 | Camouflage | Ranged attacks against it −1 hit (min 1). The −2 at range 3+ and −3 in Tall Grass are left off (position and terrain) |
 | Beast Slayer | +20% melee damage against Big Targets and Vehicles. Its block chance is left off (random) |
