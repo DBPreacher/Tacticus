@@ -56,9 +56,12 @@ def fights(g):
 def debuff_totals(g, fight):
     """what winning both side battles takes off this boss (each chain in full)"""
     tot = dict(armour=0.0, block=0.0, steps=0)
-    for mini in fight['minis']:
-        for k, chain in g['bossDebuffs'].items():
-            if not k.startswith(mini + '_') or fight['bossType'].lower() not in k.lower():
+    for k, chain in g['bossDebuffs'].items():          # each chain once, even when both side battles are the same unit
+        for mini in set(fight['minis']):
+            if not k.startswith(mini + '_'):
+                continue
+            suffix = k[len(mini) + 1:].lstrip('0123456789')      # some chains name the boss, some don't
+            if suffix and fight['bossType'].lower() not in suffix.lower():
                 continue
             for x in chain:
                 tot['steps'] += 1
@@ -66,6 +69,7 @@ def debuff_totals(g, fight):
                     tot['armour'] += int(x.rsplit('_', 1)[1])
                 elif 'blockChance' in x:
                     tot['block'] += int(x.rsplit('_', 1)[1])
+            break
     return tot
 
 
