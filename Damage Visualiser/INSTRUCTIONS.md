@@ -157,7 +157,16 @@ the boss's own faction is banned.
   (+20% Damage for Mechanical or Psyker characters), the Plagueburst Crawler's
   Blighted Land (+20% Damage, but you have to stand on its contaminated hexes,
   so it follows the All triggered switch). The rest are defensive and do nothing
-  for a damage run. The page brings the best machine for the five it picked, and
+  for a damage run. **How often a machine fires**: each one has a single ability
+  that costs a munition and one that is free, and a machine acts once a round, so
+  the free one goes off most rounds and the munition one about once a fight. Its
+  abilities take the rarity bonus like a character's - a Mythic machine doubles
+  them. Anything that waits for the enemy to walk onto marked hexes is left out
+  (the Rukkatrukk's Squig Mine, both of Galatian's).
+  On damage alone the Biovore now wins for every team, including Mech, where real
+  players bring the **Reanimator**. That is not a contradiction: the Reanimator
+  repairs, and survivability is not modelled.
+  The page brings the best machine for the five it picked, and
   the boss's faction is banned here too (the owner confirmed in game, September
   2026, that a banned-faction machine can't be brought).
   **+20% damage taken beats +20% Damage**, because Armour is taken off each hit

@@ -714,21 +714,25 @@ MOW_BUFF = {
     # the rest are defensive (less damage taken, shields): nothing for a damage run
     'Galatian': None, 'Exorcist': None, 'Forgefiend': None, "Tson'ji": None, 'Storm Speeder': None,
 }
-MOW_SHOTS = {      # what it can fire at a boss, how often, and its damage type when the data leaves it out
-    # The machine acts once a round. Most rounds it launches one Spore Mine; when Bio-Minefield is off
-    # cooldown it sends three in together instead. Over five fighting rounds that is four launches and one
-    # Bio-Minefield - about seven mines, which is what the owner's video shows.
+# What a machine fires at a boss, how often, and its damage type and hits where the data leaves them out.
+# Every machine has one ability that costs a munition and one that is free, and it acts once a round: so
+# the free one goes off most rounds (0.8 of five) and the munition one about once a fight (0.2). The
+# Biovore is the exception the owner's video pinned down - Bio-Minefield sends three mines in at once, so
+# its one use is worth 0.6. Abilities that can only hit summons, or that just summon something, are left
+# out; so is anything a boss would have to walk into.
+MOW_SHOTS = {
     'Biovore': [('SporeMineLauncher', 0.8, 'Toxic'), ('BioMinefield', 0.6, 'Toxic')],
-    'Galatian': [('MacroPlasmaIncinerator', 0.5)],
-    'Exorcist': [('DevastatingRefrain', 0.5)],
+    'Galatian': [],                                     # both its attacks need the enemy to walk onto marked
+                                                        # hexes, and Duty Eternal spends the machine itself
+    'Exorcist': [('DevastatingRefrain', 0.8), ('ThriceBlessedConflagration', 0.2)],
     'Reanimator': [],                                   # repairs and summons, no attack of its own
-    'Malleus Rocket Launcher': [('MalleusRocketBarrage', 0.5)],
-    'Forgefiend': [('DaemonicOrdnance', 0.5)],          # the autocannons only fire at summons
-    'Plagueburst Crawler': [('EntropyCannons', 1.0), ('PlagueburstMortar', 0.5)],
-    'Rukkatrukk': [('SquigLaunchas', 0.5)],
-    "Tson'ji": [('HeavyRailRifle', 0.5), ('TwinSmartMissileSystem', 0.5)],
-    "Z'Kar": [('InfernalCannon', 0.5)],
-    'Storm Speeder': [('DeathOnTheWind', 0.5)],
+    'Malleus Rocket Launcher': [('MalleusRocketBarrage', 0.2, None, 3)],   # three missiles on the hex
+    'Forgefiend': [('DaemonicOrdnance', 0.8)],          # the autocannons only fire at summons
+    'Plagueburst Crawler': [('PlagueburstMortar', 0.8), ('EntropyCannons', 0.2)],
+    'Rukkatrukk': [('SquigLaunchas', 0.2)],             # the Squig Mine waits for the enemy to step on it
+    "Tson'ji": [('TwinSmartMissileSystem', 0.8), ('HeavyRailRifle', 0.2)],
+    "Z'Kar": [('InfernalCannon', 0.8)],
+    'Storm Speeder': [('DeathOnTheWind', 0.2)],         # Hailstrike is a buff on an ally, not its own attack
 }
 MOW_LEVELS = 65                   # a Machine of War's abilities go to 65
 MYTHIC_ABILITY_LEVEL = 4          # its Mythic ability has four levels; the tool uses the top one
@@ -767,11 +771,13 @@ def mow_damage(g, mow, boss, ds, lv, rules=None):
     """the Machine of War's own damage on the boss over the 6 turns"""
     tot = 0.0
     for shot in MOW_SHOTS.get(mow['name'], []):
-        ab_id, rate, dt = (list(shot) + [None])[:3]
+        ab_id, rate, dt, hits = (list(shot) + [None, None])[:4]
         ab = _ability(g, ab_id)
         if not ab or 'minDmg' not in (ab.get('variables') or {}):
             continue
         part = _part(ab, min(lv, MOW_LEVELS), '', dt, rarity=True)
+        if hits:
+            part['hits'] = hits
         tot += bm.part_vs_defence(part, boss, ds, False)[0] * rate * FIGHTING
     return tot
 
