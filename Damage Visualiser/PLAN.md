@@ -228,6 +228,34 @@ adjacent to five characters at the start of each of its turns. Needs the owner:
 in a real Mortarion run, how often does a melee character actually eat
 Arch-Contaminator?
 
+## The sweep: the same bugs, on every other character (September 2026)
+
+Calibrating against the owner's videos turned up six *kinds* of mistake, not six
+mistakes. Each one was found on one character and then turned out to apply to
+several. The sweep below is the to-do list: work through it and check each
+against the ability text, the way Kariyan's and Atlacoya's were.
+
+| The kind of thing | Found on | Still to do |
+|---|---|---|
+| An active that keeps giving for the rest of the battle | Abaddon (`extra:A1:after`) | Haarken, Sword Brother Godswyl, Lucien, Hâvyr |
+| A different attack against a Big Target - and every boss is one | Kariyan (`extra:1\|2`) | none found |
+| An ability that grows with each turn its owner has fought | Kariyan (`RAMP`) | none found |
+| An ability that grows with each use, or each active the team uses | Atlacoya (`RAMP_FLAT`) | Titus, Snappawrecka, Wrask, Shiron, Kîmm |
+| A damage type that changes with the target or the team | Atlacoya (`DIRECT`) | Commander Farsight |
+| Hits that scale with what the team has done this turn | Sekhetar (`PSYCHIC_HITS`) | Ahriman, Adamatar |
+
+Two more, from the same hunt, that are about the model rather than one character:
+
+- **A character gets its own buff.** Anything that lands on the enemy helps the
+  one who cast it; an ally buff skips its caster only when the text says "other
+  friendly". This was worth about 15% on a real team.
+- **"The first attack that is not a normal attack"** is the attack a passive adds
+  on any round where nobody uses an active, not the active itself.
+
+Run `python -X utf8 check_guild.py` after each one. It scores the owner's real
+runs in half a second, and every fix above should move those numbers toward the
+video, not away.
+
 ## Known gaps found in the calibration hunt (September 2026)
 
 Going through every "not counted" note in the ability CSVs with a Guild Raid in

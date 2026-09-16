@@ -22,7 +22,11 @@ import build_map as bm
 import support_model as sm
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TURNS = 6
+TURNS = 6                 # a raid attack lasts 6 rounds
+MOVING = 1                # but the first goes on getting into position, in every battle (owner,
+                          # September 2026). Round 2 is often partial too, depending on the map; working
+                          # that out would mean simulating the board, which this tool doesn't try to do.
+FIGHTING = TURNS - MOVING  # the rounds you actually attack in
 TEAM = 5
 TEAM_REACH = {'team': 4, 'target': 4, 'one': 1, 'next attack': 1, 'adjacent': 2, '2 hexes': 3}   # of the 4 team-mates
 FACTION_ID = {'AdeptusMechanicus': 'Adeptus Mechanicus', 'Orks': 'Orks', 'Tyranids': 'Tyranids', 'Aeldari': 'Aeldari',
@@ -197,7 +201,7 @@ def buff_turns(r, ab):
     lasts = (r['Lasts'] or '').strip().lower()
     active = r['Source'] == 'Active'          # the Condition column is a switch, not a duration
     if lasts == 'battle':
-        return TURNS
+        return FIGHTING
     if lasts == 'once':
         return 1                                        # it only ever happens once
     m = re.match(r'(\d+)\s*round', lasts)
@@ -206,12 +210,12 @@ def buff_turns(r, ab):
         if lasts.startswith('each') or lasts in ('turn', 'every turn', ''):
             return TURNS                                # something that happens again every turn
         if lasts == 'every third round':
-            return -(-TURNS // 3)
-        return min(rounds, TURNS)
+            return -(-FIGHTING // 3)
+        return min(rounds, FIGHTING)
     cd = (ab.get('constants') or {}).get('cooldownTurns') if ab else None
     cd = int(float(cd)) if cd not in (None, '') else 2
     uses = (TURNS - 1) // (cd + 1) + 1                  # turn 1, then every cooldown + 1 turns
-    return min(TURNS, rounds * uses)
+    return min(FIGHTING, rounds * uses)
 
 
 DEBUFF_KINDS = ('taken', 'takenpct', 'armour', 'armignore')   # these land on the enemy, so they help everyone
@@ -327,7 +331,7 @@ def tweak_spec(member, spec, team, boss, turn, lv, used):
     return dict(spec, parts=parts)
 
 
-def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=TURNS,
+def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=FIGHTING,
                   mow=None, team_uses=(), high=False):
     """one character's damage over the 6 turns: the active turn plus normal attacks.
     extra: flat Damage added to this character's stat (Laviscus's Outrage, the Neurothrope's parasite).
@@ -494,13 +498,13 @@ def outrage(member, team, boss, ds, rows, sp, lv, trig, act, gear, high=()):
     mates = [x for x in team if x['name'] != member['name']]
     pct = sm.value(member['passive'], 'extraDmgPct', lv) / 100
     out = []
-    for turn in range(1, TURNS + 1):
+    for turn in range(1, FIGHTING + 1):
         s = 0.0
         for m in mates:
-            opener = act and turn in active_turns(m, TURNS)
+            opener = act and turn in active_turns(m, FIGHTING)
             s += biggest_hit(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp, lv, trig, act,
                              gear, opener, turn, m['name'] in high)
-        if act and turn in active_turns(member, TURNS):
+        if act and turn in active_turns(member, FIGHTING):
             # his own Euphoric Strikes doesn't end his turn, so it feeds his Outrage before he attacks (wiki)
             s += ability_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear)
         out.append(pct * s)
@@ -746,14 +750,14 @@ def mow_damage(g, mow, boss, ds, lv, rules=None):
         if not ab or 'minDmg' not in (ab.get('variables') or {}):
             continue
         part = _part(ab, min(lv, MOW_LEVELS), '', dt)
-        tot += bm.part_vs_defence(part, boss, ds, False)[0] * rate * TURNS
+        tot += bm.part_vs_defence(part, boss, ds, False)[0] * rate * FIGHTING
     return tot
 
 
 def team_turns(team, surv, lv, trig, act, gear, tier_key):
     """{name: turns alive} for a team, or 6 each when the deaths switch is off"""
     if not surv:
-        return {m['name']: TURNS for m in team}
+        return {m['name']: FIGHTING for m in team}
     front = front_line(team)
     return {m['name']: survives(m, [x for x in team if x['name'] != m['name']], surv['terms'], front,
                                 surv['drows'], lv, trig, act, gear, tier_key,
@@ -764,7 +768,7 @@ def member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buf
     """the flat Damage a character brings into this team on each of the 6 turns: Laviscus's Outrage, the
     Neuroparasite and the Norn Crown, a Machine of War's +Damage"""
     extra = (outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear, high) if m['name'] == 'Laviscus'
-             else [0.0] * TURNS)
+             else [0.0] * FIGHTING)
     flat = parasite(m, team, boss, lv, gear, tier_key)
     if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
         flat += m['dmg'] * buff['pct'] / 100
@@ -781,7 +785,7 @@ def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_
     total = mow['own'] if mow else 0.0
     buff = mow['buff'] if mow else None
     alive = team_turns(team, surv, lv, trig, act, gear, tier_key)
-    uses = sorted(x for m in team for x in (active_turns(m, TURNS) if act else ()))
+    uses = sorted(x for m in team for x in (active_turns(m, FIGHTING) if act else ()))
     each, args = {}, {}
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
@@ -887,7 +891,7 @@ def main():
           + (f" · side battles cleared: -{dbf['armour']:.0f}% Armour, -{dbf['block']:.0f}% block" if args.debuffs else ''))
     for n in rules['notes']:
         print(f'   rule: {n}')
-    print(f"no {banned} allowed · {TURNS} turns · {args.tier} abilities {args.ability} "
+    print(f"no {banned} allowed · {TURNS} rounds, {FIGHTING} of them fighting · {args.tier} abilities {args.ability} "
           f"{'standard gear' if args.gear else 'no gear'} {'all triggered' if args.trig else 'always-on'} "
           f"active {'on' if act else 'off'}"
           + (f" · {HIGH_GROUND} on high ground" if args.high else ''))
@@ -909,7 +913,7 @@ def main():
             mow = best_mow(team, opts, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier, surv)
             team, score = best_team(U, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, banned, rules,
                                     tuple(args.anchor), tier_key=args.tier, surv=surv, mow=mow, high=args.high)
-    print(f"\nBest five: {score:,.0f} damage in {TURNS} turns ({score / fight['hp'] * 100:.2f}% of the boss)")
+    print(f"\nBest five: {score:,.0f} damage in {FIGHTING} fighting rounds ({score / fight['hp'] * 100:.2f}% of the boss)")
     if mow:
         b = mow['buff']
         print(f"  Machine of War: {mow['name']} - {mow['own']:,.0f} damage of its own"
@@ -920,7 +924,7 @@ def main():
                   else ' (its Mythic ability is defensive: nothing for a damage run)')))
     alive = team_turns(team, surv, args.ability, args.trig, act, args.gear, args.tier)
     buff0 = mow['buff'] if mow else None
-    uses0 = sorted(x for u in team for x in (active_turns(u, TURNS) if act else ()))
+    uses0 = sorted(x for u in team for x in (active_turns(u, FIGHTING) if act else ()))
     extras = {m['name']: member_extra(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear,
                                       args.tier, buff0) for m in team}
     on_high = set()
@@ -942,7 +946,7 @@ def main():
         tag = f'  (+{max(extra):,.0f} Damage from the team)' if max(extra) else ''
         if args.high and m['name'] in on_high:
             tag += '  [high ground]'
-        if alive[m['name']] < TURNS:
+        if alive[m['name']] < FIGHTING:
             tag += f"  [dies on turn {alive[m['name']]}]"
         print(f"  {m['name']:<24}{withteam:>11,.0f}   (alone {alone:>9,.0f}, buffs +{withteam - alone:>9,.0f}){tag}")
     solo = sorted(((member_damage(u, [], boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules), u['name'])

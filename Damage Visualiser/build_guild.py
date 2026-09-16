@@ -84,11 +84,11 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
                                        tier_key=tier_key, mow=mow, high=high)
     score_of = lambda t: gr.team_damage(t, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None, mow, high)
     buff = mow['buff'] if mow else None
-    uses = sorted(x for u in team for x in (gr.active_turns(u, gr.TURNS) if act else ()))
+    uses = sorted(x for u in team for x in (gr.active_turns(u, gr.FIGHTING) if act else ()))
     extras = {m['name']: gr.member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buff)
               for m in team}
     plain = {m['name']: gr.member_damage(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp, lv,
-                                         trig, act, gear, rules, extras[m['name']], gr.TURNS, buff, uses)
+                                         trig, act, gear, rules, extras[m['name']], gr.FIGHTING, buff, uses)
              for m in team}
     on_high = gr.high_ground(plain) if high else set()
     if on_high:                               # Outrage grows when its feeders are on the high ground
@@ -101,7 +101,7 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
         mates = [x for x in team if x['name'] != m['name']]
         extra = extras[m['name']]
         alone = gr.member_damage(m, [], boss, ds, rows, sp, lv, trig, act, gear, rules)
-        with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, gr.TURNS,
+        with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, gr.FIGHTING,
                                      buff, uses, m['name'] in on_high)
         five.append([idx[m['name']], round(with_team), round(alone)] + ([1] if m['name'] in on_high else []))
     # who else would fit: the best swap each character outside the five could make
@@ -207,8 +207,8 @@ def main():
                        dbf=[round(dbf2['armour']), round(dbf2['block'])],
                        rules=gr.boss_rules(g, f)['notes'], rules2=rules2,
                        traits=sorted(boss['traits'])))
-    data = dict(version=g['version'], tiers=tiers, chars=chars, mows=mows, fights=fl, turns=gr.TURNS,
-                high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
+    data = dict(version=g['version'], tiers=tiers, chars=chars, mows=mows, fights=fl, turns=gr.FIGHTING,
+                high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT), fighting=gr.FIGHTING,
                 r={t['key']: {} for t in tiers})
     if old:                                   # keep every setting this run isn't redoing
         data['r'] = old['r']

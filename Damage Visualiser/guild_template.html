@@ -243,8 +243,9 @@ function draw() {
   ].map(s => '<span>' + s + '</span>').join('');
 
   el('chartTitle').textContent = f.n + ' · ' + f.slot + ', level ' + f.l + (f.season ? '   ·   the ' + f.season + ' season' : '');
-  el('chartHint').innerHTML = '<span class="total"><b>' + n(res.s) + '</b><em>damage in ' + DATA.turns +
-    ' turns · ' + (res.s / f.hp * 100).toFixed(2) + '% of the boss</em></span>';
+  el('chartHint').innerHTML = '<span class="total"><b>' + n(res.s) + '</b><em>damage in ' +
+    (DATA.fighting || DATA.turns) + ' fighting rounds · ' + (res.s / f.hp * 100).toFixed(2) +
+    '% of the boss</em></span>';
 
   const max = Math.max(...res.f.map(r => r[1]));
   el('five').innerHTML = res.f.slice().sort((a,b) => b[1] - a[1]).map(r => {
@@ -286,7 +287,8 @@ function draw() {
     '<li><b>' + DATA.chars[a[0]].n + '</b><span>' + (a[1] >= 0 ? '+' : '−') + n(Math.abs(a[1])) + '</span></li>').join('');
 
   el('switchHint').textContent = 'Every character is at ' + t.about + '.';
-  el('foot').textContent = 'A raid attack is ' + DATA.turns + ' turns with five characters and a Machine of War, and the boss’s own faction is banned. ' +
+  el('foot').textContent = 'A raid attack is ' + DATA.turns + ' rounds with five characters and a Machine of War, and the boss’s own faction is banned. ' +
+    'The first round goes on getting into position, so ' + (DATA.fighting || DATA.turns) + ' of them are spent fighting. ' +
     'Bosses are Immune, so nothing reduces their Armour and they cannot be Stunned, Suppressed or Taunted.';
   el('foot2').textContent = 'Game data version ' + DATA.version;
   fitPage();
