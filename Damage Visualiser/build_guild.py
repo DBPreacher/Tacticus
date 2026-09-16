@@ -91,6 +91,11 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
                                          trig, act, gear, rules, extras[m['name']], gr.TURNS, buff, uses)
              for m in team}
     on_high = gr.high_ground(plain) if high else set()
+    if on_high:                               # Outrage grows when its feeders are on the high ground
+        for m in team:
+            if m['name'] == 'Laviscus':
+                extras[m['name']] = gr.member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear,
+                                                    tier_key, buff, on_high)
     five = []
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
