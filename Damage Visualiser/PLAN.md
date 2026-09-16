@@ -133,8 +133,23 @@ mostly -30% Armour and -15% block chance).
 
 Owner decisions: start with "best 5 for this boss", assume a full 6-turn run and
 as much real support as possible, and a side-battle debuff switch. Terrain height
-matters in the game but isn't modelled. Not counted yet: summons, bombs, the
-Machine of War slot (the real teams all run the Biovore).
+matters in the game but isn't modelled. Not counted yet: summons and bombs.
+
+**The Machine of War slot** is counted. Every machine has a Mythic ability that
+works on friendly Mythic characters, and it is worth far more than the machine's
+own damage: the Biovore's Hyper Corrosive Acid is +20% damage taken from
+anything a Spore Mine has hit, which is every attack the five make, so it wins
+almost everywhere - exactly the machine the real teams bring. The Rukkatrukk's
+version is melee-only and the Malleus Rocket Launcher's ranged-only; the
+Reanimator and Z'Kar give +20% Damage to Mechanical and Psyker characters, which
+is why a Mech team brings the Reanimator instead; the Plagueburst Crawler's
+Blighted Land needs your characters to stand on the hexes it contaminates, so it
+follows the All triggered switch. The other five are defensive. The boss's
+faction is banned for machines too (so no Reanimator against Szarekh).
+
+`build_guild.py` builds **guild-raid.html** from these numbers: every boss and
+tier, every roster setting, the side battles on and off, with the five, the
+machine, and the eight characters who came closest to making the team.
 
 Each boss brings its own rules: Mortarion's Revoltingly Resilient (only the first
 hit of an attack lands in full, each one after that half the last), Szarekh's

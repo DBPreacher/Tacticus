@@ -1,7 +1,7 @@
 # Damage Visualiser — Instructions
 
-How to keep the **Roster Battle Map**, the **"typical character" graphic**
-and the **Support Map** up to date. It's written for the owner and for future
+How to keep the **Roster Battle Map**, the **"typical character" graphic**,
+the **Support Map** and the **Guild Raid page** up to date. It's written for the owner and for future
 Claude sessions: follow it step by step, and you shouldn't need this
 conversation's history.
 
@@ -10,6 +10,7 @@ conversation's history.
 | `roster-battle-map.html` | `build_map.py` | https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8 |
 | `typical-character.html` | `build_map.py` (same run) | https://claude.ai/artifact/SEssFu6qK5qQyXgUAmGjrz |
 | `support-map.html` | `build_support.py` (after `build_map.py`) | https://claude.ai/artifact/MBWNzAY2cDkcJetmmCJp3y |
+| `guild-raid.html` | `build_guild.py` (after `build_map.py`) | (published after the first build) |
 
 Republish each to its own link after a rebuild (read it first with the
 Artifact tool, then publish with `url`).
@@ -43,6 +44,9 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `support_model.py` | Runs `support_abilities.csv` through the damage model: how much each buff helps every ally who can use it. `python -X utf8 support_model.py [--defence [--spread]] [--active] [--gear] [--trig] [--level 50]` prints the Diamond III rankings | Only to change the rules |
 | `build_support.py` | Builds `support-map.html`: every tier and setting, both sides and both Enemy focus settings, in parallel (about 5 minutes on this PC). `--page-only` rebuilds just the page from the template with the last numbers (for design changes) | No |
 | `support_template.html` | The Support Map's design (its CSS starts as a copy of `map_template.html`'s) | Yes, for design changes |
+| `build_guild.py` | Builds `guild-raid.html`: the best five for every boss and tier at every setting, with the side battles on and off, in parallel (about 10 minutes on this PC). `--page-only` rebuilds just the page from the template | No |
+| `guild_template.html` | The Guild Raid page's design | Yes, for design changes |
+| `guild-raid.html` | The built Guild Raid page | **Never.** It's overwritten |
 | `support-map.html` | The built Support Map | **Never.** It's overwritten |
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
@@ -120,6 +124,43 @@ python -X utf8 build_support.py
 | Bellator, Progression: Mythic | 11,350 Health / 1,334 Damage / 1,735 Armour (the wiki's Mythic 14★ A2 values) | Tier settings broke |
 | Every relic placed | The build warns if a relic has no owner in the roster | Check `relic_owners.csv` / the wiki page |
 | Number of characters | Same as the non-MoW, non-Do_Not_Use rows in the CSV | A name didn't match; see the `ALIAS` warning |
+
+
+---
+
+## Guild Raid
+
+`guild-raid.html` answers one question: **who are the best five against this
+boss?** A raid attack is 6 turns with five characters and a Machine of War, and
+the boss's own faction is banned.
+
+- `guild_raid.py` is the model and a command line; `build_guild.py` runs it for
+  every boss, tier and setting and writes the page.
+- The page's switches are the Roster Battle Map's (roster tier, ability level,
+  gear, All triggered, actives) plus **Side battles cleared**, which applies the
+  two debuff chains to the boss (mostly -30% Armour, -15% block chance).
+- The boss picker lists every boss and every tier it appears in; the numbers use
+  the hardest level of that tier.
+- **Machine of War.** Every machine has a Mythic ability that works on friendly
+  Mythic characters, and it is usually worth more than the machine's own damage:
+  the Biovore's Hyper Corrosive Acid (+20% damage taken, anything a Spore Mine
+  has hit), the Rukkatrukk's (melee only), the Malleus Rocket Launcher's (ranged
+  only), the Reanimator's Guardian Construct and Z'Kar's Cabal of Sorcerers
+  (+20% Damage for Mechanical or Psyker characters), the Plagueburst Crawler's
+  Blighted Land (+20% Damage, but you have to stand on its contaminated hexes,
+  so it follows the All triggered switch). The rest are defensive and do nothing
+  for a damage run. The page brings the best machine for the five it picked, and
+  the boss's faction is banned here too.
+- **Boss rules** are read from each boss's own abilities: Mortarion's Revoltingly
+  Resilient, Szarekh's Noctilith Beacons and Obeisance Generators, the Lion's
+  Emperor's Shield. Laviscus's Outrage, the Neurothrope's Neuroparasite and the
+  Norn Crown are counted; Xybia's Mind Control is not, because a Boss cannot be
+  Taunted.
+- **Not counted:** the boss killing your characters (`--deaths` on the command
+  line, see PLAN.md), terrain height, bombs and summons.
+
+To rebuild after a game update: `python -X utf8 build_map.py`, then
+`python -X utf8 build_guild.py`, then republish the artifact.
 
 ---
 

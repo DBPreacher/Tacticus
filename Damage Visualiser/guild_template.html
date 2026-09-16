@@ -1,0 +1,294 @@
+<meta charset="utf-8">
+<title>Guild Raid Five</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<!-- Built by build_guild.py: edit this template, never guild-raid.html. /*DATA*/ is replaced with the model output.
+     The CSS down to "Guild Raid additions" is copied from map_template.html so the pages match. -->
+<style>
+:root{
+  --ground:#0a0a0a; --panel:#0f1318; --panel-2:#141a21; --rule:#232b35; --rule-soft:#1a2029;
+  --ink:#e8eaf0; --ink-2:#a3aab8; --ink-3:#6e7686; --guide:#4a5363;
+  --imperial:#d9ad3f; --chaos:#dc4638; --xenos:#5cbfe0;
+  --display:'Cinzel',Georgia,'Times New Roman',serif;
+  --data:'Rajdhani','Arial Narrow',Arial,sans-serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;margin:0}
+.wrap{max-width:1440px;margin:0 auto;padding:28px 28px 48px;display:flex;flex-direction:column;gap:22px}
+/* on windows wider than 1440px, fitPage() lays the page out at 1440px and zooms it up to fill the screen */
+.wrap.fit{width:1440px;max-width:none}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;border-bottom:1px solid var(--rule);padding-bottom:18px}
+.eyebrow{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
+.setup{display:flex;flex-wrap:wrap;gap:6px}
+.setup span{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:3px 9px;border-radius:3px;font-variant-numeric:tabular-nums}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 300px 226px;gap:16px;align-items:stretch}
+.main>.controls,.main>.detail{contain:size;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+@media (max-width:1280px){.main{grid-template-columns:1fr 1fr}.main>.chart-card{grid-column:1/-1}.main>.controls,.main>.detail{contain:none;overflow:visible}}
+@media (max-width:760px){.main{grid-template-columns:1fr}}
+.chart-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px 16px 12px;position:relative}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 2px 10px;flex-wrap:wrap}
+/* the title stays on one line and the hint always gets its own, so nothing shifts when the settings change */
+.chart-head h2{font-family:var(--display);font-size:16px;font-weight:600;margin:0;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 100%}
+.hint{font-size:12.5px;color:var(--ink-3)}
+.chart-head .hint{flex:1 1 100%}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:16px}
+.label{font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.controls{display:flex;flex-direction:column;gap:12px;padding:14px}
+.controls .label{margin-bottom:6px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.seg button{all:unset;cursor:pointer;text-align:center;font-family:var(--data);font-weight:600;font-size:14.5px;padding:6px 3px;white-space:nowrap;color:var(--ink-2);background:var(--panel-2)}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#0a0a0a}
+.seg button:focus-visible,.bosslist button:focus-visible,.check input:focus-visible+span{outline:2px solid var(--ink);outline-offset:2px}
+.check{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13.5px;color:var(--ink)}
+.check input{position:absolute;opacity:0}
+.check span.box{width:32px;height:18px;border-radius:9px;background:var(--rule);position:relative;flex:none;transition:background .2s}
+.check span.box::after{content:"";position:absolute;top:3px;left:3px;width:12px;height:12px;border-radius:50%;background:var(--ink-2);transition:transform .2s,background .2s}
+.check input:checked+span.box{background:#6e7686}
+.check input:checked+span.box::after{transform:translateX(14px);background:#fff}
+footer{border-top:1px solid var(--rule);padding-top:14px;color:var(--ink-3);font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 22px;justify-content:space-between}
+
+/* ---------------------------------------------------------------- Guild Raid additions */
+/* the five, as one bar each: what the character does on its own, then what the team adds */
+.five{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:182px minmax(0,1fr) 104px;align-items:center;gap:12px}
+.who{min-width:0}
+.who b{display:block;font-family:var(--data);font-weight:700;font-size:16.5px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who span{display:block;font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:26px;background:var(--panel-2);border-radius:3px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%;transition:width .35s cubic-bezier(.22,.9,.32,1)}
+.bar i.solo{opacity:1}
+.bar i.team{opacity:.42}
+.num{font-family:var(--data);font-weight:700;font-size:18px;text-align:right;font-variant-numeric:tabular-nums}
+.num span{display:block;font-family:var(--body);font-weight:400;font-size:11px;color:var(--ink-3)}
+.total{display:flex;align-items:baseline;gap:10px;font-family:var(--data);font-variant-numeric:tabular-nums}
+.total b{font-size:30px;font-weight:700;line-height:1}
+.total em{font-style:normal;font-size:15px;color:var(--ink-2)}
+.mow{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule-soft)}
+.mow .tag{font-family:var(--data);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);flex:none}
+.mow b{font-family:var(--data);font-weight:700;font-size:17px}
+.mow span{font-size:12.5px;color:var(--ink-2)}
+.key{display:flex;gap:16px;margin:12px 2px 0;padding-top:10px;border-top:1px solid var(--rule-soft);font-size:12.5px;color:var(--ink-2);flex-wrap:wrap}
+.key i{width:22px;height:10px;border-radius:2px;display:inline-block;vertical-align:0;margin-right:6px;background:var(--ink-3)}
+.key i.team{opacity:.42}
+/* the boss panel */
+.detail{padding:14px}
+.bosslist{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.bosslist button{all:unset;cursor:pointer;font-family:var(--data);font-weight:600;font-size:13.5px;padding:3px 8px;border:1px solid var(--rule);border-radius:3px;color:var(--ink-2);background:var(--panel-2)}
+.bosslist button[aria-pressed="true"]{background:var(--ink);color:#0a0a0a;border-color:var(--ink)}
+.facts{display:flex;flex-direction:column;gap:5px;font-size:13px;margin-top:10px}
+.facts div{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+.facts div span:last-child{font-family:var(--data);font-weight:600;font-size:15px}
+.rules{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.rules p{margin:0;font-size:12.5px;color:var(--ink-2);border-left:2px solid var(--guide);padding-left:9px}
+.alts{margin:12px 2px 0;padding-top:11px;border-top:1px solid var(--rule-soft)}
+.alts .label{margin-bottom:7px}
+.alts ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.alts li{display:flex;align-items:baseline;gap:8px;font-size:13px;font-variant-numeric:tabular-nums;
+  border:1px solid var(--rule);border-radius:3px;padding:3px 9px;background:var(--panel-2)}
+.alts li b{font-family:var(--data);font-weight:600;font-size:14.5px}
+.alts li span{color:var(--ink-3);font-family:var(--data);font-weight:600}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Guild Raid</div>
+      <h1 id="title">The best five for this boss</h1>
+    </div>
+    <div class="setup" id="setup"></div>
+  </header>
+
+  <div class="main">
+    <div class="chart-card" id="chartCard">
+      <div class="chart-head">
+        <h2 id="chartTitle">The best five</h2>
+        <div class="hint" id="chartHint"></div>
+      </div>
+      <div class="five" id="five"></div>
+      <div class="mow" id="mow"></div>
+      <div class="key">
+        <div><i class="solo"></i>On their own</div>
+        <div><i class="team"></i>What the other four and the Machine of War add</div>
+      </div>
+      <div class="alts">
+        <p class="label">Who else fits <span class="hint" style="text-transform:none;letter-spacing:0">— what the five would lose by bringing them instead</span></p>
+        <ol id="alts"></ol>
+      </div>
+    </div>
+
+    <div class="panel detail">
+      <p class="label">The boss</p>
+      <div class="bosslist" id="bosslist"></div>
+      <div class="seg" id="bosstier"></div>
+      <div class="facts" id="facts"></div>
+      <div class="rules" id="rules"></div>
+    </div>
+
+    <div class="panel controls">
+      <div>
+        <p class="label">Your roster</p>
+        <div class="seg" id="tier"></div>
+      </div>
+      <div>
+        <p class="label">Ability level</p>
+        <div class="seg" id="level"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="gear"><span class="box"></span><span>Standard gear</span></label>
+      <label class="check"><input type="checkbox" id="trig"><span class="box"></span><span>All triggered</span></label>
+      <label class="check"><input type="checkbox" id="act" checked><span class="box"></span><span>Actives on</span></label>
+      <label class="check"><input type="checkbox" id="dbf" checked><span class="box"></span><span>Side battles cleared</span></label>
+      <p class="hint" id="switchHint"></p>
+    </div>
+  </div>
+
+  <footer>
+    <div id="foot"></div>
+    <div id="foot2"></div>
+  </footer>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+
+const ALLIANCE = {Imperial:'var(--imperial)', Chaos:'var(--chaos)', Xenos:'var(--xenos)'};
+const n = x => x.toLocaleString('en-GB', {maximumFractionDigits:0});
+const el = id => document.getElementById(id);
+
+const state = {tier:'mythic', lv:null, gear:true, trig:false, act:true, dbf:true, boss:null, btier:null};
+
+const bosses = [...new Set(DATA.fights.map(f => f.n))].sort();
+const tiersOf = b => DATA.fights.map((f,i) => ({f, i})).filter(x => x.f.n === b).sort((a,b) => a.f.t - b.f.t);
+state.boss = bosses.includes('Mortarion') ? 'Mortarion' : bosses[0];
+state.btier = tiersOf(state.boss).slice(-1)[0].f.t;
+
+function tierDef() { return DATA.tiers.find(t => t.key === state.tier); }
+function scenarioKey() {
+  return (state.trig ? 'trig' : 'base') + '_l' + state.lv + (state.act ? '_a' : '') + (state.gear ? '_g' : '');
+}
+function fightIndex() {
+  const rows = tiersOf(state.boss);
+  return (rows.find(x => x.f.t === state.btier) || rows[rows.length - 1]).i;
+}
+function result() {
+  return DATA.r[state.tier][scenarioKey()][fightIndex()][state.dbf ? 1 : 0];
+}
+
+/* ---------------------------------------------------------------- the controls */
+function seg(host, items, active, onPick) {
+  host.innerHTML = '';
+  items.forEach(it => {
+    const b = document.createElement('button');
+    b.textContent = it.label;
+    b.setAttribute('aria-pressed', String(it.value === active));
+    b.onclick = () => { onPick(it.value); draw(); };
+    host.appendChild(b);
+  });
+}
+
+function buildControls() {
+  seg(el('tier'), DATA.tiers.map(t => ({label:t.label, value:t.key})), state.tier, v => {
+    state.tier = v;
+    if (!tierDef().levels.includes(state.lv)) state.lv = tierDef().levels[0];
+  });
+  if (!state.lv || !tierDef().levels.includes(state.lv)) state.lv = tierDef().levels[0];
+  seg(el('level'), tierDef().levels.map(l => ({label:String(l), value:l})), state.lv, v => state.lv = v);
+
+  const list = el('bosslist');
+  list.innerHTML = '';
+  bosses.forEach(b => {
+    const btn = document.createElement('button');
+    btn.textContent = b;
+    btn.setAttribute('aria-pressed', String(b === state.boss));
+    btn.onclick = () => {
+      state.boss = b;
+      const ts = tiersOf(b).map(x => x.f.t);
+      if (!ts.includes(state.btier)) state.btier = ts[ts.length - 1];
+      draw();
+    };
+    list.appendChild(btn);
+  });
+  const TIER_LABEL = ['Common','Uncom','Rare','Epic','Leg','Mythic'];
+  seg(el('bosstier'), tiersOf(state.boss).map(x => ({label:TIER_LABEL[x.f.t] || x.f.r, value:x.f.t})), state.btier,
+      v => state.btier = v);
+  ['gear','trig','act','dbf'].forEach(k => { el(k).checked = state[k]; el(k).onchange = () => { state[k] = el(k).checked; draw(); }; });
+}
+
+/* ---------------------------------------------------------------- the page */
+function draw() {
+  buildControls();
+  const f = DATA.fights[fightIndex()], res = result(), t = tierDef();
+
+  el('title').textContent = 'The best five for ' + f.n;
+  el('setup').innerHTML = [
+    t.label, 'Abilities ' + state.lv, state.gear ? 'Standard gear' : 'No gear',
+    state.trig ? 'All triggered' : 'Always-on only', state.act ? 'Actives on' : 'Actives off',
+    state.dbf ? 'Side battles cleared' : 'Side battles not cleared'
+  ].map(s => '<span>' + s + '</span>').join('');
+
+  el('chartTitle').textContent = f.n + ' · ' + f.r + ' tier, level ' + f.l;
+  el('chartHint').innerHTML = '<span class="total"><b>' + n(res.s) + '</b><em>damage in ' + DATA.turns +
+    ' turns · ' + (res.s / f.hp * 100).toFixed(2) + '% of the boss</em></span>';
+
+  const max = Math.max(...res.f.map(r => r[1]));
+  el('five').innerHTML = res.f.slice().sort((a,b) => b[1] - a[1]).map(r => {
+    const c = DATA.chars[r[0]], col = ALLIANCE[c.a] || 'var(--ink-3)';
+    const solo = Math.min(r[2], r[1]);
+    return '<div class="row"><div class="who"><b>' + c.n + '</b><span>' + c.f + '</span></div>' +
+      '<div class="bar"><i class="solo" style="width:' + (solo / max * 100) + '%;background:' + col + '"></i>' +
+      '<i class="team" style="width:' + ((r[1] - solo) / max * 100) + '%;background:' + col + '"></i></div>' +
+      '<div class="num">' + n(r[1]) + '<span>' + n(solo) + ' alone</span></div></div>';
+  }).join('');
+
+  const mow = res.m ? DATA.mows[res.m[0]] : null;
+  el('mow').innerHTML = mow
+    ? '<span class="tag">Machine of War</span><b>' + mow.n + '</b><span>' + n(res.m[1]) + ' damage of its own' +
+      (res.m.length > 2
+        ? ' · ' + (mow.b ? mow.b.name + ': ' : '') + (res.m[3] === 'taken' ? 'the boss takes' : 'your characters deal') +
+          ' +' + res.m[2] + '%' + (mow.b && mow.b.note ? ' (' + mow.b.note + ')' : '')
+        : ' · its Mythic ability needs a Mythic roster') + '</span>'
+    : '<span class="tag">Machine of War</span><span>none allowed against this boss</span>';
+
+  const off = state.dbf ? f.dbf : [0, 0];
+  const arm = Math.round(f.arm * (1 - off[0] / 100)), bc = Math.max(f.bc - off[1], 0);
+  el('facts').innerHTML = [
+    ['Health', n(f.hp)],
+    ['Armour', n(arm) + (off[0] ? ' · was ' + n(f.arm) : '')],
+    ['Blocks', bc ? bc + '% for ' + n(f.bd) : 'never'],
+    ['Banned', 'no ' + f.ban]
+  ].map(r => '<div><span>' + r[0] + '</span><span>' + r[1] + '</span></div>').join('');
+
+  el('rules').innerHTML = (f.rules || []).map(r => '<p>' + r.charAt(0).toUpperCase() + r.slice(1) + '</p>').join('');
+
+  el('alts').innerHTML = res.a.map(a =>
+    '<li><b>' + DATA.chars[a[0]].n + '</b><span>' + (a[1] >= 0 ? '+' : '−') + n(Math.abs(a[1])) + '</span></li>').join('');
+
+  el('switchHint').textContent = 'Every character is at ' + t.about + '.';
+  el('foot').textContent = 'A raid attack is ' + DATA.turns + ' turns with five characters and a Machine of War, and the boss’s own faction is banned. ' +
+    'Bosses are Immune, so nothing reduces their Armour and they cannot be Stunned, Suppressed or Taunted.';
+  el('foot2').textContent = 'Game data version ' + DATA.version;
+  fitPage();
+}
+
+/* ---------------------------------------------------------------- fit the page to the window */
+const wrapEl = document.querySelector('.wrap'), chartCard = el('chartCard');
+function fitPage() {
+  wrapEl.style.zoom = ''; wrapEl.classList.remove('fit');
+  const w = document.documentElement.clientWidth;
+  if (w > 1440) {
+    wrapEl.classList.add('fit');
+    const bottom = document.querySelector('footer').getBoundingClientRect().bottom + scrollY + 16;
+    const z = Math.min(w / 1440, innerHeight / bottom);
+    if (z > 1) wrapEl.style.zoom = z; else wrapEl.classList.remove('fit');
+  }
+}
+let fitSize = '';
+function refit() { const s = document.documentElement.clientWidth + 'x' + innerHeight; if (s !== fitSize) { fitSize = s; fitPage(); } }
+addEventListener('resize', refit);
+if (window.ResizeObserver) new ResizeObserver(refit).observe(document.documentElement);
+draw();
+if (document.fonts) document.fonts.ready.then(fitPage);
+</script>

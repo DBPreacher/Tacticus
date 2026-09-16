@@ -103,8 +103,9 @@ def boss_rules(g, fight):
     for k in (u.get('passiveAbilities') or []) + (u.get('activeAbilities') or []):
         if k == 'RevoltinglyResilient':                 # Mortarion: hits after the first get halved, then halved again
             out['diminish'] = (int(const(k, 'nrOfHits', 1)), const(k, 'dmgPctReduction', 50))
-            out['notes'].append(f"only the first {out['diminish'][0]} hit(s) of an attack land in full, "
-                                f"each one after that {out['diminish'][1]:.0f}% weaker than the last")
+            n_ = out['diminish'][0]
+            out['notes'].append(f"only the first {'hit' if n_ == 1 else str(n_) + ' hits'} of an attack lands in "
+                                f"full, each one after that {out['diminish'][1]:.0f}% weaker than the last")
         elif k == 'NoctilithBeacons':                   # Szarekh: Psykers do less
             out['psyker_pct'] = const(k, 'dmgPctReduction', 0)
             out['notes'].append(f"Psykers deal -{out['psyker_pct']:.0f}% damage")
@@ -114,7 +115,7 @@ def boss_rules(g, fight):
                                 "and he hits back at attacks he blocks twice")
         elif k == 'ObeisanceGenerators':                # Szarekh: don't charge him
             out['charge_hits'] = int(const(k, 'hitsReduction', 0))
-            out['notes'].append(f"charging costs {out['charge_hits']} hits (so stand still and attack)")
+            out['notes'].append(f"charging him costs you {out['charge_hits']} hits, so stand still and attack")
     return out
 
 
@@ -195,7 +196,8 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
     return toks
 
 
-def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=TURNS):
+def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=TURNS,
+                  mow=None):
     """one character's damage over the 6 turns: the active turn plus normal attacks.
     extra: flat Damage added to this character's stat (Laviscus's Outrage, the Neurothrope's parasite).
     turns: how many of the 6 it is alive for, when the deaths switch is on."""
@@ -207,6 +209,8 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
         a = dict(a, dmg=a['dmg'] + extra)
     dmg, _, w = bm.best_attack(a, boss, trig, ds, False, False)
     f = rule_factor(a, w, rules, member)
+    if mow and mow['kind'] == 'taken' and (not mow['only'] or mow['only'] == w['kind']):
+        f *= 1 + mow['pct'] / 100                       # the boss takes more damage from these attacks
     normal = dmg * f
     if turns <= 0:
         return 0.0
@@ -403,6 +407,82 @@ def survives(member, mates, terms, front, drows, lv, trig, act, gear, tier_key, 
     return turns
 
 
+# ---------------------------------------------------------------- the Machine of War slot
+# A raid team is five characters plus a Machine of War, and every Machine of War has a Mythic ability
+# that works on friendly Mythic characters. That ability is the reason one of them is in every team:
+# 'taken' = the boss takes more damage, 'dmg' = your characters hit harder. only= restricts it to melee
+# or ranged attacks, who= to a trait. The conditions are all things the Machine of War sets up itself
+# (the Biovore's Spore Mines, the Plagueburst Crawler's contaminated hexes), so they are counted as on.
+MOW_BUFF = {
+    'Biovore': dict(kind='taken', ab='HyperCorrosiveAcid', note='everything a Spore Mine has hit'),
+    'Rukkatrukk': dict(kind='taken', ab='MoreGitzOverEre', only='melee', note='normal melee attacks only'),
+    'Malleus Rocket Launcher': dict(kind='taken', ab='OnMyPosition', only='ranged', note='ranged attacks only'),
+    'Reanimator': dict(kind='dmg', ab='GuardianConstruct', who='Mechanical', note='Mechanical characters only'),
+    "Z'Kar": dict(kind='dmg', ab='CabalOfSorcerers', who='Psyker', note='Psyker characters only'),
+    # Blighted Land needs your characters to stand on the hexes it contaminates, so it follows the
+    # Traits switch, like the other effects you have to set up. The rest are things the machine does itself.
+    'Plagueburst Crawler': dict(kind='dmg', ab='BlightedLand', note='on a contaminated hex', trig=True),
+    # the rest are defensive (less damage taken, shields): nothing for a damage run
+    'Galatian': None, 'Exorcist': None, 'Forgefiend': None, "Tson'ji": None, 'Storm Speeder': None,
+}
+MOW_SHOTS = {                     # what it can fire at a boss, and how often ('' = every other turn)
+    'Biovore': [('SporeMineLauncher', 1.0)],            # a Spore Mine every turn, walked into the boss
+    'Galatian': [('MacroPlasmaIncinerator', 0.5)],
+    'Exorcist': [('DevastatingRefrain', 0.5)],
+    'Reanimator': [],                                   # repairs and summons, no attack of its own
+    'Malleus Rocket Launcher': [('MalleusRocketBarrage', 0.5)],
+    'Forgefiend': [('DaemonicOrdnance', 0.5)],          # the autocannons only fire at summons
+    'Plagueburst Crawler': [('EntropyCannons', 1.0), ('PlagueburstMortar', 0.5)],
+    'Rukkatrukk': [('SquigLaunchas', 0.5)],
+    "Tson'ji": [('HeavyRailRifle', 0.5), ('TwinSmartMissileSystem', 0.5)],
+    "Z'Kar": [('InfernalCannon', 0.5)],
+    'Storm Speeder': [('DeathOnTheWind', 0.5)],
+}
+MOW_LEVELS = 65                   # a Machine of War's abilities go to 65
+MYTHIC_ABILITY_LEVEL = 4          # its Mythic ability has four levels; the tool uses the top one
+
+
+def machines(g):
+    m = g['machinesOfWar']
+    return list(m.values()) if isinstance(m, dict) else list(m)
+
+
+def _ability(g, name):
+    """a Machine of War ability by its id, or by the id its name normalises to"""
+    ab = g['abilities'].get(name)
+    if ab:
+        return ab
+    want = name.lower().replace("'", '')
+    return next((a for k, a in g['abilities'].items()
+                 if (a.get('name') or '').lower().replace(' ', '').replace("'", '').replace('-', '') == want), None)
+
+
+def mow_buff(g, mow, lv, tier_key, trig=False):
+    """what this Machine of War's Mythic ability does for the five (nothing below Mythic)"""
+    spec = MOW_BUFF.get(mow['name'])
+    if not spec or tier_key != 'mythic' or (spec.get('trig') and not trig):
+        return None
+    ab = _ability(g, spec['ab']) or next((g['abilities'][k] for k in (mow.get('mythicAbilities') or [])
+                                          if k in g['abilities']), None)
+    if not ab:
+        return None
+    pct = bossval(ab, 'extraDmgPct', MYTHIC_ABILITY_LEVEL) or 0.0
+    return dict(kind=spec['kind'], pct=pct, only=spec.get('only'), who=spec.get('who', 'all'),
+                name=ab.get('name') or spec['ab'], note=spec.get('note', ''))
+
+
+def mow_damage(g, mow, boss, ds, lv, rules=None):
+    """the Machine of War's own damage on the boss over the 6 turns"""
+    tot = 0.0
+    for ab_id, rate in MOW_SHOTS.get(mow['name'], []):
+        ab = _ability(g, ab_id)
+        if not ab or 'minDmg' not in (ab.get('variables') or {}):
+            continue
+        part = _part(ab, min(lv, MOW_LEVELS))
+        tot += bm.part_vs_defence(part, boss, ds, False)[0] * rate * TURNS
+    return tot
+
+
 def team_turns(team, surv, lv, trig, act, gear, tier_key):
     """{name: turns alive} for a team, or 6 each when the deaths switch is off"""
     if not surv:
@@ -413,8 +493,9 @@ def team_turns(team, surv, lv, trig, act, gear, tier_key):
                                 (surv['rnd'].get(m['name']), surv['rest'].get(m['name']))) for m in team}
 
 
-def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_key='d3', surv=None):
-    total = 0.0
+def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_key='d3', surv=None, mow=None):
+    total = mow['own'] if mow else 0.0
+    buff = mow['buff'] if mow else None
     alive = team_turns(team, surv, lv, trig, act, gear, tier_key)
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
@@ -422,17 +503,19 @@ def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_
         if m['name'] == 'Laviscus':
             extra += outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear)
         extra += parasite(m, team, boss, lv, gear, tier_key)
-        total += member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, alive[m['name']])
+        if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
+            extra += m['dmg'] * buff['pct'] / 100
+        total += member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, alive[m['name']], buff)
     return total
 
 
 def best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules=None, anchors=(), passes=3,
-              tier_key='d3', surv=None):
+              tier_key='d3', surv=None, mow=None):
     """greedy five, then swap each slot for anything better until it stops improving.
     anchors: characters that must be in the team (the team styles the owner plays)."""
     pool = [u for u in U if u['faction'] != banned]
     names = lambda team: {u['name'] for u in team}
-    score_of = lambda team: team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, surv)
+    score_of = lambda team: team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, surv, mow)
     team = [u for u in U if u['name'] in anchors]
     while len(team) < TEAM:
         team.append(max((u for u in pool if u['name'] not in names(team)), key=lambda u: score_of(team + [u])))
@@ -454,6 +537,23 @@ def best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules=None, an
     return team, score
 
 
+def mow_options(g, fight, boss, ds, lv, tier_key, banned, trig=False):
+    """every Machine of War you may bring to this boss, with its own damage and its Mythic ability"""
+    out = []
+    for m in machines(g):
+        if FACTION_ID.get(m['factionId'], m['factionId']) == banned:
+            continue                                    # the boss's own faction is banned here too
+        out.append(dict(name=m['name'], faction=m['factionId'], own=mow_damage(g, m, boss, ds, lv),
+                        buff=mow_buff(g, m, lv, tier_key, trig)))
+    return out
+
+
+def best_mow(team, opts, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, surv):
+    """the Machine of War that adds the most to this team"""
+    return max(opts, key=lambda mw: team_damage(team, boss, ds, rows, sp, lv, trig, act, gear,
+                                                rules, tier_key, surv, mw))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--boss', default='Belisarius Cawl')
@@ -467,6 +567,8 @@ def main():
     ap.add_argument('--anchor', action='append', default=[], help='a character the team must include (repeatable)')
     ap.add_argument('--team', help='score this team instead of searching: comma-separated names')
     ap.add_argument('--deaths', action='store_true', help='count the boss killing your characters')
+    ap.add_argument('--mow', help='the Machine of War to bring (default: the best one for the team)')
+    ap.add_argument('--no-mow', action='store_true', help='no Machine of War slot')
     args = ap.parse_args()
     g = game()
     fs = [f for f in fights(g) if f['name'].lower().startswith(args.boss.lower())]
@@ -486,22 +588,41 @@ def main():
     print(f"no {banned} allowed · {TURNS} turns · {args.tier} abilities {args.ability} "
           f"{'standard gear' if args.gear else 'no gear'} {'all triggered' if args.trig else 'always-on'} "
           f"active {'on' if act else 'off'}")
+    opts = [] if args.no_mow else mow_options(g, fight, boss, ds, args.ability, args.tier, banned, args.trig)
+    if args.mow:
+        opts = [o for o in opts if o['name'].lower().startswith(args.mow.lower())]
+    mow = None
     if args.team:
         want = [x.strip().lower() for x in args.team.split(',')]
         team = [u for u in U if u['name'].lower() in want]
-        score = team_damage(team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier, surv)
+        if opts:
+            mow = best_mow(team, opts, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier, surv)
+        score = team_damage(team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier,
+                            surv, mow)
     else:
         team, score = best_team(U, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, banned, rules,
                                 tuple(args.anchor), tier_key=args.tier, surv=surv)
+        if opts:
+            mow = best_mow(team, opts, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier, surv)
+            team, score = best_team(U, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, banned, rules,
+                                    tuple(args.anchor), tier_key=args.tier, surv=surv, mow=mow)
     print(f"\nBest five: {score:,.0f} damage in {TURNS} turns ({score / fight['hp'] * 100:.2f}% of the boss)")
+    if mow:
+        b = mow['buff']
+        print(f"  Machine of War: {mow['name']} - {mow['own']:,.0f} damage of its own"
+              + (f", and {b['name']} ({'the boss takes' if b['kind'] == 'taken' else 'your characters deal'} "
+                 f"+{b['pct']:.0f}% - {b['note']})" if b else ' (its Mythic ability does nothing for a damage run)'))
     alive = team_turns(team, surv, args.ability, args.trig, act, args.gear, args.tier)
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
         extra = (outrage(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear) if m['name'] == 'Laviscus' else 0.0)
         extra += parasite(m, team, boss, args.ability, args.gear, args.tier)
+        buff = mow['buff'] if mow else None
+        if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
+            extra += m['dmg'] * buff['pct'] / 100
         alone = member_damage(m, [], boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules)
         withteam = member_damage(m, mates, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, extra,
-                                 alive[m['name']])
+                                 alive[m['name']], buff)
         tag = f'  (+{extra:,.0f} Damage from the team)' if extra else ''
         if alive[m['name']] < TURNS:
             tag += f"  [dies on turn {alive[m['name']]}]"
