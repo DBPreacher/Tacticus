@@ -111,6 +111,23 @@ Earlier ideas that were replaced:
   characters gain most (Titus +60%), high-pierce one-hitters least (Incisus,
   Vitruvius about +10%). Needs a reviewed `support_abilities.csv` and owner
   decisions (allies in range, buff duration, whether healing belongs here).
+- **A "this one ramps" note in the character panel** (owner, 2026-09-16 - not
+  built yet, just parked). Build-up effects are not counted, so a character
+  who grows through a battle is charted as he is on turn 1. Titus is the
+  extreme: Fuelled by Fury gives +84.6 Damage for every active a friendly
+  character has used this battle, so he reads 91st for Damage at 0 stacks,
+  25th at 8 and 9th at 12 - realistic for a five-turn fight with four allies.
+  23 passives and about a dozen actives have a component left out for this
+  reason (Kharn, Ragnar, Haarken, Shiron, Macer, Tanksmasha, Wrask and the
+  rest). Proposal: flag the ones whose rank would move by more than ~20
+  places over a battle and say so in the pinned panel - no assumed stack
+  counts, no model change, nothing arbitrary to decide.
+  Worth knowing while this is open: the model already handles build-up three
+  different ways - zero (Titus and most), an assumed midpoint (Blessings of
+  Khorne at 4 of 8 stacks, All triggered only) and one stack (Kimm's Modified
+  Exoarmour, from the second attack on). That split is by trait vs ability,
+  not by principle.
+
 - **Teammate-powered damage:** Laviscus's Outrage (+120% of the highest hit a
   friend lands on an enemy next to him, +Crit Damage per Chaos friend) isn't
   counted. Alone he's 101st for damage at defaults; with one 1,500 hit from a
