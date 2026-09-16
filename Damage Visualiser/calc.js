@@ -183,11 +183,19 @@ function buffsFor(member, mates, D, immune) {
   return toks;
 }
 
+/* The order buffs land in (support_model._tok_order). Without it a team's damage depends on the order
+   its five happen to be listed in, because a token that lifts damage only lifts the parts that already
+   exist when it lands: first everything that adds to the character's own attacks, then the ability-scope
+   multipliers on those, then what the enemy takes - flat first, then the percentages, the way a normal
+   attack does it. */
+const tokRank = t => t.k === 'taken' ? 2 : t.k === 'takenpct' ? 3
+  : ((SCOPE[t.s] === undefined ? t.s : SCOPE[t.s]) === 'ability' ? 1 : 0);
+
 /* apply those tokens: mirrors support_model.buffed */
 function buffed(ally, toks, spec) {
   const a = Object.assign({}, ally, {ps: (ally.ps || []).slice(), pg: (ally.pg || []).slice()});
   spec = spec ? clone(spec) : null;
-  for (const tok of toks) {
+  for (const tok of toks.slice().sort((x, y) => tokRank(x) - tokRank(y))) {
     const k = tok.k, o = tok.o || {}, v = tok.v;
     let vs = null, vsnot = null;
     if (o.vs) { const names = o.vs.replace(/^!/, '').split('|'); if (o.vs.startsWith('!')) vsnot = names; else vs = names; }

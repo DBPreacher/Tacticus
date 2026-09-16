@@ -135,6 +135,19 @@ def _vs(o):
     return (None, names) if vs.startswith('!') else (names, None)
 
 
+def _tok_order(t):
+    """The order buffs land in. Without this a team's damage depends on the order its five happen to be
+    listed in, because a token that lifts damage only lifts the parts that already exist when it lands:
+    first everything that adds to the character's own attacks, then the ability-scope multipliers on
+    those attacks, and last what the enemy takes - which lifts everything it takes."""
+    if t['kind'] in ('taken', 'takenpct'):
+        # flat first, then the percentages, the way a normal attack does it
+        return 2 if t['kind'] == 'taken' else 3
+    if _scope(t['scope']) == 'ability':
+        return 1
+    return 0
+
+
 def buffed(ally, toks, spec, gear_on):
     """(ally with the buffs added, active spec with ability-side buffs, armour taken off every enemy)"""
     a = dict(ally)
@@ -142,7 +155,7 @@ def buffed(ally, toks, spec, gear_on):
     pg = list(a.get('pg') or [])
     spec = copy.deepcopy(spec) if spec else None
     armour = 0.0
-    for t in toks:
+    for t in sorted(toks, key=_tok_order):
         k, o, v = t['kind'], t['opts'], t.get('value')
         vs, vsnot = _vs(o)
         types = set(o['type'].split('|')) if 'type' in o else None

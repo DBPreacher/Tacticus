@@ -202,11 +202,13 @@ actually play at about a third of what they do. It now lands inside 10%:
 
 | Real run | The team | Real | The model |
 |---|---|---:|---:|
-| Mortarion Mythic 3 | Laviscus, Atlacoya, Boss Gulgortz, Trajann, Kariyan + Biovore | 1,632,137 and ~1,660,000 | 1,778,467 |
-| Szarekh Mythic 2 | Aesoth, Boss Gulgortz, Trajann, Laviscus, Kariyan + Biovore | ~2,620,000 | 2,452,026 |
+| Mortarion Mythic 3 | Laviscus, Atlacoya, Boss Gulgortz, Trajann, Kariyan + Biovore | 1,632,137 and ~1,660,000 | 1,528,669 |
+| Szarekh Mythic 2 | Aesoth, Boss Gulgortz, Trajann, Laviscus, Kariyan + Biovore | ~2,620,000 | 2,445,414 |
 
-Both at Mythic, ability 60, standard gear, All triggered, side battles cleared,
-High ground on. **Ability 60 is the game's maximum today** (owner, September
+Mortarion with the side battles **not** cleared and Szarekh with them cleared -
+`check_guild.py` prints both states and takes the closer one, because which side
+battles a guild had done is not in the videos. Both at Mythic, ability 60,
+standard gear, All triggered, High ground on. Worst miss: 7.9%. **Ability 60 is the game's maximum today** (owner, September
 2026); 65 arrives with Adamantine III, so don't raise the tier until it does.
 
 If the numbers drift again, the things that turned out to matter were: what
@@ -231,6 +233,18 @@ it is about the *fight*, it stays in `guild_raid.py`.
 | A buff only counts for the turns it is up | `guild_raid.py` only | **No** - the Support Map measures a buff's boost to *one attack*, so how long it lasts isn't part of that question (the Defence side already handles round-only effects) |
 | Boss rules, side-battle debuffs, the Machine of War slot, high ground | `guild_raid.py` only | **No** - there are no bosses, machines or terrain on the other pages |
 | "+Damage taken" and "not a normal attack" buffs reach the hits a passive adds | `support_model.py`, so both pages | **Yes** - it makes those buffs worth more on the Support Map |
+| Buffs land in a fixed order, so a team's score doesn't depend on the order its five are listed in | `support_model._tok_order`, so both pages | **Yes** - see below |
+
+**The order buffs land in.** A buff that lifts damage only lifts the parts that
+exist when it lands: "+60% damage taken" applied before a team-mate's extra
+attack has been added misses that attack entirely. Buffs used to land in
+whatever order the five happened to be listed in, so the same team scored up to
+**35% differently depending on the order it was written down** - and the search
+kept whichever order it built the team in. `support_model._tok_order` fixes the
+order: everything that adds to the character's own attacks, then the
+ability-scope multipliers on those, then what the enemy takes, flat before
+percentages, the way a normal attack does it. Found by the page's Calculate
+button disagreeing with the page's own precomputed five (September 2026).
 
 The one finding worth saying on camera rather than coding: **+20% damage taken is
 worth more than +20% Damage**, because Armour comes off every hit before the
