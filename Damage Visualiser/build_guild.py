@@ -126,10 +126,10 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
 # nothing to spread, so it goes out in small chunks instead - 20 minutes becomes about a minute.
 CHUNK = 3
 FULL_CHUNK = 999
-# Which rosters the page offers. A Gold roster is not attacking a Guild Raid boss, so it is not built
-# (owner, September 2026) - and every tier dropped halves the build. Drop 'd3' too if it stops being
-# useful: it is this one line.
-TIERS = ['d3', 'mythic']
+# Which rosters the page offers. The Guild Raid page is for maxed characters (owner, September 2026):
+# a Gold or Diamond III roster is not attacking a raid boss, and every tier dropped halves the build.
+# Put 'd3' back in this list if that changes.
+TIERS = ['mythic']
 
 
 def job(args):
