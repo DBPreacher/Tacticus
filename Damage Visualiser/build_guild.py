@@ -64,7 +64,7 @@ def season_names(g):
     return {f['season']: f['name'] for f in gr.fights(g) if f['tier'] == 5 and f['set'] == 2}
 
 
-def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, high=False):
+def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, high=False, seed=None):
     """the best five for one boss at one setting"""
     boss, ds, dbf = gr.boss_defender(g, fight, debuffs)
     rules = gr.boss_rules(g, fight, dbf if debuffs else None)
@@ -75,13 +75,13 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
     mow = max(opts, key=lambda o: ((o['buff'] or {}).get('pct', 0) if not (o['buff'] or {}).get('only') else 0,
                                    o['own'])) if opts else None
     team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules, tier_key=tier_key,
-                               mow=mow, high=high)
+                               mow=mow, high=high, seed=seed)
     if opts:
         pick = gr.best_mow(team, opts, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None)
         if pick['name'] != mow['name']:
             mow = pick
             team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules,
-                                       tier_key=tier_key, mow=mow, high=high)
+                                       tier_key=tier_key, mow=mow, high=high, seed=team)
     score_of = lambda t: gr.team_damage(t, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None, mow, high)
     buff = mow['buff'] if mow else None
     uses = sorted(x for u in team for x in (gr.active_turns(u, gr.FIGHTING) if act else ()))
@@ -106,12 +106,14 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
         five.append([idx[m['name']], round(with_team), round(alone)] + ([1] if m['name'] in on_high else []))
     # who else would fit: the best swap each character outside the five could make
     names = {m['name'] for m in team}
+    # a character who would improve the five almost always does it by replacing its weakest member, so
+    # trying that one slot gives the same list for a fifth of the work
+    weak = min(range(gr.TEAM), key=lambda i: plain.get(team[i]['name'], 0.0))
     alts = []
     for u in U:
         if u['name'] in names or u['faction'] == banned:
             continue
-        best = max(score_of(team[:i] + [u] + team[i + 1:]) for i in range(gr.TEAM))
-        alts.append([idx[u['name']], round(best - score)])
+        alts.append([idx[u['name']], round(score_of(team[:weak] + [u] + team[weak + 1:]) - score)])
     alts.sort(key=lambda x: -x[1])
     out = dict(s=round(score), f=five, a=alts[:ALTS])
     if mow:
@@ -124,11 +126,16 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
 # nothing to spread, so it goes out in small chunks instead - 20 minutes becomes about a minute.
 CHUNK = 3
 FULL_CHUNK = 999
+# Which rosters the page offers. A Gold roster is not attacking a Guild Raid boss, so it is not built
+# (owner, September 2026) - and every tier dropped halves the build. Drop 'd3' too if it stops being
+# useful: it is this one line.
+TIERS = ['d3', 'mythic']
 
 
 def job(args):
     tier_key, key, lv, trig, act, gear, lo, chunk = args
     units, specs = _tier(tier_key)
+    chars = units
     g = gr.game()
     idx = {u['name']: i for i, u in enumerate(units)}
     mow_names = [m['name'] for m in gr.machines(g)]
@@ -138,8 +145,15 @@ def job(args):
     rows, U, sp = _cache[key_u]
     res = []
     for fight in fight_list(g)[lo:lo + chunk]:
-        res.append([[one(g, fight, d, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, h)
-                     for h in (False, True)] for d in (False, True)])
+        seed, four = None, []
+        for d in (False, True):
+            row = []
+            for h in (False, True):
+                got = one(g, fight, d, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, h, seed)
+                seed = [{'name': chars[x[0]]['name']} for x in got['f']]
+                row.append(got)
+            four.append(row)
+        res.append(four)
     return tier_key, key, lo, res
 
 
@@ -178,7 +192,7 @@ def main():
     g = gr.game()
     fights = fight_list(g)
     jobs, tiers = [], []
-    for t in bm.TIERS:
+    for t in [x for x in bm.TIERS if x['key'] in TIERS]:
         bm.set_tier(t)
         gd, units = bm.load()
         tiers.append(dict(key=t['key'], label=t['label'], levels=list(t['levels']), about=t['about']))

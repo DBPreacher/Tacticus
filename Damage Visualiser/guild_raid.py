@@ -816,14 +816,20 @@ def team_order(team, on):
 
 
 def best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules=None, anchors=(), passes=3,
-              tier_key='d3', surv=None, mow=None, high=False):
+              tier_key='d3', surv=None, mow=None, high=False, seed=None):
     """greedy five, then swap each slot for anything better until it stops improving.
-    anchors: characters that must be in the team (the team styles the owner plays)."""
+    anchors: characters that must be in the team (the team styles the owner plays).
+    seed: start from this five instead of building one. The same boss with the side battles or the high
+    ground switched almost always lands on the same team, so starting there saves the whole build phase
+    and the swaps still check every character."""
     pool = [u for u in U if u['faction'] != banned]
     names = lambda team: {u['name'] for u in team}
     score_of = lambda team: team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, surv,
                                         mow, high)
     team = [u for u in U if u['name'] in anchors]
+    if seed:
+        want = {m['name'] for m in seed} | set(anchors)
+        team = [u for u in U if u['name'] in want and u['faction'] != banned][:TEAM]
     while len(team) < TEAM:
         team.append(max((u for u in pool if u['name'] not in names(team)), key=lambda u: score_of(team + [u])))
     score = score_of(team)

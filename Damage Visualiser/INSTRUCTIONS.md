@@ -242,9 +242,22 @@ checking a change:
    last build, so the page is right where you are looking.
 3. The full `build_guild.py` once, when the model has settled.
 
-(A job is a whole setting in a full build, so the 48 of them spread over the
-cores; with `--settings` there is nothing to spread, so jobs become chunks of
-three fights instead - that is what turns 20 minutes into 80 seconds.)
+(A job is a whole setting in a full build, so they spread over the cores; with
+`--settings` there is nothing to spread, so jobs become chunks of three fights
+instead - that is what turns 20 minutes into about a minute.)
+
+**What the full build costs, and the levers.** Every model change makes each
+search dearer, so re-measure rather than trusting an old figure. As of September
+2026 it is about 28 minutes, after three things:
+
+- each of a fight's four answers (side battles x high ground) seeds its search
+  from the last one, because they nearly always land on the same five;
+- "who else fits" tries each character in the five's weakest slot rather than all
+  five slots, for the same list at a fifth of the cost;
+- **Gold is not built at all** (`TIERS` at the top of `build_guild.py`). A Gold
+  roster is not attacking a raid boss. Every tier dropped halves the build, so
+  `TIERS = ['mythic']` takes it to about 14 minutes if Diamond III stops being
+  useful too.
 
 ---
 
