@@ -480,6 +480,53 @@ JS was silently missing, which is the argument for keeping the check scores: a
 model change that is not mirrored shows up as a failing vector, not as a wrong
 number on camera.
 
+## A buff was counted twice on the character casting it (September 2026)
+
+Found because the owner asked why Ragnar was out-damaging Laviscus on
+Ghazghkull. It was not his active repeating - he has no `cooldownTurns`, so it
+fires once. It was that his Saga of the Warrior Born was written down twice:
+
+- `passive_abilities.csv` records what an ability does **for its owner**
+  (`hits:extraHits:melee`, and `critdmg` in the Gear column);
+- `support_abilities.csv` records what the same ability does **for everyone
+  else** (`hits:extraHits:melee:who=Space Wolves`, `critdmg:...`).
+
+`helps_itself()` then handed the caster the support row as well, so Ragnar got
++3 hits from his passive and +3 hits again from his own support row, and the
+same for his Crit Damage. Nine characters were affected - and three of them were
+the most-picked characters on the whole page: Ragnar in 89.5% of the best fives,
+Lhykhis 83.3%, Vitruvius 66.0%.
+
+| Character | Ability | Counted twice |
+|---|---|---|
+| Ragnar | Saga of the Warrior Born | +hits, +Crit Damage |
+| Ragnar | War Howl | +crit chance |
+| Vitruvius | Master Annihilator | +hits |
+| Lhykhis | Whispering Web | ramp |
+| Ahriman | Psychic Stalk | +%, +Damage |
+| Lysander | Icon of Obstinacy | +Damage, damage from block |
+| High Marshal Helbrecht | Destroy The Witch | +Damage |
+| Uthar | Grim Efficiency | Armour ignored |
+| Commander Farsight | Way of the Short Blade | follow-up attack |
+
+**The rule now:** `own_side_kinds()` reads both ability files, and `buffs_for`
+drops a self-token whose kind the character already gets from its own copy of
+that ability. The other sixteen self-helping rows are untouched, because their
+ability file entry is the active's *damage parts*, not the buff - Roswitha's
+Brazier, Boss Gulgortz's Waaagh!, Haarken, Havyr, Yazaghor, Cyrus, Snappawrecka,
+Godswyl.
+
+What it costs, and it is worth writing down: for an **active**, the ability
+file's Gear entry only applies on the turn the active goes off, while the
+support row carries the buff for its full duration. Dropping the token there
+means Ragnar's War Howl crit chance now lasts one turn instead of two. That is a
+small undercount, taken deliberately over a larger overcount.
+
+On Ghazghkull Mythic 2 the old best five falls 20.8%: Ragnar -34.8%, Vitruvius
+-57.4%, Lhykhis -17.8%, Laviscus -4.6% (his Outrage feeds on their hits). The
+calibration runs do not move at all - none of the nine is in the owner's teams -
+which is the sign that the fix is aimed at the right thing.
+
 ## Open questions
 
 - **Havyr's passive: settled (owner, 2026-09-16) - count it as written.** Fury

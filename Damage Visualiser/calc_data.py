@@ -125,7 +125,9 @@ def support_rows(U, lv, trig):
         if not toks:
             continue
         out.append(dict(n=r['Name'], src=r['Source'], ab=r['Ability'], rec=r['Receives'], reach=r['Reach'],
-                        up=gr.buff_turns(r, ab), cond=r['Condition'], self=bool(gr.helps_itself(r)), t=toks))
+                        up=gr.buff_turns(r, ab), cond=r['Condition'], self=bool(gr.helps_itself(r)),
+                        # kinds the caster already gets from its own ability file, so they aren't doubled
+                        own=sorted(gr.own_side_kinds().get((r['Name'], r['Ability']), ())) or None, t=toks))
     return out
 
 

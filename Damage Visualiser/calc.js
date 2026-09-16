@@ -173,9 +173,11 @@ function buffsFor(member, mates, D, immune) {
         const elig = everyone.filter(m => m.n !== s.n && matches(m, r.rec)).sort((x, y) => y.dmg - x.dmg);
         if (!elig.slice(0, TEAM_REACH[r.reach] === undefined ? 1 : TEAM_REACH[r.reach]).some(m => m.n === member.n)) continue;
       }
+      const own = (s.n === member.n && r.own) ? r.own : null;
       for (const tok of r.t) {
         if (immune && tok.k === 'armour') continue;          /* a Boss's Armour can't be reduced */
         if (tok.o && tok.o.who && !matches(member, tok.o.who)) continue;
+        if (own && own.indexOf(tok.k) >= 0) continue;        /* already counted on the character itself */
         toks.push({t: tok, up: r.up});
       }
     }

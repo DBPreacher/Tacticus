@@ -223,6 +223,34 @@ def buff_turns(r, ab):
 DEBUFF_KINDS = ('taken', 'takenpct', 'armour', 'armignore')   # these land on the enemy, so they help everyone
 
 
+_OWN_SIDE = None
+
+
+def own_side_kinds():
+    """{(character, ability): the token kinds that ability already does for the character casting it}.
+
+    An ability that buffs the team is written down twice: `passive_abilities.csv` / `active_abilities.csv`
+    record what it does for its owner, and `support_abilities.csv` records what it does for everyone else.
+    So when a buff also reaches its caster, the caster's share must not be added a second time - Ragnar's
+    Saga was giving him +3 hits from his own passive and +3 hits again from his support row."""
+    global _OWN_SIDE
+    if _OWN_SIDE is None:
+        _OWN_SIDE = {}
+        for path, col in ((bm.PASSIVES_CSV, 'Passive'), (bm.ACTIVES_CSV, 'Active')):
+            with open(path, newline='', encoding='utf-8') as f:
+                for row in csv.DictReader(f):
+                    kinds = {x.split(':')[0].strip() for field in ('Attack', 'Gear')
+                             for x in (row.get(field) or '').split(';') if x.strip()}
+                    if kinds:
+                        _OWN_SIDE[(row['Name'], row[col])] = kinds
+    return _OWN_SIDE
+
+
+def already_own(r, name):
+    """the kinds of this row's tokens that `name` already gets from its own ability file"""
+    return own_side_kinds().get((r['Name'], r['Ability']), set()) if r['Name'] == name else set()
+
+
 def helps_itself(r):
     """does this ability help the character casting it, as well as the rest of the team? Anything that
     lands on the enemy does. A buff on your own side only skips you when it says "other friendly"."""
@@ -263,8 +291,11 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
                     continue
             ab, relic = (None, False) if r['Source'] == 'Trait' else sm.row_ability(lookup, r)
             up = buff_turns(r, ab)
+            own = already_own(r, member['name'])
             for t in sm.tokens_for(r, member, ab, relic, lv, trig):
                 if immune and t['kind'] == 'armour':          # a Boss's Armour can't be reduced
+                    continue
+                if t['kind'] in own:                          # already counted on the character itself
                     continue
                 toks.append((t, up))
     return toks
