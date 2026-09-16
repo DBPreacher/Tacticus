@@ -714,25 +714,30 @@ MOW_BUFF = {
     # the rest are defensive (less damage taken, shields): nothing for a damage run
     'Galatian': None, 'Exorcist': None, 'Forgefiend': None, "Tson'ji": None, 'Storm Speeder': None,
 }
-# What a machine fires at a boss, how often, and its damage type and hits where the data leaves them out.
-# Every machine has one ability that costs a munition and one that is free, and it acts once a round: so
-# the free one goes off most rounds (0.8 of five) and the munition one about once a fight (0.2). The
-# Biovore is the exception the owner's video pinned down - Bio-Minefield sends three mines in at once, so
-# its one use is worth 0.6. Abilities that can only hit summons, or that just summon something, are left
-# out; so is anything a boss would have to walk into.
+# What a machine fires at a boss. Munitions are not a limit in practice (owner, September 2026): after its
+# initial cooldown a machine uses its best attack every round unless the ability says otherwise. So each
+# entry is an ability and the round it becomes available, and the model fires the best one every round from
+# then on. The Biovore is the exception the owner's video pinned down: it launches one Spore Mine a round
+# and Bio-Minefield gathers them, which works out at about seven mines over five rounds.
+# Abilities that can only hit summons, that just summon something, or that wait for the enemy to walk onto
+# marked hexes are left out.
 MOW_SHOTS = {
     'Biovore': [('SporeMineLauncher', 0.8, 'Toxic'), ('BioMinefield', 0.6, 'Toxic')],
-    'Galatian': [],                                     # both its attacks need the enemy to walk onto marked
-                                                        # hexes, and Duty Eternal spends the machine itself
-    'Exorcist': [('DevastatingRefrain', 0.8), ('ThriceBlessedConflagration', 0.2)],
+}
+# machine -> [(ability, the round it is first available, damage type if the data omits it, hits override)]
+MOW_EVERY_ROUND = {
+    'Galatian': [],                                     # both attacks wait for the enemy to move onto hexes
+    'Exorcist': [('DevastatingRefrain', 2)],
     'Reanimator': [],                                   # repairs and summons, no attack of its own
-    'Malleus Rocket Launcher': [('MalleusRocketBarrage', 0.2, None, 3)],   # three missiles on the hex
-    'Forgefiend': [('DaemonicOrdnance', 0.8)],          # the autocannons only fire at summons
-    'Plagueburst Crawler': [('PlagueburstMortar', 0.8), ('EntropyCannons', 0.2)],
-    'Rukkatrukk': [('SquigLaunchas', 0.2)],             # the Squig Mine waits for the enemy to step on it
-    "Tson'ji": [('TwinSmartMissileSystem', 0.8), ('HeavyRailRifle', 0.2)],
-    "Z'Kar": [('InfernalCannon', 0.8)],
-    'Storm Speeder': [('DeathOnTheWind', 0.2)],         # Hailstrike is a buff on an ally, not its own attack
+    'Malleus Rocket Launcher': [('MalleusRocketBarrage', 2, None, 3)],   # three missiles on the hex
+    'Forgefiend': [('DaemonicOrdnance', 2)],            # the autocannons only fire at summons
+    'Plagueburst Crawler': [('EntropyCannons', 1), ('PlagueburstMortar', 2)],
+    'Rukkatrukk': [('SquigLaunchas', 2)],               # the Squig Mine waits to be stepped on
+    # the Rail Rifle loses 30% for every hex the target moved, and a boss runs away; using it also puts
+    # its own cooldown up, so it is not an every-round attack
+    "Tson'ji": [('TwinSmartMissileSystem', 1)],
+    "Z'Kar": [('InfernalCannon', 2)],
+    'Storm Speeder': [('DeathOnTheWind', 2)],
 }
 MOW_LEVELS = 65                   # a Machine of War's abilities go to 65
 MYTHIC_ABILITY_LEVEL = 4          # its Mythic ability has four levels; the tool uses the top one
@@ -770,6 +775,17 @@ def mow_buff(g, mow, lv, tier_key, trig=False):
 def mow_damage(g, mow, boss, ds, lv, rules=None):
     """the Machine of War's own damage on the boss over the 6 turns"""
     tot = 0.0
+    for shot in MOW_EVERY_ROUND.get(mow['name'], []):
+        # the best of these, fired every round once it is available
+        ab_id, first, dt, hits = (list(shot) + [None, None])[:4]
+        ab = _ability(g, ab_id)
+        if not ab or 'minDmg' not in (ab.get('variables') or {}):
+            continue
+        part = _part(ab, min(lv, MOW_LEVELS), '', dt, rarity=True)
+        if hits:
+            part['hits'] = hits
+        rounds = max(FIGHTING - (first - 1), 0)
+        tot = max(tot, bm.part_vs_defence(part, boss, ds, False)[0] * rounds)
     for shot in MOW_SHOTS.get(mow['name'], []):
         ab_id, rate, dt, hits = (list(shot) + [None, None])[:4]
         ab = _ability(g, ab_id)
