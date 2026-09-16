@@ -34,6 +34,7 @@ FACTION_ID = {'AdeptusMechanicus': 'Adeptus Mechanicus', 'Orks': 'Orks', 'Tyrani
               'DeathGuard': 'Death Guard', 'DarkAngels': 'Dark Angels', 'Necrons': 'Necrons'}
 
 
+GAME = None               # set by game(), so the summon helpers can reach the npc table
 _GAME = None
 
 
@@ -43,6 +44,7 @@ def game():
     if _GAME is None:
         with open(os.path.join(HERE, 'cache', 'gameinfo.json'), encoding='utf-8') as f:
             _GAME = json.load(f)
+        globals()['GAME'] = _GAME
     return _GAME
 
 
@@ -784,6 +786,70 @@ def team_turns(team, surv, lv, trig, act, gear, tier_key):
                                 (surv['rnd'].get(m['name']), surv['rest'].get(m['name']))) for m in team}
 
 
+# ---------------------------------------------------------------- summons
+# Characters that put units on the board: Gulgortz's Ork Boyz, Abraxas's Pink Horrors, the Patermine's
+# Genestealers. They keep attacking for the rest of the fight, and the Norn Crown says in so many words
+# that friendly Summons hit an infected enemy harder, which is why they belong in a Neurothrope team.
+# They are not characters, so they do not feed Laviscus's Outrage and a Machine of War's Mythic ability
+# does not reach them. The team's own debuffs on the boss are not counted for them either - conservative.
+_NPC = {}
+
+
+def npc_of(g, unit_id):
+    """the stat block of a summoned unit. An ability calls it 'astraSmnGuardsman' and the npc table calls
+    it 'astraNpc1Guardsman', so match on what is left after the Smn/Npc part."""
+    if not _NPC:
+        npcs = g.get('npcs') or {}
+        items = npcs.items() if isinstance(npcs, dict) else [(x.get('id'), x) for x in npcs]
+        for k, v in items:
+            _NPC[re.sub(r'[^a-z]', '', re.sub(r'npc\d*|smn', '', str(k).lower()))] = v
+    key = re.sub(r'[^a-z]', '', re.sub(r'npc\d*|smn', '', str(unit_id).lower()))
+    if key in _NPC:
+        return _NPC[key]
+    return next((v for k, v in _NPC.items() if k.startswith(key[:10]) or key.startswith(k[:10])), None)
+
+
+def summons_of(g, member, lv):
+    """[(how many, stat block, their Damage, the ability it came from)] for one character"""
+    out = []
+    for kind in ('ability', 'passive'):
+        ab = member.get(kind) or {}
+        c = ab.get('constants') or {}
+        if 'summonDmg' not in (ab.get('variables') or {}) or not c.get('unitId'):
+            continue
+        npc = npc_of(g, c['unitId'])
+        if not npc or not (npc.get('meleeWeapon') or npc.get('rangeWeapon')):
+            continue
+        n = float(c.get('nrOfSummons') or c.get('nrOfUnits') or 1)
+        out.append((n, npc, bm.ability_value(ab, 'summonDmg', lv) or 0.0, kind))
+    return out
+
+
+def summon_damage(g, member, team, boss, ds, lv, trig, act, gear, tier_key, turns=None):
+    """what a character's summons add over the fight"""
+    turns = FIGHTING if turns is None else turns
+    got = summons_of(g, member, lv)
+    if not got:
+        return 0.0
+    bonus = 0.0
+    neuro = next((m for m in team if m['name'] == 'Neurothrope'), None)
+    if neuro and tier_key == 'mythic' and gear and (neuro.get('relic') or {}).get('name') == 'Norn Crown':
+        bonus = sm.value(neuro['relic']['ability'], 'extraDmg', bm.RELIC_LEVEL, True)   # the Crown names Summons
+    total = 0.0
+    for n, npc, dmg, kind in got:
+        if kind == 'ability' and not act:
+            continue
+        rounds = max(turns - (1 if kind == 'ability' else 0), 0)      # an active's summons arrive a turn in
+        best = 0.0
+        for w in (npc.get('meleeWeapon'), npc.get('rangeWeapon')):
+            if not w:
+                continue
+            part = dict(dmg=dmg + bonus, hits=w['hits'], type=bm.dtype(w['damageProfile']), crit=False)
+            best = max(best, bm.part_vs_defence(part, boss, ds, False)[0])
+        total += n * best * rounds
+    return total
+
+
 def member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buff, high=()):
     """the flat Damage a character brings into this team on each of the 6 turns: Laviscus's Outrage, the
     Neuroparasite and the Norn Crown, a Machine of War's +Damage"""
@@ -825,6 +891,8 @@ def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_
         extra = member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buff)
         each[m['name']] = member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra,
                                         alive[m['name']], buff, uses)
+        each[m['name']] += summon_damage(GAME, m, team, boss, ds, lv, trig, act, gear, tier_key,
+                                         alive[m['name']])
         args[m['name']] = (m, mates, extra)
     if high:
         # the ones already doing the most damage take it, which is what the teams in the videos do
@@ -836,6 +904,7 @@ def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_
                 extra = member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buff, on)
             each[n] = member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra,
                                     alive[n], buff, uses, n in on)
+            each[n] += summon_damage(GAME, m, team, boss, ds, lv, trig, act, gear, tier_key, alive[n])
     return total + sum(each.values())
 
 
