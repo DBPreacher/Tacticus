@@ -195,13 +195,15 @@ Arch-Contaminator?
 
 ## Open questions
 
-- **Havyr's passive (owner checking, September 2026).** Fury from the Dêlve
-  adds a 2-hit Eviscerating attack after a normal attack against an enemy at
-  or below 50% health. It isn't counted in either traits setting. If the game
-  checks the 50% *after* the attack lands, it finishes a typical kill: his
-  Damage would go from 2.37 to about 2.0 (1.33 to 1.0 with All triggered). If
-  it checks *before*, it barely matters. Leave it uncounted until the owner
-  confirms how it works; he may revisit after the video's feedback.
+- **Havyr's passive: settled (owner, 2026-09-16) - count it as written.** Fury
+  from the Dêlve adds a 2-hit Eviscerating attack after a normal attack against
+  an enemy at or below 50% health, so it lands on every attack made once the
+  target is already at or below half, and not on the attack that takes them
+  there. `extrahalf:` in `passive_abilities.csv`, handled inside `kill_count`.
+  His Damage goes from 2.37 to 2.28 attacks (Diamond III, ability 36, no gear).
+  Against a Guild Raid boss it never fires, because your five only take a couple
+  of per cent off the boss - unless the guild has already taken it below half,
+  which the page doesn't offer a switch for (owner declined, 2026-09-16).
 
 - Optional: 5–6 fresh Creed test numbers at the current patch (e.g. Jain Zar,
   Morvenn Vahl, one Terminator Armour character). They would confirm that the

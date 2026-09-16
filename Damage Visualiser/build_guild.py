@@ -56,8 +56,8 @@ def slot_name(f):
 
 def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names):
     """the best five for one boss at one setting"""
-    boss, ds, _ = gr.boss_defender(g, fight, debuffs)
-    rules = gr.boss_rules(g, fight)
+    boss, ds, dbf = gr.boss_defender(g, fight, debuffs)
+    rules = gr.boss_rules(g, fight, dbf if debuffs else None)
     banned = gr.FACTION_ID.get(fight['faction'], fight['faction'])
     opts = gr.mow_options(g, fight, boss, ds, lv, tier_key, banned, trig)
     # search with the machine that usually wins, then check it against the rest and only search again
@@ -152,11 +152,12 @@ def main():
     for f in fights:
         boss, ds, dbf = gr.boss_defender(g, f, False)
         _, _, dbf2 = gr.boss_defender(g, f, True)
+        rules2 = gr.boss_rules(g, f, dbf2)['notes']
         fl.append(dict(n=f['name'], t=f['tier'], l=f['level'], hp=f['hp'], r=f['rarity'], slot=slot_name(f),
                        ban=gr.FACTION_ID.get(f['faction'], f['faction']), arm=round(boss['arm']),
                        bc=round(ds['bc'] * 100), bd=round(ds['bd']),
                        dbf=[round(dbf2['armour']), round(dbf2['block'])],
-                       rules=gr.boss_rules(g, f)['notes'],
+                       rules=gr.boss_rules(g, f)['notes'], rules2=rules2,
                        traits=sorted(boss['traits'])))
     data = dict(version=g['version'], tiers=tiers, chars=chars, mows=mows, fights=fl, turns=gr.TURNS,
                 r={t['key']: {} for t in tiers})

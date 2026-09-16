@@ -442,9 +442,10 @@ def attack_spec(u, row, level, trig, ab=None):
         if trig_only and not trig:
             continue
         e = dict(kind=kind, scope=scope, vs=vs)
-        if kind == 'extra':
+        if kind in ('extra', 'extrahalf'):
             e['part'] = build_part(ab, text, arg, level)
-            desc.append(f"+{part_text(e['part'])} on each attack{WHERE[scope]}{vs_text(vs)}")
+            when = ' once the target is at or below half health' if kind == 'extrahalf' else ''
+            desc.append(f"+{part_text(e['part'])} on each attack{WHERE[scope]}{vs_text(vs)}{when}")
         elif kind == 'follow':
             desc.append('melee attacks are followed by a normal ranged attack')
         elif kind in ('flat', 'pct', 'pierce', 'hits', 'armignore', 'ramp', 'armpct'):
@@ -689,7 +690,8 @@ def block_of(d, ds):
     return x
 
 
-def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, follow=True, gearx=None, dblk=None):
+def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, follow=True, gearx=None, dblk=None,
+                  half=False):
     """one normal attack by a on d with weapon w: (damage, ignores Terminator Armour).
     Includes a's passive (a['ps']) and, with gear, crits (a['g'], a['pg'], gearx) and d's blocks (dblk).
     See DAMAGE_MODEL.md."""
@@ -750,7 +752,7 @@ def normal_attack(a, d, w, trig, dmg_override=None, first=False, hits_minus=0, f
             if chance:
                 total -= _chain(chance, n) * min(block, per_hit)
     for e in eff:                                         # passive: extra hits after each attack
-        if e['kind'] == 'extra':
+        if e['kind'] == 'extra' or (half and e['kind'] == 'extrahalf'):
             total += ability_hits(e['part'], d, 0.0, cr, dblk)[0]
     if follow and melee and any(e['kind'] == 'follow' for e in eff):
         rw = next((x for x in a['weapons'] if x['kind'] == 'ranged'), None)
@@ -781,20 +783,21 @@ def _def_ok(scope, vs, kind, first_turn, psychic, a):
     return ok and (vs is None or bool(vs & (a['traits'] | {a.get('alliance')})))
 
 
-def one_attack(a, d, w, trig, ds, first_seq, first_turn=None, dmg_override=None, gearx=None):
+def one_attack(a, d, w, trig, ds, first_seq, first_turn=None, dmg_override=None, gearx=None, half=False):
     """a normal attack after the defender's defensive effects (ds may be None).
     first_seq = the first attack of the whole kill (the attacker's own 'after' effects);
     first_turn = the first attack of an enemy turn (the defender's 'one' effects)."""
     first_turn = first_seq if first_turn is None else first_turn
     dblk = block_of(d, ds)
     if not ds:
-        return normal_attack(a, d, w, trig, dmg_override, first_seq, gearx=gearx, dblk=dblk)
+        return normal_attack(a, d, w, trig, dmg_override, first_seq, gearx=gearx, dblk=dblk, half=half)
     psychic = w['type'] in ('Psychic', 'Direct')
     ok = lambda sc, vs: _def_ok(sc, vs, w['kind'], first_turn, psychic, a)
     flat = sum(v for v, sc, vs in ds['flat'] if ok(sc, vs))
     hits_minus = int(sum(v for v, sc, vs in ds['hitsless'] if ok(sc, vs)))
     base = dmg_override if dmg_override is not None else a['dmg']
-    dmg, psy = normal_attack(a, d, w, trig, max(base - flat, 0), first_seq, hits_minus, gearx=gearx, dblk=dblk)
+    dmg, psy = normal_attack(a, d, w, trig, max(base - flat, 0), first_seq, hits_minus, gearx=gearx, dblk=dblk,
+                             half=half)
     dmg *= _prod(m for m, sc, vs in ds['pct'] if ok(sc, vs)) * _prod(m for m, sc, vs in ds['enemy'] if ok(sc, vs))
     for p, cap, sc, vs in ds['pctcap']:
         if ok(sc, vs):
@@ -818,12 +821,12 @@ def part_vs_defence(part, d, ds, first_turn, a=None, trig=False, gearx=None):
     return dmg, psy
 
 
-def best_attack(a, d, trig, ds, first_seq, first_turn, kind=None, dmg_override=None, gearx=None):
+def best_attack(a, d, trig, ds, first_seq, first_turn, kind=None, dmg_override=None, gearx=None, half=False):
     """(damage, ignores TA, weapon) of the attacker's best normal attack in this situation"""
     ws = [w for w in a['weapons'] if not kind or w['kind'] == kind] or a['weapons']
     best = None
     for w in ws:
-        dmg, psy = one_attack(a, d, w, trig, ds, first_seq, first_turn, dmg_override, gearx)
+        dmg, psy = one_attack(a, d, w, trig, ds, first_seq, first_turn, dmg_override, gearx, half)
         if best is None or dmg > best[0]:
             best = (dmg, psy, w)
     return best
@@ -853,7 +856,7 @@ def opener(a, d, trig, spec, ds):
     return attacks
 
 
-def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=None):
+def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=None, half=0.0):
     """attacks to kill, one attack at a time. An enemy turn is ATTACKS_PER_TURN attacks.
     first = list of (damage, ignores_TA) making up attack 1 (several parts for an active);
     early = damage of attacks 2..ATTACKS_PER_TURN (inside the first enemy turn);
@@ -863,7 +866,7 @@ def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=Non
     enemy turn, hit=health back after each attack, shield=a shield at the start of every enemy turn,
     shield_first=a shield for the first enemy turn only). Healing never goes above hp."""
     if regen:
-        return _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen)
+        return _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen, half)
     ta = 'TerminatorArmour' in d['traits']
     left = hp
     for i in range(5000):
@@ -877,6 +880,8 @@ def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=Non
             dmg = later
         if cap_first is not None and i % ATTACKS_PER_TURN == 0:
             dmg = min(dmg, cap_first * left)
+        if half and left <= hp / 2:           # Havyr: the extra attack only lands on a wounded target
+            dmg += half
         dmg = max(dmg, 1.0)
         if dmg >= left:
             return i + left / dmg
@@ -884,7 +889,7 @@ def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=Non
     return 5000.0
 
 
-def _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen):
+def _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen, half=0.0):
     """kill_count with healing between and during enemy turns, and shields (support_model.py)"""
     ta = 'TerminatorArmour' in d['traits']
     left, shield = hp, 0.0
@@ -904,6 +909,8 @@ def _kill_count_regen(first, early, turn_first, later, d, hp, cap_first, regen):
             dmg = later
         if cap_first is not None and i % ATTACKS_PER_TURN == 0:
             dmg = min(dmg, cap_first * left)
+        if half and left <= hp / 2:
+            dmg += half
         dmg = max(dmg, 1.0)
         soak = min(shield, dmg)
         shield -= soak
@@ -931,10 +938,13 @@ def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None, regen=No
     early = best_attack(a, d1, trig, ds_round, False, False)[0]
     tf = best_attack(a, d2, trig, ds_rest, False, True)
     later_dmg, _, later_w = best_attack(a, d2, trig, ds_rest, False, False)
-    k = kill_count([a1[:2]], early, tf[:2], later_dmg, d, hp, cap, regen)
+    half = 0.0
+    if any(e['kind'] == 'extrahalf' for e in (a.get('ps') or ([], []))[0]):
+        half = max(best_attack(a, d2, trig, ds_rest, False, False, half=True)[0] - later_dmg, 0.0)
+    k = kill_count([a1[:2]], early, tf[:2], later_dmg, d, hp, cap, regen, half)
     used = False
     if spec:
-        k_act = kill_count(opener(a, d1, trig, spec, ds_round), early, tf[:2], later_dmg, d, hp, cap, regen)
+        k_act = kill_count(opener(a, d1, trig, spec, ds_round), early, tf[:2], later_dmg, d, hp, cap, regen, half)
         if k_act < k:
             k, used = k_act, True
     guard = (ds_round or {}).get('guard') or (ds_rest or {}).get('guard')

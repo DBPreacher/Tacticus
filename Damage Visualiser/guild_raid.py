@@ -54,8 +54,10 @@ def fights(g):
 
 
 def debuff_totals(g, fight):
-    """what winning both side battles takes off this boss (each chain in full)"""
-    tot = dict(armour=0.0, block=0.0, steps=0)
+    """what winning both side battles takes off this boss (each chain in full). Most steps weaken the
+    boss's attacks or its summons, which this tool doesn't model, but some weaken the rules that decide
+    how much damage it takes: Mortarion's Revoltingly Resilient and the Lion's Emperor's Shield."""
+    tot = dict(armour=0.0, block=0.0, steps=0, res_hits=0, no_shield=False)
     for k, chain in g['bossDebuffs'].items():          # each chain once, even when both side battles are the same unit
         for mini in set(fight['minis']):
             if not k.startswith(mini + '_'):
@@ -69,6 +71,10 @@ def debuff_totals(g, fight):
                     tot['armour'] += int(x.rsplit('_', 1)[1])
                 elif 'blockChance' in x:
                     tot['block'] += int(x.rsplit('_', 1)[1])
+                elif 'RevoltinglyResilient_hits' in x:
+                    tot['res_hits'] += int(x.rsplit('_', 1)[1])      # another hit lands in full
+                elif x.endswith('TheEmperorsShield'):
+                    tot['no_shield'] = True                          # the Lion stops building up block
             break
     return tot
 
@@ -86,9 +92,10 @@ def boss_defender(g, fight, debuffs=False):
     return boss, ds, d
 
 
-def boss_rules(g, fight):
-    """the boss passives that change how much damage it takes, read from the game data at its ability level.
-    Everything else about a boss (its own attacks, summons, what you can dodge) isn't modelled yet."""
+def boss_rules(g, fight, dbf=None):
+    """the boss passives that change how much damage it takes, read from the game data at its ability level,
+    and what clearing the side battles does to them. Everything else about a boss (its own attacks, summons,
+    what you can dodge, the bosses that repair themselves) isn't modelled yet."""
     u = g['guildRaidUnits'][fight['uid']]
     lvl = u['stats'][min(fight['level'], len(u['stats']) - 1)]['abilityLevel']
     out = dict(diminish=None, psyker_pct=0.0, block_ramp=0.0, charge_hits=0, notes=[])
@@ -116,6 +123,16 @@ def boss_rules(g, fight):
         elif k == 'ObeisanceGenerators':                # Szarekh: don't charge him
             out['charge_hits'] = int(const(k, 'hitsReduction', 0))
             out['notes'].append(f"charging him costs you {out['charge_hits']} hits, so stand still and attack")
+    if dbf and dbf.get('res_hits') and out['diminish']:
+        n_ = out['diminish'][0] + dbf['res_hits']
+        out['diminish'] = (n_, out['diminish'][1])
+        out['notes'] = [f"the side battles bought you {dbf['res_hits']} more hits: the first {n_} hits of an "
+                        f"attack land in full, each one after that {out['diminish'][1]:.0f}% weaker"
+                        if 'land' in x or 'lands' in x else x for x in out['notes']]
+    if dbf and dbf.get('no_shield') and out['block_ramp']:
+        out['block_ramp'] = 0.0
+        out['notes'] = [("the side battles took the Emperor's Shield away: no block building up"
+                         if 'block chance for the turn' in x else x) for x in out['notes']]
     return out
 
 
@@ -616,7 +633,7 @@ def main():
     fs = [f for f in fights(g) if f['name'].lower().startswith(args.boss.lower())]
     fight = next((f for f in fs if f['level'] == args.level), fs[-1])
     boss, ds, dbf = boss_defender(g, fight, args.debuffs)
-    rules = boss_rules(g, fight)
+    rules = boss_rules(g, fight, dbf if args.debuffs else None)
     act = not args.no_active
     U, sp, rnd, rest = setting(args.tier, args.ability, args.trig, act, args.gear)
     rows = sm.load_rows('Attack')

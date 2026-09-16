@@ -268,7 +268,9 @@ function draw() {
     ['Banned', 'no ' + f.ban]
   ].map(r => '<div><span>' + r[0] + '</span><span>' + r[1] + '</span></div>').join('');
 
-  el('rules').innerHTML = (f.rules || []).map(r => '<p>' + r.charAt(0).toUpperCase() + r.slice(1) + '</p>').join('');
+  /* clearing the side battles weakens some of the boss's own rules, so show that set instead */
+  el('rules').innerHTML = ((state.dbf ? f.rules2 : f.rules) || f.rules || [])
+    .map(r => '<p>' + r.charAt(0).toUpperCase() + r.slice(1) + '</p>').join('');
 
   el('alts').innerHTML = res.a.map(a =>
     '<li><b>' + DATA.chars[a[0]].n + '</b><span>' + (a[1] >= 0 ? '+' : '−') + n(Math.abs(a[1])) + '</span></li>').join('');

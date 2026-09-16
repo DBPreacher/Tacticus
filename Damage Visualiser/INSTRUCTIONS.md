@@ -158,7 +158,16 @@ the boss's own faction is banned.
   Toxic, which only the ability text says, so `MOW_SHOTS` carries the type.
 - **Boss rules** are read from each boss's own abilities: Mortarion's Revoltingly
   Resilient, Szarekh's Noctilith Beacons and Obeisance Generators, the Lion's
-  Emperor's Shield. Laviscus's Outrage, the Neurothrope's Neuroparasite and the
+  Emperor's Shield. **The side battles weaken some of them**, which is what the
+  chains in `bossDebuffs` say: Mortarion's two chains both carry
+  `RevoltinglyResilient_hits_1`, so clearing both makes the first *three* hits of
+  an attack land in full instead of one, and the Lion's carries
+  `TheEmperorsShield`, which stops his block building up. The page shows whichever
+  set of rules matches the switch. Most other steps in those chains weaken the
+  boss's attacks or its summons, which this tool doesn't model - including
+  Belisarius Cawl's `SelfRepairMechanism`, so his numbers assume you have cleared
+  the side battles that stop him repairing himself. Magnus is the one Mythic boss
+  whose chains take no Armour off at all. Laviscus's Outrage, the Neurothrope's Neuroparasite and the
   Norn Crown are counted; Xybia's Mind Control is not, because a Boss cannot be
   Taunted.
 - **Not counted:** the boss killing your characters (`--deaths` on the command
