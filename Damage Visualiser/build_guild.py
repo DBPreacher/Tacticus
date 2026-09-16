@@ -59,7 +59,7 @@ def season_names(g):
     return {f['season']: f['name'] for f in gr.fights(g) if f['tier'] == 5 and f['set'] == 2}
 
 
-def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names):
+def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, high=False):
     """the best five for one boss at one setting"""
     boss, ds, dbf = gr.boss_defender(g, fight, debuffs)
     rules = gr.boss_rules(g, fight, dbf if debuffs else None)
@@ -69,15 +69,20 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
     # if a different one suits the five better
     mow = max(opts, key=lambda o: ((o['buff'] or {}).get('pct', 0) if not (o['buff'] or {}).get('only') else 0,
                                    o['own'])) if opts else None
-    team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules, tier_key=tier_key, mow=mow)
+    team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules, tier_key=tier_key,
+                               mow=mow, high=high)
     if opts:
         pick = gr.best_mow(team, opts, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None)
         if pick['name'] != mow['name']:
             mow = pick
             team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules,
-                                       tier_key=tier_key, mow=mow)
-    score_of = lambda t: gr.team_damage(t, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None, mow)
+                                       tier_key=tier_key, mow=mow, high=high)
+    score_of = lambda t: gr.team_damage(t, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None, mow, high)
     buff = mow['buff'] if mow else None
+    uses = sorted(x for u in team for x in (gr.active_turns(u, gr.TURNS) if act else ()))
+    plain = {m['name']: gr.member_damage(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp, lv,
+                                         trig, act, gear, rules, None, gr.TURNS, buff, uses) for m in team}
+    on_high = set(sorted(plain, key=plain.get, reverse=True)[:gr.HIGH_GROUND]) if high else set()
     five = []
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
@@ -87,9 +92,9 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
             flat += m['dmg'] * buff['pct'] / 100
         extra = (extra[0] + flat, extra[1] + flat)
         alone = gr.member_damage(m, [], boss, ds, rows, sp, lv, trig, act, gear, rules)
-        with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, gr.TURNS, buff,
-                                     sorted(x for u in team for x in (gr.active_turns(u, gr.TURNS) if act else ())))
-        five.append([idx[m['name']], round(with_team), round(alone)])
+        with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, gr.TURNS,
+                                     buff, uses, m['name'] in on_high)
+        five.append([idx[m['name']], round(with_team), round(alone)] + ([1] if m['name'] in on_high else []))
     # who else would fit: the best swap each character outside the five could make
     names = {m['name'] for m in team}
     alts = []
@@ -115,7 +120,8 @@ def job(args):
     U, sp, _, _ = sm.setting_units(units, specs, lv, trig, act, gear)
     res = []
     for fight in fight_list(g):
-        res.append([one(g, fight, d, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names) for d in (False, True)])
+        res.append([[one(g, fight, d, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, h)
+                     for h in (False, True)] for d in (False, True)])
     return tier_key, key, res
 
 
@@ -169,6 +175,7 @@ def main():
                        rules=gr.boss_rules(g, f)['notes'], rules2=rules2,
                        traits=sorted(boss['traits'])))
     data = dict(version=g['version'], tiers=tiers, chars=chars, mows=mows, fights=fl, turns=gr.TURNS,
+                high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
                 r={t['key']: {} for t in tiers})
     with Pool(min(len(jobs), os.cpu_count() or 4)) as pool:
         for tier_key, key, res in pool.imap_unordered(job, jobs):

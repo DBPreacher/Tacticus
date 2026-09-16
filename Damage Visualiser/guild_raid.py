@@ -242,6 +242,9 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
 # actives that grow as the battle goes on. RAMP: +pct for every turn its owner has already fought
 # (Kariyan's Martial Inspiration). RAMP_FLAT: +Damage for every active the team has used so far
 # (Atlacoya's Talons Of The Emperor). Both are worth more the later they go off, so the model holds them.
+HIGH_GROUND_PCT = 50      # the wiki: a unit on high ground deals +50% Damage to one below it
+HIGH_GROUND = 2           # how many of the five stand on it when the High ground switch is on. Watching
+                          # real runs, the two biggest hitters take the high ground (owner, Sept 2026)
 RAMP = {'Kariyan': 'extraDmgPct'}
 RAMP_FLAT = {'Atlacoya': 'extraDmg'}
 # Talons Of The Emperor is Direct Damage - no Armour at all - against a Psyker, or next to a Custodes
@@ -290,7 +293,7 @@ def tweak_spec(member, spec, team, boss, turn, lv, used):
 
 
 def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=None, extra=None, turns=TURNS,
-                  mow=None, team_uses=()):
+                  mow=None, team_uses=(), high=False):
     """one character's damage over the 6 turns: the active turn plus normal attacks.
     extra: flat Damage added to this character's stat (Laviscus's Outrage, the Neurothrope's parasite).
     turns: how many of the 6 it is alive for, when the deaths switch is on.
@@ -310,6 +313,8 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
         a, spec2, _ = sm.buffed(member, live, spec1, gear) if live else (member, spec1, 0.0)
         if xtra:
             a = dict(a, dmg=a['dmg'] + xtra)
+        if high:                                     # high ground lifts the whole Damage stat, Outrage and all
+            a = dict(a, dmg=a['dmg'] * (1 + HIGH_GROUND_PCT / 100))
         if chaos:                                       # Refusal to be Outdone's other half
             cd = sm.value(member['passive'] or {}, 'extraCritDmg', lv) * chaos
             a = dict(a, pg=list(a.get('pg') or []) +
@@ -657,11 +662,13 @@ def team_turns(team, surv, lv, trig, act, gear, tier_key):
                                 (surv['rnd'].get(m['name']), surv['rest'].get(m['name']))) for m in team}
 
 
-def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_key='d3', surv=None, mow=None):
+def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_key='d3', surv=None, mow=None,
+                high=False):
     total = mow['own'] if mow else 0.0
     buff = mow['buff'] if mow else None
     alive = team_turns(team, surv, lv, trig, act, gear, tier_key)
     uses = sorted(x for m in team for x in (active_turns(m, TURNS) if act else ()))
+    each, args = {}, {}
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
         extra = outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear) if m['name'] == 'Laviscus' else (0.0, 0.0)
@@ -669,18 +676,26 @@ def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_
         if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
             flat += m['dmg'] * buff['pct'] / 100
         extra = (extra[0] + flat, extra[1] + flat)
-        total += member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, alive[m['name']],
-                               buff, uses)
-    return total
+        each[m['name']] = member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra,
+                                        alive[m['name']], buff, uses)
+        args[m['name']] = (m, mates, extra)
+    if high:
+        # the ones who gain most take it, which is what the teams in the videos do
+        for n in sorted(each, key=each.get, reverse=True)[:HIGH_GROUND]:
+            m, mates, extra = args[n]
+            each[n] = member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra,
+                                    alive[n], buff, uses, True)
+    return total + sum(each.values())
 
 
 def best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules=None, anchors=(), passes=3,
-              tier_key='d3', surv=None, mow=None):
+              tier_key='d3', surv=None, mow=None, high=False):
     """greedy five, then swap each slot for anything better until it stops improving.
     anchors: characters that must be in the team (the team styles the owner plays)."""
     pool = [u for u in U if u['faction'] != banned]
     names = lambda team: {u['name'] for u in team}
-    score_of = lambda team: team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, surv, mow)
+    score_of = lambda team: team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, surv,
+                                        mow, high)
     team = [u for u in U if u['name'] in anchors]
     while len(team) < TEAM:
         team.append(max((u for u in pool if u['name'] not in names(team)), key=lambda u: score_of(team + [u])))
@@ -734,6 +749,8 @@ def main():
     ap.add_argument('--deaths', action='store_true', help='count the boss killing your characters')
     ap.add_argument('--mow', help='the Machine of War to bring (default: the best one for the team)')
     ap.add_argument('--no-mow', action='store_true', help='no Machine of War slot')
+    ap.add_argument('--high', action='store_true',
+                    help=f'the {HIGH_GROUND} biggest hitters fight from high ground (+{HIGH_GROUND_PCT}%% Damage)')
     args = ap.parse_args()
     g = game()
     fs = [f for f in fights(g) if f['name'].lower().startswith(args.boss.lower())]
@@ -752,7 +769,8 @@ def main():
         print(f'   rule: {n}')
     print(f"no {banned} allowed · {TURNS} turns · {args.tier} abilities {args.ability} "
           f"{'standard gear' if args.gear else 'no gear'} {'all triggered' if args.trig else 'always-on'} "
-          f"active {'on' if act else 'off'}")
+          f"active {'on' if act else 'off'}"
+          + (f" · {HIGH_GROUND} on high ground" if args.high else ''))
     opts = [] if args.no_mow else mow_options(g, fight, boss, ds, args.ability, args.tier, banned, args.trig)
     if args.mow:
         opts = [o for o in opts if o['name'].lower().startswith(args.mow.lower())]
@@ -763,14 +781,14 @@ def main():
         if opts:
             mow = best_mow(team, opts, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier, surv)
         score = team_damage(team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier,
-                            surv, mow)
+                            surv, mow, args.high)
     else:
         team, score = best_team(U, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, banned, rules,
-                                tuple(args.anchor), tier_key=args.tier, surv=surv)
+                                tuple(args.anchor), tier_key=args.tier, surv=surv, high=args.high)
         if opts:
             mow = best_mow(team, opts, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, args.tier, surv)
             team, score = best_team(U, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, banned, rules,
-                                    tuple(args.anchor), tier_key=args.tier, surv=surv, mow=mow)
+                                    tuple(args.anchor), tier_key=args.tier, surv=surv, mow=mow, high=args.high)
     print(f"\nBest five: {score:,.0f} damage in {TURNS} turns ({score / fight['hp'] * 100:.2f}% of the boss)")
     if mow:
         b = mow['buff']
@@ -781,6 +799,13 @@ def main():
                   ' (its Mythic ability needs All triggered)' if (MOW_BUFF.get(mow['name']) or {}).get('trig')
                   else ' (its Mythic ability is defensive: nothing for a damage run)')))
     alive = team_turns(team, surv, args.ability, args.trig, act, args.gear, args.tier)
+    on_high = set()
+    if args.high:
+        uses0 = sorted(x for u in team for x in (active_turns(u, TURNS) if act else ()))
+        plain = {m['name']: member_damage(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp,
+                                          args.ability, args.trig, act, args.gear, rules, None,
+                                          alive[m['name']], mow['buff'] if mow else None, uses0) for m in team}
+        on_high = set(sorted(plain, key=plain.get, reverse=True)[:HIGH_GROUND])
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
         extra = (outrage(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear)
@@ -793,8 +818,10 @@ def main():
         alone = member_damage(m, [], boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules)
         uses = sorted(x for u in team for x in (active_turns(u, TURNS) if act else ()))
         withteam = member_damage(m, mates, boss, ds, rows, sp, args.ability, args.trig, act, args.gear, rules, extra,
-                                 alive[m['name']], buff, uses)
+                                 alive[m['name']], buff, uses, args.high and m['name'] in on_high)
         tag = f'  (+{max(extra):,.0f} Damage from the team)' if max(extra) else ''
+        if args.high and m['name'] in on_high:
+            tag += '  [high ground]'
         if alive[m['name']] < TURNS:
             tag += f"  [dies on turn {alive[m['name']]}]"
         print(f"  {m['name']:<24}{withteam:>11,.0f}   (alone {alone:>9,.0f}, buffs +{withteam - alone:>9,.0f}){tag}")
