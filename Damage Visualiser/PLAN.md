@@ -147,6 +147,13 @@ Blighted Land needs your characters to stand on the hexes it contaminates, so it
 follows the All triggered switch. The other five are defensive. The boss's
 faction is banned for machines too (so no Reanimator against Szarekh).
 
+**The search is greedy:** it builds the five one at a time, then swaps each slot
+for anything better until nothing improves. That finds the best five almost
+always, but it can stop at a five where only changing two characters at once
+would help - anchoring the Neurothrope against Szarekh beats the free search by
+about 1.5%. If that starts to matter, seed the search from a second starting
+five and keep the better run.
+
 **Buffs only count while they are up.** A support ability that lasts the battle
 counts for all six turns; one that lasts a round or two counts for that long,
 and an active comes back whenever its cooldown allows (a 2-round buff on a

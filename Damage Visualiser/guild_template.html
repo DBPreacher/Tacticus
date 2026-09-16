@@ -42,6 +42,9 @@ h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;mar
 .seg button{all:unset;cursor:pointer;text-align:center;font-family:var(--data);font-weight:600;font-size:14.5px;padding:6px 3px;white-space:nowrap;color:var(--ink-2);background:var(--panel-2)}
 .seg button+button{border-left:1px solid var(--rule)}
 .seg button[aria-pressed="true"]{background:var(--ink);color:#0a0a0a}
+/* a boss turns up in a lot of slots: let those buttons wrap onto several rows */
+.wrapseg{display:flex;flex-wrap:wrap;border:0;gap:4px}
+.wrapseg button{border:1px solid var(--rule);border-radius:3px;flex:1 0 auto;padding:4px 8px;font-size:13.5px}
 .seg button:focus-visible,.bosslist button:focus-visible,.check input:focus-visible+span{outline:2px solid var(--ink);outline-offset:2px}
 .check{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:13.5px;color:var(--ink)}
 .check input{position:absolute;opacity:0}
@@ -158,20 +161,21 @@ const ALLIANCE = {Imperial:'var(--imperial)', Chaos:'var(--chaos)', Xenos:'var(-
 const n = x => x.toLocaleString('en-GB', {maximumFractionDigits:0});
 const el = id => document.getElementById(id);
 
-const state = {tier:'mythic', lv:null, gear:true, trig:false, act:true, dbf:true, boss:null, btier:null};
+const state = {tier:'mythic', lv:null, gear:true, trig:false, act:true, dbf:true, boss:null, slot:null};
 
 const bosses = [...new Set(DATA.fights.map(f => f.n))].sort();
-const tiersOf = b => DATA.fights.map((f,i) => ({f, i})).filter(x => x.f.n === b).sort((a,b) => a.f.t - b.f.t);
+/* every fight this boss appears in, hardest last */
+const slotsOf = b => DATA.fights.map((f,i) => ({f, i})).filter(x => x.f.n === b).sort((a,b) => a.f.l - b.f.l);
 state.boss = bosses.includes('Mortarion') ? 'Mortarion' : bosses[0];
-state.btier = tiersOf(state.boss).slice(-1)[0].f.t;
+state.slot = slotsOf(state.boss).slice(-1)[0].i;
 
 function tierDef() { return DATA.tiers.find(t => t.key === state.tier); }
 function scenarioKey() {
   return (state.trig ? 'trig' : 'base') + '_l' + state.lv + (state.act ? '_a' : '') + (state.gear ? '_g' : '');
 }
 function fightIndex() {
-  const rows = tiersOf(state.boss);
-  return (rows.find(x => x.f.t === state.btier) || rows[rows.length - 1]).i;
+  const rows = slotsOf(state.boss);
+  return (rows.find(x => x.i === state.slot) || rows[rows.length - 1]).i;
 }
 function result() {
   return DATA.r[state.tier][scenarioKey()][fightIndex()][state.dbf ? 1 : 0];
@@ -205,15 +209,15 @@ function buildControls() {
     btn.setAttribute('aria-pressed', String(b === state.boss));
     btn.onclick = () => {
       state.boss = b;
-      const ts = tiersOf(b).map(x => x.f.t);
-      if (!ts.includes(state.btier)) state.btier = ts[ts.length - 1];
+      const rows = slotsOf(b);
+      if (!rows.some(x => x.i === state.slot)) state.slot = rows[rows.length - 1].i;
       draw();
     };
     list.appendChild(btn);
   });
-  const TIER_LABEL = ['Common','Uncom','Rare','Epic','Leg','Mythic'];
-  seg(el('bosstier'), tiersOf(state.boss).map(x => ({label:TIER_LABEL[x.f.t] || x.f.r, value:x.f.t})), state.btier,
-      v => state.btier = v);
+  el('bosstier').className = slotsOf(state.boss).length > 5 ? 'seg wrapseg' : 'seg';
+  seg(el('bosstier'), slotsOf(state.boss).map(x => ({label:x.f.slot, value:x.i})), state.slot,
+      v => state.slot = v);
   ['gear','trig','act','dbf'].forEach(k => { el(k).checked = state[k]; el(k).onchange = () => { state[k] = el(k).checked; draw(); }; });
 }
 
@@ -229,7 +233,7 @@ function draw() {
     state.dbf ? 'Side battles cleared' : 'Side battles not cleared'
   ].map(s => '<span>' + s + '</span>').join('');
 
-  el('chartTitle').textContent = f.n + ' · ' + f.r + ' tier, level ' + f.l;
+  el('chartTitle').textContent = f.n + ' · ' + f.slot + ', level ' + f.l;
   el('chartHint').innerHTML = '<span class="total"><b>' + n(res.s) + '</b><em>damage in ' + DATA.turns +
     ' turns · ' + (res.s / f.hp * 100).toFixed(2) + '% of the boss</em></span>';
 

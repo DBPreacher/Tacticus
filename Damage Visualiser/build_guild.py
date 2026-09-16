@@ -41,14 +41,17 @@ def _tier(tier_key):
     return _cache[tier_key]
 
 
+TIER_NAMES = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic']
+
+
 def fight_list(g):
-    """one fight per boss and tier: the hardest level of that tier"""
-    best = {}
-    for f in gr.fights(g):
-        k = (f['name'], f['tier'])
-        if k not in best or f['level'] > best[k]['level']:
-            best[k] = f
-    return sorted(best.values(), key=lambda f: (f['tier'], f['name']))
+    """every boss fight, in the game's own order. A tier holds several sets, and the game names them
+    the way players do: Mythic 1, Mythic 2, Mythic 3 are three different fights."""
+    return sorted(gr.fights(g), key=lambda f: (f['tier'], f['set'], f['name']))
+
+
+def slot_name(f):
+    return TIER_NAMES[f['tier']] + ' ' + str(f['set'] + 1)
 
 
 def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names):
@@ -57,9 +60,17 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
     rules = gr.boss_rules(g, fight)
     banned = gr.FACTION_ID.get(fight['faction'], fight['faction'])
     opts = gr.mow_options(g, fight, boss, ds, lv, tier_key, banned, trig)
-    team, _ = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules, tier_key=tier_key)
-    mow = gr.best_mow(team, opts, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None) if opts else None
+    # search with the machine that usually wins, then check it against the rest and only search again
+    # if a different one suits the five better
+    mow = max(opts, key=lambda o: ((o['buff'] or {}).get('pct', 0) if not (o['buff'] or {}).get('only') else 0,
+                                   o['own'])) if opts else None
     team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules, tier_key=tier_key, mow=mow)
+    if opts:
+        pick = gr.best_mow(team, opts, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None)
+        if pick['name'] != mow['name']:
+            mow = pick
+            team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules,
+                                       tier_key=tier_key, mow=mow)
     score_of = lambda t: gr.team_damage(t, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None, mow)
     buff = mow['buff'] if mow else None
     five = []
@@ -141,7 +152,7 @@ def main():
     for f in fights:
         boss, ds, dbf = gr.boss_defender(g, f, False)
         _, _, dbf2 = gr.boss_defender(g, f, True)
-        fl.append(dict(n=f['name'], t=f['tier'], l=f['level'], hp=f['hp'], r=f['rarity'],
+        fl.append(dict(n=f['name'], t=f['tier'], l=f['level'], hp=f['hp'], r=f['rarity'], slot=slot_name(f),
                        ban=gr.FACTION_ID.get(f['faction'], f['faction']), arm=round(boss['arm']),
                        bc=round(ds['bc'] * 100), bd=round(ds['bd']),
                        dbf=[round(dbf2['armour']), round(dbf2['block'])],
