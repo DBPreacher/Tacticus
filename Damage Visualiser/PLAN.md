@@ -147,6 +147,12 @@ Blighted Land needs your characters to stand on the hexes it contaminates, so it
 follows the All triggered switch. The other five are defensive. The boss's
 faction is banned for machines too (so no Reanimator against Szarekh).
 
+**Buffs only count while they are up.** A support ability that lasts the battle
+counts for all six turns; one that lasts a round or two counts for that long,
+and an active comes back whenever its cooldown allows (a 2-round buff on a
+2-turn cooldown covers four of the six turns). Before this was counted, teams
+of short-lived actives looked far better than they are.
+
 `build_guild.py` builds **guild-raid.html** from these numbers: every boss and
 tier, every roster setting, the side battles on and off, with the five, the
 machine, and the eight characters who came closest to making the team.

@@ -17,7 +17,7 @@ Rules from the game data (see INSTRUCTIONS.md, "Guild Raid"):
 
     python -X utf8 guild_raid.py --boss "Belisarius Cawl" [--debuffs] [--gear] [--ability 50] [--tier mythic]
 """
-import argparse, csv, json, os
+import argparse, csv, json, os, re
 import build_map as bm
 import support_model as sm
 
@@ -166,9 +166,34 @@ def setting(tier_key, lv, trig, act, gear):
     return U, sp, rnd, rest
 
 
+def buff_turns(r, ab):
+    """how many of the 6 turns a buff is up. A passive is up all battle unless it names a shorter window.
+    An active starts on turn 1 and comes back whenever its cooldown allows, so a 2-round buff on a 2-turn
+    cooldown covers 4 of the 6 turns."""
+    lasts = (r['Lasts'] or '').strip().lower()
+    active = r['Source'] == 'Active' or r['Condition'] == 'active'
+    if lasts == 'battle':
+        return TURNS
+    if lasts == 'once':
+        return 1                                        # it only ever happens once
+    m = re.match(r'(\d+)\s*round', lasts)
+    rounds = int(m.group(1)) if m else 1
+    if not active:
+        if lasts.startswith('each') or lasts in ('turn', 'every turn', ''):
+            return TURNS                                # something that happens again every turn
+        if lasts == 'every third round':
+            return -(-TURNS // 3)
+        return min(rounds, TURNS)
+    cd = (ab.get('constants') or {}).get('cooldownTurns') if ab else None
+    cd = int(float(cd)) if cd not in (None, '') else 2
+    uses = (TURNS - 1) // (cd + 1) + 1                  # turn 1, then every cooldown + 1 turns
+    return min(TURNS, rounds * uses)
+
+
 def buffs_for(member, mates, rows, lv, trig, act, immune):
-    """the Attack-side tokens this member picks up from its team-mates. Each buff goes to the team-mates
-    it helps most (biggest Damage first), as far as its reach allows."""
+    """the Attack-side tokens this member picks up from its team-mates, each with how many of the 6 turns
+    it is up. Each buff goes to the team-mates it helps most (biggest Damage first), as far as its reach
+    allows."""
     toks = []
     everyone = mates + [member]
     lookup = {u['name']: u for u in everyone}
@@ -189,10 +214,11 @@ def buffs_for(member, mates, rows, lv, trig, act, immune):
             if member['name'] not in [m['name'] for m in eligible[:TEAM_REACH.get(r['Reach'], 1)]]:
                 continue
             ab, relic = (None, False) if r['Source'] == 'Trait' else sm.row_ability(lookup, r)
+            up = buff_turns(r, ab)
             for t in sm.tokens_for(r, member, ab, relic, lv, trig):
                 if immune and t['kind'] == 'armour':          # a Boss's Armour can't be reduced
                     continue
-                toks.append(t)
+                toks.append((t, up))
     return toks
 
 
@@ -202,27 +228,40 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     extra: flat Damage added to this character's stat (Laviscus's Outrage, the Neurothrope's parasite).
     turns: how many of the 6 it is alive for, when the deaths switch is on."""
     rules = rules or dict(diminish=None, psyker_pct=0.0, block_ramp=0.0, charge_hits=0, notes=[])
-    toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])
-    spec = sp['active'].get(member['name']) if act else None
-    a, spec2, _ = sm.buffed(member, toks, spec, gear) if toks else (member, spec, 0.0)
-    if extra:
-        a = dict(a, dmg=a['dmg'] + extra)
-    dmg, _, w = bm.best_attack(a, boss, trig, ds, False, False)
-    f = rule_factor(a, w, rules, member)
-    if mow and mow['kind'] == 'taken' and (not mow['only'] or mow['only'] == w['kind']):
-        f *= 1 + mow['pct'] / 100                       # the boss takes more damage from these attacks
-    normal = dmg * f
     if turns <= 0:
         return 0.0
-    if spec2:
-        first = sum(x[0] for x in bm.opener(a, boss, trig, spec2, ds)) * f
-        return max(first, normal) + normal * (turns - 1)
-    return normal * turns
+    toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])
+    spec = sp['active'].get(member['name']) if act else None
+
+    def attack(live):
+        """(the damage of one normal attack, the opener, the character with these buffs on)"""
+        a, spec2, _ = sm.buffed(member, live, spec, gear) if live else (member, spec, 0.0)
+        if extra:
+            a = dict(a, dmg=a['dmg'] + extra)
+        dmg, _, w = bm.best_attack(a, boss, trig, ds, False, False)
+        f = rule_factor(a, w, rules, member)
+        if mow and mow['kind'] == 'taken' and (not mow['only'] or mow['only'] == w['kind']):
+            f *= 1 + mow['pct'] / 100                   # the boss takes more damage from these attacks
+        first = sum(x[0] for x in bm.opener(a, boss, trig, spec2, ds)) * f if spec2 else 0.0
+        return dmg * f, first
+    # the turns fall into blocks: as each short buff runs out, work out the attack again
+    ups = sorted({min(up, turns) for _, up in toks} | {turns})
+    total, done, live = 0.0, 0, [t for t, _ in toks]
+    for i, up in enumerate(ups):
+        live = [t for t, n in toks if n > done]
+        normal, first = attack(live)
+        block = up - done
+        if done == 0:                                   # the active lands on the first turn
+            total += max(first, normal) + normal * (block - 1)
+        else:
+            total += normal * block
+        done = up
+    return total
 
 
 def biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear):
     """this character's biggest single hit on the boss (what Laviscus's Outrage feeds on)"""
-    toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])
+    toks = [t for t, _ in buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])]
     a, _, _ = sm.buffed(member, toks, None, gear) if toks else (member, None, 0.0)
     best = 0.0
     for w in a['weapons']:
