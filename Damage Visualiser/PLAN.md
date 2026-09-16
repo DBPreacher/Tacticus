@@ -147,6 +147,18 @@ Blighted Land needs your characters to stand on the hexes it contaminates, so it
 follows the All triggered switch. The other five are defensive. The boss's
 faction is banned for machines too (so no Reanimator against Szarekh).
 
+**Terrain is counted, as a switch.** The wiki's rule is +50% Damage for a unit
+on high ground against one below it. Watching real runs, the two biggest hitters
+take the high ground, so the switch gives it to the two who gain most - and the
+model picks the same two the videos show (Laviscus and Kariyan). It was the last
+third of the calibration gap.
+
+How many stand on it barely matters: two, three or all five come out within 5%
+of each other, because the damage is concentrated in one or two characters.
+Owner (2026-09-16) watched a Szarekh run with three on high ground most of the
+battle and five by the last round; the model's two-character version is 5% under
+that run and 8% over the Mortarion one.
+
 **The search is greedy:** it builds the five one at a time, then swaps each slot
 for anything better until nothing improves. That finds the best five almost
 always, but it can stop at a five where only changing two characters at once

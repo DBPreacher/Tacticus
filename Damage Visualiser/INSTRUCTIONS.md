@@ -138,7 +138,10 @@ the boss's own faction is banned.
   every boss, tier and setting and writes the page.
 - The page's switches are the Roster Battle Map's (roster tier, ability level,
   gear, All triggered, actives) plus **Side battles cleared**, which applies the
-  two debuff chains to the boss (mostly -30% Armour, -15% block chance).
+  two debuff chains to the boss (mostly -30% Armour, -15% block chance), and
+  **High ground**, which gives the two characters who gain most +50% Damage
+  (the wiki's terrain rule). Both are on by default, because that is what a real
+  run looks like.
 - The boss picker lists every fight a boss appears in, named the way the game
   names it: Mythic 1, Mythic 2 and Mythic 3 are three different fights (levels
   23, 24 and 25), not one Mythic tier. **A boss only appears in the slots its
@@ -181,6 +184,25 @@ the boss's own faction is banned.
 - **Not counted:** the boss killing your characters (`--deaths` on the command
   line, see PLAN.md), terrain height, bombs and summons.
 
+### Calibration (September 2026)
+
+The owner found videos of real runs and the model was scoring the teams people
+actually play at about a third of what they do. It now lands inside 10%:
+
+| Real run | The team | Real | The model |
+|---|---|---:|---:|
+| Mortarion Mythic 3 | Laviscus, Atlacoya, Boss Gulgortz, Trajann, Kariyan + Biovore | 1,632,137 and ~1,660,000 | 1,778,467 |
+| Szarekh Mythic 2 | Aesoth, Boss Gulgortz, Trajann, Laviscus, Kariyan + Biovore | ~2,620,000 | 2,452,026 |
+
+Both at Mythic, ability 60, standard gear, All triggered, side battles cleared,
+High ground on. **Ability 60 is the game's maximum today** (owner, September
+2026); 65 arrives with Adamantine III, so don't raise the tier until it does.
+
+If the numbers drift again, the things that turned out to matter were: what
+Laviscus's Outrage feeds on (the biggest *hit* of any kind, crits included), the
+buffs that reach the hits a passive adds, Atlacoya's Direct damage, and terrain.
+Check those first.
+
 ### What the Guild Raid work changed in the other pages
 
 A Guild Raid is six fixed turns against something that cannot die, so several
@@ -196,7 +218,8 @@ it is about the *fight*, it stays in `guild_raid.py`.
 | Kariyan's active ramps with every turn he has fought | `guild_raid.py` only | **No** - it starts from turn 2 and a map kill is over inside turn 1 |
 | Laviscus's +Crit Damage per Chaos ally | `guild_raid.py` only | **No** - it needs team-mates feeding his Outrage, and the map is one-on-one |
 | A buff only counts for the turns it is up | `guild_raid.py` only | **No** - the Support Map measures a buff's boost to *one attack*, so how long it lasts isn't part of that question (the Defence side already handles round-only effects) |
-| Boss rules, side-battle debuffs, the Machine of War slot | `guild_raid.py` only | **No** - there are no bosses or machines on the other pages |
+| Boss rules, side-battle debuffs, the Machine of War slot, high ground | `guild_raid.py` only | **No** - there are no bosses, machines or terrain on the other pages |
+| "+Damage taken" and "not a normal attack" buffs reach the hits a passive adds | `support_model.py`, so both pages | **Yes** - it makes those buffs worth more on the Support Map |
 
 The one finding worth saying on camera rather than coding: **+20% damage taken is
 worth more than +20% Damage**, because Armour comes off every hit before the
