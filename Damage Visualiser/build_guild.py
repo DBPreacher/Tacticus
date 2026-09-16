@@ -7,6 +7,11 @@ guild_template.html. Run it after build_map.py:
 
     python -X utf8 build_guild.py
     python -X utf8 build_guild.py --page-only   # design changes: reuse the last build's numbers
+    python -X utf8 build_guild.py --settings mythic:trig_l60_a_g   # one setting, about a minute
+
+A full build is 81 boss fights x 48 settings x side battles x high ground, so about half an hour.
+While a change to the model is being checked, build the one setting the videos use and look at that;
+do the full build once, at the end.
 
 See INSTRUCTIONS.md ("Guild Raid").
 """
@@ -109,19 +114,28 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
     return out
 
 
+# How many fights go in one job. A full build has 48 settings to spread over the cores, so whole settings
+# are best: each worker then stays on one setting and its caches stay warm. Rebuilding a single setting has
+# nothing to spread, so it goes out in small chunks instead - 20 minutes becomes about a minute.
+CHUNK = 3
+FULL_CHUNK = 999
+
+
 def job(args):
-    tier_key, key, lv, trig, act, gear = args
+    tier_key, key, lv, trig, act, gear, lo, chunk = args
     units, specs = _tier(tier_key)
     g = gr.game()
     idx = {u['name']: i for i, u in enumerate(units)}
     mow_names = [m['name'] for m in gr.machines(g)]
-    rows = sm.load_rows('Attack')
-    U, sp, _, _ = sm.setting_units(units, specs, lv, trig, act, gear)
+    key_u = (tier_key, lv, trig, act, gear)
+    if key_u not in _cache:                   # the roster at this setting, once per worker
+        _cache[key_u] = (sm.load_rows('Attack'),) + sm.setting_units(units, specs, lv, trig, act, gear)[:2]
+    rows, U, sp = _cache[key_u]
     res = []
-    for fight in fight_list(g):
+    for fight in fight_list(g)[lo:lo + chunk]:
         res.append([[one(g, fight, d, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, h)
                      for h in (False, True)] for d in (False, True)])
-    return tier_key, key, res
+    return tier_key, key, lo, res
 
 
 def write_page(data):
@@ -136,7 +150,10 @@ def write_page(data):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--page-only', action='store_true', help="rebuild the page from the template with the last build's numbers")
-    if ap.parse_args().page_only:
+    ap.add_argument('--settings', help='only these tier:key settings, comma separated, keeping the rest of the '
+                                       'last build (e.g. mythic:trig_l60_a_g)')
+    args = ap.parse_args()
+    if args.page_only:
         with open(OUT, encoding='utf-8') as f:
             m = re.search(r'const DATA = (\{.*?\});\n', f.read(), re.S)
         if not m:
@@ -144,6 +161,14 @@ def main():
         write_page(json.loads(m.group(1)))
         print('Rebuilt guild-raid.html from the template (numbers unchanged).')
         return
+    only = set(args.settings.split(',')) if args.settings else None
+    old = None
+    if only:
+        with open(OUT, encoding='utf-8') as f:
+            m = re.search(r'const DATA = (\{.*?\});\n', f.read(), re.S)
+        if not m:
+            sys.exit('--settings needs a full build to start from.')
+        old = json.loads(m.group(1))
     start = time.time()
     g = gr.game()
     fights = fight_list(g)
@@ -153,8 +178,12 @@ def main():
         gd, units = bm.load()
         tiers.append(dict(key=t['key'], label=t['label'], levels=list(t['levels']), about=t['about']))
         for key, trig, lv, act, gear in bm.scenario_keys():
-            if lv:
-                jobs.append((t['key'], key, lv, trig, act, gear))
+            if lv and (only is None or f"{t['key']}:{key}" in only):
+                step = CHUNK if only else FULL_CHUNK
+                jobs += [(t['key'], key, lv, trig, act, gear, lo, step)
+                         for lo in range(0, len(fights), step)]
+    if only and not jobs:
+        sys.exit(f'No settings matched {sorted(only)}. They look like tier:key, e.g. mythic:trig_l60_a_g.')
     chars = [dict(n=u['name'], a=u['alliance'], f=u['faction']) for u in units]
     mows = [dict(n=m['name'], f=m['factionId'], trig=bool((gr.MOW_BUFF.get(m['name']) or {}).get('trig')),
                  b=(lambda b: dict(name=b['name'], pct=b['pct'], kind=b['kind'], only=b['only'] or '',
@@ -176,13 +205,23 @@ def main():
     data = dict(version=g['version'], tiers=tiers, chars=chars, mows=mows, fights=fl, turns=gr.TURNS,
                 high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
                 r={t['key']: {} for t in tiers})
+    if old:                                   # keep every setting this run isn't redoing
+        data['r'] = old['r']
+        for tier_key, key in {(a[0], a[1]) for a in jobs}:
+            data['r'].setdefault(tier_key, {}).pop(key, None)
+    done = 0
     with Pool(min(len(jobs), os.cpu_count() or 4)) as pool:
-        for tier_key, key, res in pool.imap_unordered(job, jobs):
-            data['r'][tier_key][key] = res
-            print(f'  {tier_key} {key}  ({time.time() - start:.0f}s)', flush=True)
+        for tier_key, key, lo, res in pool.imap_unordered(job, jobs):
+            slot = data['r'][tier_key].setdefault(key, [None] * len(fights))
+            slot[lo:lo + len(res)] = res
+            done += 1
+            if done % 10 == 0 or done == len(jobs):
+                print(f'  {done}/{len(jobs)} chunks  ({time.time() - start:.0f}s)', flush=True)
     write_page(data)
-    print(f'Built guild-raid.html: {len(fights)} boss fights x {len(jobs)} settings x 2 (side battles), '
-          f'game version {g["version"]}, {time.time() - start:.0f}s.')
+    n_settings = len({(a[0], a[1]) for a in jobs})
+    print(f'Built guild-raid.html: {len(fights)} boss fights x {n_settings} settings x 2 (side battles) '
+          f'x 2 (high ground), game version {g["version"]}, {time.time() - start:.0f}s.'
+          + (f'  Only {", ".join(sorted(only))}; the rest is from the last build.' if only else ''))
 
 
 if __name__ == '__main__':

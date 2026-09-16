@@ -30,9 +30,16 @@ FACTION_ID = {'AdeptusMechanicus': 'Adeptus Mechanicus', 'Orks': 'Orks', 'Tyrani
               'DeathGuard': 'Death Guard', 'DarkAngels': 'Dark Angels', 'Necrons': 'Necrons'}
 
 
+_GAME = None
+
+
 def game():
-    with open(os.path.join(HERE, 'cache', 'gameinfo.json'), encoding='utf-8') as f:
-        return json.load(f)
+    """the game data, parsed once per process: it is 11 MB and every caller wants the same copy"""
+    global _GAME
+    if _GAME is None:
+        with open(os.path.join(HERE, 'cache', 'gameinfo.json'), encoding='utf-8') as f:
+            _GAME = json.load(f)
+    return _GAME
 
 
 def fights(g):

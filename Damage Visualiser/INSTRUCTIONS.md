@@ -228,6 +228,24 @@ multiplier.
 To rebuild after a game update: `python -X utf8 build_map.py`, then
 `python -X utf8 build_guild.py`, then republish the artifact.
 
+### Changing the model without waiting half an hour
+
+A full build is 81 fights x 48 settings x side battles x high ground, about
+31,000 searched answers and half an hour. Don't run it while you are still
+checking a change:
+
+1. `python -X utf8 check_guild.py` - scores the real runs from the owner's
+   videos against what they actually did. Half a second. If a change swings one
+   of those, that is the change to look at.
+2. `python -X utf8 build_guild.py --settings mythic:trig_l60_a_g` - rebuilds
+   just the setting the videos use (about 80 seconds) and keeps the rest of the
+   last build, so the page is right where you are looking.
+3. The full `build_guild.py` once, when the model has settled.
+
+(A job is a whole setting in a full build, so the 48 of them spread over the
+cores; with `--settings` there is nothing to spread, so jobs become chunks of
+three fights instead - that is what turns 20 minutes into 80 seconds.)
+
 ---
 
 ## Recording it for a video
