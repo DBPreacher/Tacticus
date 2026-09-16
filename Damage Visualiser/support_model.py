@@ -94,8 +94,8 @@ def tokens_for(r, ally, ab, relic, level, trig):
         if t['trig'] and not trig:
             continue
         o = t['opts']
-        if not matches(ally, o.get('who', 'all')):
-            continue
+        if ally is not None and not matches(ally, o.get('who', 'all')):
+            continue      # ally=None: no receiver yet, so the 'who' travels with the token
         m = re.fullmatch(r'(\d+)x(\w+)\((\w+)(?:-(\w+))?\)', t['arg'])
         if m:
             n, typ, a, b = m.groups()

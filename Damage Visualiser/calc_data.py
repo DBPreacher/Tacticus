@@ -13,6 +13,7 @@ do the arithmetic, and it checks itself on load against exact scores from guild_
 Used by build_guild.py. See INSTRUCTIONS.md ("Guild Raid", the Calculate button).
 """
 import random
+import build_map as bm
 import support_model as sm
 import guild_raid as gr
 
@@ -21,7 +22,7 @@ N_VECTORS = 50                                 # exact scores the page checks it
 
 
 def _weapon(w):
-    return dict(k=w['kind'], t=w['type'], h=w['hits'], p=w['pierce'])
+    return dict(k=w['kind'], t=w['type'], h=w['hits'], p=w['pierce'], r=w['range'])
 
 
 def _part(p):
@@ -55,16 +56,45 @@ def characters(U, sp, g, lv):
                  g=dict(cc=gear.get('cc', 0), cd=gear.get('cd', 0), bc=gear.get('bc', 0), bd=gear.get('bd', 0)),
                  ps=[_effect(e) for e in eff],
                  pg=[_effect(e) for e in (u.get('pg') or [])])
-        if spec and spec.get('parts'):
-            c['sp'] = dict(p=[_part(p) for p in spec['parts']], same=bool(spec.get('same_turn')))
+        # an active with no damage parts of its own still counts: several are just a normal attack
+        if spec and (spec.get('parts') or spec.get('normal') in ('Y', 'PCT') or spec.get('same_turn')):
+            c['sp'] = dict(p=[_part(p) for p in spec['parts']], same=bool(spec.get('same_turn')),
+                           normal=spec.get('normal'), weapon=spec.get('weapon'), pct=spec.get('pct'),
+                           cap=spec.get('cap'), flat=spec.get('flat'),
+                           bonus=_part(spec['bonus']) if spec.get('bonus') else None,
+                           gx=[_effect(e) for e in (spec.get('gear') or [])] or None)
         if (u.get('relic') or {}).get('name'):
             c['rel'] = u['relic']['name']
         act = ((u.get('ability') or {}).get('constants') or {}).get('cooldownTurns')
         if act not in (None, ''):
             c['cd'] = int(float(act))
+        # the handful of characters whose numbers grow through the battle, resolved here so the page
+        # doesn't have to know their names
+        ab = u['passive'] or {}
+        if u['name'] in gr.RAMP:
+            c['rampPct'] = sm.value(u['ability'] or {}, gr.RAMP[u['name']], lv)
+        if u['name'] in gr.RAMP_FLAT:
+            c['rampFlat'] = sm.value(u['ability'] or {}, gr.RAMP_FLAT[u['name']], lv)
+        if u['name'] in gr.DIRECT:
+            c['direct'] = list(gr.DIRECT[u['name']])
+        if u['name'] in gr.PSYCHIC_HITS:
+            c['psyCap'] = float(((u['ability'] or {}).get('constants') or {}).get(gr.PSYCHIC_HITS[u['name']]) or 99)
+        if u['name'] in gr.RAMP_TEAM:
+            c['rampTeam'] = sm.value(ab, gr.RAMP_TEAM[u['name']], lv)
+        if u['name'] in gr.RAMP_STACK:
+            var, capvar = gr.RAMP_STACK[u['name']]
+            c['rampStack'] = [sm.value(ab, var, lv), float((ab.get('constants') or {}).get(capvar) or 99)]
+        if u['name'] == 'Laviscus':
+            c['outragePct'] = sm.value(ab, 'extraDmgPct', lv)
+            c['chaosCrit'] = sm.value(ab, 'extraCritDmg', lv)
+        if u['name'] == 'Neurothrope':
+            cap = float((ab.get('constants') or {}).get('buffMaxLevel') or (ab.get('variables') or {}).get('buffMaxLevel', [15])[0])
+            c['parasite'] = [sm.value(ab, 'extraDmg', lv), cap]
+            if (u.get('relic') or {}).get('name') == 'Norn Crown':
+                c['crown'] = sm.value(u['relic']['ability'], 'extraDmg', bm.RELIC_LEVEL, True)
         s = gr.summons_of(g, u, lv)
         if s:
-            c['sum'] = [dict(n=n, d=round(dmg, 1), w=[_weapon(dict(kind=k, type=w['damageProfile'], hits=w['hits'],
+            c['sum'] = [dict(n=n, d=round(dmg, 1), w=[_weapon(dict(kind=k, type=bm.dtype(w['damageProfile']), hits=w['hits'],
                                                                    pierce=w['piercingRatio'] / 100, range=1))
                                                      for k, w in (('melee', npc.get('meleeWeapon')),
                                                                   ('ranged', npc.get('rangeWeapon'))) if w],
@@ -77,14 +107,13 @@ def characters(U, sp, g, lv):
 def support_rows(U, lv, trig):
     """the buff each character hands the rest of the team, with its numbers worked out"""
     lookup = {u['name']: u for u in U}
-    any_ally = next(iter(U))
     out = []
     for r in sm.load_rows('Attack'):
         if r['Name'] not in lookup:
             continue
         ab, relic = (None, False) if r['Source'] == 'Trait' else sm.row_ability(lookup, r)
         toks = []
-        for t in sm.tokens_for(r, any_ally, ab, relic, lv, trig):
+        for t in sm.tokens_for(r, None, ab, relic, lv, trig):   # who it helps travels with the token
             tok = dict(k=t['kind'], s=t['scope'], o=t.get('opts') or {})
             if t.get('value') is not None:
                 tok['v'] = round(t['value'], 2)
@@ -124,6 +153,30 @@ def vectors(g, fights, U, sp, rows, lv, trig, act, gear, tier_key, seed=11):
     return out
 
 
+def bosses(g, fights, lv):
+    """each fight twice: as it stands, and with the side battles cleared. Each carries what every
+    Machine of War you may bring does to that boss on its own, which is how the page picks one."""
+    ms = list(gr.machines(g))
+    out = []
+    for f in fights:
+        both = []
+        banned = gr.FACTION_ID.get(f['faction'], f['faction'])
+        for dbf in (False, True):
+            boss, ds, d2 = gr.boss_defender(g, f, dbf)
+            rules = gr.boss_rules(g, f, d2 if dbf else None)
+            both.append(dict(arm=round(boss['arm'], 1), bc=round(ds['bc'], 3), bd=round(ds['bd'], 1),
+                             ccr=round(ds['ccr'], 3), cdr=round(ds['cdr'], 1),
+                             tr=sorted(boss['traits']), hp=f['hp'], ban=banned,
+                             dim=list(rules['diminish']) if rules['diminish'] else None,
+                             psy=rules['psyker_pct'], ramp=rules['block_ramp'],
+                             dmg=round(boss['dmg'], 1),
+                             mow={m['name']: round(gr.mow_damage(g, m, boss, ds, lv))
+                                  for m in ms
+                                  if gr.FACTION_ID.get(m['factionId'], m['factionId']) != banned}))
+        out.append(both)
+    return out
+
+
 def build(g, fights):
     """everything the Calculate button needs, for the setting the videos use"""
     tier_key, lv, trig, act, gear = SETTING
@@ -137,4 +190,5 @@ def build(g, fights):
     return dict(setting=dict(tier=tier_key, lv=lv, trig=trig, act=act, gear=gear),
                 turns=gr.FIGHTING, high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
                 chars=characters(U, sp, g, lv), rows=support_rows(U, lv, trig), mows=machines,
+                bosses=bosses(g, fights, lv),
                 vec=vectors(g, fights, U, sp, rows, lv, trig, act, gear, tier_key))
