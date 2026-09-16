@@ -280,6 +280,12 @@ RAMP_FLAT = {'Atlacoya': 'extraDmg'}
 DIRECT = {'Atlacoya': ('Psyker', 'Adeptus Custodes')}
 # an active that scores a hit for every Psychic attack the team makes that turn (Sekhetar's Warpflamer)
 PSYCHIC_HITS = {'Sekhetar': 'maxNrOfHits'}
+# +Damage on everything they do, for each active the whole team has used (Titus's Fuelled by Fury)
+RAMP_TEAM = {'Titus': 'extraDmg'}
+# +Damage on everything they do, a stack a turn up to a cap. Shiron's counts Overkills and enemies he
+# would have Suppressed - a Boss is immune to Suppress but the stack still builds - so it follows the
+# Traits switch, like the rest of the things you have to set up.
+RAMP_STACK = {'Shiron': ('extraDmg', 'buffMaxLevel')}
 
 
 def active_turns(member, turns):
@@ -340,6 +346,11 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     rules = rules or dict(diminish=None, psyker_pct=0.0, block_ramp=0.0, charge_hits=0, notes=[])
     if turns <= 0:
         return 0.0
+    if 'Immune' in boss['traits'] and member.get('ps'):
+        # its own Armour reduction is no good against a Boss either (Godswyl, Havyr, Snappawrecka)
+        eff_, desc_ = member['ps']
+        if any(e['kind'] in ('armignore', 'armpct') for e in eff_):
+            member = dict(member, ps=([e for e in eff_ if e['kind'] not in ('armignore', 'armpct')], desc_))
     toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'])
     spec = sp['active'].get(member['name']) if act else None
 
@@ -775,7 +786,20 @@ def member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buf
     flat = parasite(m, team, boss, lv, gear, tier_key)
     if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
         flat += m['dmg'] * buff['pct'] / 100
-    return [x + flat for x in extra]
+    out = [x + flat for x in extra]
+    ab = m['passive'] or {}
+    var = RAMP_TEAM.get(m['name'])
+    if var and act:                                   # a stack for every active the team has used
+        uses = sorted(x for u in team for x in active_turns(u, FIGHTING))
+        step = sm.value(ab, var, lv)
+        out = [x + step * sum(1 for u in uses if u < turn) for turn, x in enumerate(out, 1)]
+    got = RAMP_STACK.get(m['name'])
+    if got and trig:                                  # a stack a turn, up to the ability's cap
+        var2, capvar = got
+        cap = float((ab.get('constants') or {}).get(capvar) or 99)
+        step = sm.value(ab, var2, lv)
+        out = [x + step * min(turn - 1, cap) for turn, x in enumerate(out, 1)]
+    return out
 
 
 def high_ground(per_member):

@@ -252,14 +252,25 @@ mistakes. Each one was found on one character and then turned out to apply to
 several. The sweep below is the to-do list: work through it and check each
 against the ability text, the way Kariyan's and Atlacoya's were.
 
-| The kind of thing | Found on | Still to do |
+| The kind of thing | Found on | Swept (September 2026) |
 |---|---|---|
-| An active that keeps giving for the rest of the battle | Abaddon (`extra:A1:after`) | Haarken, Sword Brother Godswyl, Lucien, Hâvyr |
-| A different attack against a Big Target - and every boss is one | Kariyan (`extra:1\|2`) | none found |
-| An ability that grows with each turn its owner has fought | Kariyan (`RAMP`) | none found |
-| An ability that grows with each use, or each active the team uses | Atlacoya (`RAMP_FLAT`) | Titus, Snappawrecka, Wrask, Shiron, Kîmm |
-| A damage type that changes with the target or the team | Atlacoya (`DIRECT`) | Commander Farsight |
-| Hits that scale with what the team has done this turn | Sekhetar (`PSYCHIC_HITS`) | Ahriman, Adamatar |
+| An active that keeps giving for the rest of the battle | Abaddon (`extra:A1:after`) | **Godswyl** done: his after-moving attack was counted, his -653 Armour was not. **Haarken** and **Lucien** need kills or charging, so nothing to count. **Havyr**'s is on his active, which the token grammar can't reach yet |
+| A different attack against a Big Target | Kariyan (`extra:1\|2`) | nothing else found |
+| An ability that grows with each turn its owner has fought | Kariyan (`RAMP`) | nothing else found |
+| An ability that grows with each use | Atlacoya (`RAMP_FLAT`) | **Titus** done (`RAMP_TEAM`): +148 on everything he does for each active the team has used, worth +1,480 a round by the end. **Shiron** done (`RAMP_STACK`): +196 a turn to a cap of 6. **Snappawrecka** needs repairs, **Wrask** needs to be attacked, **Kîmm** needs to charge |
+| A damage type that changes with the target or the team | Atlacoya (`DIRECT`) | Farsight's is already right |
+| Hits that scale with what the team has done | Sekhetar (`PSYCHIC_HITS`) | **Ahriman** needs Fire hexes and **Adamatar** needs kills. Adamatar's other half, the +718 enemies take from ranged attacks, was already a support row |
+
+Two things the sweep settled that are worth keeping in mind. First, the ability
+CSVs were in better shape than a keyword scan suggests: Adamatar and Godswyl's
+extra attack were already handled, and the scan only flagged them because it
+cannot read the Notes column properly. Second, a character's own Armour
+reduction is no good against a **Boss** - they are Immune - so `member_damage`
+strips `armignore` and `armpct` from a character's own passive in a raid, while
+the Roster Battle Map keeps them.
+
+Titus's and Shiron's ramps are Guild Raid only. They build over six rounds, and
+a one-on-one kill on the map is over in two to five attacks.
 
 Two more, from the same hunt, that are about the model rather than one character:
 
