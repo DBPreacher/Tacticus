@@ -196,7 +196,7 @@ def build(g, fights):
         b = gr.mow_buff(g, m, lv, tier_key, trig)
         machines.append(dict(n=m['name'], f=m['factionId'],
                              b=(dict(k=b['kind'], pct=b['pct'], only=b['only'] or '', who=b['who']) if b else None)))
-    return dict(setting=dict(tier=tier_key, lv=lv, trig=trig, act=act, gear=gear),
+    return dict(version=g['version'], setting=dict(tier=tier_key, lv=lv, trig=trig, act=act, gear=gear),
                 turns=gr.FIGHTING, high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
                 chars=characters(U, sp, g, lv), rows=support_rows(U, lv, trig), mows=machines,
                 bosses=bosses(g, fights, lv),
