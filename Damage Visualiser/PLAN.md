@@ -611,6 +611,38 @@ buff, reach and duration included. Two relics do this on the Attack side:
 
 ## Open questions
 
+### How far do these buffs actually reach? (owner testing in game, September 2026)
+
+Six Attack rows carry a **per-token reach** that `buffs_for` never reads - it only
+ever uses the row-level `Reach` column. The owner is settling these by playing
+them rather than by reading the ability text, so the model is deliberately left
+alone until then. What to watch for, and what the model currently assumes:
+
+| Ability | The text says | The model gives it to | If the text is right |
+|---|---|---|---|
+| **Commander Shadowsun**, Defender of the Greater Good | non-Tau allies adjacent, **Tau allies at 2 hexes** | 2 allies either way | 3 allies for a Tau team - **undercounted** |
+| **Darkstrider**, Structural Analyser | the same split | 2 allies | 3 for a Tau team - **undercounted** |
+| **Boss Gulgortz**, Waaagh! | **the whole team** | 2 allies | 4 allies - **undercounted, the biggest of the six** |
+| **Aun'Shi**, Serene Unifier | 2 hexes | 2 allies | 3 allies - undercounted |
+| **Asmodai**, Exemplar of Hate | **one** ally | 4 allies | 1 ally - **overcounted** |
+| **Haarken Worldclaimer**, Herald of the Apocalypse | next attack | the same | no change |
+
+The test in game is the same each time: put the buffed character at each distance
+from the caster and see whether the buff icon appears. For Boss Gulgortz, whether
+every character on the team gets the Waaagh! or only the two beside him.
+
+Why it matters beyond the numbers: **Shadowsun, Darkstrider and Boss Gulgortz are
+in the proven five on 8 of the 14 fights**, so if the text is right, those teams
+are stronger than the page says and the order behind them may change. Fixing it
+means re-running `brute_all.js` (about two hours), so it is worth doing once, with
+the answers in hand, rather than twice.
+
+A reminder of what "proven" does and doesn't cover: `brute_all.js` proves no other
+five scores higher **according to the model**. It removes search error, not model
+error. This is model error, and it is the kind only the game can settle.
+
+
+
 - **Havyr's passive: settled (owner, 2026-09-16) - count it as written.** Fury
   from the Dêlve adds a 2-hit Eviscerating attack after a normal attack against
   an enemy at or below 50% health, so it lands on every attack made once the
