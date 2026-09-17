@@ -25,7 +25,78 @@ function prep(D, fi, mowName) {
     if (!m) throw new Error(mowName + ' is not allowed against this boss');
     mow = {n: m.n, b: m.b, own: boss.mow[m.n]};
   }
-  return {D, boss, pool, mow, buff: mow ? mow.b : null, turns: D.turns, immune: boss.tr.includes('Immune')};
+  return pairTable({D, boss, pool, mow, buff: mow ? mow.b : null, turns: D.turns,
+                    immune: boss.tr.includes('Immune')});
+}
+
+/* ---------------------------------------------------------------- who gives what to whom
+   calc.js walks all 56 support rows against all five characters for every team, which the profiler put
+   at 27% of a run. Whether a row can reach a character at all is fixed - it depends on the pair, not the
+   team - so that is worked out once here. What is left per team is the reach cut: a buff goes to the
+   biggest hitters it can reach, and Damage ties are broken by list order, so this reproduces calc.js's
+   order exactly rather than sorting freely. */
+const REACH = {team: 4, target: 4, one: 1, 'next attack': 1, adjacent: 2, '2 hexes': 3};
+
+function pairTable(ctx) {
+  const D = ctx.D, pool = ctx.pool, N = pool.length;
+  const recOf = D.rows.map(r => pool.map(m => c.matches(m, r.rec)));
+  const table = [];
+  for (let s = 0; s < N; s++) {
+    const S = pool[s], row = new Array(N).fill(null);
+    for (let ri = 0; ri < D.rows.length; ri++) {
+      const r = D.rows[ri];
+      if (r.n !== S.n) continue;
+      if (r.rel && S.rel !== r.rel) continue;
+      for (let rc = 0; rc < N; rc++) {
+        if (!recOf[ri][rc]) continue;
+        const R = pool[rc];
+        if (ctx.immune && r.n === 'Xybia' && r.ab === 'Mind Control') continue;
+        const own = (s === rc && r.own) ? r.own : null;
+        const toks = [];
+        for (const tok of r.t) {
+          if (ctx.immune && tok.k === 'armour') continue;
+          if (tok.o && tok.o.who && !c.matches(R, tok.o.who)) continue;
+          if (own && own.indexOf(tok.k) >= 0) continue;
+          if (s === rc && !tok.self) continue;
+          toks.push({t: tok, up: r.up});
+        }
+        if (!toks.length) continue;
+        (row[rc] = row[rc] || []).push({ri: ri, reach: REACH[r.reach] === undefined ? 1 : REACH[r.reach], toks: toks});
+      }
+    }
+    table.push(row);
+  }
+  ctx.table = table;
+  ctx.recOf = recOf;
+  return ctx;
+}
+
+/* the tokens reaching team position i, identical to calc.js buffsFor for the same team */
+function tokensFor(ctx, team, ix, i) {
+  const out = [];
+  const me = team[i], myDmg = me.dmg;
+  /* calc.js builds the list as mates-in-team-order then the character itself, and a stable sort by
+     Damage keeps that order for ties - so this is where the character sits in it */
+  const posOf = q => q === i ? 4 : (q < i ? q : q - 1);
+  const myPos = 4;
+  for (let s = 0; s < 5; s++) {
+    const ent = ctx.table[ix[s]][ix[i]];
+    if (!ent) continue;
+    for (const e of ent) {
+      if (s !== i) {
+        let rank = 0;
+        for (let q = 0; q < 5; q++) {
+          if (q === s || q === i) continue;
+          if (!ctx.recOf[e.ri][ix[q]]) continue;
+          const d = team[q].dmg;
+          if (d > myDmg || (d === myDmg && posOf(q) < myPos)) rank++;
+        }
+        if (rank >= e.reach) continue;
+      }
+      for (const tk of e.toks) out.push(tk);
+    }
+  }
+  return out;
 }
 
 /* what a character's buffs come to, as a string: two teams that give it the same buffs give it the same
@@ -90,7 +161,7 @@ function biggestHit(ctx, m, mates, tk, opener, turn, high) {
 /* ---------------------------------------------------------------- one team */
 const EMPTY = [];
 
-function score(ctx, team, want) {
+function score(ctx, team, want, ix) {
   const D = ctx.D, turns = ctx.turns, n = team.length;
   const mates = new Array(n), toks = new Array(n), tks = new Array(n), actives = new Array(n);
   let uses = [];
@@ -98,7 +169,7 @@ function score(ctx, team, want) {
     const rest = [];
     for (let j = 0; j < n; j++) if (j !== i) rest.push(team[j]);
     mates[i] = rest;
-    toks[i] = c.buffsFor(team[i], rest, D, ctx.immune);
+    toks[i] = ctx.table ? tokensFor(ctx, team, ix, i) : c.buffsFor(team[i], rest, D, ctx.immune);
     tks[i] = tokenKey(toks[i]);
     actives[i] = c.activeTurns(team[i], turns);
     for (const t of actives[i]) uses.push(t);
@@ -157,7 +228,7 @@ function sweep(ctx, opts) {
   const pool = ctx.pool, N = pool.length, limit = opts.limit || Infinity;
   let best = -Infinity, bestTeam = null, tried = 0;
   const perChar = new Array(N).fill(-Infinity), perCharTeam = new Array(N).fill(null);
-  const team = new Array(5);
+  const team = new Array(5), ix = new Array(5);
   outer:
   for (let a = 0; a < N - 4; a++) {
     team[0] = pool[a];
@@ -169,10 +240,10 @@ function sweep(ctx, opts) {
           team[3] = pool[e];
           for (let f = e + 1; f < N; f++) {
             team[4] = pool[f];
-            const s = score(ctx, team, false);
+            ix[0] = a; ix[1] = b; ix[2] = d; ix[3] = e; ix[4] = f;
+            const s = score(ctx, team, false, ix);
             tried++;
             if (s > best) { best = s; bestTeam = team.slice(); }
-            const ix = [a, b, d, e, f];
             for (let q = 0; q < 5; q++) if (s > perChar[ix[q]]) { perChar[ix[q]] = s; perCharTeam[ix[q]] = team.slice(); }
             if (tried >= limit) break outer;
           }
@@ -196,9 +267,11 @@ if (require.main === module) {
     /* the fast scorer has to agree with calc.js exactly, or none of this is worth anything */
     let worst = 0, n = 0;
     for (let i = 0; i < 4000; i++) {
-      const t = [], u = new Set();
-      while (t.length < 5) { const j = (Math.random() * ctx.pool.length) | 0; if (!u.has(j)) { u.add(j); t.push(ctx.pool[j]); } }
-      const fast = score(ctx, t, false);
+      const t = [], ix = [], u = new Set();
+      while (t.length < 5) { const j = (Math.random() * ctx.pool.length) | 0; if (!u.has(j)) { u.add(j); ix.push(j); t.push(ctx.pool[j]); } }
+      ix.sort((p, q) => p - q);                      /* the sweep walks them in pool order, so check that order */
+      for (let q = 0; q < 5; q++) t[q] = ctx.pool[ix[q]];
+      const fast = score(ctx, t, false, ix);
       const slow = c.teamTotal(D, t, ctx.boss, ctx.mow, true).total;
       worst = Math.max(worst, Math.abs(fast - slow) / Math.max(slow, 1)); n++;
     }

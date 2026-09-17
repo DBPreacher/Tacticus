@@ -224,7 +224,7 @@ function buffed(ally, toks, spec) {
     const weapons = a.w.filter(w => (scope === 'all' || scope === 'ability' || w.k === scope)
       && (types === null || types.includes(w.t)) && !notypes.includes(w.t));
     const kinds = [...new Set(weapons.map(w => w.k))].sort();
-    const add = (kind, extra) => { for (const wk of kinds) a.ps.push(Object.assign({k: kind, s: wk, vs, vsnot}, extra)); };
+    const add = (kind, v, p) => { for (const wk of kinds) a.ps.push(mkEff(kind, wk, vs, vsnot, v, p)); };
     if (scope === 'ability') {
       if (k === 'pct') {
         if (spec) for (const p of spec.p) p.d *= 1 + v / 100;
@@ -250,22 +250,22 @@ function buffed(ally, toks, spec) {
       continue;
     }
     if (k === 'hits' && tok.cap === undefined && v !== Math.trunc(v)) {
-      for (const w of weapons) a.ps.push({k: 'pct', s: w.k, vs, vsnot, v: v / w.h * 100});
+      for (const w of weapons) a.ps.push(mkEff('pct', w.k, vs, vsnot, v / w.h * 100));
     } else if (['flat', 'pct', 'pierce', 'armignore', 'ramp'].includes(k) || (k === 'hits' && tok.cap === undefined)) {
-      add(k, {v});
+      add(k, v);
     } else if (k === 'hits') {
-      for (const w of weapons) a.ps.push({k: 'extra', s: w.k, vs, vsnot,
-        p: {d: Math.min(a.dmg, tok.cap), h: Math.trunc(v), t: w.t, c: true}});
+      for (const w of weapons) a.ps.push(mkEff('extra', w.k, vs, vsnot, 0,
+        mkPart(Math.min(a.dmg, tok.cap), Math.trunc(v), w.t, true)));
     } else if (k === 'extra' || k === 'partner') {
-      add('extra', {p: tok.p});
+      add('extra', 0, tok.p);
     } else if (k === 'attack') {
       const w = weapons.length ? weapons.reduce((x, y) => (y.h > x.h ? y : x)) : null;
-      if (w) a.ps.push({k: 'extra', s: 'all', vs, vsnot,
-        p: {d: Math.min(a.dmg * v / 100, tok.cap === undefined ? 1e9 : tok.cap), h: w.h, t: w.t, c: true}});
+      if (w) a.ps.push(mkEff('extra', 'all', vs, vsnot, 0,
+        mkPart(Math.min(a.dmg * v / 100, tok.cap === undefined ? 1e9 : tok.cap), w.h, w.t, true)));
     } else if (k === 'follow') {
-      add('follow', {});
+      add('follow', 0);
     } else if (k === 'taken' || k === 'takenpct') {
-      add(k === 'taken' ? 'flat' : 'pct', {v});
+      add(k === 'taken' ? 'flat' : 'pct', v);
       if (tok.s === 'all') {
         const cond = (vs || vsnot) ? {k: k, v: v, vs: vs, vsnot: vsnot} : null;
         const hit = cond
@@ -281,9 +281,9 @@ function buffed(ally, toks, spec) {
       }
     } else if (k === 'critchance' || k === 'critdmg') {
       if (!a.g) { if (o.gearonly) continue; a.g = {cc: 0, cd: 0, bc: 0, bd: 0}; }
-      a.pg = a.pg.concat([{k, v: k === 'critchance' ? v / 100 : v, s: scope === 'all' ? 'all' : scope, vs, vsnot}]);
+      a.pg = a.pg.concat([mkEff(k, scope === 'all' ? 'all' : scope, vs, vsnot, k === 'critchance' ? v / 100 : v)]);
     } else if (k === 'dmgfromblock') {
-      if (a.g) a.pg = a.pg.concat([{k: 'dmgfromblock', v: v / 100, s: 'all', vs, vsnot}]);
+      if (a.g) a.pg = a.pg.concat([mkEff('dmgfromblock', 'all', vs, vsnot, v / 100)]);
     } else if (k === 'reuse') {
       if (spec) spec.p = spec.p.concat(clone(spec.p));
     }
@@ -410,7 +410,7 @@ function memberDamage(D, member, mates, boss, extra, buff, teamUses, high) {
       if (xtra) x = Object.assign({}, x, {dmg: x.dmg + xtra});
       if (high) { x = Object.assign({}, x, {dmg: x.dmg * hg}); x = scaleParts(x, hg); }
       if (chaos) x = Object.assign({}, x, {pg: (x.pg || []).concat(
-        [{k: 'critdmg', v: (m.chaosCrit || 0) * chaos, s: 'all', vs: null, vsnot: null}])});
+        [mkEff('critdmg', 'all', null, null, (m.chaosCrit || 0) * chaos)])});
       return x;
     };
     a = dressed(a); plain = dressed(plain);
@@ -549,7 +549,7 @@ function summonDamage(D, m, team, boss) {
   for (const s of m.sum) {
     const rounds = Math.max(D.turns - (s.src === 'ability' ? 1 : 0), 0);
     let best = 0;
-    for (const w of s.w) best = Math.max(best, abilityHits({d: s.d + bonus, h: w.h, t: w.t, c: false}, boss, null));
+    for (const w of s.w) best = Math.max(best, abilityHits(mkPart(s.d + bonus, w.h, w.t, false), boss, null));
     total += s.n * best * rounds;
   }
   return total;
@@ -603,8 +603,41 @@ function scoreTeam(D, names, fightIndex, opts) {
   return out;
 }
 
+/* Every effect, token and part gets the same set of properties, whether it needs them or not. V8
+   compiles a fast path for a property read only while the objects arriving at it have one shape; the
+   export is sparse (some effects carry a value, some a part, some a cap), so the hot reads in buffsFor
+   and normalAttack were falling back to dictionary lookups - a quarter of the whole run. */
+const EFFECT = {k: '', s: 'all', v: 0, vs: null, vsnot: null, p: null, pb: null, cap: undefined, o: null,
+                mods: null, self: false};
+const PART = {d: 0, h: 1, t: '', c: true, mods: null};
+
+/* the same shape for effects and parts built while scoring, not just the ones that arrive in the data */
+const mkEff = (k, s, vs, vsnot, v, p) =>
+  ({k: k, s: s, v: v === undefined ? 0 : v, vs: vs, vsnot: vsnot, p: p === undefined ? null : p,
+    pb: null, cap: undefined, o: null, mods: null, self: false});
+const mkPart = (d, h, type, crit) => ({d: d, h: h, t: type, c: crit, mods: null});
+
+function shape(o, mould) {
+  if (!o) return o;
+  const out = {};
+  for (const k in mould) out[k] = o[k] === undefined ? mould[k] : o[k];
+  return out;
+}
+
+function shapeAll(data) {
+  const part = p => shape(p, PART);
+  const eff = e => { const x = shape(e, EFFECT); x.p = part(x.p); x.pb = part(x.pb); return x; };
+  for (const c of data.chars) {
+    c.ps = (c.ps || []).map(eff);
+    c.pg = (c.pg || []).map(eff);
+    if (c.sp) { c.sp.p = c.sp.p.map(part); c.sp.bonus = part(c.sp.bonus); c.sp.gx = c.sp.gx ? c.sp.gx.map(eff) : null; }
+  }
+  for (const r of data.rows) r.t = r.t.map(eff);
+}
+
 /* the page hands over the JSON calc_data.py built, once */
 function load(data) {
+  shapeAll(data);
   data.by = {};
   for (const c of data.chars) data.by[c.n] = c;
   data.bosses.forEach((both, i) => both.forEach((b, j) => { b.id = i + ':' + j; }));
