@@ -622,14 +622,30 @@ alone until then. What to watch for, and what the model currently assumes:
 |---|---|---|---|
 | **Commander Shadowsun**, Defender of the Greater Good | non-Tau allies adjacent, **Tau allies at 2 hexes** | 2 allies either way | 3 allies for a Tau team - **undercounted** |
 | **Darkstrider**, Structural Analyser | the same split | 2 allies | 3 for a Tau team - **undercounted** |
-| **Boss Gulgortz**, Waaagh! | **the whole team** | 2 allies | 4 allies - **undercounted, the biggest of the six** |
+| ~~**Boss Gulgortz**, Waaagh!~~ **settled (owner, in game, September 2026)** | "all friendly Orks and friendly units **adjacent** to Boss Gulgortz" - two rules in one ability | 2 allies, adjacent | **no change needed.** He is in three proven fives and none has a second Ork, so the "Orks anywhere" half never fires |
 | **Aun'Shi**, Serene Unifier | 2 hexes | 2 allies | 3 allies - undercounted |
 | **Asmodai**, Exemplar of Hate | **one** ally | 4 allies | 1 ally - **overcounted** |
 | **Haarken Worldclaimer**, Herald of the Apocalypse | next attack | the same | no change |
 
-The test in game is the same each time: put the buffed character at each distance
-from the caster and see whether the buff icon appears. For Boss Gulgortz, whether
-every character on the team gets the Waaagh! or only the two beside him.
+**The owner's rule of thumb, worth trusting: the ability text is literal.** Boss
+Gulgortz reads "all friendly Orks *and* friendly units adjacent to Boss Gulgortz"
+and that is exactly what it does - two rules in one sentence, not a loose way of
+saying "nearby".
+
+**One test settles the rest of the list**: stand **Commander Farsight two hexes
+from Darkstrider** and see whether he gets the +Damage. Darkstrider or Shadowsun
+are in 7 of the 14 proven fives, and in every one the only other Tau is Farsight -
+so he is precisely the ally the model is denying the buff to. Ranked on Damage the
+four team-mates go Vitruvius 6,677, Laviscus 5,340, Farsight 2,671, Trajann 1,469,
+so "adjacent" (the top two) leaves him out and "2 hexes" (the top three) lets him
+in.
+
+That test also settles a second thing in the same place. The reach ranking is done
+against the row's `Receives` column - "all" - rather than against the token's own
+`who`. So for Darkstrider's **Tau-only** clause the model queues Farsight behind
+Vitruvius and Laviscus, neither of whom can receive that clause at all. Read
+strictly, Farsight is the only candidate and should be first in line whatever the
+reach. If he gets the buff in game, both need fixing together.
 
 Why it matters beyond the numbers: **Shadowsun, Darkstrider and Boss Gulgortz are
 in the proven five on 8 of the 14 fights**, so if the text is right, those teams
