@@ -117,6 +117,14 @@ function tokenKey(toks) {
 const DMG = new Map();        /* one character's damage, given its buffs */
 const BIG = new Map();        /* one character's biggest hit, which is what Outrage feeds on */
 
+/* How many situations to remember. Left to grow, the maps reach millions of entries and the whole thing
+   slows down - 77,000 teams a second at 2 million teams, 30,000 by 20 million, and 1.8 GB of heap. Most
+   of what they hold is cold: the sweep moves through the pool in order, so situations involving
+   characters it has left behind are never asked for again. Emptying them keeps the hot part hot. */
+let CAP = 400000;
+const setCap = n => { CAP = n; };
+const trim = () => { if (DMG.size > CAP) DMG.clear(); if (BIG.size > CAP) BIG.clear(); };
+
 /* The three things a character's damage reads off its team-mates besides their buffs. Miss one and the
    cache hands back a number from a different team - the check against calc.js catches it at once. */
 function mateKey(m, mates) {
@@ -226,11 +234,16 @@ function score(ctx, team, want, ix) {
 /* ---------------------------------------------------------------- every five there is */
 function sweep(ctx, opts) {
   const pool = ctx.pool, N = pool.length, limit = opts.limit || Infinity;
+  /* aFrom/aTo: the slice of the outer loop this worker owns. Teams are enumerated in pool order, so
+     handing out first-character values is a clean way to split a fight across cores - the slices never
+     overlap and together they are every team. */
+  const aFrom = opts.aFrom === undefined ? 0 : opts.aFrom;
+  const aTo = opts.aTo === undefined ? N - 4 : Math.min(opts.aTo, N - 4);
   let best = -Infinity, bestTeam = null, tried = 0;
   const perChar = new Array(N).fill(-Infinity), perCharTeam = new Array(N).fill(null);
   const team = new Array(5), ix = new Array(5);
   outer:
-  for (let a = 0; a < N - 4; a++) {
+  for (let a = aFrom; a < aTo; a++) {
     team[0] = pool[a];
     for (let b = a + 1; b < N - 3; b++) {
       team[1] = pool[b];
@@ -245,6 +258,10 @@ function sweep(ctx, opts) {
             tried++;
             if (s > best) { best = s; bestTeam = team.slice(); }
             for (let q = 0; q < 5; q++) if (s > perChar[ix[q]]) { perChar[ix[q]] = s; perCharTeam[ix[q]] = team.slice(); }
+            if ((tried & 0xFFFF) === 0) {
+              trim();
+              if (opts.onProgress) opts.onProgress(tried, best, bestTeam);
+            }
             if (tried >= limit) break outer;
           }
         }
@@ -254,7 +271,7 @@ function sweep(ctx, opts) {
   return {best, bestTeam, tried, perChar, perCharTeam};
 }
 
-module.exports = {prep, score, sweep, tokenKey, DMG, BIG};
+module.exports = {prep, score, sweep, tokenKey, tokensFor, setCap, DMG, BIG};
 
 /* ---------------------------------------------------------------- run it */
 if (require.main === module) {
