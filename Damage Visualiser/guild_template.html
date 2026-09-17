@@ -24,9 +24,9 @@ header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-be
 h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
 .setup{display:flex;flex-wrap:wrap;gap:6px}
 .setup span{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:3px 9px;border-radius:3px;font-variant-numeric:tabular-nums}
-.main{display:grid;grid-template-columns:minmax(0,1fr) 300px 226px;gap:16px;align-items:stretch}
-.main>.controls,.main>.detail{contain:size;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
-@media (max-width:1280px){.main{grid-template-columns:1fr 1fr}.main>.chart-card{grid-column:1/-1}.main>.controls,.main>.detail{contain:none;overflow:visible}}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:stretch}
+.main>.detail{contain:size;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+@media (max-width:1280px){.main{grid-template-columns:1fr 1fr}.main>.chart-card{grid-column:1/-1}.main>.detail{contain:none;overflow:visible}}
 @media (max-width:760px){.main{grid-template-columns:1fr}}
 .chart-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px 16px 12px;position:relative}
 .chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 2px 10px;flex-wrap:wrap}
@@ -115,6 +115,12 @@ footer{border-top:1px solid var(--rule);padding-top:14px;color:var(--ink-3);font
   font-family:var(--data);font-variant-numeric:tabular-nums;flex-wrap:wrap}
 .verdict b{font-size:26px;font-weight:700;line-height:1}
 .verdict em{font-style:normal;font-size:14px;color:var(--ink-2);font-family:var(--body)}
+/* "Reading the chart", the same three-column block the Roster Battle Map uses */
+dl.defs{margin:0;font-size:12.5px;color:var(--ink-2);columns:3 300px;column-gap:32px}
+dl.defs dt{break-after:avoid;font-family:var(--data);font-weight:700;font-size:13.5px;color:var(--ink)}
+dl.defs dd{margin:0 0 10px;break-inside:avoid}
+ul.tl{margin:4px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:2px}
+ul.tl li{line-height:1.4}
 </style>
 
 <div class="wrap">
@@ -153,22 +159,6 @@ footer{border-top:1px solid var(--rule);padding-top:14px;color:var(--ink-3);font
       <div class="rules" id="rules"></div>
     </div>
 
-    <div class="panel controls">
-      <div>
-        <p class="label">Your roster</p>
-        <div class="seg" id="tier"></div>
-      </div>
-      <div>
-        <p class="label">Ability level</p>
-        <div class="seg" id="level"></div>
-      </div>
-      <label class="check"><input type="checkbox" id="gear"><span class="box"></span><span>Standard gear</span></label>
-      <label class="check"><input type="checkbox" id="trig"><span class="box"></span><span>All triggered</span></label>
-      <label class="check"><input type="checkbox" id="act" checked><span class="box"></span><span>Actives on</span></label>
-      <label class="check"><input type="checkbox" id="dbf" checked><span class="box"></span><span>Side battles cleared</span></label>
-      <label class="check"><input type="checkbox" id="high" checked><span class="box"></span><span>High ground</span></label>
-      <p class="hint" id="switchHint"></p>
-    </div>
   </div>
 
   <div class="chart-card calc" id="calcCard">
@@ -189,6 +179,84 @@ footer{border-top:1px solid var(--rule);padding-top:14px;color:var(--ink-3);font
   </div>
   <datalist id="allchars"></datalist>
 
+  <section class="panel reading" aria-label="Reading the chart">
+    <p class="label">Reading the chart</p>
+    <dl class="defs">
+      <dt>What a raid attack is</dt>
+      <dd>Five characters and one Machine of War against a boss that cannot die inside your attack — you
+        are chipping at a health bar the whole guild shares. Six rounds, but the first goes on getting into
+        position, so the model counts <b id="rdFighting">5</b> rounds of fighting. The boss's own faction is
+        banned, so no Death Guard against Mortarion.</dd>
+
+      <dt>The setup, and why it isn't a set of switches</dt>
+      <dd>Every number here is at one setting: <b id="rdSetup"></b>. That is what a maxed roster looks like
+        today, and it is what the videos are recorded at. Earlier versions of this page let you flip the
+        level, the gear and the triggers, which meant working out thousands of answers and searching each
+        one shallowly. One setting means the search can be thorough instead.</dd>
+
+      <dt>Standard gear</dt>
+      <dd>Each character's own item slots filled with the best Mythic items they can equip, at top level,
+        boosters included — and the character's <b>relic</b> in its slot at level 10, with its effect
+        counted. Gear is where crit chance and Crit Damage come from, so it changes who is worth bringing,
+        not just how hard they hit.</dd>
+
+      <dt>▲ High ground</dt>
+      <dd>+50% Damage to whoever is standing on it. The model gives it to the <b id="rdHigh">two</b>
+        characters already doing the most damage in that five, which is what the teams in the videos do —
+        they are marked ▲. It counts for everything they deal: their weapon, the hits their passive adds,
+        and their active.</dd>
+
+      <dt>Side battles cleared</dt>
+      <dd>The two smaller fights beside the boss. Clearing them takes Armour off the boss and softens its
+        block, and it weakens some bosses' own rules — Mortarion's Revoltingly Resilient lets three hits
+        through at full strength instead of one. The panel on the right shows the Armour it is left with,
+        and what it was before.</dd>
+
+      <dt>All triggered</dt>
+      <dd>Every trait whose condition is met counts: Rapid Assault, Crushing Strike, Heavy Weapon, Ranged
+        Specialist and the rest. Over five rounds against one enormous target, most of them do fire — this
+        is the optimistic reading, not a guaranteed one.</dd>
+
+      <dt>Actives on</dt>
+      <dd>Everyone uses their active. Most are once a battle; the few with a cooldown come back as often as
+        it allows. An active that grows through the fight (Kariyan, Atlacoya) is held back as late as it
+        can be without losing a use. On the turn it goes off, the model takes whichever is bigger — the
+        active or a normal attack.</dd>
+
+      <dt>The bars</dt>
+      <dd>The solid part is what that character would do <b>alone</b> against this boss. The faded part is
+        what the other four and the Machine of War add — buffs, debuffs on the boss, and Laviscus's Outrage,
+        which feeds on his team-mates' biggest hits. A character with a short solid bar and a long faded one
+        is not carrying the team; the team is carrying them.</dd>
+
+      <dt>Machine of War</dt>
+      <dd>The sixth slot. Each machine has one free ability and one that spends a munition, and it fires
+        every round once its cooldown is up — munitions are not the limit in a raid. Its own damage counts,
+        and so does the Mythic ability many of them have, which usually makes the boss take more damage.
+        Its faction is banned the same way your characters' is.</dd>
+
+      <dt>Bosses are Immune</dt>
+      <dd>Nothing reduces a boss's Armour and it cannot be Stunned, Suppressed or Taunted — so characters
+        built around those do nothing here, however good they are elsewhere. Bosses are also Big Targets,
+        which some abilities hit harder.</dd>
+
+      <dt>Who else fits</dt>
+      <dd>What the five would lose by bringing that character instead — it swaps them into the weakest slot
+        of the five above. A small number means they are nearly as good as the character they replace.</dd>
+
+      <dt>Try your own five</dt>
+      <dd>The five above are the best the search found. The picker below runs the same model in your browser
+        on any five you name, at the same setting and the same boss, so you can test the team you actually
+        own. It checks itself against exact scores from the model before it shows a number.</dd>
+
+      <dt>What is not counted</dt>
+      <dd>The boss killing your characters — every five here fights all five rounds. The movement round.
+        Where anyone is standing, beyond the high ground. Bombs and Overwatch, which don't count towards a
+        raid score and nobody uses. Against the owner's own recorded runs the model lands about 6–8% low,
+        and most of that looks like damage scored in the round it treats as movement.</dd>
+    </dl>
+  </section>
+
   <footer>
     <div id="foot"></div>
     <div id="foot2"></div>
@@ -205,7 +273,8 @@ const n = x => x.toLocaleString('en-GB', {maximumFractionDigits:0});
 const DOT = '·';
 const el = id => document.getElementById(id);
 
-const state = {tier:'mythic', lv:null, gear:true, trig:false, act:true, dbf:true, high:true, boss:null, slot:null};
+/* the page is built at one setting now (build_guild.SETTING), so all that is left to choose is the fight */
+const state = {boss:null, slot:null};
 
 const bosses = [...new Set(DATA.fights.map(f => f.n))].sort();
 /* every fight this boss appears in, hardest last */
@@ -213,18 +282,11 @@ const slotsOf = b => DATA.fights.map((f,i) => ({f, i})).filter(x => x.f.n === b)
 state.boss = bosses.includes('Mortarion') ? 'Mortarion' : bosses[0];
 state.slot = slotsOf(state.boss).slice(-1)[0].i;
 
-function tierDef() { return DATA.tiers.find(t => t.key === state.tier); }
-function scenarioKey() {
-  return (state.trig ? 'trig' : 'base') + '_l' + state.lv + (state.act ? '_a' : '') + (state.gear ? '_g' : '');
-}
 function fightIndex() {
   const rows = slotsOf(state.boss);
   return (rows.find(x => x.i === state.slot) || rows[rows.length - 1]).i;
 }
-function result() {
-  const at = DATA.r[state.tier][scenarioKey()][fightIndex()][state.dbf ? 1 : 0];
-  return Array.isArray(at) ? at[state.high ? 1 : 0] : at;
-}
+const result = () => DATA.r[fightIndex()];
 
 /* ---------------------------------------------------------------- the controls */
 function seg(host, items, active, onPick) {
@@ -239,13 +301,6 @@ function seg(host, items, active, onPick) {
 }
 
 function buildControls() {
-  seg(el('tier'), DATA.tiers.map(t => ({label:t.label, value:t.key})), state.tier, v => {
-    state.tier = v;
-    if (!tierDef().levels.includes(state.lv)) state.lv = tierDef().levels[0];
-  });
-  if (!state.lv || !tierDef().levels.includes(state.lv)) state.lv = tierDef().levels[0];
-  seg(el('level'), tierDef().levels.map(l => ({label:String(l), value:l})), state.lv, v => state.lv = v);
-
   const list = el('bosslist');
   list.innerHTML = '';
   bosses.forEach(b => {
@@ -266,21 +321,15 @@ function buildControls() {
   el('bosstier').className = rows.length > 5 ? 'seg wrapseg' : 'seg';
   seg(el('bosstier'), rows.map(x => ({label:x.f.slot + (seen[x.f.slot] > 1 ? ' L' + x.f.l : ''), value:x.i})),
       state.slot, v => state.slot = v);
-  ['gear','trig','act','dbf','high'].forEach(k => { el(k).checked = state[k]; el(k).onchange = () => { state[k] = el(k).checked; draw(); }; });
 }
 
 /* ---------------------------------------------------------------- the page */
 function draw() {
   buildControls();
-  const f = DATA.fights[fightIndex()], res = result(), t = tierDef();
+  const f = DATA.fights[fightIndex()], res = result();
 
   el('title').textContent = 'The best five for ' + f.n;
-  el('setup').innerHTML = [
-    t.label, 'Abilities ' + state.lv, state.gear ? 'Standard gear' : 'No gear',
-    state.trig ? 'All triggered' : 'Always-on only', state.act ? 'Actives on' : 'Actives off',
-    state.dbf ? 'Side battles cleared' : 'Side battles not cleared',
-    state.high ? (DATA.high ? DATA.high.n : 2) + ' on high ground' : 'No high ground'
-  ].map(s => '<span>' + s + '</span>').join('');
+  el('setup').innerHTML = DATA.setup.map(s => '<span>' + s + '</span>').join('');
 
   el('chartTitle').textContent = f.n + ' · ' + f.slot + ', level ' + f.l + (f.season ? '   ·   the ' + f.season + ' season' : '');
   el('chartHint').innerHTML = '<span class="total"><b>' + n(res.s) + '</b><em>damage in ' +
@@ -304,32 +353,26 @@ function draw() {
       (res.m.length > 2
         ? ' · ' + (mow.b ? mow.b.name + ': ' : '') + (res.m[3] === 'taken' ? 'the boss takes' : 'your characters deal') +
           ' +' + res.m[2] + '%' + (mow.b && mow.b.note ? ' (' + mow.b.note + ')' : '')
-        : ' · ' + (state.tier !== 'mythic' ? 'its Mythic ability only works on a Mythic roster'
-            : mow.trig ? 'its Mythic ability needs All triggered'
-            : 'its Mythic ability is defensive, so it adds nothing to a damage run')) + '</span>'
+        : ' · its Mythic ability is defensive, so it adds nothing to a damage run') + '</span>'
     : '<span class="tag">Machine of War</span><span>none allowed against this boss</span>';
 
-  const off = state.dbf ? f.dbf : [0, 0];
-  const arm = Math.round(f.arm * (1 - off[0] / 100)), bc = Math.max(f.bc - off[1], 0);
   el('facts').innerHTML = [
     ['Health', n(f.hp)],
-    ['Armour', n(arm) + (off[0] ? ' · was ' + n(f.arm) : '')],
-    ['Blocks', bc ? bc + '% for ' + n(f.bd) : 'never'],
+    ['Armour', n(f.arm2) + (f.arm2 !== f.arm ? ' · was ' + n(f.arm) : '')],
+    ['Blocks', f.bc2 ? f.bc2 + '% for ' + n(f.bd) : 'never'],
     ['Banned', 'no ' + f.ban],
     ['Season', f.season || '-']
   ].map(r => '<div><span>' + r[0] + '</span><span>' + r[1] + '</span></div>').join('');
 
-  /* clearing the side battles weakens some of the boss's own rules, so show that set instead */
-  el('rules').innerHTML = ((state.dbf ? f.rules2 : f.rules) || f.rules || [])
-    .map(r => '<p>' + r.charAt(0).toUpperCase() + r.slice(1) + '</p>').join('');
+  el('rules').innerHTML = (f.rules || []).map(r => '<p>' + r.charAt(0).toUpperCase() + r.slice(1) + '</p>').join('');
 
   el('alts').innerHTML = res.a.map(a =>
     '<li><b>' + DATA.chars[a[0]].n + '</b><span>' + (a[1] >= 0 ? '+' : '−') + n(Math.abs(a[1])) + '</span></li>').join('');
 
-  el('switchHint').textContent = 'Every character is at ' + t.about + '.';
-  el('foot').textContent = 'A raid attack is ' + DATA.turns + ' rounds with five characters and a Machine of War, and the boss’s own faction is banned. ' +
-    'The first round goes on getting into position, so ' + (DATA.fighting || DATA.turns) + ' of them are spent fighting. ' +
-    'Bosses are Immune, so nothing reduces their Armour and they cannot be Stunned, Suppressed or Taunted.';
+  el('foot').textContent = 'Every character is at ' + DATA.about + '.';
+  el('rdSetup').textContent = DATA.setup.join(' · ');
+  el('rdFighting').textContent = DATA.fighting;
+  el('rdHigh').textContent = DATA.high.n === 2 ? 'two' : DATA.high.n;
   el('foot2').textContent = 'Game data version ' + DATA.version;
   drawCalc();
   fitPage();
@@ -347,21 +390,9 @@ let selfCheck = null;
 const calcByName = {};
 CALC.chars.forEach(c => calcByName[c.n.toLowerCase()] = c);
 const calcChar = s => calcByName[(s || '').trim().toLowerCase()] || null;
-const calcSetting = () => [
-  DATA.tiers.find(t => t.key === CALC.setting.tier).label, 'abilities ' + CALC.setting.lv,
-  CALC.setting.gear ? 'standard gear' : 'no gear', CALC.setting.trig ? 'all triggered' : 'always-on only',
-  CALC.setting.act ? 'actives on' : 'actives off'
-].join(', ');
-
-/* the best five the search found at the calculator's own setting, to measure a pick against */
-function bestHere() {
-  const k = (CALC.setting.trig ? 'trig' : 'base') + '_l' + CALC.setting.lv +
-            (CALC.setting.act ? '_a' : '') + (CALC.setting.gear ? '_g' : '');
-  const set = (DATA.r[CALC.setting.tier] || {})[k];
-  if (!set || !set[fightIndex()]) return null;
-  const at = set[fightIndex()][state.dbf ? 1 : 0];
-  return Array.isArray(at) ? at[state.high ? 1 : 0] : at;
-}
+/* the calculator is built at the same setting as the page, so a pick is measured against the page's five */
+const bestHere = () => DATA.r[fightIndex()];
+const DBF = 1, HIGH = true;             /* side battles cleared, the two biggest hitters on high ground */
 
 function buildPicker() {
   const host = el('picker');
@@ -417,7 +448,7 @@ function runCalc() {
   }
   if (selfCheck === null) selfCheck = CalcLib.check(CALC).length;   /* once, before anything is shown */
   const t0 = performance.now();
-  const got = CalcLib.scoreTeam(CALC, names, fightIndex(), {dbf: state.dbf, high: state.high});
+  const got = CalcLib.scoreTeam(CALC, names, fightIndex(), {dbf: !!DBF, high: HIGH});
   const ms = Math.round(performance.now() - t0);
   note.className = 'hint' + (selfCheck ? ' warn' : '');
   note.textContent = selfCheck
@@ -441,7 +472,7 @@ function paintCalc(got) {
   }).join('');
 
   const mow = got.mow ? CALC.mows.find(m => m.n === got.mow) : null;
-  const own = mow ? CALC.bosses[fightIndex()][state.dbf ? 1 : 0].mow[mow.n] : 0;
+  const own = mow ? CALC.bosses[fightIndex()][DBF].mow[mow.n] : 0;
   el('calcMow').hidden = false;
   el('calcMow').innerHTML = mow
     ? '<span class="tag">Machine of War</span><b>' + mow.n + '</b><span>' + n(own) + ' damage of its own' +
@@ -455,14 +486,14 @@ function paintCalc(got) {
     (best ? ' · ' + (got.total / best.s * 100).toFixed(0) + '% of what the best five do here' : '') + '</em>';
 }
 
-/* what a score depends on: changing the roster switches above doesn't make this one stale */
-const calcKey = () => fightIndex() + '|' + (state.dbf ? 1 : 0) + '|' + (state.high ? 1 : 0);
+/* what a score depends on: only which fight it is */
+const calcKey = () => String(fightIndex());
 let lastCalc = null;
 
 function drawCalc() {
   buildPicker();
-  el('calcHint').textContent = 'Scored against ' + DATA.fights[fightIndex()].n + ' ' + DATA.fights[fightIndex()].slot +
-    ' with the side battles and high ground as you have them set, at ' + calcSetting() + '.';
+  el('calcHint').textContent = 'Scored against ' + DATA.fights[fightIndex()].n + ' ' +
+    DATA.fights[fightIndex()].slot + ', at the same setting as the five above.';
   if (lastCalc && lastCalc.key === calcKey()) {
     el('calcNote').className = 'hint' + (lastCalc.warn ? ' warn' : '');
     el('calcNote').textContent = lastCalc.note;

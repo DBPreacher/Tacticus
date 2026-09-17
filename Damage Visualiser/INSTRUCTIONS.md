@@ -44,7 +44,7 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `support_model.py` | Runs `support_abilities.csv` through the damage model: how much each buff helps every ally who can use it. `python -X utf8 support_model.py [--defence [--spread]] [--active] [--gear] [--trig] [--level 50]` prints the Diamond III rankings | Only to change the rules |
 | `build_support.py` | Builds `support-map.html`: every tier and setting, both sides and both Enemy focus settings, in parallel (about 5 minutes on this PC). `--page-only` rebuilds just the page from the template with the last numbers (for design changes) | No |
 | `support_template.html` | The Support Map's design (its CSS starts as a copy of `map_template.html`'s) | Yes, for design changes |
-| `build_guild.py` | Builds `guild-raid.html`: the best five for every boss and tier at every setting, with the side battles on and off, in parallel (about 10 minutes on this PC). `--page-only` rebuilds just the page from the template | No |
+| `build_guild.py` | Builds `guild-raid.html`: the best five for each of the 14 Mythic boss fights, at the one setting in `SETTING` at the top of the file, in parallel (about 10 seconds). `--page-only` rebuilds just the page from the template | No |
 | `guild_template.html` | The Guild Raid page's design | Yes, for design changes |
 | `calc_data.py` | Everything the page's Calculate button needs: every character with its abilities already resolved to numbers, the buffs they hand each other, each boss twice (side battles cleared or not) with what every Machine of War does to it, and 50 exact scores from `guild_raid.py` for the page to check itself against. `build_guild.py` embeds it | Only to add something the model learned |
 | `calc.js` | The arithmetic half of `guild_raid.py`, in JavaScript, so the page can score a five it has never seen. Run it under node against the check scores before trusting it (see "The Calculate button") | Yes, but only alongside the Python it mirrors |
@@ -260,74 +260,34 @@ multiplier.
 To rebuild after a game update: `python -X utf8 build_map.py`, then
 `python -X utf8 build_guild.py`, then republish the artifact.
 
-### Changing the model without waiting half an hour
+### Changing the model
 
-A full build is 81 fights x 48 settings x side battles x high ground, about
-31,000 searched answers and half an hour. Don't run it while you are still
-checking a change:
+A build is 14 answers and takes about **ten seconds**, so there is nothing to
+plan around: change the model, run it, look at the page.
 
 1. `python -X utf8 check_guild.py` - scores the real runs from the owner's
    videos against what they actually did. Half a second. If a change swings one
    of those, that is the change to look at.
-2. `python -X utf8 build_guild.py --settings mythic:trig_l60_a_g` - rebuilds
-   just the setting the videos use (about 80 seconds) and keeps the rest of the
-   last build, so the page is right where you are looking.
-3. The full `build_guild.py` once, when the model has settled.
+2. `python -X utf8 build_guild.py` - the whole page.
+3. `python -X utf8 build_guild.py --page-only` - design changes only, reusing
+   the last build's numbers.
 
-(A job is a whole setting in a full build, so they spread over the cores; with
-`--settings` there is nothing to spread, so jobs become chunks of three fights
-instead - that is what turns 20 minutes into about a minute.)
+**It was not always this cheap.** Until September 2026 the page carried every
+tier, sixteen ability/gear/trigger/active settings, all 81 fights, and the side
+battles and high ground both ways: **5,184 answers**, half an hour a build, and a
+search that had to be shallow enough to run 5,184 times. The owner cut it to the
+one setting the videos are recorded at, against the Mythic bosses only (`SETTING`
+and `fight_list` in `build_guild.py`). Everything else the model can still do
+from the command line:
 
-**What the full build costs, and the levers.** Every model change makes each
-search dearer, so re-measure rather than trusting an old figure. As of September
-2026 it is about 28 minutes, after three things:
+    python -X utf8 guild_raid.py --boss "Ghazghkull" --tier d3 --ability 36 --team "A,B,C,D,E"
 
-- each of a fight's four answers (side battles x high ground) seeds its search
-  from the last one, because they nearly always land on the same five;
-- "who else fits" tries each character in the five's weakest slot rather than all
-  five slots, for the same list at a fifth of the cost;
-- **Gold is not built at all** (`TIERS` at the top of `build_guild.py`). A Gold
-  roster is not attacking a raid boss. Every tier dropped halves the build, so
-  `TIERS = ['mythic']` takes it to about 14 minutes if Diamond III stops being
-  useful too.
-
-### The Calculate button
-
-The page ships the best five for every boss, but "score *these* five" cannot be
-precomputed: 117 characters make 138 million teams, and a team's damage does not
-come apart into per-character pieces. Adding or multiplying per-character values
-was measured at 39-113% out, so the page runs the model itself.
-
-The split is: **Python resolves, JavaScript adds up.** `calc_data.py` exports
-each character with its weapons, traits, gear, the effects of its passive, the
-parts of its active and its summons - all already numbers at Mythic, abilities
-60, standard gear, all triggered - plus the buff rows, the bosses and the
-machines. `calc.js` is `guild_raid.py`'s arithmetic: `normalAttack`,
-`openerDamage`, `memberDamage`, `outrage`, `summonDamage`, `teamTotal`,
-`scoreTeam`. `build_guild.py` inlines both into the page.
-
-The two have to agree, so `calc_data.py` also ships `N_VECTORS` exact scores for
-random fives, and the page runs them before it shows a number. To check a change
-headlessly (node is on this PC):
-
-    python -c "import json,guild_raid as gr,calc_data as cd; g=gr.game();       open('calc.json','w').write(json.dumps(cd.build(g, gr.fights(g))))"
-    node -e "const c=require('./calc.js'), D=c.load(require('./calc.json'));       console.log(c.check(D).length + ' of ' + D.vec.length + ' disagree')"
-
-Raise `cd.N_VECTORS` to a few hundred for a real sweep - 400 fives take about
-two seconds to score in Python and a third of a second in the browser. They
-agree to 0.002%, which is the rounding in the export.
-
-**Anything the model learns has to be taught twice.** If a change touches
-`build_map.normal_attack`, `support_model.buffed` or the team maths in
-`guild_raid.py`, mirror it in `calc.js` and re-run the sweep. Things the port
-had to be told, all found this way: an active with no damage parts is still an
-active; a buff's `who` is resolved against the character receiving it; Mind
-Control needs a Taunt, so it is out against a Boss; an active can carry gear
-effects of its own; a boss can take crit chance off its attackers; a melee swing
-that also fires the ranged weapon; and a summon's weapon has a damage profile
-that has to be read as one.
+That trade is the point: 370x less work per build buys a search that can afford
+to be thorough. See PLAN.md, "How good is the search?".
 
 ---
+
+## Recording it for a video---
 
 ## Recording it for a video
 
