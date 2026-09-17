@@ -412,7 +412,10 @@ Smaller, and structural rather than numeric:
 - **Havyr's active** takes 653 Armour off for the rest of the battle. The `A`
   prefix on a token can read an active's numbers, but only for `extra:`; this
   needs the same for `armignore:`.
-- **The search is greedy** and can stop about 1.5% short of the best five.
+- ~~**The search is greedy**~~ - **settled (September 2026): there is no search.**
+  `brute_all.js` scores every possible five, 2,092,558,347 of them, in about two
+  hours, and the page publishes the winners. The greedy search it replaced was
+  already optimal on 7 of the 14 fights and up to 9.2% short on the rest.
 - **Xybia: settled (owner, 2026-09-16) - she does not work on a boss.** Proved in
   game: Mind Control needs the Taunt to land and a Boss cannot be Taunted. The
   model already drops it, so nothing to change.

@@ -115,6 +115,7 @@ footer{border-top:1px solid var(--rule);padding-top:14px;color:var(--ink-3);font
   font-family:var(--data);font-variant-numeric:tabular-nums;flex-wrap:wrap}
 .verdict b{font-size:26px;font-weight:700;line-height:1}
 .verdict em{font-style:normal;font-size:14px;color:var(--ink-2);font-family:var(--body)}
+.proven{font-family:var(--data);font-weight:700;color:var(--ink);letter-spacing:.02em}
 /* "Reading the chart", the same three-column block the Roster Battle Map uses */
 dl.defs{margin:0;font-size:12.5px;color:var(--ink-2);columns:3 300px;column-gap:32px}
 dl.defs dt{break-after:avoid;font-family:var(--data);font-weight:700;font-size:13.5px;color:var(--ink)}
@@ -146,7 +147,7 @@ ul.tl li{line-height:1.4}
         <div><i class="team"></i>What the other four and the Machine of War add</div>
       </div>
       <div class="alts">
-        <p class="label">Who else fits <span class="hint" style="text-transform:none;letter-spacing:0">— what the five would lose by bringing them instead</span></p>
+        <p class="label">Who else fits <span class="hint" style="text-transform:none;letter-spacing:0">— the most each of them can manage here, in the best five they can be part of</span></p>
         <ol id="alts"></ol>
       </div>
     </div>
@@ -240,14 +241,23 @@ ul.tl li{line-height:1.4}
         built around those do nothing here, however good they are elsewhere. Bosses are also Big Targets,
         which some abilities hit harder.</dd>
 
+      <dt>The best five there is</dt>
+      <dd>Not "the best we found". Every possible five was scored — <b id="rdTeams">2.1 billion</b> teams
+        across these fights — so no other five does more. Earlier versions built a team a character at a
+        time and then tried swapping one out, which is fast but can settle for a team it cannot improve by
+        any single swap while a completely different five is better. On half these fights it did exactly
+        that, by as much as 9%.</dd>
+
       <dt>Who else fits</dt>
-      <dd>What the five would lose by bringing that character instead — it swaps them into the weakest slot
-        of the five above. A small number means they are nearly as good as the character they replace.</dd>
+      <dd>The most that character can manage on this boss, in the best five they can be part of — and the
+        gap to the best five overall. Every team containing them was scored, so it is their ceiling, not an
+        estimate. Hover to see the five they would be in. Useful when you don't own one of the five above:
+        it says who to build around instead, and what it costs you.</dd>
 
       <dt>Try your own five</dt>
-      <dd>The five above are the best the search found. The picker below runs the same model in your browser
-        on any five you name, at the same setting and the same boss, so you can test the team you actually
-        own. It checks itself against exact scores from the model before it shows a number.</dd>
+      <dd>The picker below runs the same model in your browser on any five you name, at the same setting and
+        the same boss, so you can test the team you actually own against the best one there is. It checks
+        itself against exact scores from the model before it shows a number.</dd>
 
       <dt>What is not counted</dt>
       <dd>The boss killing your characters — every five here fights all five rounds. The movement round.
@@ -334,7 +344,7 @@ function draw() {
   el('chartTitle').textContent = f.n + ' · ' + f.slot + ', level ' + f.l + (f.season ? '   ·   the ' + f.season + ' season' : '');
   el('chartHint').innerHTML = '<span class="total"><b>' + n(res.s) + '</b><em>damage in ' +
     (DATA.fighting || DATA.turns) + ' fighting rounds · ' + (res.s / f.hp * 100).toFixed(2) +
-    '% of the boss</em></span>';
+    '% of the boss' + (DATA.proven ? ' · <b class="proven">the best five there is</b>' : '') + '</em></span>';
 
   const max = Math.max(...res.f.map(r => r[1]));
   el('five').innerHTML = res.f.slice().sort((a,b) => b[1] - a[1]).map(r => {
@@ -366,13 +376,16 @@ function draw() {
 
   el('rules').innerHTML = (f.rules || []).map(r => '<p>' + r.charAt(0).toUpperCase() + r.slice(1) + '</p>').join('');
 
+  /* a[2] is the five they would be in: every team containing them was scored, so this is their ceiling */
   el('alts').innerHTML = res.a.map(a =>
-    '<li><b>' + DATA.chars[a[0]].n + '</b><span>' + (a[1] >= 0 ? '+' : '−') + n(Math.abs(a[1])) + '</span></li>').join('');
+    '<li title="' + (a[2] ? 'best with ' + a[2].map(i => DATA.chars[i].n).join(', ') : '') + '"><b>' +
+    DATA.chars[a[0]].n + '</b><span>' + (a[1] >= 0 ? '+' : '−') + n(Math.abs(a[1])) + '</span></li>').join('');
 
   el('foot').textContent = 'Every character is at ' + DATA.about + '.';
   el('rdSetup').textContent = DATA.setup.join(' · ');
   el('rdFighting').textContent = DATA.fighting;
   el('rdHigh').textContent = DATA.high.n === 2 ? 'two' : DATA.high.n;
+  if (DATA.proven) el('rdTeams').textContent = (DATA.proven.teams / 1e9).toFixed(1) + ' billion';
   el('foot2').textContent = 'Game data version ' + DATA.version;
   drawCalc();
   fitPage();

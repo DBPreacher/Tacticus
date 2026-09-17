@@ -48,6 +48,9 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `guild_template.html` | The Guild Raid page's design | Yes, for design changes |
 | `calc_data.py` | Everything the page's Calculate button needs: every character with its abilities already resolved to numbers, the buffs they hand each other, each boss twice (side battles cleared or not) with what every Machine of War does to it, and 50 exact scores from `guild_raid.py` for the page to check itself against. `build_guild.py` embeds it | Only to add something the model learned |
 | `calc.js` | The arithmetic half of `guild_raid.py`, in JavaScript, so the page can score a five it has never seen. Run it under node against the check scores before trusting it (see "The Calculate button") | Yes, but only alongside the Python it mirrors |
+| `brute.js` | Scores a team the way `calc.js` does but without doing the same sum twice, and sweeps every five there is for one fight. `node brute.js --fight 12 --check` proves it still agrees with `calc.js` | Yes, with `--check` after |
+| `brute_all.js` | Runs that sweep over all 14 Mythic fights across the machine's cores and writes `best_fives.json` (about two hours). `node brute_all.js [--workers 22]` | No |
+| `best_fives.json` | **The answers.** The proven best five for each fight, the Machine of War it brings, and for all 111 characters the best team containing them - plus a fingerprint of everything that decided them | **Never.** `brute_all.js` writes it |
 | `guild-raid.html` | The built Guild Raid page | **Never.** It's overwritten |
 | `support-map.html` | The built Support Map | **Never.** It's overwritten |
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
@@ -259,6 +262,43 @@ multiplier.
 
 To rebuild after a game update: `python -X utf8 build_map.py`, then
 `python -X utf8 build_guild.py`, then republish the artifact.
+
+### The best five are proven, not searched
+
+`build_guild.py` does not search for a team any more. `brute_all.js` scores
+**every possible five** - 2,092,558,347 of them across the 14 fights, about two
+hours on 22 workers - and writes the winners to `best_fives.json`. The page build
+reads that file and only works out the breakdown it draws, which takes a second.
+
+Why it changed: the old search built a five one character at a time and then
+tried swapping one out until nothing improved. That is fast, but it settles for a
+team it cannot improve *by any single swap* while a completely different five is
+better. Measured against the exhaustive answer, it was already optimal on 7 of
+the 14 fights and short on the other 7 by up to 9.2% (Rogal Dorn Mythic 2,
+2,102,419 against 2,294,904). There was no way to tell which half you were
+looking at, which is the part that mattered.
+
+**A run is stamped with a fingerprint** - the game version plus a hash of the
+ability CSVs and every file that decides what a team scores (`calc_data.FINGERPRINT_FILES`).
+`build_guild.py` refuses to publish if it no longer matches:
+
+    best_fives.json was computed from different inputs (... vs ...).
+    The game data or the model has changed since. Run: node brute_all.js
+
+So a game update or a model change can't quietly leave last month's answers on
+the page. The normal rhythm is: patch lands, `update_game_data.py`, the build
+refuses, one `brute_all.js` run, everything instant again until the next patch.
+
+Two things to know before re-running it:
+
+- **The Machine of War is fixed by hand**, not searched: the Biovore wherever it
+  is allowed (owner's rule - it also walks the AI characters around, which the
+  model can't see). Tyranids are banned on Screamer-Killer Mythic 1, so that one
+  fight runs the three candidates and proves which wins. It is the Rukkatrukk.
+- **`brute.js --check` before any long run.** It scores random teams both ways
+  and must report 0.000000%. It has caught two real mistakes: a cache key missing
+  Laviscus's Crit Damage per Chaos ally, and one missing the Norn Crown's lift on
+  summons. Both would have produced confident, wrong answers over two hours.
 
 ### Changing the model
 

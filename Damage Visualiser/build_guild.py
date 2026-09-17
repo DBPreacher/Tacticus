@@ -16,7 +16,6 @@ do the full build once, at the end.
 See INSTRUCTIONS.md ("Guild Raid").
 """
 import argparse, csv, json, os, re, sys, time
-from multiprocessing import Pool
 import build_map as bm
 import calc_data
 import support_model as sm
@@ -26,6 +25,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE = os.path.join(HERE, 'guild_template.html')
 OUT = os.path.join(HERE, 'guild-raid.html')
 CALC_JS = os.path.join(HERE, 'calc.js')
+BEST = os.path.join(HERE, 'best_fives.json')
 ALTS = 8                      # how many characters just outside the five the page lists
 
 _cache = {}
@@ -69,26 +69,28 @@ def season_names(g):
     return {f['season']: f['name'] for f in gr.fights(g) if f['tier'] == 5 and f['set'] == 2}
 
 
-def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, high=False, seed=None):
-    """the best five for one boss at one setting"""
+def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_names, high, proven):
+    """the numbers behind a five that brute_all.js has already proved is the best there is.
+
+    Nothing here searches. `proven` is that fight's entry from best_fives.json: the winning five, the
+    Machine of War it brings, and the best team every other character can manage. All this does is work
+    out the breakdown the page draws - what each of the five does alone, what they do together, and who
+    stands on the high ground."""
     boss, ds, dbf = gr.boss_defender(g, fight, debuffs)
     rules = gr.boss_rules(g, fight, dbf if debuffs else None)
+    by = {u['name']: u for u in U}
+    team = [by[n] for n in proven['best']['team']]
     banned = gr.FACTION_ID.get(fight['faction'], fight['faction'])
     opts = gr.mow_options(g, fight, boss, ds, lv, tier_key, banned, trig)
-    # search with the machine that usually wins, then check it against the rest and only search again
-    # if a different one suits the five better
-    mow = max(opts, key=lambda o: ((o['buff'] or {}).get('pct', 0) if not (o['buff'] or {}).get('only') else 0,
-                                   o['own'])) if opts else None
-    team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules, tier_key=tier_key,
-                               mow=mow, high=high, seed=seed)
-    if opts:
-        pick = gr.best_mow(team, opts, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None)
-        if pick['name'] != mow['name']:
-            mow = pick
-            team, score = gr.best_team(U, boss, ds, rows, sp, lv, trig, act, gear, banned, rules,
-                                       tier_key=tier_key, mow=mow, high=high, seed=team)
-    score_of = lambda t: gr.team_damage(t, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None, mow, high)
+    mow = next((o for o in opts if o['name'] == proven['best']['mow']), None)
     buff = mow['buff'] if mow else None
+    # brute_all.js works from calc.json, whose numbers are rounded for the page, so it lands a hair away
+    # from the model it mirrors - the check scores put that at 0.0014%. Anything bigger means the model has
+    # moved since the run, and the fingerprint above should already have caught it.
+    score = gr.team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules, tier_key, None, mow, high)
+    if abs(score - proven['best']['score']) > score * 0.001:
+        sys.exit(f"{fight['name']}: best_fives.json says {proven['best']['score']:,.0f} but the model now "
+                 f"says {score:,.0f}. Re-run brute_all.js.")
     uses = sorted(x for u in team for x in (gr.active_turns(u, gr.FIGHTING) if act else ()))
     extras = {m['name']: gr.member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buff)
               for m in team}
@@ -96,31 +98,24 @@ def one(g, fight, debuffs, U, sp, rows, idx, lv, trig, act, gear, tier_key, mow_
                                          trig, act, gear, rules, extras[m['name']], gr.FIGHTING, buff, uses)
              for m in team}
     on_high = gr.high_ground(plain) if high else set()
-    if on_high:                               # Outrage grows when its feeders are on the high ground
-        for m in team:
-            if m['name'] == 'Laviscus':
-                extras[m['name']] = gr.member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear,
-                                                    tier_key, buff, on_high)
+    for m in team:
+        if m['name'] == 'Laviscus' and on_high:   # Outrage grows when its feeders are on the high ground
+            extras[m['name']] = gr.member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear,
+                                                tier_key, buff, on_high)
     five = []
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
-        extra = extras[m['name']]
         alone = gr.member_damage(m, [], boss, ds, rows, sp, lv, trig, act, gear, rules)
-        with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extra, gr.FIGHTING,
-                                     buff, uses, m['name'] in on_high)
+        with_team = gr.member_damage(m, mates, boss, ds, rows, sp, lv, trig, act, gear, rules, extras[m['name']],
+                                     gr.FIGHTING, buff, uses, m['name'] in on_high)
+        with_team += gr.summon_damage(gr.GAME, m, team, boss, ds, lv, trig, act, gear, tier_key)
         five.append([idx[m['name']], round(with_team), round(alone)] + ([1] if m['name'] in on_high else []))
-    # who else would fit: the best swap each character outside the five could make
+    # Who else fits: the most that character can do on this boss, in the best five they can be part of -
+    # brute_all.js knows that exactly, because it scored every team each of them appears in.
     names = {m['name'] for m in team}
-    # a character who would improve the five almost always does it by replacing its weakest member, so
-    # trying that one slot gives the same list for a fifth of the work
-    weak = min(range(gr.TEAM), key=lambda i: plain.get(team[i]['name'], 0.0))
-    alts = []
-    for u in U:
-        if u['name'] in names or u['faction'] == banned:
-            continue
-        alts.append([idx[u['name']], round(score_of(team[:weak] + [u] + team[weak + 1:]) - score)])
-    alts.sort(key=lambda x: -x[1])
-    out = dict(s=round(score), f=five, a=alts[:ALTS])
+    alts = [[idx[p['n']], round(p['score'] - proven['best']['score']), [idx[x] for x in p['team']]]
+            for p in proven['perChar'] if p['n'] not in names and p['n'] in idx][:ALTS]
+    out = dict(s=round(score), f=five, a=alts)   # the model's own number, so the five below add up to it
     if mow:
         out['m'] = [mow_names.index(mow['name']), round(mow['own'])] + ([round(buff['pct']), buff['kind']] if buff else [])
     return out
@@ -136,6 +131,25 @@ MYTHIC = 5                     # the game's tier number for a Mythic fight
 SETTING = dict(tier='mythic', key='trig_l60_a_g', lv=60, trig=True, act=True, gear=True, dbf=True, high=True)
 
 
+_PROVEN = None
+
+
+def proven(lo):
+    """the fight's entry in best_fives.json, once the fingerprint says it was computed from what is here now"""
+    global _PROVEN
+    if _PROVEN is None:
+        if not os.path.exists(BEST):
+            sys.exit(f'{os.path.basename(BEST)} is missing. Run:  node brute_all.js')
+        with open(BEST, encoding='utf-8') as f:
+            _PROVEN = json.load(f)
+        want = calc_data.fingerprint(gr.game())
+        if _PROVEN.get('fingerprint') != want:
+            sys.exit(f"{os.path.basename(BEST)} was computed from different inputs "
+                     f"({_PROVEN.get('fingerprint')} vs {want}). The game data or the model has changed "
+                     f"since. Run:  node brute_all.js")
+    return _PROVEN['fights'][str(lo)]
+
+
 def job(lo):
     """the answer for one fight, at the setting the page is built at"""
     units, specs = _tier(SETTING['tier'])
@@ -148,7 +162,7 @@ def job(lo):
             units, specs, SETTING['lv'], SETTING['trig'], SETTING['act'], SETTING['gear'])[:2]
     rows, U, sp = _cache[key_u]
     got = one(g, fight_list(g)[lo], SETTING['dbf'], U, sp, rows, idx, SETTING['lv'], SETTING['trig'],
-              SETTING['act'], SETTING['gear'], SETTING['tier'], mow_names, SETTING['high'])
+              SETTING['act'], SETTING['gear'], SETTING['tier'], mow_names, SETTING['high'], proven(lo))
     return lo, got
 
 
@@ -184,6 +198,7 @@ def main():
     start = time.time()
     g = gr.game()
     fights = fight_list(g)
+    proven(0)                 # load and fingerprint-check best_fives.json before anything else
     tier = next(x for x in bm.TIERS if x['key'] == SETTING['tier'])
     bm.set_tier(tier)
     gd, units = bm.load()
@@ -207,12 +222,14 @@ def main():
     data = dict(version=g['version'], chars=chars, mows=mows, fights=fl, turns=gr.TURNS,
                 fighting=gr.FIGHTING, high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
                 about=tier['about'],
+                proven=dict(teams=_PROVEN['teams'], built=_PROVEN['built'], seconds=_PROVEN['seconds']),
                 setup=[tier['label'], f"Abilities {SETTING['lv']}", 'Standard gear', 'All triggered',
                        'Actives on', 'Side battles cleared', f'{gr.HIGH_GROUND} on high ground'],
                 r=[None] * len(fights))
-    with Pool(min(len(fights), os.cpu_count() or 4)) as pool:
-        for lo, got in pool.imap_unordered(job, range(len(fights))):
-            data['r'][lo] = got
+    # 14 fights at a fifth of a second each: the search that needed a process pool has moved to
+    # brute_all.js, and all this does now is work out the breakdown of an answer it has already proved
+    for lo in range(len(fights)):
+        data['r'][lo] = job(lo)[1]
     write_page(data)
     print(f"Built guild-raid.html: {len(fights)} Mythic boss fights at {', '.join(data['setup'])}, "
           f"game version {g['version']}, {time.time() - start:.0f}s.")

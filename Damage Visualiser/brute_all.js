@@ -104,7 +104,8 @@ for (const w of workers) take(w);
 function finish() {
   const secs = (Date.now() - started) / 1000;
   const chars = D.chars.map(x => x.n);
-  const out = {built: new Date().toISOString(), version: D.version || null, setting: D.setting,
+  const out = {built: new Date().toISOString(), version: D.version || null, fingerprint: D.fingerprint || null,
+               setting: D.setting,
                seconds: Math.round(secs), teams, fights: {}};
   for (const p of plan) {
     const boss = D.bosses[p.fi][1];

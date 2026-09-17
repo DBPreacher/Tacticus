@@ -12,6 +12,8 @@ do the arithmetic, and it checks itself on load against exact scores from guild_
 
 Used by build_guild.py. See INSTRUCTIONS.md ("Guild Raid", the Calculate button).
 """
+import hashlib
+import os
 import random
 import build_map as bm
 import support_model as sm
@@ -19,6 +21,27 @@ import guild_raid as gr
 
 SETTING = ('mythic', 60, True, True, True)     # tier, ability level, traits, actives, gear
 N_VECTORS = 50                                 # exact scores the page checks itself against
+
+
+# Everything that can change an answer. brute_all.js stamps this into best_fives.json and build_guild.py
+# refuses to publish a run whose fingerprint no longer matches, so a game update or a change to the model
+# can't quietly leave two-hour-old best fives on the page.
+FINGERPRINT_FILES = ('active_abilities.csv', 'passive_abilities.csv', 'relic_abilities.csv',
+                     'support_abilities.csv', 'build_map.py', 'support_model.py', 'guild_raid.py',
+                     'calc_data.py', 'calc.js', 'brute.js')
+
+
+def fingerprint(g):
+    """one short string for the game data and every file that decides what a team scores"""
+    h = hashlib.sha1(g['version'].encode())
+    here = os.path.dirname(os.path.abspath(__file__))
+    for name in FINGERPRINT_FILES:
+        path = os.path.join(here, name)
+        if os.path.exists(path):
+            with open(path, 'rb') as f:
+                h.update(name.encode())
+                h.update(hashlib.sha1(f.read()).digest())
+    return h.hexdigest()[:16]
 
 
 def _weapon(w):
@@ -196,7 +219,7 @@ def build(g, fights):
         b = gr.mow_buff(g, m, lv, tier_key, trig)
         machines.append(dict(n=m['name'], f=m['factionId'],
                              b=(dict(k=b['kind'], pct=b['pct'], only=b['only'] or '', who=b['who']) if b else None)))
-    return dict(version=g['version'], setting=dict(tier=tier_key, lv=lv, trig=trig, act=act, gear=gear),
+    return dict(version=g['version'], fingerprint=fingerprint(g), setting=dict(tier=tier_key, lv=lv, trig=trig, act=act, gear=gear),
                 turns=gr.FIGHTING, high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
                 chars=characters(U, sp, g, lv), rows=support_rows(U, lv, trig), mows=machines,
                 bosses=bosses(g, fights, lv),
