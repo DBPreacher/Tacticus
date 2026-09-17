@@ -441,6 +441,29 @@ sides picked by the **Attack / Defence** switch at the top.
   matter, because most attacks against a typical enemy are already on
   their pierce floor.
 
+### "Mark the target first": counted as always on (owner, September 2026)
+
+Nine Attack rows only work once their owner has done something to the target
+first - Vitruvius has to hit it for Master Annihilator, Darkstrider has to shoot
+it for the Markerlight, Lhykhis has to hit it for Whispering Web, Farsight needs
+the target next to a friendly character, and so on. All nine are counted as
+always on.
+
+The reasoning, which is the owner's: a raid is five characters beating on one
+enormous boss for five rounds. The condition is met in round one and stays met.
+You lose it if you miss, shoot something else, or the target dies - and that is
+**acceptable, and it is the same risk for all of them**, so counting one as
+conditional and another as always on would be the inconsistent choice.
+
+The nine: Actus, Ahriman, Aun'Shi, Baldr, Commander Farsight, Darkstrider,
+Hollan, Lhykhis, Vitruvius. Each carries the reasoning in its own `Notes` column
+as well.
+
+Where this does *not* apply: a condition that is about the battle rather than the
+target - a trait that needs All triggered, an ability that needs a unit to die
+first (Nicodemus's Chalice), or one that ramps with the round (Shadowsun's extra
+hit chance climbs 25% a round). Those are counted as what they are.
+
 ### Support abilities
 
 `support_abilities.csv` is the data, one row per ability and side. `Side` is
