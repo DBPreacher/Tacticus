@@ -625,7 +625,7 @@ function check(D) {
 
 const API = {PIERCE, sum, prod, chain, hitValue, matches, applies, critOf, abilityHits, normalAttack,
   bestAttack, buffsFor, buffed, hitsOf, ruleFactor, openerDamage, TEAM_REACH,
-  activeTurns, tweakSpec, memberDamage, biggestHit, outrage, memberExtra, summonDamage,
+  activeTurns, tweakSpec, memberDamage, biggestHit, abilityHit, outrage, memberExtra, summonDamage,
   teamTotal, scoreTeam, load, check};
 
 /* node requires this file; the page wraps it and picks it up off window */
