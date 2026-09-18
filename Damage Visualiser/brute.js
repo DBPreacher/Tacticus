@@ -138,7 +138,8 @@ function mateKey(m, mates) {
   /* what a faction ally unlocks: Ramus's cooldown, Asmodai's and Baraqiel's +Damage, the Winged Prime's
      Hormagaunts arriving once per Synapse ally */
   if (m.facFlat) k += '' + (mates.filter(x => x.f === m.facFlat[0]).length ? 1 : 0);
-  if (m.perAdj) k += '' + mates.filter(x => x.f === m.perAdj[0]).length;
+  if (m.perAdj) k += '' + m.perAdj.map(c => c[0] === 'any' ? mates.length
+                                          : mates.filter(x => x.f === c[0]).length).join(',');
   if (m.noCd) k += '' + (mates.filter(x => x.f === m.noCd).length ? 1 : 0);
   if (m.smnAlly) k += '' + mates.filter(x => x.tr.indexOf(m.smnAlly[0]) >= 0).length;
   return k;
@@ -213,9 +214,8 @@ function score(ctx, team, want, ix) {
     if (ctx.buff && ctx.buff.k === 'dmg' && c.matches(m, ctx.buff.who)) flat += m.dmg * ctx.buff.pct / 100;
     if (m.facFlat && m.facFlat[1] === 'all')      /* Asmodai's, unlocked by a Dark Angel ally */
       flat += team.filter(x => x.n !== m.n && x.f === m.facFlat[0]).length ? m.facFlat[3] : m.facFlat[2];
-    if (m.perAdj && m.perAdj[1] === 'all')        /* Forcas's, one lot per adjacent Dark Angel */
-      flat += m.perAdj[2] * Math.min(team.filter(x => x.n !== m.n && x.f === m.perAdj[0]).length,
-                                     D.adjacent === undefined ? 3 : D.adjacent);
+    for (const p of c.perAdjacent(m, team, D))    /* Forcas's, one lot per adjacent Dark Angel */
+      if (p[1] === 'flat' && p[2] === 'all') flat += p[0];
     if (!out && !flat && m.rampTeam === undefined && !m.rampStack) return EMPTY;
     const res = out || new Array(turns).fill(0);
     for (let k = 0; k < turns; k++) {

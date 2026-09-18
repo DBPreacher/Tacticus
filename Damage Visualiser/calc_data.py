@@ -119,9 +119,13 @@ def characters(U, sp, g, lv, trig=True):
             if not (needs_trig and not trig):
                 c['facFlat'] = [faction, scope, round(base * alone, 1), round(base * allied, 1)]
         if u['name'] in gr.PER_ADJACENT:
-            faction, kind, var, scope = gr.PER_ADJACENT[u['name']]
-            ab2 = u.get(kind) or {}
-            c['perAdj'] = [faction, scope, round(bm.ability_value(ab2, var, lv) or 0.0, 1)]
+            adj = []
+            for who, kind, var, how, scope in gr.PER_ADJACENT[u['name']]:
+                ab2 = u.get(kind) or {}
+                if var in (ab2.get('variables') or {}):
+                    adj.append([who, how, scope, round(bm.ability_value(ab2, var, lv) or 0.0, 2)])
+            if adj:
+                c['perAdj'] = adj
         if u['name'] in gr.SUMMON_PER_ALLY:
             trait, capvar = gr.SUMMON_PER_ALLY[u['name']]
             c['smnAlly'] = [trait, bm.ability_value(u['passive'] or {}, capvar, lv) or 1]

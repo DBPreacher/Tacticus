@@ -958,11 +958,21 @@ weapon, so it is a melee reaction to something walking into him, and the model h
 no movement. "An enemy moves next to him every turn" is a bigger assumption than
 the trait itself, so it stays out and gets said on the page.
 
-**Still open on Forcas:** his other clause, "+20% Damage for each adjacent unit",
-is counted for the melee target only (`pct:extraDmgPct:melee`, the owner's note
-says so). Read with the adjacency convention it would be the target plus three
-allies, so +80% rather than +20%. That reverses an existing owner decision, so it
-is left alone until asked.
+**Both his clauses count, because the literal reading is the standing rule**
+(owner, September 2026 - "rule of thumb always applies, have you read the skill
+literally?"). "+20% Damage for each adjacent unit" means every unit next to him,
+so in a five it is the enemy he is hitting plus three allies: **+80%, not +20%**.
+The ability files already count the enemy, which is right for the Roster Battle
+Map where nobody has allies, so only the allies are added in a team.
+
+One detail worth knowing when reading the code: "+X for each" **stacks by
+adding**, so four adjacent units is +4X rather than X applied four times. The
+model multiplies its percentage effects, so `per_adjacent` converts the clause
+into the single top-up that lands on the literal total - +50% on top of the
+existing +20% gives x1.80, which is +80%.
+
+Together the two clauses make Forcas **+162.8%** in a Dark Angels five, and the
+five **+24.1%**.
 
 ## Open questions
 

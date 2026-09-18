@@ -372,22 +372,36 @@ SUMMON_PER_ALLY = {'Winged Prime': ('Synapse', 'maxSummons')}
 # every "for each adjacent friendly ..." clause is counted the same way, whatever faction adds one next.
 ADJACENT_ALLIES = 3
 
-# +Damage for each adjacent ally of a kind: (faction, ability, variable, scope). Forcas is the only one
-# in the game today - the other "for each" clauses count free hexes, adjacent enemies, kills or rounds.
-PER_ADJACENT = {'Forcas': ('Dark Angels', 'passive', 'extraDmg', 'all')}
+# What a character gets for every unit standing next to it, read literally. Forcas is the only one in the
+# game today - the other "for each" clauses count free hexes, adjacent enemies, kills or rounds.
+# (who it counts, ability, variable, kind, scope). 'any' means any unit at all, friendly or enemy: the
+# ability files already count the one being attacked, so only the allies are added here.
+PER_ADJACENT = {'Forcas': [('any', 'passive', 'extraDmgPct', 'pct', 'melee'),
+                           ('Dark Angels', 'passive', 'extraDmg', 'flat', 'all')]}
 
 
-def per_adjacent_flat(member, team, lv):
-    """the +Damage a character gets for the allies standing next to it"""
-    got = PER_ADJACENT.get(member['name'])
-    if not got:
-        return 0.0, 'all'
-    faction, kind, var, scope = got
-    ab = member.get(kind) or {}
-    if var not in (ab.get('variables') or {}):
-        return 0.0, scope
-    n = min(faction_allies(member, team, faction), ADJACENT_ALLIES)
-    return (bm.ability_value(ab, var, lv) or 0.0) * n, scope
+def per_adjacent(member, team, lv):
+    """[(value, kind, scope)] for what the units standing next to this character are worth.
+
+    "+X for each adjacent unit" is read literally and stacks by adding, so four adjacent units is +4X,
+    not X applied four times over. The ability files already count the enemy being attacked, so what is
+    added here is the allies only - and the model multiplies its percentage effects, so a percentage is
+    converted into the single top-up that lands on the literal total."""
+    out = []
+    for who, kind, var, how, scope in PER_ADJACENT.get(member['name'], ()):
+        ab = member.get(kind) or {}
+        if var not in (ab.get('variables') or {}):
+            continue
+        base = bm.ability_value(ab, var, lv) or 0.0
+        n = min(len(team) - 1 if who == 'any' else faction_allies(member, team, who), ADJACENT_ALLIES)
+        if not n or not base:
+            continue
+        if how == 'pct':
+            already, whole = 1 + base / 100, 1 + base * (1 + n) / 100
+            out.append(((whole / already - 1) * 100, 'pct', scope))
+        else:
+            out.append((base * n, 'flat', scope))
+    return out
 
 
 def faction_allies(member, team, faction):
@@ -474,9 +488,12 @@ def with_faction_flat(member, team, lv, trig):
     effects so the scope is respected (Baraqiel's is melee and Plasma Cannon only)"""
     eff, desc = member.get('ps') or ([], [])
     add = []
-    for ally_flat, scope in (faction_flat(member, team, lv, trig), per_adjacent_flat(member, team, lv)):
-        if ally_flat and scope != 'all':
-            add.append(dict(kind='flat', scope=scope, vs=None, vsnot=None, value=ally_flat))
+    ally_flat, scope = faction_flat(member, team, lv, trig)
+    if ally_flat and scope != 'all':
+        add.append(dict(kind='flat', scope=scope, vs=None, vsnot=None, value=ally_flat))
+    for v, how, scope in per_adjacent(member, team, lv):
+        if how == 'pct' or scope != 'all':
+            add.append(dict(kind=how, scope=scope, vs=None, vsnot=None, value=v))
     return dict(member, ps=(list(eff) + add, desc)) if add else member
 
 
@@ -1013,9 +1030,12 @@ def member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buf
     extra = (outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear, high) if m['name'] == 'Laviscus'
              else [0.0] * FIGHTING)
     flat = parasite(m, team, boss, lv, gear, tier_key)
-    for ally_flat, ally_scope in (faction_flat(m, team, lv, trig), per_adjacent_flat(m, team, lv)):
-        if ally_flat and ally_scope == 'all':
-            flat += ally_flat      # scoped ones go on as an effect below, not onto the Damage stat
+    ally_flat, ally_scope = faction_flat(m, team, lv, trig)
+    if ally_flat and ally_scope == 'all':
+        flat += ally_flat          # scoped ones go on as an effect below, not onto the Damage stat
+    for v, how, scope in per_adjacent(m, team, lv):
+        if how == 'flat' and scope == 'all':
+            flat += v
     if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
         flat += m['dmg'] * buff['pct'] / 100
     out = [x + flat for x in extra]
