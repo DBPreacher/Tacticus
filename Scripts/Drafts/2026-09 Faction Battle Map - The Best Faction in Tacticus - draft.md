@@ -152,28 +152,27 @@ that on its own is a real gap, because the machine turns out to matter more than
 expected.
 
 The Malleus Rocket Launcher is doing thirty nine percent of the Astra Militarum's
-killing. Thirty nine percent, out of the sixth slot, in fact without it they drop to
-being one of the worst factions in the game for attack.
+killing. Thirty nine percent, out of the sixth slot, and you'll see later what happens
+to them without it.
 
 *[Creed joke goes here. One you might use: "So the Guard's best attacking option is
 a tube on wheels with nobody driving it, which honestly does feel about right for
 my Imperial Guard." Swap for your own.]*
 
 For the Ultramarines, Galatian is doing twenty four percent, and on top of that its
-Mythic ability takes twenty percent off everything the team takes, which turns the
-Ultramarines into the single hardest faction in the game to kill at four point five
-one attacks.
+Mythic ability takes twenty percent off everything the team takes, so it's carrying
+them on both axes at once.
 
 At the other end the Reanimator is doing about one percent, and that's not a bug,
 it's that the Reanimator has no attack at all. It repairs, it revives, and it
 permanently raises a Necron's maximum health, which is really useful and is not
 damage.
 
-Worth saying because a few of you will go and check. The Sisters have the Exorcist
-and they're still last for damage, and the Ultramarines have the Galatian and
-they're still seventeenth. That isn't the machine failing, it's that the five
-themselves aren't putting very much out, and the panel now splits it for you so
-you can see how much is the team and how much is the tank.
+One thing to keep in the back of your head for later. A couple of the factions with
+the best machines still end up near the bottom of one of the two lists, and when that
+happens it isn't the machine failing, it's that the five themselves aren't putting
+very much out. The panel splits it for you, so you can always see how much is the
+team and how much is the tank.
 
 ## Part 5 - The best in attack
 
@@ -208,9 +207,6 @@ However, with machines of war on, second are the Death Guard at three point six 
 Third are the Custodes at three point four five, then the Necrons at three point
 four three, and then the Black Templars and the Votann again.
 
-Notice that the Custodes, the Black Templars and the Votann have now turned up on
-both lists, which brings us neatly on to the next bit.
-
 ## Part 8 - The worst in defence
 
 look at the other end of the defensive teams, the Aeldari are last at one point two nine, The Emperor's Children are twentieth at one point six two, and the Astra Militarum
@@ -222,6 +218,9 @@ anybody else. It's every character for themselves, so grouping them up doesn't m
 harder to kill, and you really need to be careful picking them in a Tournament Arena.
 
 ## Part 9 - The best overall
+
+You might have noticed that the Custodes, the Black Templars and the Votann have all
+turned up near the top of both lists, and that's really what we're after here.
 
 To get an overall, I've just added a faction's two places together, so first for
 attack and third for defence gives you four. It's crude, but it's honest, and it
@@ -256,10 +255,10 @@ Second last are the Genestealer Cults on thirty eight, twentieth for attack and
 eighteenth for defence, and again no machine, although the Ambush change I mentioned
 earlier at least pulled them up off the floor on the defensive side.
 
-And third last, the Astra Militarum on thirty three, and they're the interesting
-case of the three, because with the Malleus doing nearly forty percent of the work
-they're actually mid table for attack at fourteenth. It's the defending that sinks
-them at nineteenth.
+And third last, the Astra Militarum on thirty three, and they're the interesting case
+of the three. Remember the Malleus doing nearly forty percent of their killing? That
+drags them all the way up to fourteenth for attack, which is mid table, and without it
+they'd be dead last of the lot at three point four four, behind even the Sisters. It's the defending that sinks them at nineteenth.
 
 Oh, and their best five is the one where you leave Castellan Creed at home. My own
 sparring partner, the character I've used to test every single model in this
@@ -268,18 +267,25 @@ but the maths says it.
 
 ## Part 11 - The specialists
 
-Then there's a group who are near the top of one axis and nowhere on the other, and
-I think these are the interesting ones to actually play.
+Now you've seen both lists, there's a group worth pulling out on their own, because
+they're near the top of one of them and nowhere near the top of the other, and I think
+these are the interesting ones to actually play.
 
-The Aeldari are third in the game for damage and twenty first of twenty one for
-toughness, which is about as pure a glass cannon as you'll ever see on a chart. The
-Ultramarines are the exact mirror, first for toughness and seventeenth for damage,
-so they're a wall that can't really finish anything. The Death Guard are second for
-toughness and thirteenth for damage, which is very on brand for them.
+The Aeldari and the Ultramarines are the two extremes and they're exact mirrors of one
+another. The Aeldari kill about as fast as anybody in the game and then they fold, and
+the Ultramarines will not die but they can't really finish anything, so each of them
+is third or better on one axis and seventeenth or worse on the other. The Death Guard
+are a gentler version of the Ultramarines, and that's about as on brand as a faction
+can get.
 
-One surprise for you though might be the Orks, who sit right in the
-middle and are not quite the powerhouses you may have expected considering how
-often we were seeing them in Tournament Arena for a while.
+The Sisters are the strange one. They're bottom of the game for attack, and yet
+grouping them up is worth forty seven percent on the defensive side, which is one of
+the biggest gains going, and it lands them ninth. So they will absolutely not kill
+you, but they are middle for diddle in defence.
+
+One surprise for you though might be the Orks, who sit right in the middle and are not
+quite the powerhouses you may have expected considering how often we were seeing them
+in Tournament Arena for a while.
 
 ## Part 12 - Every faction, one at a time
 
