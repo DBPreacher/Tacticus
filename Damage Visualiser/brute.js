@@ -135,6 +135,11 @@ function mateKey(m, mates) {
     k += '' + mates.filter(x => x.a === 'Chaos').length;   /* his +Crit Damage per Chaos ally */
   if (m.sum)
     k += '' + (mates.some(x => x.n === 'Neurothrope' && x.crown) ? 1 : 0);   /* the Norn Crown lifts summons */
+  /* what a faction ally unlocks: Ramus's cooldown, Asmodai's and Baraqiel's +Damage, the Winged Prime's
+     Hormagaunts arriving once per Synapse ally */
+  if (m.facFlat) k += '' + (mates.filter(x => x.f === m.facFlat[0]).length ? 1 : 0);
+  if (m.noCd) k += '' + (mates.filter(x => x.f === m.noCd).length ? 1 : 0);
+  if (m.smnAlly) k += '' + mates.filter(x => x.tr.indexOf(m.smnAlly[0]) >= 0).length;
   return k;
 }
 
@@ -179,7 +184,7 @@ function score(ctx, team, want, ix) {
     mates[i] = rest;
     toks[i] = ctx.table ? tokensFor(ctx, team, ix, i) : c.buffsFor(team[i], rest, D, ctx.immune);
     tks[i] = tokenKey(toks[i]);
-    actives[i] = c.activeTurns(team[i], turns);
+    actives[i] = c.activeTurns(team[i], turns, team);
     for (const t of actives[i]) uses.push(t);
   }
   uses.sort((a, b) => a - b);
@@ -205,6 +210,8 @@ function score(ctx, team, want, ix) {
     let flat = 0;
     if (neuro && m.n === 'Neurothrope') flat += neuro.parasite[0] * neuro.parasite[1];
     if (ctx.buff && ctx.buff.k === 'dmg' && c.matches(m, ctx.buff.who)) flat += m.dmg * ctx.buff.pct / 100;
+    if (m.facFlat && m.facFlat[1] === 'all')      /* Asmodai's, unlocked by a Dark Angel ally */
+      flat += team.filter(x => x.n !== m.n && x.f === m.facFlat[0]).length ? m.facFlat[3] : m.facFlat[2];
     if (!out && !flat && m.rampTeam === undefined && !m.rampStack) return EMPTY;
     const res = out || new Array(turns).fill(0);
     for (let k = 0; k < turns; k++) {

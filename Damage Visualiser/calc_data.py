@@ -67,7 +67,7 @@ def _effect(e):
     return out
 
 
-def characters(U, sp, g, lv):
+def characters(U, sp, g, lv, trig=True):
     """every character as the page needs it: stats, weapons, traits, gear, passive, active, summons"""
     out = []
     for u in U:
@@ -109,6 +109,18 @@ def characters(U, sp, g, lv):
         if u['name'] in gr.RAMP_STACK:
             var, capvar = gr.RAMP_STACK[u['name']]
             c['rampStack'] = [sm.value(ab, var, lv), float((ab.get('constants') or {}).get(capvar) or 99)]
+        # what a faction ally unlocks, resolved to numbers here so the page only has to count allies
+        if u['name'] in gr.NO_COOLDOWN:
+            c['noCd'] = gr.NO_COOLDOWN[u['name']]
+        if u['name'] in gr.FACTION_FLAT:
+            faction, kind, var, scope, alone, allied, needs_trig = gr.FACTION_FLAT[u['name']]
+            ab2 = u.get(kind) or {}
+            base = bm.ability_value(ab2, var, lv) or 0.0
+            if not (needs_trig and not trig):
+                c['facFlat'] = [faction, scope, round(base * alone, 1), round(base * allied, 1)]
+        if u['name'] in gr.SUMMON_PER_ALLY:
+            trait, capvar = gr.SUMMON_PER_ALLY[u['name']]
+            c['smnAlly'] = [trait, bm.ability_value(u['passive'] or {}, capvar, lv) or 1]
         if u['name'] == 'Laviscus':
             c['outragePct'] = sm.value(ab, 'extraDmgPct', lv)
             c['chaosCrit'] = sm.value(ab, 'extraCritDmg', lv)
@@ -221,6 +233,6 @@ def build(g, fights):
                              b=(dict(k=b['kind'], pct=b['pct'], only=b['only'] or '', who=b['who']) if b else None)))
     return dict(version=g['version'], fingerprint=fingerprint(g), setting=dict(tier=tier_key, lv=lv, trig=trig, act=act, gear=gear),
                 turns=gr.FIGHTING, high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
-                chars=characters(U, sp, g, lv), rows=support_rows(U, lv, trig), mows=machines,
+                chars=characters(U, sp, g, lv, trig), rows=support_rows(U, lv, trig), mows=machines,
                 bosses=bosses(g, fights, lv),
                 vec=vectors(g, fights, U, sp, rows, lv, trig, act, gear, tier_key))

@@ -342,12 +342,61 @@ RAMP_TEAM = {'Titus': 'extraDmg'}
 # Traits switch, like the rest of the things you have to set up.
 RAMP_STACK = {'Shiron': ('extraDmg', 'buffMaxLevel')}
 
+# ---------------------------------------------------------------- what a faction ally unlocks
+# Several abilities have a clause that only fires next to one of their own kind, which in a five of that
+# faction is permanently true. They were worth nothing until now. See PLAN.md, "The ally-clause review".
 
-def active_turns(member, turns):
+# Ramus's Fire Discipline "can be used again in his next turn without cooldown" if he used it beside
+# another Dark Angel. Read literally, each use buys the next, so in a Dark Angels five he fires it every
+# round instead of twice.
+NO_COOLDOWN = {'Ramus': 'Dark Angels'}
+
+# +Damage that only exists with a faction ally in the team: (faction, ability, variable, scope, multiplier).
+# Asmodai hits harder against an enemy standing next to another Dark Angel, and the enemy the whole team
+# is on always is. Baraqiel's own damage climbs when he blocks, and that is doubled beside a Dark Angel -
+# it needs him to be attacked first, so it follows the Traits switch like every other conditional.
+# (faction, ability, variable, scope, without an ally, with one, needs the Traits switch)
+FACTION_FLAT = {
+    'Asmodai': ('Dark Angels', 'passive', 'extraDmg', 'all', 0.0, 1.0, False),
+    'Baraqiel': ('Dark Angels', 'passive', 'extraDmg', 'melee', 1.0, 2.0, True),
+}
+
+# A summon that arrives more often the more allies of a kind you bring. The Winged Prime's Hormagaunts
+# come from "the Winged Prime, or another friendly unit with Synapse" attacking without killing, and a
+# Tyranid five holds three Synapse characters, so they arrive three times as often - up to the ability's
+# own cap.
+SUMMON_PER_ALLY = {'Winged Prime': ('Synapse', 'maxSummons')}
+
+
+def faction_allies(member, team, faction):
+    """how many others in the five are of that faction"""
+    return sum(1 for m in team if m['name'] != member['name'] and m['faction'] == faction)
+
+
+def faction_flat(member, team, lv, trig):
+    """the +Damage a faction ally unlocks for this character, and the scope it applies to"""
+    got = FACTION_FLAT.get(member['name'])
+    if not got:
+        return 0.0, 'all'
+    faction, kind, var, scope, alone, allied, needs_trig = got
+    if needs_trig and not trig:
+        return 0.0, scope
+    ab = member.get(kind) or {}
+    if var not in (ab.get('variables') or {}):
+        return 0.0, scope
+    base = bm.ability_value(ab, var, lv) or 0.0
+    return base * (allied if faction_allies(member, team, faction) else alone), scope
+
+
+def active_turns(member, turns, team=()):
     """the turns a character gets its active off. Nearly every active is once a battle: only the few with a
     cooldownTurns in the data come back (Baraqiel, Ramus, Aesoth, Tyrith, Kariyan). An active that grows
-    is held back as late as it can be without losing a use."""
+    is held back as late as it can be without losing a use.
+
+    team: the five it is in, for the abilities whose cooldown a faction ally removes (Ramus)."""
     c = ((member.get('ability') or {}).get('constants') or {}).get('cooldownTurns')
+    if member['name'] in NO_COOLDOWN and faction_allies(member, team, NO_COOLDOWN[member['name']]):
+        c = 0
     late = member['name'] in RAMP or member['name'] in RAMP_FLAT
     if c in (None, ''):
         return {turns if late else 1}
@@ -398,6 +447,17 @@ def tweak_spec(member, spec, team, boss, turn, lv, used):
 MODEL_OWN = {'Neurothrope': ('flat',)}
 
 
+def with_faction_flat(member, team, lv, trig):
+    """a faction ally's +Damage that only applies to some attacks, added as one of the character's own
+    effects so the scope is respected (Baraqiel's is melee and Plasma Cannon only)"""
+    ally_flat, scope = faction_flat(member, team, lv, trig)
+    if not ally_flat or scope == 'all':
+        return member
+    eff, desc = member.get('ps') or ([], [])
+    add = dict(kind='flat', scope=scope, vs=None, vsnot=None, value=ally_flat)
+    return dict(member, ps=(list(eff) + [add], desc))
+
+
 def guild_unit(member, immune):
     """the character as the Guild Raid model sees it: without the effects it counts elsewhere, and
     without its own Armour reduction when the boss is Immune (Godswyl, Havyr, Snappawrecka)"""
@@ -420,6 +480,9 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
     if turns <= 0:
         return 0.0
     member = guild_unit(member, 'Immune' in boss['traits'])
+    all_ = [member] + mates
+    member = with_faction_flat(member, all_, lv, trig)
+    all_ = [member] + mates
     toks = buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'], gear)
     spec = sp['active'].get(member['name']) if act else None
 
@@ -452,7 +515,7 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
         # "This attack and attacks from Legacy of Combat *this turn*": the ramp only lifts the extra
         # attack on a turn its owner gets the active off. The owner's round 3 and round 6 confirm it.
         ramp = (ramp_at(member, turn, lv)
-                if (member['name'] in RAMP and act and turn in active_turns(member, turns)) else 1.0)
+                if (member['name'] in RAMP and act and turn in active_turns(member, turns, all_)) else 1.0)
         if ramp != 1.0:
             a, plain_a = scale_parts(a, ramp), scale_parts(plain_a, ramp)
 
@@ -479,7 +542,7 @@ def member_damage(member, mates, boss, ds, rows, sp, lv, trig, act, gear, rules=
         return dmg * f, first
     # the turns fall into blocks: as each short buff runs out, work out the attack again
     ups = sorted({min(up, turns) for _, up in toks} | {turns})
-    actives = active_turns(member, turns) if act else set()
+    actives = active_turns(member, turns, all_) if act else set()
     xs = extra if isinstance(extra, list) else [extra or 0.0] * turns
     grows = member['name'] in RAMP or member['name'] in RAMP_FLAT
     total, done, seen = 0.0, 0, {}
@@ -518,6 +581,7 @@ def _biggest_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear, opener=
     Legacy of Combat lands one big Piercing hit on a Big Target) and so do the parts of an active on the
     turn it is used (opener=True)."""
     member = guild_unit(member, 'Immune' in boss['traits'])
+    member = with_faction_flat(member, [member] + mates, lv, trig)
     toks = [t for t, _ in buffs_for(member, mates, rows, lv, trig, act, 'Immune' in boss['traits'], gear)]
     spec = sp['active'].get(member['name']) if (act and opener) else None
     if spec:            # the turn it goes off, an active that grows is at its biggest
@@ -585,10 +649,10 @@ def outrage(member, team, boss, ds, rows, sp, lv, trig, act, gear, high=()):
     for turn in range(1, FIGHTING + 1):
         s = 0.0
         for m in mates:
-            opener = act and turn in active_turns(m, FIGHTING)
+            opener = act and turn in active_turns(m, FIGHTING, team)
             s += biggest_hit(m, [x for x in team if x['name'] != m['name']], boss, ds, rows, sp, lv, trig, act,
                              gear, opener, turn, m['name'] in high)
-        if act and turn in active_turns(member, FIGHTING):
+        if act and turn in active_turns(member, FIGHTING, team):
             # his own Euphoric Strikes doesn't end his turn, so it feeds his Outrage before he attacks (wiki)
             s += ability_hit(member, mates, boss, ds, rows, sp, lv, trig, act, gear)
         out.append(pct * s)
@@ -898,10 +962,18 @@ def summon_damage(g, member, team, boss, ds, lv, trig, act, gear, tier_key, turn
     neuro = next((m for m in team if m['name'] == 'Neurothrope'), None)
     if neuro and tier_key == 'mythic' and gear and (neuro.get('relic') or {}).get('name') == 'Norn Crown':
         bonus = sm.value(neuro['relic']['ability'], 'extraDmg', bm.RELIC_LEVEL, True)   # the Crown names Summons
+    per_ally = SUMMON_PER_ALLY.get(member['name'])
     total = 0.0
     for n, npc, dmg, kind in got:
         if kind == 'ability' and not act:
             continue
+        if per_ally and kind == 'passive':
+            # it arrives when any ally with the trait attacks without killing, so a five holding three of
+            # them triggers it three times as often - up to the ability's own cap
+            trait, capvar = per_ally
+            ab = member.get(kind) or {}
+            cap = bm.ability_value(ab, capvar, lv) or n
+            n = min(sum(1 for m in team if trait in m['traits']), max(cap, n))
         rounds = max(turns - (1 if kind == 'ability' else 0), 0)      # an active's summons arrive a turn in
         best = 0.0
         for w in (npc.get('meleeWeapon'), npc.get('rangeWeapon')):
@@ -919,13 +991,16 @@ def member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buf
     extra = (outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear, high) if m['name'] == 'Laviscus'
              else [0.0] * FIGHTING)
     flat = parasite(m, team, boss, lv, gear, tier_key)
+    ally_flat, ally_scope = faction_flat(m, team, lv, trig)
+    if ally_flat and ally_scope == 'all':
+        flat += ally_flat          # scoped ones go on as an effect below, not onto the Damage stat
     if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
         flat += m['dmg'] * buff['pct'] / 100
     out = [x + flat for x in extra]
     ab = m['passive'] or {}
     var = RAMP_TEAM.get(m['name'])
     if var and act:                                   # a stack for every active the team has used
-        uses = sorted(x for u in team for x in active_turns(u, FIGHTING))
+        uses = sorted(x for u in team for x in active_turns(u, FIGHTING, team))
         step = sm.value(ab, var, lv)
         out = [x + step * sum(1 for u in uses if u < turn) for turn, x in enumerate(out, 1)]
     got = RAMP_STACK.get(m['name'])
@@ -947,7 +1022,7 @@ def team_damage(team, boss, ds, rows, sp, lv, trig, act, gear, rules=None, tier_
     total = mow['own'] if mow else 0.0
     buff = mow['buff'] if mow else None
     alive = team_turns(team, surv, lv, trig, act, gear, tier_key)
-    uses = sorted(x for m in team for x in (active_turns(m, FIGHTING) if act else ()))
+    uses = sorted(x for m in team for x in (active_turns(m, FIGHTING, team) if act else ()))
     each, args = {}, {}
     for m in team:
         mates = [x for x in team if x['name'] != m['name']]
@@ -1095,7 +1170,7 @@ def main():
                   else ' (its Mythic ability is defensive: nothing for a damage run)')))
     alive = team_turns(team, surv, args.ability, args.trig, act, args.gear, args.tier)
     buff0 = mow['buff'] if mow else None
-    uses0 = sorted(x for u in team for x in (active_turns(u, FIGHTING) if act else ()))
+    uses0 = sorted(x for u in team for x in (active_turns(u, FIGHTING, team) if act else ()))
     extras = {m['name']: member_extra(m, team, boss, ds, rows, sp, args.ability, args.trig, act, args.gear,
                                       args.tier, buff0) for m in team}
     on_high = set()

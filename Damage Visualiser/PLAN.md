@@ -629,7 +629,15 @@ single run to clear them all. Parked so far:
   Guild Raid build will refuse until `brute_all.js` is re-run. That is the guard
   working, not a fault.
 - **The Roster Battle Map is stale** until `build_map.py` is re-run: Xybia, Judh,
-  Hollan and Isaak are still published at their old Toughness.
+  Hollan and Isaak are still published at their old Toughness, and no summon
+  damage is counted on the published page.
+- **The ally clauses are in** (September 2026) and change Guild Raid numbers for
+  any five holding Dark Angels or several Synapse Tyranids, so `brute_all.js`
+  needs re-running before the Guild Raid page is rebuilt. Measured in a full Dark
+  Angels five on Mortarion Mythic 1: **the team gains 19.4%** - Asmodai +53.8%,
+  Ramus +42.8% (his active fires every round instead of twice), Baraqiel +23.8%.
+  The Winged Prime's Hormagaunts gain **+66%** in a Tyranid five, on top of the
+  Norn Crown, which is a separate synergy.
 
 ## What the data says before anything is built
 

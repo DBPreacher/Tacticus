@@ -339,12 +339,26 @@ function openerDamage(a, spec, boss, trig) {
 
 
 /* ---------------------------------------------------------------- a character over the fight */
-/* the turns a character gets its active off; one that grows is held back as late as it can be */
-function activeTurns(c, turns) {
+/* how many others in the five are of that faction (guild_raid.faction_allies) */
+const factionAllies = (m, team, faction) =>
+  (team || []).filter(x => x.n !== m.n && x.f === faction).length;
+
+/* the +Damage a faction ally unlocks: [faction, scope, alone, with an ally] */
+function factionFlat(m, team) {
+  if (!m.facFlat) return [0, 'all'];
+  const f = m.facFlat;
+  return [factionAllies(m, team, f[0]) ? f[3] : f[2], f[1]];
+}
+
+/* the turns a character gets its active off; one that grows is held back as late as it can be.
+   team: for the abilities whose cooldown a faction ally removes (Ramus next to another Dark Angel) */
+function activeTurns(c, turns, team) {
   const late = c.rampPct !== undefined || c.rampFlat !== undefined;
   const out = new Set();
-  if (c.cd === undefined) { out.add(late ? turns : 1); return out; }
-  const step = c.cd + 1;
+  let cd = c.cd;
+  if (c.noCd && factionAllies(c, team, c.noCd)) cd = 0;
+  if (cd === undefined) { out.add(late ? turns : 1); return out; }
+  const step = cd + 1;
   if (late) { for (let t = turns; t > 0; t -= step) out.add(t); }
   else { for (let t = 1; t <= turns; t += step) out.add(t); }
   return out;
@@ -391,12 +405,16 @@ function guildUnit(member, immune) {
 /* one character's damage over the fighting rounds: the active turn plus normal attacks */
 function memberDamage(D, member, mates, boss, extra, buff, teamUses, high) {
   const turns = D.turns, trig = D.setting.trig, immune = boss.tr.includes('Immune');
-  const m = guildUnit(member, immune);
+  let m = guildUnit(member, immune);
+  const scoped = factionFlat(m, [m].concat(mates));
+  if (scoped[0] && scoped[1] !== 'all')
+    m = Object.assign({}, m, {ps: (m.ps || []).concat(
+      [mkEff('flat', scoped[1], null, null, scoped[0])])});
   const toks = buffsFor(m, mates, D, immune);
   const spec0 = m.sp || null, all = [m].concat(mates);
   const chaos = m.n === 'Laviscus' ? mates.filter(x => x.a === 'Chaos').length : 0;
   const hg = 1 + D.high.pct / 100;
-  const actives = activeTurns(m, turns);
+  const actives = activeTurns(m, turns, all);
 
   const attack = (live, xtra, turn) => {
     const used = teamUses.filter(u => u < turn).length;
@@ -459,7 +477,12 @@ function biggestHit(D, member, mates, boss, opener, turn, high) {
 
 function _biggestHit(D, member0, mates, boss, opener, turn, high) {
   const trig = D.setting.trig, immune = boss.tr.includes('Immune');
-  const member = guildUnit(member0, immune);
+  let member = guildUnit(member0, immune);
+  const scoped = factionFlat(member, [member].concat(mates));
+  if (scoped[0] && scoped[1] !== 'all')       /* what a faction ally unlocks counts here too, because
+                                                 Laviscus's Outrage feeds on this number */
+    member = Object.assign({}, member, {ps: (member.ps || []).concat(
+      [mkEff('flat', scoped[1], null, null, scoped[0])])});
   const toks = buffsFor(member, mates, D, immune).map(x => x.t);
   let spec = opener ? (member.sp || null) : null;
   if (spec) spec = tweakSpec(member, spec, [member].concat(mates), boss, turn, mates.length);
@@ -511,12 +534,12 @@ function abilityHit(D, member, boss) {
 /* Laviscus: 120% of the sum of his team-mates' biggest hits, on each turn */
 function outrage(D, member, team, boss, high) {
   const mates = team.filter(x => x.n !== member.n), pct = (member.outragePct || 0) / 100, out = [];
-  const mine = activeTurns(member, D.turns);
+  const mine = activeTurns(member, D.turns, team);
   for (let turn = 1; turn <= D.turns; turn++) {
     let s = 0;
     for (const m of mates)
       s += biggestHit(D, m, team.filter(x => x.n !== m.n), boss,
-                      activeTurns(m, D.turns).has(turn), turn, high.has(m.n));
+                      activeTurns(m, D.turns, team).has(turn), turn, high.has(m.n));
     if (mine.has(turn)) s += abilityHit(D, member, boss);   /* Euphoric Strikes feeds it before he swings */
     out.push(pct * s);
   }
@@ -532,6 +555,8 @@ function memberExtra(D, m, team, boss, buff, high, teamUses) {
   const neuro = team.find(x => x.n === 'Neurothrope');
   if (neuro && m.n === 'Neurothrope') flat += neuro.parasite[0] * neuro.parasite[1];
   if (buff && buff.k === 'dmg' && matches(m, buff.who)) flat += m.dmg * buff.pct / 100;
+  const ally = factionFlat(m, team);
+  if (ally[0] && ally[1] === 'all') flat += ally[0];       /* scoped ones go on as an effect instead */
   const res = out.map(x => x + flat);
   if (m.rampTeam !== undefined)                      /* a stack for every active the team has used */
     for (let i = 0; i < res.length; i++) res[i] += m.rampTeam * teamUses.filter(u => u < i + 1).length;
@@ -547,10 +572,16 @@ function summonDamage(D, m, team, boss) {
   const bonus = (neuro && neuro.crown) ? neuro.crown : 0;    /* the Crown names friendly Summons */
   let total = 0;
   for (const s of m.sum) {
+    let n = s.n;
+    if (m.smnAlly && s.src === 'passive') {
+      /* it arrives when any ally with the trait attacks without killing, up to the ability's cap */
+      const have = team.filter(x => x.tr.indexOf(m.smnAlly[0]) >= 0).length;
+      n = Math.min(have, Math.max(m.smnAlly[1], n));
+    }
     const rounds = Math.max(D.turns - (s.src === 'ability' ? 1 : 0), 0);
     let best = 0;
     for (const w of s.w) best = Math.max(best, abilityHits(mkPart(s.d + bonus, w.h, w.t, false), boss, null));
-    total += s.n * best * rounds;
+    total += n * best * rounds;
   }
   return total;
 }
@@ -561,7 +592,7 @@ const EMPTY = new Set();
 function teamTotal(D, team, boss, mow, high) {
   const buff = mow ? mow.b : null;
   let uses = [];
-  for (const m of team) uses = uses.concat([...activeTurns(m, D.turns)]);
+  for (const m of team) uses = uses.concat([...activeTurns(m, D.turns, team)]);
   uses.sort((a, b) => a - b);
   const each = {}, args = {};
   for (const m of team) {
