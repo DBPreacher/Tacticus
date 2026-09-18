@@ -891,7 +891,7 @@ summons_of = bm.summons_of
 def summon_damage(g, member, team, boss, ds, lv, trig, act, gear, tier_key, turns=None):
     """what a character's summons add over the fight"""
     turns = FIGHTING if turns is None else turns
-    got = summons_of(g, member, lv)
+    got = summons_of(member, lv, g)
     if not got:
         return 0.0
     bonus = 0.0

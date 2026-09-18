@@ -805,6 +805,43 @@ page.
   Target and occupies more hexes, so it can be surrounded by more - relevant there,
   not here.)
 
+### What it did, once built (September 2026)
+
+**Passive summoners rose; active summoners mostly did not**, and that is the model
+working rather than failing.
+
+    Celestine     rank 66 -> 43      Mataneo    84 -> 62
+    The Patermine 49 -> 20           Tan Gi'da  95 -> 79
+    Archimatos    51 -> 29           Sho'syl    37 -> 22
+    Boss Gulgortz 19 ->  9           Xybia      83 -> 75
+
+    Ammuk       117 -> 117      Gibbascrapz 114 -> 114
+    Aleph-Null  111 -> 111      Bellator    110 -> 112
+
+A passive summon is simply there. An **active** summon costs the character its
+attack that turn, and the Damage axis measures a *single kill* - Bellator kills a
+typical character in 4.2 attacks, less than one turn, so his Inceptor gets one
+swing and never earns back the action it cost. In a battle you summon once and it
+fights all game; in a duel that ends inside a turn, summoning is a waste.
+
+**The owner chose to charge the action** (the alternative was treating the summon
+as already on the board, which would have moved Abraxas 103 -> 51 and Anuphet
+87 -> 56). The reason: the model charges the action for *every* other active in
+the game, and a free pass for summoners is a special case that could not be
+defended on camera. Ranks that *fall* (Bellator 110 -> 112) fall because others
+rose past them - no character's absolute number gets worse.
+
+**So the caveat belongs on the page:** a summon is an investment that pays across a
+whole battle, and this measure is one kill, so summoners are undersold here by
+design.
+
+**One action a turn, and it is the same for everyone.** Checked against the
+ability text: 92 actives replace the attack, 13 *include* a normal attack
+(`Normal_Attack = Y/PCT` - Celestine moves and attacks, Gulgortz charges and
+attacks, Mephiston's Blood Angels attack on arrival), and 12 explicitly do not end
+the turn (`Same_Turn = Y`). No character gets a free attack the text does not
+grant.
+
 ### Order of work
 
 All three of these change the Roster Battle Map, so they land before it is rebuilt

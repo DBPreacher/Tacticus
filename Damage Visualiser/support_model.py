@@ -264,6 +264,7 @@ def setting_units(units, specs, lv, trig, act, gear):
          else dict(u, g=None) for u in units]
     for u in U:
         u['ps'] = sp['passive'].get(u['name'])
+        u['summons'] = sp['summons'].get(u['name'])
         u['pg'] = sp['passive_goff'].get(u['name'])
     rnd = {u['name']: bm.merge_defence(*((sp['active_def'].get(u['name']), sp['active_gdef'].get(u['name'])) if act else ()),
                                        sp['passive_def'].get(u['name']), sp['passive_gdef'].get(u['name'])) for u in U}

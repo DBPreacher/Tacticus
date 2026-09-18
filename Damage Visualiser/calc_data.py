@@ -117,7 +117,7 @@ def characters(U, sp, g, lv):
             c['parasite'] = [sm.value(ab, 'extraDmg', lv), cap]
             if (u.get('relic') or {}).get('name') == 'Norn Crown':
                 c['crown'] = sm.value(u['relic']['ability'], 'extraDmg', bm.RELIC_LEVEL, True)
-        s = gr.summons_of(g, u, lv)
+        s = gr.summons_of(u, lv, g)
         if s:
             c['sum'] = [dict(n=n, d=round(dmg, 1), w=[_weapon(dict(kind=k, type=bm.dtype(w['damageProfile']), hits=w['hits'],
                                                                    pierce=w['piercingRatio'] / 100, range=1))

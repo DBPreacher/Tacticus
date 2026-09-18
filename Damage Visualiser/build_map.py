@@ -85,6 +85,7 @@ MAX_ADJACENT = 6                    # a character has six hexes around it, so at
 
 
 _NPC = {}
+GAME = None
 
 
 def npc_of(g, unit_id):
@@ -98,7 +99,7 @@ def npc_of(g, unit_id):
     return _NPC.get(re.sub(r'[^a-z]', '', re.sub(r'npc\d*|smn', '', str(unit_id).lower())))
 
 
-def summons_of(g, unit, lv):
+def summons_of(unit, lv, g=None):
     """[(how many, stat block, their Damage, which ability made them)] for one character.
 
     Two shapes in the data caught us out. An ability can summon a *second* kind of unit under `unitId_2`
@@ -106,6 +107,7 @@ def summons_of(g, unit, lv):
     Neophyte Hybrids live, and reading only the first slot meant Isaak scored nothing at all, his first
     slot being a decoy with no weapon. And Bellator's Inceptors sit under `unitToSpawn` rather than
     `unitId`, so his whole kit was invisible."""
+    g = g or GAME
     out = []
     for kind in ('ability', 'passive'):
         ab = unit.get(kind) or {}
@@ -210,6 +212,8 @@ def load():
     with open(CACHE, encoding='utf-8') as f:
         g = json.load(f)
     g = g.get('data', g)
+    global GAME
+    GAME = g                        # summons_of needs the npc table; this saves threading it everywhere
     by_norm = {}
     for h in g['heroes'].values():
         for k in (h['longName'], h['name'], h['id']):
@@ -924,7 +928,7 @@ def opener(a, d, trig, spec, ds):
     return attacks
 
 
-def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=None, half=0.0):
+def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=None, half=0.0, summon=0.0):
     """attacks to kill, one attack at a time. An enemy turn is ATTACKS_PER_TURN attacks.
     first = list of (damage, ignores_TA) making up attack 1 (several parts for an active);
     early = damage of attacks 2..ATTACKS_PER_TURN (inside the first enemy turn);
@@ -938,6 +942,12 @@ def kill_count(first, early, turn_first, later, d, hp, cap_first=None, regen=Non
     ta = 'TerminatorArmour' in d['traits']
     left = hp
     for i in range(5000):
+        if summon and i % ATTACKS_PER_TURN == 0:
+            # the character's summons act once a turn alongside it. Nothing is hitting back in this
+            # measure, so they live as long as the kill takes - see PLAN.md, "Summons".
+            left -= summon
+            if left <= 0:
+                return i
         if i == 0:
             dmg = sum(x * (0.25 if (j == 0 and ta and not p) else 1) for j, (x, p) in enumerate(first))
         elif i % ATTACKS_PER_TURN == 0:
@@ -994,6 +1004,27 @@ def _with_defence(d, ds):
     return d
 
 
+def summon_turn(summons, d, ds=None):
+    """what a character's summons deal to this defender in one turn.
+
+    They cannot crit (they are not the character's own attack) and there are at most MAX_ADJACENT of
+    anything hitting one target, because a character has six hexes around it."""
+    total, count = 0.0, 0.0
+    for n, npc, dmg, kind in summons:
+        n = min(n, max(MAX_ADJACENT - count, 0))
+        if n <= 0:
+            break
+        best = 0.0
+        for w in (npc.get('meleeWeapon'), npc.get('rangeWeapon')):
+            if not w:
+                continue
+            part = dict(dmg=dmg, hits=w['hits'], type=dtype(w['damageProfile']), crit=False)
+            best = max(best, part_vs_defence(part, d, ds, False)[0])
+        total += n * best
+        count += n
+    return total
+
+
 def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None, regen=None):
     """(attacks, best attack kind, normal attack damage, used the active).
     spec = the attacker's active (offence); a['ps'] = the attacker's passive.
@@ -1013,10 +1044,19 @@ def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None, regen=No
     half = 0.0
     if any(e['kind'] == 'extrahalf' for e in (a.get('ps') or ([], []))[0]):
         half = max(best_attack(a, d2, trig, ds_rest, False, False, half=True)[0] - later_dmg, 0.0)
-    k = kill_count([a1[:2]], early, tf[:2], later_dmg, d, hp, cap, regen, half)
+    # A summon from a passive is there whatever happens; one from an active only exists if the active is
+    # used, so it belongs to that branch alone. Both sit behind the usual switches, like any other effect.
+    smn = a.get('summons') or []
+    smn_passive = summon_turn([s for s in smn if s[3] == 'passive'], d2, ds_rest)
+    smn_all = summon_turn(smn, d2, ds_rest)
+    k = kill_count([a1[:2]], early, tf[:2], later_dmg, d, hp, cap, regen, half, smn_passive)
     used = False
-    if spec:
-        k_act = kill_count(opener(a, d1, trig, spec, ds_round), early, tf[:2], later_dmg, d, hp, cap, regen, half)
+    # Characters whose active *is* the summon - Ammuk, Bellator, Gibbascrapz - have no active spec at all,
+    # because the ability deals no damage of its own. Using it costs them the attack and buys the summon,
+    # which is a trade worth making, so the branch has to run for them too.
+    if spec or smn_all > smn_passive:
+        first = opener(a, d1, trig, spec, ds_round) if spec else [(0.0, False)]
+        k_act = kill_count(first, early, tf[:2], later_dmg, d, hp, cap, regen, half, smn_all)
         if k_act < k:
             k, used = k_act, True
     guard = (ds_round or {}).get('guard') or (ds_rest or {}).get('guard')
@@ -1052,6 +1092,7 @@ def run_scenarios(units, specs, keep=None):
         for u in U:
             n = u['name']
             u['ps'] = sp['passive'].get(n) if sp else None
+            u['summons'] = sp['summons'].get(n) if sp else None
             u['pg'] = sp['passive_goff'].get(n) if sp else None
         rnd = {u['name']: merge_defence(*((sp['active_def'].get(u['name']), sp['active_gdef'].get(u['name'])) if act else ()),
                                         sp['passive_def'].get(u['name']), sp['passive_gdef'].get(u['name']))
@@ -1239,7 +1280,7 @@ def build_specs(units, actives, passives, relics):
     for lv in ABILITY_LEVELS:
         for trig in (False, True):
             for gear in (False, True):
-                sp = dict(active={}, active_def={}, active_gdef={}, active_gtext={},
+                sp = dict(active={}, active_def={}, active_gdef={}, active_gtext={}, summons={},
                           passive={}, passive_def={}, passive_goff={}, passive_gdef={}, passive_gtext={},
                           passive_only={}, passive_only_def={}, relic_text={})
                 for u in units:
@@ -1247,6 +1288,8 @@ def build_specs(units, actives, passives, relics):
                     try:
                         if (x := active_spec(u, arow, lv)):
                             sp['active'][n] = x
+                        if (x := summons_of(u, lv)):
+                            sp['summons'][n] = x
                         if (x := defence_spec(u, u['ability'] or {}, (arow or {}).get('Defence'), lv, trig)): sp['active_def'][n] = x
                         if (x := attack_spec(u, prow, lv, trig)): sp['passive'][n] = sp['passive_only'][n] = x
                         if (x := defence_spec(u, u['passive'] or {}, (prow or {}).get('Defence'), lv, trig)):
