@@ -609,6 +609,149 @@ buff, reach and duration included. Two relics do this on the Attack side:
   still nowhere near worth a slot - swapping him for Boss Gulgortz on Mortarion
   is 1,319,702 against 1,528,669.
 
+# Faction comparison (started September 2026)
+
+The next piece of work, and the next video. Where you field a whole faction is
+**Arena and Tournament Arena** - five characters plus a Machine of War, the same
+rules in both, and there is a Faction + MoW Tournament Arena.
+
+## Working rule while this is on
+
+**Do not rebuild the Guild Raid page.** A full `brute_all.js` run is two hours and
+the owner is testing the new teams in game. Any Guild Raid bug found while the
+faction work is on gets **written down here** and fixed in one batch later, with a
+single run to clear them all. Bugs parked so far:
+
+- (none yet)
+
+## What the data says before anything is built
+
+**Faction sizes make this a comparison, not a search.** 13 factions have exactly
+five characters, so their "best five" is forced; 8 have six, giving six choices
+each; Adeptus Astartes has three and cannot field a team at all. About 67 teams in
+total - seconds to compute, not hours.
+
+**The faction bonus is rarer than people think, and it comes in two shapes that
+must not be muddled on camera:**
+
+| | Has a signature trait | No signature trait |
+|---|---|---|
+| **Has faction-locked abilities** | Custodes, Orks, Genestealer Cults, Votann, Thousand Sons | Tau, Aeldari, Dark Angels, Blood Angels, Tyranids, Space Wolves |
+| **Neither** | Black Legion, Emperor's Children, Necrons, World Eaters, Sororitas, Death Guard | **Ultramarines, Adeptus Mechanicus, Astra Militarum, Black Templars** |
+
+- A **signature trait** (Get Stuck In, Blessings of Khorne, Act of Faith) is
+  carried by every member whether or not the rest of the team shares the faction.
+  It is already in each character's numbers on the Roster Battle Map. **It is not a
+  reward for going pure** and must not be presented as one.
+- A **faction-locked ability** is the real reward, and it usually hides as a clause
+  inside an ability you already use: Atlacoya's active deals Direct damage "if
+  Atlacoya is adjacent to a friendly Adeptus Custodes"; Aesoth's passive widens its
+  reach "if a friendly Adeptus Custodes uses an Active Ability"; Thaumachus shields
+  the closest ally "preferring Thousand Sons". In a mono-faction five those
+  conditions are free and permanent.
+
+**Eleven of the 21 fieldable factions have a Machine of War** (fixed September
+2026: `FACTION_ID` was missing `Sisterhood` and `BlackLegion`, so the Exorcist and
+the Forgefiend belonged to nobody).
+
+## The sweep: ally-conditioned abilities
+
+58 clauses across 51 characters depend on what an **ally** is - nearly half the
+roster. 48 are counted somewhere (a support row, the character's own ability file,
+or a hard-coded rule in `guild_raid.py`). **Ten are counted nowhere:**
+
+| Faction | Character | Needs a friendly |
+|---|---|---|
+| Dark Angels | Asmodai, Baraqiel, Ramus, Sarquael | Dark Angel |
+| Adeptus Mechanicus | Tan Gi'da | Mechanical |
+| Death Guard | Corrodius | Chaos |
+| Astra Militarum | Castellan Creed | Summon |
+| Genestealer Cults | Isaak | Decoy |
+| Leagues of Votann | Vynn | Summon |
+| Tyranids | Winged Prime | Synapse |
+
+**Dark Angels is the faction the model most under-represents** - four of its six
+characters have a "next to another Dark Angel" clause worth nothing today. A
+ranking published before these are reviewed would be unfair to them specifically.
+Some may be rightly uncounted (Isaak's decoys and Vynn's summon-repair are board
+effects, not damage) - that is an owner review, not a bug list.
+
+## The page
+
+A **new page**, not a toggle on the Roster Battle Map. The map's unit of analysis
+is one character in a duel, where nobody buffs anybody; a faction's unit is a five
+playing together, where the buffs are the whole point.
+
+- **The same Damage and Toughness definitions as the Roster Battle Map**, computed
+  for the five together with buffs on, so the axes mean the same thing and the
+  video can carry on from the last one.
+- **The "typical character" becomes per faction**: buff each faction's five with
+  its own mates, then run those 105 characters against each other. About 11,000
+  matchups, fewer than the map already does. It costs nothing extra and it leaves a
+  **21x21 faction matchup matrix** behind as a by-product.
+- **21 labelled points**, so there is no colour-coding problem: identity comes from
+  the label and the faction badge, not from 21 hues nobody can tell apart.
+- **The 5-or-6 problem, drawn as a range**: each faction is a point at its best
+  five with a whisker down to its worst five. A short whisker means the sixth
+  character is interchangeable; a long one means the choice is the story. The 13
+  five-character factions have no whisker at all, which itself says "no decision
+  here". The benched character is named on the marker - and **the one you bench for
+  attack may not be the one you bench for defence**, so both are kept.
+- **Machine of War toggles**: on, off, and only-factions-that-have-one, with the
+  machine's contribution shown separately so a faction's rank is never silently its
+  tank.
+- **Per faction**: a synergy number (the five together over the same five alone),
+  the signature trait, the faction-locked abilities, and what the faction is
+  missing (all-melee, no healer, no ranged). **Adeptus Astartes is shown greyed at
+  "3 of 5"** as the clearest illustration of that idea.
+- Stretch, explicitly not the first cut: the matchup matrix as a page of its own, a
+  per-enemy-faction sheet in the style of `typical-character.html`, and how far
+  behind an unrestricted five the best faction five is.
+
+## The caveats the page has to state
+
+- **"Attacks to kill" is a one-on-one measure.** Five against five has focus fire,
+  characters dying mid-fight and being unable to answer, and reinforcements. The
+  page keeps the duel simplification because it is what makes the numbers
+  comparable to the Roster Battle Map, but the matchup matrix will read as more
+  precise than it is unless this is said plainly.
+- **Turn order is not modelled at all**, and in Arena it is frequently the whole
+  game. This page ranks what a faction *can do*, not who moves first. Say it on the
+  page and say it in the video.
+
+## Faction badges
+
+19 of 22 are at `E:\Video Production\Assets\Images\Game Renders\Faction badges\Factions`
+as 256x256 PNGs, and they are properly coloured (Sororitas white and red,
+Mechanicus red and teal, Aeldari gold and blue, Astra Militarum green). Missing:
+**Emperor's Children** and **Leagues of Votann** - the two that matter - plus
+Adeptus Astartes, which cannot field a team anyway. The wiki has them in the same
+format.
+
+Proposal: use the **badge itself as the mark** on the chart rather than a colour,
+with a thin alliance-coloured ring around it and the faction name beside it. Badges
+are instantly readable where 21 hues are not, and they are the game's own visual
+language, which matters for video. Downscaled to about 64px and inlined they should
+cost well under 100 KB for all 21.
+
+## The video
+
+Treated as a **direct follow-up to the Roster Battle Map video**, not a standalone.
+That video landed well ("the Mount Rushmore of Tacticus videos"), so the sequel
+assumes the audience knows the map, the axes and what "typical character" means,
+and does not re-explain them.
+
+The script belongs in this repo alongside the others (`Scripts/`, see its README
+and VOICE.md). What it should cover:
+
+1. What is new: the same axes, but for a five that plays together.
+2. The two shapes of faction bonus, and why a signature trait is not a synergy.
+3. The 5-or-6 problem, and that for 13 factions there is no decision to make.
+4. **Turn order**, called out properly - the biggest thing the model does not know.
+5. The learnings from building it: how few factions have a real bonus, and which
+   ones the model was under-selling until the sweep.
+6. **Who is the best faction in Tacticus** - the question people came for.
+
 ## Open questions
 
 ### How far do these buffs actually reach? (owner testing in game, September 2026)
