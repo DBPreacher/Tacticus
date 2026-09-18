@@ -189,7 +189,9 @@ function step2(f, t, members, col){
     + 'long. Turn each one upside down and you get a rate, the share of a kill they land with one attack. '
     + 'Those do add up. Add them together, and the team between them kills a typical character in '
     + `<em>1 &divide; ${total.toFixed(3)} = ${(1 / total).toFixed(3)}</em> attacks. Multiply by five to put it `
-    + 'back on the same scale as the Roster Battle Map, and that is the faction’s Damage number.'
+    + 'back on the same scale as the Roster Battle Map, and that is the faction’s Damage number. That five '
+    + 'is a fixed scale and not a head count, so it stays at five whether or not a Machine of War is '
+    + 'helping: the machine is extra on top rather than another mouth to divide by.'
     + (out.size ? ` <em>${[...out].join(' and ')}</em> spent the turn healing, so that one is not in the sum.` : '')
     + (rate ? ` The <em>${F[S.who].mow.name}</em> is the grey bar, and it is doing `
               + `<em>${(t.mow_share * 100).toFixed(0)}%</em> of the killing on its own.` : ''));
@@ -219,7 +221,7 @@ function step2(f, t, members, col){
   el('text', {class:'name', x:sx + 55, y:H - M.b + 26, 'text-anchor':'middle'}).textContent =
     rate ? 'All five + machine' : 'All five';
   el('text', {class:'brace-t', x:sx + 55, y:Y(total) - 12, 'text-anchor':'middle'}).textContent = total.toFixed(3);
-  answer(sx + 160, t.d, 'Damage', `5 ÷ ${total.toFixed(3)}`);
+  answer(sx + 160, t.d, 'Damage', `${(1 / total).toFixed(3)} × 5`);
 }
 
 // 3. toughness is a time, so it adds up the other way
