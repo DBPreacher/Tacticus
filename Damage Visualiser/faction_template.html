@@ -47,7 +47,8 @@ svg{display:block;width:100%;height:auto;font-family:var(--data)}
 .fac{cursor:pointer;transition:opacity .25s}
 .fac.dim{opacity:.13}
 .fac.dim .hit{pointer-events:none}
-.reach{stroke:var(--ink-3);stroke-width:1.4;opacity:.5;fill:none}
+.reach{stroke:var(--ink-3);stroke-width:1.6;opacity:.55;fill:none;stroke-linecap:round}
+.reach.cap{stroke-width:2}
 .fac.sel .reach{stroke:var(--ink);opacity:1;stroke-width:2}
 .alt{stroke:var(--panel);stroke-width:1.2}
 .badge{image-rendering:auto}
@@ -147,14 +148,14 @@ footer em{color:var(--ink-2);font-style:normal}
     <section class="chart-card" aria-label="Faction damage and toughness chart">
       <div class="chart-head">
         <h2 id="chartTitle">Every faction that can field a five</h2>
-        <span class="hint">Hover a badge for numbers &middot; click to pin it &middot; the line behind a badge is
-          how far the sixth character moves it</span>
+        <span class="hint">Hover a badge for numbers &middot; click to pin it &middot; the bar behind a badge runs
+          from the faction's best five to its worst</span>
       </div>
       <svg id="map" viewBox="0 0 1000 670" role="img" aria-label="Chart of every faction by damage and toughness"></svg>
       <div class="chart-key">
         <div class="legend" id="legend" role="group" aria-label="Alliances (click to hide or show)"></div>
         <div class="shapes">
-          <span><svg viewBox="-8 -8 16 16"><circle r="3" fill="#6e7686"/><path d="M-7,0L7,0" stroke="#6e7686" stroke-width="1.4"/></svg>Another five from the same six</span>
+          <span><svg viewBox="-8 -8 16 16"><path d="M0,-6L0,6M-4,6L4,6" stroke="#6e7686" stroke-width="1.4" fill="none"/></svg>What benching the wrong character costs</span>
         </div>
       </div>
       <div class="tip" id="tip" role="status"></div>
@@ -163,6 +164,14 @@ footer em{color:var(--ink-2);font-style:normal}
     <div class="panel detail" id="detail" aria-live="polite"></div>
 
     <div class="panel controls">
+      <div>
+        <p class="label">View</p>
+        <div class="seg" role="group" aria-label="View" id="segView">
+          <button data-v="attack" aria-pressed="false">Attack</button>
+          <button data-v="defence" aria-pressed="false">Defence</button>
+          <button data-v="map" aria-pressed="true">Map</button>
+        </div>
+      </div>
       <div>
         <p class="label">Machine of War</p>
         <div class="seg" role="group" aria-label="Machine of War" id="segMow">
@@ -178,7 +187,6 @@ footer em{color:var(--ink-2);font-style:normal}
         </div>
       </div>
       <label class="check"><input type="checkbox" id="names" checked><span class="box"></span>Show faction names</label>
-      <label class="check"><input type="checkbox" id="alts" checked><span class="box"></span>Show the other fives</label>
       <div>
         <p class="label">Find</p>
         <input class="search" id="q" type="search" placeholder="Faction or character" autocomplete="off">
@@ -201,12 +209,19 @@ footer em{color:var(--ink-2);font-style:normal}
         then they are measured against each other. So a faction is being judged against other factions
         playing together, which is the fight it will actually have. It is the Roster Battle Map's typical
         character moved up a level.</dd>
-      <dt>The line behind a badge</dt>
-      <dd>Nine factions have six characters and must bench one, so they have six possible fives. The badge
-        sits on the best of them and the other five are the small dots. A long line means the sixth
-        character is the whole story; twelve factions have exactly five and no line at all, which is its own
-        answer &mdash; there is no decision to make. The character left out is named in the panel, and it is
-        often <em>not</em> the same one for attacking as for defending.</dd>
+      <dt>The bar behind a badge</dt>
+      <dd>Nine factions have six characters and must bench one. The badge sits on their best five and the
+        bar runs to their worst, along whichever axis is being ranked, so its length is exactly what
+        benching the wrong character costs. Twelve factions have five characters and no bar at all, which
+        is its own answer: there is no decision to make. The one left out is named in the panel, and for
+        seven of the nine it is <em>not</em> the same character for attacking as for defending.</dd>
+      <dt>A healer does not attack</dt>
+      <dd>You cannot heal and attack, so a heal is treated as a repeatable active: the eleven characters
+        with a heal or repair action either spend the turn on it or spend it swinging, and the model keeps
+        whichever is better for the axis being asked about. It matters most for Baldr, whose Healing Balms
+        hands the unit he heals a great deal of Crit, and it costs the Space Wolves first place on damage.
+        Worth knowing: under focused fire at this level 112 of the 117 die inside a single enemy turn, so a
+        heal that arrives once a turn usually arrives too late, which is why so few fives choose to heal.</dd>
       <dt>Synergy: what going pure is worth</dt>
       <dd>The same five measured against the same yardstick with their buffs on and with them off. It counts
         the mates' buffs on both sides, and the faction-locked clauses that only work next to one of their
@@ -219,11 +234,14 @@ footer em{color:var(--ink-2);font-style:normal}
         Ten factions have one, eleven do not, and it makes no difference to the gain shown here. The reward
         for going pure is the locked clause, and it is much rarer.</dd>
       <dt>Machine of War</dt>
-      <dd>Eleven of the 21 have one. With it on, its Mythic ability lands on the five and the attack it fires
-        every round is counted as a sixth attacker. Two things it does not do: six of the eleven machines are
-        defensive &mdash; the Galatian, the Exorcist, the Forgefiend, the Tson'ji and the Storm Speeder shield
-        rather than hit &mdash; and nothing reads those abilities yet, so a machine never moves the Toughness
-        axis. And a machine is counted as a sixth attacker, never as a sixth body for the enemy to kill.</dd>
+      <dd>Eleven of the 21 have one, and with it on you get its Mythic ability and the attack it fires every
+        round, counted as a sixth attacker. Six of those Mythic abilities are a percentage on damage; the
+        other five are defensive and are counted too, so a machine moves both axes. Four of them take a flat
+        20% off everything the five takes, and the Exorcist's Shield of Faith is worth half a character's
+        Health every turn. A machine is a sixth attacker, never a sixth body for the enemy to kill.
+        <b>What is still missing</b> is some of what the machines <em>do</em>: each has two active abilities
+        and the model fires only one of them, and the ones that summon something are not counted at all.
+        The Galatian is the worst case, because neither of its actives is counted.</dd>
       <dt>Turn order is not modelled at all</dt>
       <dd>In Arena it is frequently the whole game: who moves first, who gets to focus somebody down before
         they answer. None of that is here. This page ranks what a faction <em>can do</em>, not who goes first.</dd>
@@ -273,7 +291,7 @@ const BADGES = /*BADGES*/;
 const F = DATA.factions;
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
 const NS = 'http://www.w3.org/2000/svg';
-const S = {mow:0, pick:'dmg', names:true, alts:true, sel:'Dark Angels', q:'',
+const S = {view:'map', mow:0, pick:'dmg', names:true, sel:'Dark Angels', q:'',
            hidden:new Set(), sort:{k:'dmg', dir:1}};
 
 const PRETTY = {ActOfFaith:'Act of Faith', GetStuckIn:'Get Stuck In', BlessingsOfKhorne:'Blessings of Khorne',
@@ -322,45 +340,76 @@ function draw(){
   // damage is attacks needed, so the axis runs downwards: fewer attacks sits higher up
   const X = v => PAD.l + (v - dx.lo) / (dx.hi - dx.lo) * (W - PAD.l - PAD.r);
   const Y = v => PAD.t + (v - dy.lo) / (dy.hi - dy.lo) * (H - PAD.t - PAD.b);
-  scale = {X, Y};
+  // In the Attack and Defence views only one axis carries a number and the other is just the running
+  // order, evenly spaced, so 21 badges have room to sit side by side and every name fits.
+  const rankAxis = (lo, hi, i, n) => lo + (hi - lo) * (n < 2 ? .5 : (i + .5) / n);
+  const order = [...pts].sort((a, b) => S.view === 'defence' ? b.t.tough - a.t.tough : a.t.d - b.t.d);
+  const seat = {};
+  order.forEach((p, i) => { seat[p.n] = rankAxis(S.view === 'defence' ? PAD.t + 18 : PAD.l + 34,
+                                                 S.view === 'defence' ? H - PAD.b - 18 : W - PAD.r - 34,
+                                                 i, order.length); });
+  const px = p => S.view === 'attack' ? seat[p.n] : X(p.t.tough);
+  const py = p => S.view === 'defence' ? seat[p.n] : Y(p.t.d);
+  scale = {X, Y, px, py};
 
   const grid = el('g', {class:'grid'}, svg);
-  for(let v = dx.lo; v <= dx.hi + 1e-9; v += dx.s){
-    el('line', {x1:X(v), x2:X(v), y1:PAD.t, y2:H - PAD.b}, grid);
-    el('text', {class:'tick', x:X(v), y:H - PAD.b + 20, 'text-anchor':'middle'}, svg).textContent = (+v.toFixed(2));
+  if(S.view !== 'attack'){
+    for(let v = dx.lo; v <= dx.hi + 1e-9; v += dx.s){
+      el('line', {x1:X(v), x2:X(v), y1:PAD.t, y2:H - PAD.b}, grid);
+      el('text', {class:'tick', x:X(v), y:H - PAD.b + 20, 'text-anchor':'middle'}, svg).textContent = (+v.toFixed(2));
+    }
+    el('text', {class:'axis-title', x:(PAD.l + W - PAD.r) / 2, y:H - 12, 'text-anchor':'middle'}, svg)
+      .textContent = 'Toughness → attacks to kill one of them';
   }
-  for(let v = dy.lo; v <= dy.hi + 1e-9; v += dy.s){
-    el('line', {x1:PAD.l, x2:W - PAD.r, y1:Y(v), y2:Y(v)}, grid);
-    el('text', {class:'tick', x:PAD.l - 10, y:Y(v) + 4, 'text-anchor':'end'}, svg).textContent = (+v.toFixed(2));
+  if(S.view !== 'defence'){
+    for(let v = dy.lo; v <= dy.hi + 1e-9; v += dy.s){
+      el('line', {x1:PAD.l, x2:W - PAD.r, y1:Y(v), y2:Y(v)}, grid);
+      el('text', {class:'tick', x:PAD.l - 10, y:Y(v) + 4, 'text-anchor':'end'}, svg).textContent = (+v.toFixed(2));
+    }
+    el('text', {class:'axis-title', x:0, y:0, 'text-anchor':'middle',
+      transform:`translate(20,${(PAD.t + H - PAD.b) / 2}) rotate(-90)`}, svg)
+      .textContent = 'Damage → attacks to kill a typical character';
   }
-  el('text', {class:'axis-title', x:(PAD.l + W - PAD.r) / 2, y:H - 12, 'text-anchor':'middle'}, svg)
-    .textContent = 'Toughness → attacks to kill one of them';
-  const yt = el('text', {class:'axis-title', x:0, y:0, 'text-anchor':'middle',
-    transform:`translate(20,${(PAD.t + H - PAD.b) / 2}) rotate(-90)`}, svg);
-  yt.textContent = 'Damage → attacks to kill a typical character';
 
   // the middle of the field, so "better than most" is readable without doing arithmetic
   const mid = a => { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
-  const mx = mid(pts.map(p => p.t.tough)), my = mid(pts.map(p => p.t.d));
-  el('line', {class:'median', x1:X(mx), x2:X(mx), y1:PAD.t, y2:H - PAD.b}, svg);
-  el('line', {class:'median', x1:PAD.l, x2:W - PAD.r, y1:Y(my), y2:Y(my)}, svg);
-  el('text', {class:'median-label', x:X(mx) + 6, y:PAD.t + 13}, svg).textContent = 'Middle faction';
-  el('text', {class:'quad', x:W - PAD.r - 8, y:PAD.t + 20, 'text-anchor':'end'}, svg).textContent = 'Hits hard, hard to kill';
-  el('text', {class:'quad', x:PAD.l + 8, y:H - PAD.b - 10}, svg).textContent = 'Neither';
+  if(S.view !== 'attack'){
+    const mx = mid(pts.map(p => p.t.tough));
+    el('line', {class:'median', x1:X(mx), x2:X(mx), y1:PAD.t, y2:H - PAD.b}, svg);
+    el('text', {class:'median-label', x:X(mx) + 6, y:PAD.t + 13}, svg).textContent = 'Middle faction';
+  }
+  if(S.view !== 'defence'){
+    const my = mid(pts.map(p => p.t.d));
+    el('line', {class:'median', x1:PAD.l, x2:W - PAD.r, y1:Y(my), y2:Y(my)}, svg);
+    if(S.view === 'attack')
+      el('text', {class:'median-label', x:W - PAD.r - 4, y:Y(my) - 7, 'text-anchor':'end'}, svg)
+        .textContent = 'Middle faction';
+  }
+  if(S.view === 'map'){
+    el('text', {class:'quad', x:W - PAD.r - 8, y:PAD.t + 20, 'text-anchor':'end'}, svg).textContent = 'Hits hard, hard to kill';
+    el('text', {class:'quad', x:PAD.l + 8, y:H - PAD.b - 10}, svg).textContent = 'Neither';
+  }
 
   const q = S.q.trim().toLowerCase();
-  const placed = pts.map(p => [X(p.t.tough) - 21, Y(p.t.d) - 21, X(p.t.tough) + 21, Y(p.t.d) + 21]);
-  for(const {n, t} of pts){
-    const f = F[n], col = ALLY[f.alliance] || '#a3aab8';
+  const placed = pts.map(p => [px(p) - 21, py(p) - 21, px(p) + 21, py(p) + 21]);
+  for(const p of pts){
+    const {n, t} = p, f = F[n], col = ALLY[f.alliance] || '#a3aab8';
     const hit = q && !(n.toLowerCase().includes(q) || f.roster.some(m => m.toLowerCase().includes(q)));
     const g = el('g', {class:'fac' + (n === S.sel ? ' sel' : '') + (hit ? ' dim' : ''),
-                       transform:`translate(${X(t.tough)},${Y(t.d)})`}, svg);
-    const others = teams(n).filter(o => o !== t);
-    if(S.alts && others.length){
-      for(const o of others){
-        const ox = X(o.tough) - X(t.tough), oy = Y(o.d) - Y(t.d);
-        el('path', {class:'reach', d:`M0,0L${ox},${oy}`}, g);
-        el('circle', {class:'alt', cx:ox, cy:oy, r:3.4, fill:col}, g);
+                       transform:`translate(${px(p)},${py(p)})`}, svg);
+    // The sixth character, as a bar along whichever axis is being ranked: it runs from this faction's
+    // best five to its worst, so its length is exactly what benching the wrong person costs. Twelve
+    // factions have five characters and no bar at all, which is the answer for them.
+    const ts = teams(n);
+    if(ts.length > 1 && !hit){
+      const worst = S.pick === 'tough' ? Math.min(...ts.map(v => v.tough)) : Math.max(...ts.map(v => v.d));
+      const to = S.pick === 'tough'
+        ? [(S.view === 'attack' ? 0 : X(worst) - px(p)), 0]
+        : [0, (S.view === 'defence' ? 0 : Y(worst) - py(p))];
+      if(Math.abs(to[0]) > 2 || Math.abs(to[1]) > 2){
+        const u = [Math.sign(to[0]) * 20, Math.sign(to[1]) * 20];
+        el('path', {class:'reach', d:`M${u[0]},${u[1]}L${to[0]},${to[1]}`}, g);
+        el('path', {class:'reach cap', d:to[0] ? `M${to[0]},-6L${to[0]},6` : `M-6,${to[1]}L6,${to[1]}`}, g);
       }
     }
     el('circle', {class:'ring', r:19, stroke:col}, g);
@@ -371,17 +420,16 @@ function draw(){
     g.addEventListener('mouseleave', () => { tip.style.opacity = 0; });
     g.addEventListener('click', () => { S.sel = n; render(); });
   }
-  // Names last, so they sit over the badges - and only where one fits. The middle of this chart is
-  // crowded enough that laying every name down would bury the marks the names are for.
-  if(S.names) label(pts, el('g', {}, svg), placed, X, Y);
+  // Names last, so they sit over the badges - and only where one fits.
+  if(S.names) label(pts, el('g', {}, svg), placed, px, py);
 }
 
 /* the pinned faction first, then anyone whose name finds a clear space: below the badge, above it, or
    out to either side. A name that cannot go anywhere without covering something is left to the tooltip. */
-function label(pts, box, taken, X, Y){
+function label(pts, box, taken, px, py){
   const rank = p => p.n === S.sel ? 0 : 1;
   for(const p of [...pts].sort((a, b) => rank(a) - rank(b))){
-    const sel = p.n === S.sel, x = X(p.t.tough), y = Y(p.t.d);
+    const sel = p.n === S.sel, x = px(p), y = py(p);
     const w = p.n.length * (sel ? 7.6 : 6.4) + 6, h = sel ? 16 : 14;
     const cand = [[x, y + 34, 'middle', [x - w / 2, y + 22, x + w / 2, y + 22 + h]],
                   [x, y - 24, 'middle', [x - w / 2, y - 24 - h + 4, x + w / 2, y - 20]],
@@ -444,8 +492,9 @@ function detail(){
     <div class="notes">
       ${f.signature.length ? `<p><b>Signature trait</b> ${f.signature.map(pretty).join(', ')} &mdash; carried
         everywhere they fight, so it is no reward for going pure.</p>` : '<p><b>No signature trait.</b></p>'}
-      ${f.mow ? `<p><b>${f.mow.name}</b>${f.mow.buff ? ` &mdash; ${f.mow.buff}${f.mow.note ? ', ' + f.mow.note : ''}`
-        : ' &mdash; a defensive machine, and its Mythic ability is not read yet'}.</p>` : '<p><b>No Machine of War.</b></p>'}
+      ${f.mow ? `<p><b>${f.mow.name}</b> &mdash; ${f.mow.buff
+        ? f.mow.buff + (f.mow.note ? ', ' + f.mow.note : '')
+        : (f.mow.defence || 'its Mythic ability is not read yet')}.</p>` : '<p><b>No Machine of War.</b></p>'}
       ${lacks.length ? `<p><b>Worth knowing</b> &mdash; ${lacks.join('; ')}.</p>` : ''}
       ${f.teams.length > 1 ? `<p><b>The sixth character</b> costs them ${((worst(n) / t.d - 1) * 100).toFixed(0)}% of their damage
         at worst. Left out here: ${t.benched}.</p>` : '<p>Five characters, so there is no choice to make.</p>'}
@@ -512,15 +561,17 @@ function setup(){
   document.getElementById('ver').textContent = DATA.version;
 }
 function render(){
-  for(const [id, key] of [['segMow','mow'], ['segPick','pick']])
+  // a one-axis view has already chosen which five it is ranking, so the pick follows it
+  if(S.view === 'attack') S.pick = 'dmg';
+  if(S.view === 'defence') S.pick = 'tough';
+  for(const [id, key] of [['segView','view'], ['segMow','mow'], ['segPick','pick']])
     for(const b of document.querySelectorAll('#' + id + ' button'))
       b.setAttribute('aria-pressed', String(b.dataset.v == S[key]));
   if(!F[S.sel] || !F[S.sel].teams.length) S.sel = playable[0];
   legend(); draw(); detail(); table();
 }
-seg('segMow', 'mow'); seg('segPick', 'pick');
+seg('segView', 'view'); seg('segMow', 'mow'); seg('segPick', 'pick');
 document.getElementById('names').addEventListener('change', e => { S.names = e.target.checked; draw(); });
-document.getElementById('alts').addEventListener('change', e => { S.alts = e.target.checked; draw(); });
 document.getElementById('q').addEventListener('input', e => { S.q = e.target.value; draw(); });
 for(const b of document.querySelectorAll('#tbl th button')) b.addEventListener('click', () => {
   const k = b.dataset.k;
