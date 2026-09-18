@@ -152,6 +152,62 @@ def team_summons(member, five, lv, tier_key):
     return out
 
 
+# ---------------------------------------------------------------- the Machine of War slot
+# Arena and Tournament Arena field five characters plus a Machine of War, and eleven of the 21 factions
+# have one. What it brings is read from guild_raid.py so there is one definition: its Mythic ability, and
+# the attack it fires every round.
+#
+# Two honest limits, both stated on the page. **Six of the eleven machines are defensive** - the Galatian,
+# the Exorcist, the Forgefiend, the Tson'ji and the Storm Speeder shield or heal rather than hit, and
+# nothing reads those Mythic abilities yet - so a machine never moves the Toughness axis and those
+# factions' machine column is a floor, not a figure. And the machine is a sixth attacker, not a sixth
+# body: it is never counted as something the enemy has to kill.
+def mow_of(g, faction):
+    return next((m for m in gr.machines(g)
+                 if gr.FACTION_ID.get(m['factionId'], m['factionId']) == faction), None)
+
+
+def mow_effect(buff, member):
+    """the Mythic ability as a +% on this member's attacks, or None. 'taken' puts the percentage on the
+    enemy and 'dmg' puts it on your own character; against one target both come to the same multiplier,
+    so both are read the same way, on the attacks the ability names."""
+    if not buff or (buff['who'] != 'all' and buff['who'] not in member['traits']):
+        return None
+    return dict(kind='pct', scope=buff['only'] or 'all', vs=None, value=buff['pct'])
+
+
+def mow_attacker(mow, alliance):
+    """the machine as an attacker, for the Defence buffs that only work against some attackers. It has no
+    character traits and no weapon of its own, so a "+Armour against Psykers" row does not answer it."""
+    return dict(name=mow['name'], traits=set(), alliance=alliance, weapons=[])
+
+
+def mow_round(g, mow, d, ds, lv):
+    """what the machine puts into this defender in one round. The round or two a machine waits for its
+    cooldown is not counted: over a kill that takes several turns it is worth less than it costs to say."""
+    out = 0.0
+    for shot in gr.MOW_EVERY_ROUND.get(mow['name'], []):
+        part = _mow_part(g, shot, lv)
+        if part:
+            out = max(out, bm.part_vs_defence(part, d, ds, False)[0])        # the best one, every round
+    for shot in gr.MOW_SHOTS.get(mow['name'], []):
+        part = _mow_part(g, shot, lv)
+        if part:
+            out += bm.part_vs_defence(part, d, ds, False)[0] * shot[1]       # a rate, not a round number
+    return out
+
+
+def _mow_part(g, shot, lv):
+    ab_id, _, dt, hits = (list(shot) + [None, None])[:4]
+    ab = gr._ability(g, ab_id)
+    if not ab or 'minDmg' not in (ab.get('variables') or {}):
+        return None
+    part = gr._part(ab, min(lv, gr.MOW_LEVELS), '', dt, rarity=True)
+    if hits:
+        part['hits'] = hits
+    return part
+
+
 # ---------------------------------------------------------------- a member, ready to fight
 def admits(filt, a):
     """does an attacker-conditional Defence buff work against this attacker?"""
@@ -191,11 +247,14 @@ class Fighter:
         return got
 
 
-def make(member, five, toks, drows, sp, rnd, rest, lv, tier_key):
-    """a Fighter: the member with its five's buffs, its own faction clauses, and its team summons"""
+def make(member, five, toks, drows, sp, rnd, rest, lv, tier_key, buff=None):
+    """a Fighter: the member with its five's buffs, its own faction clauses, its team summons, and its
+    Machine of War's Mythic ability if the faction has one and this call is counting it"""
     u = dict(member)
     u['summons'] = team_summons(member, five, lv, tier_key)
     extra = own_clauses(member, five, lv)
+    if (e := mow_effect(buff, member)):
+        extra.append(e)
     if extra:
         eff, desc = (list(u['ps'][0]), list(u['ps'][1])) if u.get('ps') else ([], [])
         u['ps'] = (eff + extra, desc)
@@ -211,6 +270,23 @@ def kills(atk, dfn):
         d = dict(d, arm=max(d['arm'] - atk.armour, 0.0))
     rnd, rest, regen = dfn.against(atk.u)
     return min(bm.attacks_to_kill(atk.u, d, TRIG, atk.spec, rnd, rest, regen)[0], CAP)
+
+
+def health(d, ds):
+    """the health a defender actually has to lose, the way attacks_to_kill counts it"""
+    hp = d['hp'] * (ds['hpmult'] if ds else 1) + (ds['heal'] if ds else 0)
+    return hp * 2 if (TRIG and 'Ambush' in d['traits']) else hp
+
+
+def mow_rate(g, mow, pool, alliance, lv):
+    """1 / (the turns the machine alone needs to kill a typical character)"""
+    a = mow_attacker(mow, alliance)
+    ks = []
+    for dfn in pool:
+        rnd, rest, _ = dfn.against(a)
+        per = mow_round(g, mow, dfn.u, rest, lv)
+        ks.append(health(dfn.u, rnd) / per if per > 0 else CAP)
+    return 1 / min(st.median(ks), CAP)
 
 
 def scores(f, pool):
@@ -247,10 +323,10 @@ def build(tier=2, verbose=True):
     hit_order = {n: v[0] for n, v in duel.items()}          # lowest attacks-to-kill first: buff the hitters
     frail_order = {n: v[1] for n, v in duel.items()}        # lowest toughness first: shield the fragile
 
-    def five_of(members):
+    def five_of(members, buff=None):
         toks = attack_tokens(members, arows, UA, lv, tier_key, hit_order)
         drows = defence_rows(members, drows_all, UA, SU, lv, tier_key, frail_order)
-        return [make(m, members, toks[m['name']], drows[m['name']], sp, rnd, rest, lv, tier_key)
+        return [make(m, members, toks[m['name']], drows[m['name']], sp, rnd, rest, lv, tier_key, buff)
                 for m in members]
 
     # The yardstick: every character standing among its own faction, measured against the others doing
@@ -267,21 +343,28 @@ def build(tier=2, verbose=True):
 
     out = {}
     for faction, members in sorted(roster.items()):
+        mow = mow_of(g, faction)
+        buff = gr.mow_buff(g, mow, lv, tier_key, TRIG) if mow else None
+        rate = mow_rate(g, mow, pool, members[0]['alliance'], lv) if mow else 0.0
         teams = []
         for combo in (itertools.combinations(members, TEAM) if len(members) >= TEAM else ()):
             combo = list(combo)
-            fs = five_of(combo)
-            per = [scores(f, pool) for f in fs]
+            per = [scores(f, pool) for f in five_of(combo)]
+            per_mow = [scores(f, pool) for f in five_of(combo, buff)] if buff else per
             alone = [solo[m['name']] for m in combo]
             teams.append(dict(
                 names=[m['name'] for m in combo],
                 benched=next((m['name'] for m in members if m not in combo), None),
                 dmg=TEAM / sum(1 / p[0] for p in per),
                 tough=st.mean(p[1] for p in per),
+                dmg_mow=TEAM / (sum(1 / p[0] for p in per_mow) + rate) if mow else None,
                 dmg_alone=TEAM / sum(1 / p[0] for p in alone),
                 tough_alone=st.mean(p[1] for p in alone),
                 per={m['name']: dict(d=round(p[0], 3), t=round(p[1], 3)) for m, p in zip(combo, per)}))
-        out[faction] = dict(n=len(members), roster=[m['name'] for m in members], teams=teams)
+        out[faction] = dict(n=len(members), roster=[m['name'] for m in members], teams=teams,
+                            mow=dict(name=mow['name'], buff=(buff or {}).get('name'),
+                                     note=(buff or {}).get('note', ''),
+                                     solo=round(1 / rate, 3) if rate else None) if mow else None)
         if verbose and teams:
             best = min(teams, key=lambda t: t['dmg'])
             print(f'  {faction:22} {len(teams)} five(s): best damage {best["dmg"]:.2f}')
@@ -295,12 +378,16 @@ def report(data):
             continue
         bd = min(d['teams'], key=lambda t: t['dmg'])
         bt = max(d['teams'], key=lambda t: t['tough'])
+        bw = min(d['teams'], key=lambda t: t['dmg_mow'] or 9e9) if d['mow'] else None
         rows.append((faction, d['n'], bd['dmg'], bd['dmg_alone'] / bd['dmg'] - 1, bt['tough'],
-                     bt['tough'] / bt['tough_alone'] - 1, bd['benched'], bt['benched']))
-    print(f"\n{'faction':22} {'n':>2} {'damage':>7} {'synergy':>8} {'tough':>7} {'synergy':>8}  benched (dmg / tough)")
-    for f, n, dmg, ds, tg, ts, bd, bt in sorted(rows, key=lambda r: r[2]):
+                     bt['tough'] / bt['tough_alone'] - 1, bw['dmg_mow'] if bw else None,
+                     (d['mow'] or {}).get('name'), bd['benched'], bt['benched']))
+    print(f"\n{'faction':22} {'n':>2} {'damage':>7} {'synergy':>8} {'tough':>7} {'synergy':>8} "
+          f"{'+machine':>9}  benched (dmg / tough)")
+    for f, n, dmg, ds, tg, ts, dm, mw, bd, bt in sorted(rows, key=lambda r: r[2]):
         bench = f'{bd} / {bt}' if bd else ''
-        print(f'{f:22} {n:>2} {dmg:>7.2f} {ds:>+7.1%} {tg:>7.2f} {ts:>+7.1%}  {bench}')
+        mach = f'{dm:>9.2f}' if dm else f'{mw or "-":>9}'
+        print(f'{f:22} {n:>2} {dmg:>7.2f} {ds:>+7.1%} {tg:>7.2f} {ts:>+7.1%} {mach}  {bench}')
 
 
 def main():

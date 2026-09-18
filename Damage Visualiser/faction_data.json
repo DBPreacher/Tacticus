@@ -1,0 +1,2803 @@
+{
+ "version": "1.42.110.1",
+ "setting": {
+  "tier": "mythic",
+  "level": 60,
+  "trig": true,
+  "act": true,
+  "gear": true,
+  "adjacent": 3,
+  "cap": 50
+ },
+ "factions": {
+  "Adepta Sororitas": {
+   "n": 5,
+   "roster": [
+    "Celestine",
+    "Isabella",
+    "Morvenn Vahl",
+    "Roswitha",
+    "Vindicta"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Celestine",
+      "Isabella",
+      "Morvenn Vahl",
+      "Roswitha",
+      "Vindicta"
+     ],
+     "benched": null,
+     "dmg": 3.973463551497889,
+     "tough": 2.3160871554274434,
+     "dmg_mow": 3.2988903400003027,
+     "dmg_alone": 3.975704123265237,
+     "tough_alone": 1.5752211812078099,
+     "per": {
+      "Celestine": {
+       "d": 3.299,
+       "t": 3.871
+      },
+      "Isabella": {
+       "d": 9.078,
+       "t": 1.614
+      },
+      "Morvenn Vahl": {
+       "d": 3.44,
+       "t": 1.617
+      },
+      "Roswitha": {
+       "d": 4.577,
+       "t": 2.272
+      },
+      "Vindicta": {
+       "d": 2.977,
+       "t": 2.207
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Exorcist",
+    "buff": null,
+    "note": "",
+    "solo": 3.886
+   }
+  },
+  "Adeptus Astartes": {
+   "n": 3,
+   "roster": [
+    "Cyrus",
+    "Lysander",
+    "Nubari"
+   ],
+   "teams": [],
+   "mow": null
+  },
+  "Adeptus Custodes": {
+   "n": 5,
+   "roster": [
+    "Aesoth",
+    "Atlacoya",
+    "Kariyan",
+    "Trajann",
+    "Tyrith"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Aesoth",
+      "Atlacoya",
+      "Kariyan",
+      "Trajann",
+      "Tyrith"
+     ],
+     "benched": null,
+     "dmg": 1.1726910130100723,
+     "tough": 3.4497865211140493,
+     "dmg_mow": null,
+     "dmg_alone": 2.9182186913084873,
+     "tough_alone": 3.182328655593237,
+     "per": {
+      "Aesoth": {
+       "d": 1.571,
+       "t": 6.181
+      },
+      "Atlacoya": {
+       "d": 1.232,
+       "t": 2.106
+      },
+      "Kariyan": {
+       "d": 0.936,
+       "t": 2.712
+      },
+      "Trajann": {
+       "d": 3.547,
+       "t": 4.234
+      },
+      "Tyrith": {
+       "d": 0.683,
+       "t": 2.015
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Adeptus Mechanicus": {
+   "n": 5,
+   "roster": [
+    "Actus",
+    "Exitor-Rho",
+    "Sy-Gex",
+    "Tan Gi'da",
+    "Vitruvius"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Actus",
+      "Exitor-Rho",
+      "Sy-Gex",
+      "Tan Gi'da",
+      "Vitruvius"
+     ],
+     "benched": null,
+     "dmg": 1.5078543597670904,
+     "tough": 2.4759939635435657,
+     "dmg_mow": null,
+     "dmg_alone": 3.525613055593701,
+     "tough_alone": 1.5426771759581366,
+     "per": {
+      "Actus": {
+       "d": 3.253,
+       "t": 2.563
+      },
+      "Exitor-Rho": {
+       "d": 2.473,
+       "t": 2.684
+      },
+      "Sy-Gex": {
+       "d": 0.69,
+       "t": 2.056
+      },
+      "Tan Gi'da": {
+       "d": 1.683,
+       "t": 2.198
+      },
+      "Vitruvius": {
+       "d": 1.786,
+       "t": 2.879
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Aeldari": {
+   "n": 6,
+   "roster": [
+    "Aethana",
+    "Calandis",
+    "Eldryon",
+    "Jain Zar",
+    "Lhykhis",
+    "Maugan Ra"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Aethana",
+      "Calandis",
+      "Eldryon",
+      "Jain Zar",
+      "Lhykhis"
+     ],
+     "benched": "Maugan Ra",
+     "dmg": 1.5095774134377888,
+     "tough": 1.2319610150988882,
+     "dmg_mow": null,
+     "dmg_alone": 3.2258715596504355,
+     "tough_alone": 1.2319610150988882,
+     "per": {
+      "Aethana": {
+       "d": 1.803,
+       "t": 1.673
+      },
+      "Calandis": {
+       "d": 1.455,
+       "t": 0.951
+      },
+      "Eldryon": {
+       "d": 1.803,
+       "t": 0.96
+      },
+      "Jain Zar": {
+       "d": 1.264,
+       "t": 1.379
+      },
+      "Lhykhis": {
+       "d": 1.38,
+       "t": 1.197
+      }
+     }
+    },
+    {
+     "names": [
+      "Aethana",
+      "Calandis",
+      "Eldryon",
+      "Jain Zar",
+      "Maugan Ra"
+     ],
+     "benched": "Lhykhis",
+     "dmg": 1.653490395435633,
+     "tough": 1.2385672388463946,
+     "dmg_mow": null,
+     "dmg_alone": 3.1771232586440465,
+     "tough_alone": 1.2385672388463946,
+     "per": {
+      "Aethana": {
+       "d": 2.458,
+       "t": 1.673
+      },
+      "Calandis": {
+       "d": 1.786,
+       "t": 0.951
+      },
+      "Eldryon": {
+       "d": 2.5,
+       "t": 0.96
+      },
+      "Jain Zar": {
+       "d": 1.679,
+       "t": 1.379
+      },
+      "Maugan Ra": {
+       "d": 0.942,
+       "t": 1.23
+      }
+     }
+    },
+    {
+     "names": [
+      "Aethana",
+      "Calandis",
+      "Eldryon",
+      "Lhykhis",
+      "Maugan Ra"
+     ],
+     "benched": "Jain Zar",
+     "dmg": 1.0759066625419569,
+     "tough": 1.202173093227971,
+     "dmg_mow": null,
+     "dmg_alone": 3.0195553641562833,
+     "tough_alone": 1.202173093227971,
+     "per": {
+      "Aethana": {
+       "d": 1.803,
+       "t": 1.673
+      },
+      "Calandis": {
+       "d": 1.455,
+       "t": 0.951
+      },
+      "Eldryon": {
+       "d": 1.803,
+       "t": 0.96
+      },
+      "Lhykhis": {
+       "d": 1.38,
+       "t": 1.197
+      },
+      "Maugan Ra": {
+       "d": 0.47,
+       "t": 1.23
+      }
+     }
+    },
+    {
+     "names": [
+      "Aethana",
+      "Calandis",
+      "Jain Zar",
+      "Lhykhis",
+      "Maugan Ra"
+     ],
+     "benched": "Eldryon",
+     "dmg": 1.3230473406402194,
+     "tough": 1.2859574896754444,
+     "dmg_mow": null,
+     "dmg_alone": 2.9403538246640024,
+     "tough_alone": 1.2859574896754444,
+     "per": {
+      "Aethana": {
+       "d": 2.547,
+       "t": 1.673
+      },
+      "Calandis": {
+       "d": 1.717,
+       "t": 0.951
+      },
+      "Jain Zar": {
+       "d": 1.575,
+       "t": 1.379
+      },
+      "Lhykhis": {
+       "d": 1.872,
+       "t": 1.197
+      },
+      "Maugan Ra": {
+       "d": 0.612,
+       "t": 1.23
+      }
+     }
+    },
+    {
+     "names": [
+      "Aethana",
+      "Eldryon",
+      "Jain Zar",
+      "Lhykhis",
+      "Maugan Ra"
+     ],
+     "benched": "Calandis",
+     "dmg": 1.0523861110148887,
+     "tough": 1.287720244654514,
+     "dmg_mow": null,
+     "dmg_alone": 3.083257272195837,
+     "tough_alone": 1.287720244654514,
+     "per": {
+      "Aethana": {
+       "d": 1.803,
+       "t": 1.673
+      },
+      "Eldryon": {
+       "d": 1.803,
+       "t": 0.96
+      },
+      "Jain Zar": {
+       "d": 1.264,
+       "t": 1.379
+      },
+      "Lhykhis": {
+       "d": 1.38,
+       "t": 1.197
+      },
+      "Maugan Ra": {
+       "d": 0.47,
+       "t": 1.23
+      }
+     }
+    },
+    {
+     "names": [
+      "Calandis",
+      "Eldryon",
+      "Jain Zar",
+      "Lhykhis",
+      "Maugan Ra"
+     ],
+     "benched": "Aethana",
+     "dmg": 1.4033232847443458,
+     "tough": 1.1433820895491946,
+     "dmg_mow": null,
+     "dmg_alone": 2.9006727549420734,
+     "tough_alone": 1.1433820895491946,
+     "per": {
+      "Calandis": {
+       "d": 1.703,
+       "t": 0.951
+      },
+      "Eldryon": {
+       "d": 2.445,
+       "t": 0.96
+      },
+      "Jain Zar": {
+       "d": 1.605,
+       "t": 1.379
+      },
+      "Lhykhis": {
+       "d": 1.736,
+       "t": 1.197
+      },
+      "Maugan Ra": {
+       "d": 0.731,
+       "t": 1.23
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Astra Militarum": {
+   "n": 6,
+   "roster": [
+    "Castellan Creed",
+    "Commissar Yarrick",
+    "Kut Skoden",
+    "Marshal Dreir",
+    "Sibyll Devine",
+    "Thaddeus Noble"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Castellan Creed",
+      "Commissar Yarrick",
+      "Kut Skoden",
+      "Marshal Dreir",
+      "Sibyll Devine"
+     ],
+     "benched": "Thaddeus Noble",
+     "dmg": 3.8419927855226486,
+     "tough": 1.8041461067383904,
+     "dmg_mow": 2.633163469735382,
+     "dmg_alone": 3.8419927855226486,
+     "tough_alone": 1.5965777798754246,
+     "per": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Commissar Yarrick": {
+       "d": 4.164,
+       "t": 1.257
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 2.133
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 2.199
+      },
+      "Sibyll Devine": {
+       "d": 3.359,
+       "t": 0.899
+      }
+     }
+    },
+    {
+     "names": [
+      "Castellan Creed",
+      "Commissar Yarrick",
+      "Kut Skoden",
+      "Marshal Dreir",
+      "Thaddeus Noble"
+     ],
+     "benched": "Sibyll Devine",
+     "dmg": 3.7762697647596593,
+     "tough": 1.6092521804872915,
+     "dmg_mow": 2.5946771790167222,
+     "dmg_alone": 3.8040549110094894,
+     "tough_alone": 1.6008552961997304,
+     "per": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Commissar Yarrick": {
+       "d": 4.003,
+       "t": 1.015
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 1.832
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 1.756
+      },
+      "Thaddeus Noble": {
+       "d": 3.219,
+       "t": 0.911
+      }
+     }
+    },
+    {
+     "names": [
+      "Castellan Creed",
+      "Commissar Yarrick",
+      "Kut Skoden",
+      "Sibyll Devine",
+      "Thaddeus Noble"
+     ],
+     "benched": "Marshal Dreir",
+     "dmg": 3.5259614893551676,
+     "tough": 1.590667835703512,
+     "dmg_mow": 2.394011316648199,
+     "dmg_alone": 3.6538015358325793,
+     "tough_alone": 1.4274214789013233,
+     "per": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Commissar Yarrick": {
+       "d": 4.003,
+       "t": 1.257
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 2.133
+      },
+      "Sibyll Devine": {
+       "d": 2.962,
+       "t": 0.899
+      },
+      "Thaddeus Noble": {
+       "d": 3.219,
+       "t": 1.132
+      }
+     }
+    },
+    {
+     "names": [
+      "Castellan Creed",
+      "Commissar Yarrick",
+      "Marshal Dreir",
+      "Sibyll Devine",
+      "Thaddeus Noble"
+     ],
+     "benched": "Kut Skoden",
+     "dmg": 3.7010656934619752,
+     "tough": 1.5983788243829704,
+     "dmg_mow": 2.4734669182009688,
+     "dmg_alone": 3.8421725307292123,
+     "tough_alone": 1.4112319868704992,
+     "per": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Commissar Yarrick": {
+       "d": 4.003,
+       "t": 1.257
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 2.199
+      },
+      "Sibyll Devine": {
+       "d": 2.962,
+       "t": 0.884
+      },
+      "Thaddeus Noble": {
+       "d": 3.219,
+       "t": 1.12
+      }
+     }
+    },
+    {
+     "names": [
+      "Castellan Creed",
+      "Kut Skoden",
+      "Marshal Dreir",
+      "Sibyll Devine",
+      "Thaddeus Noble"
+     ],
+     "benched": "Commissar Yarrick",
+     "dmg": 3.5414381124415355,
+     "tough": 1.7791661237875125,
+     "dmg_mow": 2.410526844739753,
+     "dmg_alone": 3.6445494537871945,
+     "tough_alone": 1.5806844875179797,
+     "per": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 2.133
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 2.199
+      },
+      "Sibyll Devine": {
+       "d": 2.962,
+       "t": 0.899
+      },
+      "Thaddeus Noble": {
+       "d": 3.219,
+       "t": 1.132
+      }
+     }
+    },
+    {
+     "names": [
+      "Commissar Yarrick",
+      "Kut Skoden",
+      "Marshal Dreir",
+      "Sibyll Devine",
+      "Thaddeus Noble"
+     ],
+     "benched": "Castellan Creed",
+     "dmg": 3.442258863929862,
+     "tough": 1.434408224261025,
+     "dmg_mow": 2.3551284050208134,
+     "dmg_alone": 3.563996596578314,
+     "tough_alone": 1.2711618674588363,
+     "per": {
+      "Commissar Yarrick": {
+       "d": 4.003,
+       "t": 1.257
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 2.133
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 1.751
+      },
+      "Sibyll Devine": {
+       "d": 2.962,
+       "t": 0.899
+      },
+      "Thaddeus Noble": {
+       "d": 3.219,
+       "t": 1.132
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Malleus Rocket Launcher",
+    "buff": "On my Position!",
+    "note": "ranged attacks only",
+    "solo": 1.863
+   }
+  },
+  "Black Legion": {
+   "n": 5,
+   "roster": [
+    "Abaddon The Despoiler",
+    "Angrax",
+    "Archimatos",
+    "Haarken Worldclaimer",
+    "Volk"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Abaddon The Despoiler",
+      "Angrax",
+      "Archimatos",
+      "Haarken Worldclaimer",
+      "Volk"
+     ],
+     "benched": null,
+     "dmg": 1.1527977822181248,
+     "tough": 1.7683013209401954,
+     "dmg_mow": 1.067613599006976,
+     "dmg_alone": 2.4071041149322334,
+     "tough_alone": 1.73741807844713,
+     "per": {
+      "Abaddon The Despoiler": {
+       "d": 0.617,
+       "t": 2.221
+      },
+      "Angrax": {
+       "d": 2.258,
+       "t": 2.463
+      },
+      "Archimatos": {
+       "d": 1.492,
+       "t": 1.007
+      },
+      "Haarken Worldclaimer": {
+       "d": 1.522,
+       "t": 1.745
+      },
+      "Volk": {
+       "d": 1.057,
+       "t": 1.405
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Forgefiend",
+    "buff": null,
+    "note": "",
+    "solo": 2.89
+   }
+  },
+  "Black Templars": {
+   "n": 5,
+   "roster": [
+    "Ancient Thoread",
+    "Brother Burchard",
+    "Brother Jaeger",
+    "High Marshal Helbrecht",
+    "Sword Brother Godswyl"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Ancient Thoread",
+      "Brother Burchard",
+      "Brother Jaeger",
+      "High Marshal Helbrecht",
+      "Sword Brother Godswyl"
+     ],
+     "benched": null,
+     "dmg": 1.2772513442340103,
+     "tough": 3.2843049867337286,
+     "dmg_mow": null,
+     "dmg_alone": 3.2873644934920994,
+     "tough_alone": 2.4390376818812105,
+     "per": {
+      "Ancient Thoread": {
+       "d": 2.265,
+       "t": 2.863
+      },
+      "Brother Burchard": {
+       "d": 0.992,
+       "t": 4.068
+      },
+      "Brother Jaeger": {
+       "d": 1.037,
+       "t": 3.612
+      },
+      "High Marshal Helbrecht": {
+       "d": 1.839,
+       "t": 2.604
+      },
+      "Sword Brother Godswyl": {
+       "d": 1.045,
+       "t": 3.274
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Blood Angels": {
+   "n": 6,
+   "roster": [
+    "Cezare",
+    "Dante",
+    "Lucien",
+    "Mataneo",
+    "Mephiston",
+    "Nicodemus"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Cezare",
+      "Dante",
+      "Lucien",
+      "Mataneo",
+      "Mephiston"
+     ],
+     "benched": "Nicodemus",
+     "dmg": 1.2090500266514597,
+     "tough": 1.8816732818948967,
+     "dmg_mow": null,
+     "dmg_alone": 2.1378321490597223,
+     "tough_alone": 1.6432998331311977,
+     "per": {
+      "Cezare": {
+       "d": 1.652,
+       "t": 2.93
+      },
+      "Dante": {
+       "d": 3.13,
+       "t": 2.07
+      },
+      "Lucien": {
+       "d": 0.639,
+       "t": 0.762
+      },
+      "Mataneo": {
+       "d": 1.83,
+       "t": 1.81
+      },
+      "Mephiston": {
+       "d": 0.909,
+       "t": 1.836
+      }
+     }
+    },
+    {
+     "names": [
+      "Cezare",
+      "Dante",
+      "Lucien",
+      "Mataneo",
+      "Nicodemus"
+     ],
+     "benched": "Mephiston",
+     "dmg": 1.3358787955123104,
+     "tough": 2.288336958186136,
+     "dmg_mow": null,
+     "dmg_alone": 2.7566969355662603,
+     "tough_alone": 1.6208397619089967,
+     "per": {
+      "Cezare": {
+       "d": 1.05,
+       "t": 3.448
+      },
+      "Dante": {
+       "d": 1.84,
+       "t": 2.07
+      },
+      "Lucien": {
+       "d": 0.736,
+       "t": 1.786
+      },
+      "Mataneo": {
+       "d": 1.83,
+       "t": 2.313
+      },
+      "Nicodemus": {
+       "d": 2.92,
+       "t": 1.825
+      }
+     }
+    },
+    {
+     "names": [
+      "Cezare",
+      "Dante",
+      "Lucien",
+      "Mephiston",
+      "Nicodemus"
+     ],
+     "benched": "Mataneo",
+     "dmg": 1.06512029810644,
+     "tough": 2.3236856692917605,
+     "dmg_mow": null,
+     "dmg_alone": 2.2472757383869695,
+     "tough_alone": 1.6505834932242156,
+     "per": {
+      "Cezare": {
+       "d": 1.05,
+       "t": 3.448
+      },
+      "Dante": {
+       "d": 3.13,
+       "t": 2.07
+      },
+      "Lucien": {
+       "d": 0.564,
+       "t": 1.786
+      },
+      "Mephiston": {
+       "d": 0.765,
+       "t": 2.49
+      },
+      "Nicodemus": {
+       "d": 2.92,
+       "t": 1.825
+      }
+     }
+    },
+    {
+     "names": [
+      "Cezare",
+      "Dante",
+      "Mataneo",
+      "Mephiston",
+      "Nicodemus"
+     ],
+     "benched": "Lucien",
+     "dmg": 1.2530757907122452,
+     "tough": 2.4291047726763324,
+     "dmg_mow": null,
+     "dmg_alone": 2.7018970336513233,
+     "tough_alone": 1.8115503523024967,
+     "per": {
+      "Cezare": {
+       "d": 0.799,
+       "t": 3.448
+      },
+      "Dante": {
+       "d": 1.84,
+       "t": 2.07
+      },
+      "Mataneo": {
+       "d": 1.83,
+       "t": 2.313
+      },
+      "Mephiston": {
+       "d": 0.765,
+       "t": 2.49
+      },
+      "Nicodemus": {
+       "d": 2.92,
+       "t": 1.825
+      }
+     }
+    },
+    {
+     "names": [
+      "Cezare",
+      "Lucien",
+      "Mataneo",
+      "Mephiston",
+      "Nicodemus"
+     ],
+     "benched": "Dante",
+     "dmg": 1.5428351833590817,
+     "tough": 1.870295313797833,
+     "dmg_mow": null,
+     "dmg_alone": 2.2953859153251077,
+     "tough_alone": 1.5323370661188895,
+     "per": {
+      "Cezare": {
+       "d": 1.594,
+       "t": 2.365
+      },
+      "Lucien": {
+       "d": 0.735,
+       "t": 1.474
+      },
+      "Mataneo": {
+       "d": 3.665,
+       "t": 1.866
+      },
+      "Mephiston": {
+       "d": 1.216,
+       "t": 2.131
+      },
+      "Nicodemus": {
+       "d": 6.29,
+       "t": 1.516
+      }
+     }
+    },
+    {
+     "names": [
+      "Dante",
+      "Lucien",
+      "Mataneo",
+      "Mephiston",
+      "Nicodemus"
+     ],
+     "benched": "Cezare",
+     "dmg": 1.1082265381528118,
+     "tough": 2.0966830305351145,
+     "dmg_mow": null,
+     "dmg_alone": 2.4007603633320973,
+     "tough_alone": 1.4734071735622791,
+     "per": {
+      "Dante": {
+       "d": 1.84,
+       "t": 2.07
+      },
+      "Lucien": {
+       "d": 0.564,
+       "t": 1.786
+      },
+      "Mataneo": {
+       "d": 1.83,
+       "t": 2.313
+      },
+      "Mephiston": {
+       "d": 0.765,
+       "t": 2.49
+      },
+      "Nicodemus": {
+       "d": 2.92,
+       "t": 1.825
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Dark Angels": {
+   "n": 6,
+   "roster": [
+    "Asmodai",
+    "Azrael",
+    "Baraqiel",
+    "Forcas",
+    "Ramus",
+    "Sarquael"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Asmodai",
+      "Azrael",
+      "Baraqiel",
+      "Forcas",
+      "Ramus"
+     ],
+     "benched": "Sarquael",
+     "dmg": 1.5595928621054815,
+     "tough": 2.0760885249515355,
+     "dmg_mow": 1.4385761716781402,
+     "dmg_alone": 2.847909256214005,
+     "tough_alone": 1.8745547020111446,
+     "per": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 1.911
+      },
+      "Azrael": {
+       "d": 2.249,
+       "t": 1.97
+      },
+      "Baraqiel": {
+       "d": 2.05,
+       "t": 3.022
+      },
+      "Forcas": {
+       "d": 0.971,
+       "t": 2.02
+      },
+      "Ramus": {
+       "d": 1.114,
+       "t": 1.457
+      }
+     }
+    },
+    {
+     "names": [
+      "Asmodai",
+      "Azrael",
+      "Baraqiel",
+      "Forcas",
+      "Sarquael"
+     ],
+     "benched": "Ramus",
+     "dmg": 1.844948270202625,
+     "tough": 2.014255603631893,
+     "dmg_mow": 1.6779666436307759,
+     "dmg_alone": 3.475223361531336,
+     "tough_alone": 1.8122790413056367,
+     "per": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 1.911
+      },
+      "Azrael": {
+       "d": 2.249,
+       "t": 1.97
+      },
+      "Baraqiel": {
+       "d": 2.05,
+       "t": 3.022
+      },
+      "Forcas": {
+       "d": 0.971,
+       "t": 2.02
+      },
+      "Sarquael": {
+       "d": 2.489,
+       "t": 1.148
+      }
+     }
+    },
+    {
+     "names": [
+      "Asmodai",
+      "Azrael",
+      "Baraqiel",
+      "Ramus",
+      "Sarquael"
+     ],
+     "benched": "Forcas",
+     "dmg": 1.939386435225481,
+     "tough": 1.901547913478354,
+     "dmg_mow": 1.755723451999267,
+     "dmg_alone": 2.691139409795549,
+     "tough_alone": 1.734920013851284,
+     "per": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 1.911
+      },
+      "Azrael": {
+       "d": 2.249,
+       "t": 1.97
+      },
+      "Baraqiel": {
+       "d": 2.05,
+       "t": 3.022
+      },
+      "Ramus": {
+       "d": 1.114,
+       "t": 1.457
+      },
+      "Sarquael": {
+       "d": 2.489,
+       "t": 1.148
+      }
+     }
+    },
+    {
+     "names": [
+      "Asmodai",
+      "Azrael",
+      "Forcas",
+      "Ramus",
+      "Sarquael"
+     ],
+     "benched": "Baraqiel",
+     "dmg": 1.602665426347026,
+     "tough": 1.701339042810915,
+     "dmg_mow": 1.4751452718781037,
+     "dmg_alone": 2.6995973654524055,
+     "tough_alone": 1.561275660716084,
+     "per": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 1.911
+      },
+      "Azrael": {
+       "d": 2.249,
+       "t": 1.97
+      },
+      "Forcas": {
+       "d": 0.971,
+       "t": 2.02
+      },
+      "Ramus": {
+       "d": 1.114,
+       "t": 1.457
+      },
+      "Sarquael": {
+       "d": 2.489,
+       "t": 1.148
+      }
+     }
+    },
+    {
+     "names": [
+      "Asmodai",
+      "Baraqiel",
+      "Forcas",
+      "Ramus",
+      "Sarquael"
+     ],
+     "benched": "Azrael",
+     "dmg": 1.580719312004153,
+     "tough": 1.7451776137594708,
+     "dmg_mow": 1.4565323338263159,
+     "dmg_alone": 2.7882342031787273,
+     "tough_alone": 1.7027707231392244,
+     "per": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 1.676
+      },
+      "Baraqiel": {
+       "d": 2.05,
+       "t": 2.665
+      },
+      "Forcas": {
+       "d": 0.971,
+       "t": 1.816
+      },
+      "Ramus": {
+       "d": 1.114,
+       "t": 1.453
+      },
+      "Sarquael": {
+       "d": 2.489,
+       "t": 1.117
+      }
+     }
+    },
+    {
+     "names": [
+      "Azrael",
+      "Baraqiel",
+      "Forcas",
+      "Ramus",
+      "Sarquael"
+     ],
+     "benched": "Asmodai",
+     "dmg": 2.125608842718661,
+     "tough": 1.875153107217307,
+     "dmg_mow": 1.9069695215136928,
+     "dmg_alone": 2.6510102074886444,
+     "tough_alone": 1.7525175061398395,
+     "per": {
+      "Azrael": {
+       "d": 3.091,
+       "t": 1.924
+      },
+      "Baraqiel": {
+       "d": 3.253,
+       "t": 2.995
+      },
+      "Forcas": {
+       "d": 1.466,
+       "t": 1.933
+      },
+      "Ramus": {
+       "d": 1.475,
+       "t": 1.422
+      },
+      "Sarquael": {
+       "d": 2.769,
+       "t": 1.101
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Storm Speeder",
+    "buff": null,
+    "note": "",
+    "solo": 3.708
+   }
+  },
+  "Death Guard": {
+   "n": 5,
+   "roster": [
+    "Corrodius",
+    "Maladus",
+    "Nauseous Rotbone",
+    "Pestillian",
+    "Typhus"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Corrodius",
+      "Maladus",
+      "Nauseous Rotbone",
+      "Pestillian",
+      "Typhus"
+     ],
+     "benched": null,
+     "dmg": 2.2465496408025696,
+     "tough": 3.6064239455818705,
+     "dmg_mow": 1.8169817409742344,
+     "dmg_alone": 3.1915112075314234,
+     "tough_alone": 2.4989812733299064,
+     "per": {
+      "Corrodius": {
+       "d": 1.966,
+       "t": 3.862
+      },
+      "Maladus": {
+       "d": 2.023,
+       "t": 2.83
+      },
+      "Nauseous Rotbone": {
+       "d": 2.067,
+       "t": 3.173
+      },
+      "Pestillian": {
+       "d": 2.68,
+       "t": 3.778
+      },
+      "Typhus": {
+       "d": 2.734,
+       "t": 4.389
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Plagueburst Crawler",
+    "buff": "Blighted Land",
+    "note": "on a contaminated hex",
+    "solo": 5.117
+   }
+  },
+  "Emperor's Children": {
+   "n": 5,
+   "roster": [
+    "Adamatar",
+    "Hascule",
+    "Laviscus",
+    "Lucius",
+    "Shiron"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Adamatar",
+      "Hascule",
+      "Laviscus",
+      "Lucius",
+      "Shiron"
+     ],
+     "benched": null,
+     "dmg": 2.2633109465969117,
+     "tough": 1.6209550738572607,
+     "dmg_mow": null,
+     "dmg_alone": 3.0859748198243193,
+     "tough_alone": 1.6209550738572607,
+     "per": {
+      "Adamatar": {
+       "d": 2.935,
+       "t": 1.588
+      },
+      "Hascule": {
+       "d": 2.631,
+       "t": 2.278
+      },
+      "Laviscus": {
+       "d": 1.679,
+       "t": 1.33
+      },
+      "Lucius": {
+       "d": 3.154,
+       "t": 1.417
+      },
+      "Shiron": {
+       "d": 1.737,
+       "t": 1.492
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Genestealer Cults": {
+   "n": 5,
+   "roster": [
+    "Hollan",
+    "Isaak",
+    "Judh",
+    "The Patermine",
+    "Xybia"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Hollan",
+      "Isaak",
+      "Judh",
+      "The Patermine",
+      "Xybia"
+     ],
+     "benched": null,
+     "dmg": 2.729471760301465,
+     "tough": 1.8609077139914272,
+     "dmg_mow": null,
+     "dmg_alone": 3.539458555239575,
+     "tough_alone": 1.5867073367425741,
+     "per": {
+      "Hollan": {
+       "d": 4.203,
+       "t": 1.646
+      },
+      "Isaak": {
+       "d": 3.831,
+       "t": 2.049
+      },
+      "Judh": {
+       "d": 2.597,
+       "t": 1.744
+      },
+      "The Patermine": {
+       "d": 1.497,
+       "t": 1.93
+      },
+      "Xybia": {
+       "d": 3.571,
+       "t": 1.935
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Leagues of Votann": {
+   "n": 5,
+   "roster": [
+    "Ammuk",
+    "Havyr",
+    "Kimm",
+    "Uthar",
+    "Vynn"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Ammuk",
+      "Havyr",
+      "Kimm",
+      "Uthar",
+      "Vynn"
+     ],
+     "benched": null,
+     "dmg": 1.1777744603675624,
+     "tough": 3.2331948425986896,
+     "dmg_mow": null,
+     "dmg_alone": 2.4759072443390515,
+     "tough_alone": 2.281489250969844,
+     "per": {
+      "Ammuk": {
+       "d": 5,
+       "t": 2.752
+      },
+      "Havyr": {
+       "d": 0.752,
+       "t": 2.347
+      },
+      "Kimm": {
+       "d": 0.997,
+       "t": 4.989
+      },
+      "Uthar": {
+       "d": 1.137,
+       "t": 3.387
+      },
+      "Vynn": {
+       "d": 1.199,
+       "t": 2.691
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Necrons": {
+   "n": 6,
+   "roster": [
+    "Aleph-Null",
+    "Anuphet",
+    "Imospekh",
+    "Makhotep",
+    "Thothmek",
+    "Thutmose"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Aleph-Null",
+      "Anuphet",
+      "Imospekh",
+      "Makhotep",
+      "Thothmek"
+     ],
+     "benched": "Thutmose",
+     "dmg": 2.7170343539712776,
+     "tough": 2.7759177140955953,
+     "dmg_mow": 2.238934578045811,
+     "dmg_alone": 4.498260732606792,
+     "tough_alone": 1.567215435423193,
+     "per": {
+      "Aleph-Null": {
+       "d": 6.036,
+       "t": 2.193
+      },
+      "Anuphet": {
+       "d": 4.079,
+       "t": 2.789
+      },
+      "Imospekh": {
+       "d": 0.92,
+       "t": 4.11
+      },
+      "Makhotep": {
+       "d": 6.566,
+       "t": 2.635
+      },
+      "Thothmek": {
+       "d": 5.259,
+       "t": 2.153
+      }
+     }
+    },
+    {
+     "names": [
+      "Aleph-Null",
+      "Anuphet",
+      "Imospekh",
+      "Makhotep",
+      "Thutmose"
+     ],
+     "benched": "Thothmek",
+     "dmg": 2.72076382372071,
+     "tough": 1.5561761591429313,
+     "dmg_mow": 2.290245392605987,
+     "dmg_alone": 3.3045227856839237,
+     "tough_alone": 1.3664174482619116,
+     "per": {
+      "Aleph-Null": {
+       "d": 6.036,
+       "t": 1.535
+      },
+      "Anuphet": {
+       "d": 4.079,
+       "t": 1.535
+      },
+      "Imospekh": {
+       "d": 2.791,
+       "t": 1.306
+      },
+      "Makhotep": {
+       "d": 6.566,
+       "t": 1.336
+      },
+      "Thutmose": {
+       "d": 1.091,
+       "t": 2.068
+      }
+     }
+    },
+    {
+     "names": [
+      "Aleph-Null",
+      "Anuphet",
+      "Imospekh",
+      "Thothmek",
+      "Thutmose"
+     ],
+     "benched": "Makhotep",
+     "dmg": 2.299772861533606,
+     "tough": 2.657799245888308,
+     "dmg_mow": 1.9237819426339409,
+     "dmg_alone": 3.2238656657887352,
+     "tough_alone": 1.5297963775799432,
+     "per": {
+      "Aleph-Null": {
+       "d": 6.036,
+       "t": 2.193
+      },
+      "Anuphet": {
+       "d": 4.079,
+       "t": 2.78
+      },
+      "Imospekh": {
+       "d": 2.791,
+       "t": 2.523
+      },
+      "Thothmek": {
+       "d": 5.259,
+       "t": 2.153
+      },
+      "Thutmose": {
+       "d": 0.823,
+       "t": 3.641
+      }
+     }
+    },
+    {
+     "names": [
+      "Aleph-Null",
+      "Anuphet",
+      "Makhotep",
+      "Thothmek",
+      "Thutmose"
+     ],
+     "benched": "Imospekh",
+     "dmg": 2.5404582642799602,
+     "tough": 2.6820758558152105,
+     "dmg_mow": 2.0949484381459222,
+     "dmg_alone": 3.7175987019226606,
+     "tough_alone": 1.541713469837648,
+     "per": {
+      "Aleph-Null": {
+       "d": 6.036,
+       "t": 2.193
+      },
+      "Anuphet": {
+       "d": 4.079,
+       "t": 2.789
+      },
+      "Makhotep": {
+       "d": 6.566,
+       "t": 2.635
+      },
+      "Thothmek": {
+       "d": 5.259,
+       "t": 2.153
+      },
+      "Thutmose": {
+       "d": 0.823,
+       "t": 3.641
+      }
+     }
+    },
+    {
+     "names": [
+      "Aleph-Null",
+      "Imospekh",
+      "Makhotep",
+      "Thothmek",
+      "Thutmose"
+     ],
+     "benched": "Anuphet",
+     "dmg": 3.0194164426819343,
+     "tough": 2.3713071188975294,
+     "dmg_mow": 2.5417813212676252,
+     "dmg_alone": 3.4291214052646177,
+     "tough_alone": 1.490029604406583,
+     "per": {
+      "Aleph-Null": {
+       "d": 6.036,
+       "t": 2.193
+      },
+      "Imospekh": {
+       "d": 2.791,
+       "t": 2.541
+      },
+      "Makhotep": {
+       "d": 6.566,
+       "t": 2.635
+      },
+      "Thothmek": {
+       "d": 5.259,
+       "t": 2.153
+      },
+      "Thutmose": {
+       "d": 1.267,
+       "t": 2.335
+      }
+     }
+    },
+    {
+     "names": [
+      "Anuphet",
+      "Imospekh",
+      "Makhotep",
+      "Thothmek",
+      "Thutmose"
+     ],
+     "benched": "Aleph-Null",
+     "dmg": 2.3140108614568664,
+     "tough": 2.632472524454383,
+     "dmg_mow": 1.9320834441016106,
+     "dmg_alone": 3.251914492733867,
+     "tough_alone": 1.490029604406583,
+     "per": {
+      "Anuphet": {
+       "d": 4.079,
+       "t": 2.193
+      },
+      "Imospekh": {
+       "d": 2.791,
+       "t": 2.541
+      },
+      "Makhotep": {
+       "d": 6.566,
+       "t": 2.635
+      },
+      "Thothmek": {
+       "d": 5.259,
+       "t": 2.153
+      },
+      "Thutmose": {
+       "d": 0.823,
+       "t": 3.641
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Reanimator",
+    "buff": "Guardian Construct",
+    "note": "Mechanical characters only",
+    "solo": 50.0
+   }
+  },
+  "Orks": {
+   "n": 5,
+   "roster": [
+    "Boss Gulgortz",
+    "Gibbascrapz",
+    "Snappawrecka",
+    "Snotflogga",
+    "Tanksmasha"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Boss Gulgortz",
+      "Gibbascrapz",
+      "Snappawrecka",
+      "Snotflogga",
+      "Tanksmasha"
+     ],
+     "benched": null,
+     "dmg": 1.92706903845349,
+     "tough": 2.2141845131864457,
+     "dmg_mow": 1.4437035425480453,
+     "dmg_alone": 3.4137564904808997,
+     "tough_alone": 1.7310872397230266,
+     "per": {
+      "Boss Gulgortz": {
+       "d": 1.784,
+       "t": 2.428
+      },
+      "Gibbascrapz": {
+       "d": 4.546,
+       "t": 1.844
+      },
+      "Snappawrecka": {
+       "d": 2.594,
+       "t": 1.672
+      },
+      "Snotflogga": {
+       "d": 1.242,
+       "t": 2.76
+      },
+      "Tanksmasha": {
+       "d": 1.603,
+       "t": 2.367
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Rukkatrukk",
+    "buff": "More Gitz Over 'Ere!",
+    "note": "normal melee attacks only",
+    "solo": 2.548
+   }
+  },
+  "Space Wolves": {
+   "n": 6,
+   "roster": [
+    "Arjac",
+    "Baldr",
+    "Njal",
+    "Ragnar",
+    "Tjark",
+    "Ulf"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Arjac",
+      "Baldr",
+      "Njal",
+      "Ragnar",
+      "Tjark"
+     ],
+     "benched": "Ulf",
+     "dmg": 0.7330623729225594,
+     "tough": 3.0933441230043095,
+     "dmg_mow": null,
+     "dmg_alone": 2.7307734183611436,
+     "tough_alone": 2.2444380479920647,
+     "per": {
+      "Arjac": {
+       "d": 1.183,
+       "t": 2.755
+      },
+      "Baldr": {
+       "d": 0.981,
+       "t": 3.161
+      },
+      "Njal": {
+       "d": 2.773,
+       "t": 3.258
+      },
+      "Ragnar": {
+       "d": 0.318,
+       "t": 2.918
+      },
+      "Tjark": {
+       "d": 0.69,
+       "t": 3.375
+      }
+     }
+    },
+    {
+     "names": [
+      "Arjac",
+      "Baldr",
+      "Njal",
+      "Ragnar",
+      "Ulf"
+     ],
+     "benched": "Tjark",
+     "dmg": 0.7161642374145247,
+     "tough": 2.9369237193722033,
+     "dmg_mow": null,
+     "dmg_alone": 2.5049706828010088,
+     "tough_alone": 2.1744788835180513,
+     "per": {
+      "Arjac": {
+       "d": 1.183,
+       "t": 2.755
+      },
+      "Baldr": {
+       "d": 0.981,
+       "t": 3.161
+      },
+      "Njal": {
+       "d": 2.773,
+       "t": 3.258
+      },
+      "Ragnar": {
+       "d": 0.318,
+       "t": 2.918
+      },
+      "Ulf": {
+       "d": 0.621,
+       "t": 2.593
+      }
+     }
+    },
+    {
+     "names": [
+      "Arjac",
+      "Baldr",
+      "Njal",
+      "Tjark",
+      "Ulf"
+     ],
+     "benched": "Ragnar",
+     "dmg": 3.2120349092027256,
+     "tough": 3.0282813610358295,
+     "dmg_mow": null,
+     "dmg_alone": 3.807622909223259,
+     "tough_alone": 2.1850930302074545,
+     "per": {
+      "Arjac": {
+       "d": 5.542,
+       "t": 2.755
+      },
+      "Baldr": {
+       "d": 4.567,
+       "t": 3.161
+      },
+      "Njal": {
+       "d": 4.878,
+       "t": 3.258
+      },
+      "Tjark": {
+       "d": 3.679,
+       "t": 3.375
+      },
+      "Ulf": {
+       "d": 1.47,
+       "t": 2.593
+      }
+     }
+    },
+    {
+     "names": [
+      "Arjac",
+      "Baldr",
+      "Ragnar",
+      "Tjark",
+      "Ulf"
+     ],
+     "benched": "Njal",
+     "dmg": 0.6195308339967235,
+     "tough": 2.960389075527934,
+     "dmg_mow": null,
+     "dmg_alone": 2.4237799884011855,
+     "tough_alone": 2.144705484672305,
+     "per": {
+      "Arjac": {
+       "d": 1.183,
+       "t": 2.755
+      },
+      "Baldr": {
+       "d": 0.981,
+       "t": 3.161
+      },
+      "Ragnar": {
+       "d": 0.318,
+       "t": 2.918
+      },
+      "Tjark": {
+       "d": 0.69,
+       "t": 3.375
+      },
+      "Ulf": {
+       "d": 0.621,
+       "t": 2.593
+      }
+     }
+    },
+    {
+     "names": [
+      "Arjac",
+      "Njal",
+      "Ragnar",
+      "Tjark",
+      "Ulf"
+     ],
+     "benched": "Baldr",
+     "dmg": 1.0170320279571803,
+     "tough": 1.8896385572798369,
+     "dmg_mow": null,
+     "dmg_alone": 2.440325757359208,
+     "tough_alone": 1.8896385572798369,
+     "per": {
+      "Arjac": {
+       "d": 1.183,
+       "t": 2.755
+      },
+      "Njal": {
+       "d": 2.773,
+       "t": 1.886
+      },
+      "Ragnar": {
+       "d": 1.047,
+       "t": 1.684
+      },
+      "Tjark": {
+       "d": 0.69,
+       "t": 1.737
+      },
+      "Ulf": {
+       "d": 0.766,
+       "t": 1.387
+      }
+     }
+    },
+    {
+     "names": [
+      "Baldr",
+      "Njal",
+      "Ragnar",
+      "Tjark",
+      "Ulf"
+     ],
+     "benched": "Arjac",
+     "dmg": 0.6591108467331581,
+     "tough": 2.7866033055640678,
+     "dmg_mow": null,
+     "dmg_alone": 2.3952832342165657,
+     "tough_alone": 1.970919714708439,
+     "per": {
+      "Baldr": {
+       "d": 0.981,
+       "t": 3.161
+      },
+      "Njal": {
+       "d": 2.773,
+       "t": 1.886
+      },
+      "Ragnar": {
+       "d": 0.318,
+       "t": 2.918
+      },
+      "Tjark": {
+       "d": 0.69,
+       "t": 3.375
+      },
+      "Ulf": {
+       "d": 0.621,
+       "t": 2.593
+      }
+     }
+    }
+   ],
+   "mow": null
+  },
+  "Tau Empire": {
+   "n": 6,
+   "roster": [
+    "Aun'Shi",
+    "Commander Farsight",
+    "Commander Shadowsun",
+    "Darkstrider",
+    "Re'vas",
+    "Sho'syl"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Aun'Shi",
+      "Commander Farsight",
+      "Commander Shadowsun",
+      "Darkstrider",
+      "Re'vas"
+     ],
+     "benched": "Sho'syl",
+     "dmg": 0.6479823780600504,
+     "tough": 2.09046050401195,
+     "dmg_mow": 0.6415396300098313,
+     "dmg_alone": 3.1587091413282744,
+     "tough_alone": 1.3652434919150085,
+     "per": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 1.6
+      },
+      "Commander Farsight": {
+       "d": 1.298,
+       "t": 2.444
+      },
+      "Commander Shadowsun": {
+       "d": 0.881,
+       "t": 2.41
+      },
+      "Darkstrider": {
+       "d": 0.736,
+       "t": 1.674
+      },
+      "Re'vas": {
+       "d": 0.235,
+       "t": 2.324
+      }
+     }
+    },
+    {
+     "names": [
+      "Aun'Shi",
+      "Commander Farsight",
+      "Commander Shadowsun",
+      "Darkstrider",
+      "Sho'syl"
+     ],
+     "benched": "Re'vas",
+     "dmg": 0.9915418543567118,
+     "tough": 1.8042042990636087,
+     "dmg_mow": 0.9765352157462038,
+     "dmg_alone": 2.9562843568656048,
+     "tough_alone": 1.2021227142502187,
+     "per": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 1.58
+      },
+      "Commander Farsight": {
+       "d": 1.298,
+       "t": 1.87
+      },
+      "Commander Shadowsun": {
+       "d": 0.881,
+       "t": 1.956
+      },
+      "Darkstrider": {
+       "d": 0.736,
+       "t": 1.571
+      },
+      "Sho'syl": {
+       "d": 0.629,
+       "t": 2.045
+      }
+     }
+    },
+    {
+     "names": [
+      "Aun'Shi",
+      "Commander Farsight",
+      "Commander Shadowsun",
+      "Re'vas",
+      "Sho'syl"
+     ],
+     "benched": "Darkstrider",
+     "dmg": 0.7888832080976869,
+     "tough": 1.4714190754165584,
+     "dmg_mow": 0.7793545390205808,
+     "dmg_alone": 2.8525652422878487,
+     "tough_alone": 1.3001687369781543,
+     "per": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 1.07
+      },
+      "Commander Farsight": {
+       "d": 1.773,
+       "t": 1.769
+      },
+      "Commander Shadowsun": {
+       "d": 1.04,
+       "t": 1.353
+      },
+      "Re'vas": {
+       "d": 0.308,
+       "t": 1.795
+      },
+      "Sho'syl": {
+       "d": 0.725,
+       "t": 1.37
+      }
+     }
+    },
+    {
+     "names": [
+      "Aun'Shi",
+      "Commander Farsight",
+      "Darkstrider",
+      "Re'vas",
+      "Sho'syl"
+     ],
+     "benched": "Commander Shadowsun",
+     "dmg": 0.8534710789162302,
+     "tough": 2.0268096249774765,
+     "dmg_mow": 0.8423292837048145,
+     "dmg_alone": 3.1375885654592808,
+     "tough_alone": 1.3282395764790778,
+     "per": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 1.6
+      },
+      "Commander Farsight": {
+       "d": 1.84,
+       "t": 2.444
+      },
+      "Darkstrider": {
+       "d": 1.117,
+       "t": 1.674
+      },
+      "Re'vas": {
+       "d": 0.3,
+       "t": 2.324
+      },
+      "Sho'syl": {
+       "d": 1.112,
+       "t": 2.092
+      }
+     }
+    },
+    {
+     "names": [
+      "Aun'Shi",
+      "Commander Shadowsun",
+      "Darkstrider",
+      "Re'vas",
+      "Sho'syl"
+     ],
+     "benched": "Commander Farsight",
+     "dmg": 1.3769191758457995,
+     "tough": 1.8950942978724992,
+     "dmg_mow": 1.3481497595656249,
+     "dmg_alone": 3.1477758070389656,
+     "tough_alone": 1.2606046074742046,
+     "per": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 1.58
+      },
+      "Commander Shadowsun": {
+       "d": 1.724,
+       "t": 1.956
+      },
+      "Darkstrider": {
+       "d": 2.39,
+       "t": 1.571
+      },
+      "Re'vas": {
+       "d": 0.618,
+       "t": 2.324
+      },
+      "Sho'syl": {
+       "d": 1.21,
+       "t": 2.045
+      }
+     }
+    },
+    {
+     "names": [
+      "Commander Farsight",
+      "Commander Shadowsun",
+      "Darkstrider",
+      "Re'vas",
+      "Sho'syl"
+     ],
+     "benched": "Aun'Shi",
+     "dmg": 0.6286149299216734,
+     "tough": 1.6941443516234116,
+     "dmg_mow": 0.622549756507958,
+     "dmg_alone": 2.7527387294515364,
+     "tough_alone": 1.3495976244381147,
+     "per": {
+      "Commander Farsight": {
+       "d": 1.773,
+       "t": 1.87
+      },
+      "Commander Shadowsun": {
+       "d": 0.924,
+       "t": 1.584
+      },
+      "Darkstrider": {
+       "d": 1.117,
+       "t": 1.377
+      },
+      "Re'vas": {
+       "d": 0.257,
+       "t": 2.324
+      },
+      "Sho'syl": {
+       "d": 0.661,
+       "t": 1.316
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Tson'ji",
+    "buff": null,
+    "note": "",
+    "solo": 12.905
+   }
+  },
+  "Thousand Sons": {
+   "n": 6,
+   "roster": [
+    "Abraxas",
+    "Ahriman",
+    "Sekhetar",
+    "Thaumachus",
+    "Toth",
+    "Yazaghor"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Abraxas",
+      "Ahriman",
+      "Sekhetar",
+      "Thaumachus",
+      "Toth"
+     ],
+     "benched": "Yazaghor",
+     "dmg": 2.221423035822247,
+     "tough": 1.93630544109709,
+     "dmg_mow": 1.816503088180249,
+     "dmg_alone": 3.455432273318444,
+     "tough_alone": 1.4068809515415377,
+     "per": {
+      "Abraxas": {
+       "d": 2.668,
+       "t": 2.522
+      },
+      "Ahriman": {
+       "d": 1.653,
+       "t": 1.556
+      },
+      "Sekhetar": {
+       "d": 2.435,
+       "t": 1.485
+      },
+      "Thaumachus": {
+       "d": 1.553,
+       "t": 1.427
+      },
+      "Toth": {
+       "d": 4.618,
+       "t": 2.69
+      }
+     }
+    },
+    {
+     "names": [
+      "Abraxas",
+      "Ahriman",
+      "Sekhetar",
+      "Thaumachus",
+      "Yazaghor"
+     ],
+     "benched": "Toth",
+     "dmg": 1.9180139276604475,
+     "tough": 1.4328019680174569,
+     "dmg_mow": 1.6226293797315874,
+     "dmg_alone": 2.954968933896868,
+     "tough_alone": 1.0262113831449122,
+     "per": {
+      "Abraxas": {
+       "d": 2.668,
+       "t": 1.36
+      },
+      "Ahriman": {
+       "d": 1.34,
+       "t": 1.006
+      },
+      "Sekhetar": {
+       "d": 2.435,
+       "t": 1.485
+      },
+      "Thaumachus": {
+       "d": 2.105,
+       "t": 1.427
+      },
+      "Yazaghor": {
+       "d": 1.667,
+       "t": 1.886
+      }
+     }
+    },
+    {
+     "names": [
+      "Abraxas",
+      "Ahriman",
+      "Sekhetar",
+      "Toth",
+      "Yazaghor"
+     ],
+     "benched": "Thaumachus",
+     "dmg": 2.1291708801993687,
+     "tough": 1.622392431570987,
+     "dmg_mow": 1.8329333795793408,
+     "dmg_alone": 3.2893791451557273,
+     "tough_alone": 1.3757065224466327,
+     "per": {
+      "Abraxas": {
+       "d": 2.668,
+       "t": 1.36
+      },
+      "Ahriman": {
+       "d": 1.34,
+       "t": 1.556
+      },
+      "Sekhetar": {
+       "d": 2.435,
+       "t": 1.485
+      },
+      "Toth": {
+       "d": 4.618,
+       "t": 2.69
+      },
+      "Yazaghor": {
+       "d": 1.667,
+       "t": 1.021
+      }
+     }
+    },
+    {
+     "names": [
+      "Abraxas",
+      "Ahriman",
+      "Thaumachus",
+      "Toth",
+      "Yazaghor"
+     ],
+     "benched": "Sekhetar",
+     "dmg": 1.9367215012043844,
+     "tough": 1.4012866574186411,
+     "dmg_mow": 1.618117156502325,
+     "dmg_alone": 3.229187057200531,
+     "tough_alone": 1.2672267830706876,
+     "per": {
+      "Abraxas": {
+       "d": 2.668,
+       "t": 0.91
+      },
+      "Ahriman": {
+       "d": 1.34,
+       "t": 1.006
+      },
+      "Thaumachus": {
+       "d": 1.553,
+       "t": 0.943
+      },
+      "Toth": {
+       "d": 4.618,
+       "t": 2.69
+      },
+      "Yazaghor": {
+       "d": 1.667,
+       "t": 1.457
+      }
+     }
+    },
+    {
+     "names": [
+      "Abraxas",
+      "Sekhetar",
+      "Thaumachus",
+      "Toth",
+      "Yazaghor"
+     ],
+     "benched": "Ahriman",
+     "dmg": 2.4680372972256306,
+     "tough": 1.769685111344619,
+     "dmg_mow": 2.07926429607432,
+     "dmg_alone": 3.6734714436276628,
+     "tough_alone": 1.3630945264720744,
+     "per": {
+      "Abraxas": {
+       "d": 4.047,
+       "t": 1.36
+      },
+      "Sekhetar": {
+       "d": 2.435,
+       "t": 1.485
+      },
+      "Thaumachus": {
+       "d": 1.587,
+       "t": 1.427
+      },
+      "Toth": {
+       "d": 7.23,
+       "t": 2.69
+      },
+      "Yazaghor": {
+       "d": 1.667,
+       "t": 1.886
+      }
+     }
+    },
+    {
+     "names": [
+      "Ahriman",
+      "Sekhetar",
+      "Thaumachus",
+      "Toth",
+      "Yazaghor"
+     ],
+     "benched": "Abraxas",
+     "dmg": 2.5486040757567516,
+     "tough": 1.8089514531118136,
+     "dmg_mow": 2.113596683396754,
+     "dmg_alone": 3.1579535675845194,
+     "tough_alone": 1.382373865017124,
+     "per": {
+      "Ahriman": {
+       "d": 1.653,
+       "t": 1.556
+      },
+      "Sekhetar": {
+       "d": 3.546,
+       "t": 1.485
+      },
+      "Thaumachus": {
+       "d": 2.105,
+       "t": 1.427
+      },
+      "Toth": {
+       "d": 4.618,
+       "t": 2.69
+      },
+      "Yazaghor": {
+       "d": 2.608,
+       "t": 1.886
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Z'Kar",
+    "buff": "Cabal of Sorcerers",
+    "note": "Psyker characters only",
+    "solo": 4.547
+   }
+  },
+  "Tyranids": {
+   "n": 5,
+   "roster": [
+    "Deathleaper",
+    "Neurothrope",
+    "Parasite of Mortrex",
+    "Tyrant Guard",
+    "Winged Prime"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Deathleaper",
+      "Neurothrope",
+      "Parasite of Mortrex",
+      "Tyrant Guard",
+      "Winged Prime"
+     ],
+     "benched": null,
+     "dmg": 3.387756814279064,
+     "tough": 2.9960823563240893,
+     "dmg_mow": 2.2380672136275863,
+     "dmg_alone": 3.696948793718391,
+     "tough_alone": 2.230690496905885,
+     "per": {
+      "Deathleaper": {
+       "d": 3.808,
+       "t": 3.849
+      },
+      "Neurothrope": {
+       "d": 2.666,
+       "t": 1.89
+      },
+      "Parasite of Mortrex": {
+       "d": 4.093,
+       "t": 2.675
+      },
+      "Tyrant Guard": {
+       "d": 3.641,
+       "t": 3.703
+      },
+      "Winged Prime": {
+       "d": 3.132,
+       "t": 2.863
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Biovore",
+    "buff": "Hyper Corrosive Acid",
+    "note": "everything a Spore Mine has hit",
+    "solo": 1.915
+   }
+  },
+  "Ultramarines": {
+   "n": 6,
+   "roster": [
+    "Bellator",
+    "Certus",
+    "Incisus",
+    "Marneus Calgar",
+    "Titus",
+    "Varro Tigurius"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Bellator",
+      "Certus",
+      "Incisus",
+      "Marneus Calgar",
+      "Titus"
+     ],
+     "benched": "Varro Tigurius",
+     "dmg": 3.0168702041220388,
+     "tough": 3.123922545738166,
+     "dmg_mow": 2.9808982714158256,
+     "dmg_alone": 3.793866984352762,
+     "tough_alone": 1.7527321014253516,
+     "per": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 4.047
+      },
+      "Certus": {
+       "d": 2.23,
+       "t": 2.783
+      },
+      "Incisus": {
+       "d": 2.829,
+       "t": 2.856
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 1.935
+      },
+      "Titus": {
+       "d": 2.149,
+       "t": 3.999
+      }
+     }
+    },
+    {
+     "names": [
+      "Bellator",
+      "Certus",
+      "Incisus",
+      "Marneus Calgar",
+      "Varro Tigurius"
+     ],
+     "benched": "Titus",
+     "dmg": 3.137358830954465,
+     "tough": 3.2200881152321936,
+     "dmg_mow": 3.0984747228179765,
+     "dmg_alone": 3.843119731646069,
+     "tough_alone": 1.5903846267234352,
+     "per": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 4.61
+      },
+      "Certus": {
+       "d": 2.23,
+       "t": 3.075
+      },
+      "Incisus": {
+       "d": 2.829,
+       "t": 2.856
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 3.03
+      },
+      "Varro Tigurius": {
+       "d": 2.49,
+       "t": 2.53
+      }
+     }
+    },
+    {
+     "names": [
+      "Bellator",
+      "Certus",
+      "Incisus",
+      "Titus",
+      "Varro Tigurius"
+     ],
+     "benched": "Marneus Calgar",
+     "dmg": 3.606599320669061,
+     "tough": 2.9476340782841333,
+     "dmg_mow": 3.555309020279822,
+     "dmg_alone": 3.606599320669061,
+     "tough_alone": 1.5233280347864537,
+     "per": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 1.782
+      },
+      "Certus": {
+       "d": 2.977,
+       "t": 3.075
+      },
+      "Incisus": {
+       "d": 3.567,
+       "t": 2.856
+      },
+      "Titus": {
+       "d": 3.211,
+       "t": 4.496
+      },
+      "Varro Tigurius": {
+       "d": 3.395,
+       "t": 2.53
+      }
+     }
+    },
+    {
+     "names": [
+      "Bellator",
+      "Certus",
+      "Marneus Calgar",
+      "Titus",
+      "Varro Tigurius"
+     ],
+     "benched": "Incisus",
+     "dmg": 2.9318250126704033,
+     "tough": 1.4569418753319254,
+     "dmg_mow": 2.897841159889168,
+     "dmg_alone": 3.753537095003955,
+     "tough_alone": 1.3391560299261358,
+     "per": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 1.782
+      },
+      "Certus": {
+       "d": 2.23,
+       "t": 0.951
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 1.935
+      },
+      "Titus": {
+       "d": 2.149,
+       "t": 1.829
+      },
+      "Varro Tigurius": {
+       "d": 2.49,
+       "t": 0.788
+      }
+     }
+    },
+    {
+     "names": [
+      "Bellator",
+      "Incisus",
+      "Marneus Calgar",
+      "Titus",
+      "Varro Tigurius"
+     ],
+     "benched": "Certus",
+     "dmg": 3.104434941189312,
+     "tough": 3.504271246438933,
+     "dmg_mow": 3.066357709131658,
+     "dmg_alone": 3.9170073909499346,
+     "tough_alone": 1.7376489531116115,
+     "per": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 4.61
+      },
+      "Incisus": {
+       "d": 2.829,
+       "t": 2.856
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 3.03
+      },
+      "Titus": {
+       "d": 2.149,
+       "t": 4.496
+      },
+      "Varro Tigurius": {
+       "d": 2.49,
+       "t": 2.53
+      }
+     }
+    },
+    {
+     "names": [
+      "Certus",
+      "Incisus",
+      "Marneus Calgar",
+      "Titus",
+      "Varro Tigurius"
+     ],
+     "benched": "Bellator",
+     "dmg": 2.744808622767099,
+     "tough": 3.197232510552624,
+     "dmg_mow": 2.715000001111643,
+     "dmg_alone": 3.4523827047605558,
+     "tough_alone": 1.6083369286106706,
+     "per": {
+      "Certus": {
+       "d": 2.23,
+       "t": 3.075
+      },
+      "Incisus": {
+       "d": 3.567,
+       "t": 2.856
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 3.03
+      },
+      "Titus": {
+       "d": 2.149,
+       "t": 4.496
+      },
+      "Varro Tigurius": {
+       "d": 2.49,
+       "t": 2.53
+      }
+     }
+    }
+   ],
+   "mow": {
+    "name": "Galatian",
+    "buff": null,
+    "note": "",
+    "solo": 50.0
+   }
+  },
+  "World Eaters": {
+   "n": 5,
+   "roster": [
+    "Azkor",
+    "Kharn",
+    "Macer",
+    "Tarvakh",
+    "Wrask"
+   ],
+   "teams": [
+    {
+     "names": [
+      "Azkor",
+      "Kharn",
+      "Macer",
+      "Tarvakh",
+      "Wrask"
+     ],
+     "benched": null,
+     "dmg": 1.9650913970442865,
+     "tough": 2.318760135500387,
+     "dmg_mow": null,
+     "dmg_alone": 2.3379580804621463,
+     "tough_alone": 1.9219103008392548,
+     "per": {
+      "Azkor": {
+       "d": 4.865,
+       "t": 2.609
+      },
+      "Kharn": {
+       "d": 0.943,
+       "t": 1.876
+      },
+      "Macer": {
+       "d": 1.93,
+       "t": 1.496
+      },
+      "Tarvakh": {
+       "d": 1.784,
+       "t": 2.399
+      },
+      "Wrask": {
+       "d": 4.996,
+       "t": 3.214
+      }
+     }
+    }
+   ],
+   "mow": null
+  }
+ }
+}
