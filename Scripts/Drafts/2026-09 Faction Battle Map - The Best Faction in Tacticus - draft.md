@@ -1,245 +1,252 @@
 # The Best Faction in Tacticus
 
-*Draft 2, September 2026. Follow-up to the Roster Battle Map video, so it assumes
+*Draft 3, September 2026. Follow-up to the Roster Battle Map video, so it assumes
 people already know the two axes and what a typical character is. Numbers from
-`Damage Visualiser/faction-battle-map.html`, built at maxed Mythic with actives
-on and everything triggered. Machine of War numbers are the "On" setting.*
+`Damage Visualiser/faction-battle-map.html` at maxed Mythic, actives on,
+everything triggered, and the Machine of War switched on where a faction has one.*
 
 ---
 
 ## Hook
 
-There isn't one best faction in Tacticus, and I know that's an annoying way to
-start. The Tau kill things faster than anybody else, the Ultramarines are nearly
-impossible to shift, and neither of them is the best team you can field. Only one
-faction is anywhere near the top of both lists, and it isn't either of those two.
-I'll get to it. But the thing that really got me building this was how few
-factions get anything at all for going pure, because I'd always assumed that was
-the entire point of a faction.
+Last time out I put all 117 characters on a chart, one at a time, and the thing
+most of you said underneath it was some version of the same question, which was
+what about whole factions? And that's a completely fair thing to ask, but the old
+chart genuinely can't answer it, because it puts every character in a duel on
+their own with nobody stood next to them. So over the last few weeks I've built a
+second chart, for whole factions playing together, and today I want to walk you
+through how it works and what it says, and then I really want your feedback on
+whether the results line up with what you're actually seeing in Arena.
 
 ## Introduction
 
-So the last video was the Roster Battle Map, every character in the game on two
-axes, how many of their attacks it takes to kill a typical character, and how
-many attacks a typical character needs to kill them. That one did really well and
-a load of you asked the same thing underneath it. What about factions?
+Quick recap for anybody who missed the last one. The Roster Battle Map puts every
+character on two axes. Damage is how many of their attacks it takes to kill a
+typical character, so a lower number is better and you sit higher up. Toughness is
+how many attacks a typical character needs to kill them, so a higher number is
+better and you sit further right.
 
-Fair question, and the map genuinely can't answer it, because it puts every
-character in a duel with nobody standing next to them. Every single ability that
-starts with the words "friendly unit" is worth absolutely nothing on it. That's
-the right call when you're comparing characters, because it's the only way to be
-fair to the ones with no support in their kit. But it's no good at all for a
-faction, because a faction is five of them playing together and the buffs are the
-whole point.
+This new one asks exactly the same two questions of a whole faction, five
+characters fielded together with a Machine of War alongside, which is the Arena and
+Tournament Arena setup. Everything is maxed Mythic, level sixty abilities, standard
+gear with the relic on, actives used and everything triggered, because there's no
+point comparing factions at different levels of investment.
 
-So I built the same chart again for whole factions. Same two axes, same scale,
-except now everybody is standing in their own faction with their own team-mates
-buffing them, and there's a Machine of War alongside. This is the Arena and
-Tournament Arena question, five of one faction plus a machine.
+There are twenty one factions that can field a five. Twelve of them have exactly
+five characters so the team picks itself, nine have six so somebody has to sit out,
+and the Adeptus Astartes have three and can't field a team at all, so they're in
+the table with a dash next to them and that's their whole entry.
 
-I'll go through what changed, then the thing about faction bonuses that genuinely
-surprised me, then the sixth character, then the machines, then what this doesn't
-know, and then who's actually best.
+## Part 1 - What's changed on the Roster Battle Map
 
-## Part 1 - What changed
+Before we get into the new one, there's a couple of changes to the old chart that
+I've made since that video went out, because a few of you pointed things out and
+some of it was just wrong.
 
-Three things, and they all pull the same way.
+The big one is the Ambush trait. Four characters have it, and when they're killed
+they leave a decoy behind and come back on it at full health the next turn, which
+means you've genuinely got to kill them twice, and the chart was only counting it
+once. That is a huge change for those four. Isaak goes from a hundred and eighth
+for toughness up to thirty fifth, Hollan goes from a hundred and fifteenth to
+seventieth, and Xybia was dead last of a hundred and seventeen and is now ninety
+first.
 
-Everybody gets their team-mates' buffs now, both the attacking side and the
-defending side. Every buff, every debuff, every shield and heal one of the five
-hands to another one of the five is in there.
+The other one is summons. The chart wasn't counting them at all, which meant that
+every character who sends something out to do the killing for them was being
+scored on just the half of their kit that swings a weapon. That's now fixed for
+the Damage axis, and the Patermine climbs from forty ninth to twentieth, Archimatos
+goes from fifty first to thirtieth, and Creed picks up eleven places as well.
 
-Then there's the clauses, and this is the interesting bit. There's a small handful
-of abilities in the game with a condition on the end that only fires when you're
-stood next to one of your own kind. Asmodai hits harder when the enemy is beside
-another Dark Angel. Baraqiel's damage doubles the same way. Forcas counts
-everybody stood around him. The Winged Prime's Hormagaunts turn up once for every
-Synapse ally you brought, so in a Tyranid team they arrive three times as often.
-Every one of those was worth exactly nothing on the Roster Battle Map because
-there was nobody there. In a mono faction five they're free and they're permanent,
-and honestly they're the only real reward for going pure that I can find.
+Two of those were my mistakes rather than modelling choices, and I'll own them.
+Some characters keep a second summon in a different slot in the game data, which is
+where Abraxas's Screamers and Archimatos's Blue Horrors live, and I was only
+reading the first slot. And Bellator's Inceptors sit in a different field
+altogether, so a character whose entire kit is Inceptors was scoring absolutely
+nothing for any of it.
 
-And the yardstick moved, which matters for a reason I'll come back to. On the old
-map a typical character meant a loose character on their own. Here, all hundred
-and seventeen get their own faction's buffs first, and then they all get measured
-against each other. So a faction isn't being scored against a bunch of lonely
-characters, it's being scored against other factions playing together, which is
-the fight it's actually going to have.
+Two honest notes on that. Summons count towards Damage but not towards Toughness,
+because whether they soak attacks for you depends entirely on what the enemy
+chooses to shoot, and the data can't tell me that, so I'd rather leave it out than
+invent a rule. And Ammuk is still a hundred and seventeenth of a hundred and
+seventeen even with his summon counted, so that one wasn't a scoring problem, he's
+just like that.
 
-That does mean the numbers don't match the old page, and they're not supposed to.
+## Part 2 - How the faction chart works, and what it doesn't cover
+
+Same two axes, and here's what's different.
+
+Everybody gets their team-mates' buffs now, both sides of it, so every buff, every
+debuff, every shield and every heal that one of the five hands to another one of
+the five is counted. There's also a small number of abilities in the game with a
+condition on the end that only fires when you're stood next to one of your own
+kind, so Asmodai hits harder when the enemy is beside another Dark Angel, and the
+Winged Prime's Hormagaunts turn up once for every Synapse ally you brought. Those
+are worth absolutely nothing on the old chart because there's nobody there, and in
+a faction team they're free and they're permanent.
+
+The other change is what a typical character means. On the old chart it was a
+character on their own. Here, all hundred and seventeen get their own faction's
+buffs first and then they all get measured against each other, so a faction is
+being scored against other factions playing together rather than against a bunch of
+characters stood on their own, which is the fight it's actually going to have.
+
+That does mean these numbers don't match the old page, and they're not meant to.
 Hascule takes three point six five attacks to kill on the Roster Battle Map and
-two point two eight here, and he hasn't got worse, everybody hitting him has got
-better. Toughness drops about eighteen percent across the whole roster for that
-reason. I've put each character's old number in grey next to their new one on the
-page so you can always see the gap.
+two point two eight here, and he hasn't got any worse, everybody swinging at him
+has got better. Toughness drops about eighteen percent across the whole roster for
+that reason. I've put each character's old number in grey next to their new one on
+the page so you can always see the gap.
 
-## Part 2 - The two kinds of faction bonus, and one of them is a lie
+Now, the things it doesn't cover, and I want to be really straight about these
+because Arena is its own animal.
 
-Right, this is the bit I had completely the wrong way round before I built it.
+It has no idea about turn order. None at all. It doesn't know who moves first, and
+it doesn't know that going first lets you take somebody off the board before they
+ever get to answer, and in Arena that is frequently the entire game. So this is a
+ranking of what a faction can do, and it is absolutely not a prediction of who
+wins.
 
-Two very different things get called a faction bonus. The first is a signature
-trait, so Get Stuck In for the Orks, Blessings of Khorne for the World Eaters, Act
-of Faith for the Sisters. Eleven of the twenty one factions have one.
+Both axes also assume focus fire, so Damage has all five of yours hitting one
+enemy and Toughness has a full enemy team of five hitting one of yours. That's on
+purpose, because it's the same fight from both ends and it's what Arena looks like
+when it's going well. If instead your five split up and took an enemy each, the
+order would move about, because then your slowest character sets the pace rather
+than your fastest, and the Leagues of Votann would drop from seventh to nineteenth
+on the attacking side, which tells you how much of that is Uthar on his own.
 
-And here's the thing about them. Every character carries their signature trait
-everywhere they go. Ragnar doesn't lose anything by being in a mixed team, and an
-Ork in your Guild Raid squad still has Get Stuck In. So it's already baked into
-that character's own numbers on the old map, and going pure adds precisely nothing
-to it. It's faction flavour, it really isn't a faction reward, and I think a lot
-of us have been reading it the wrong way round for years.
+And underneath all of it, it's still one attacker against one defender. The buffs
+are a team, but nobody dies halfway through and stops answering, and nothing gets
+reinforced. I've kept it that way on purpose because it's the only reason these
+numbers line up with the old chart at all.
 
-The actual reward is the second kind, the locked clause, and it's much rarer than
-you'd think. Atlacoya's active deals Direct damage but only if he's next to a
-friendly Custodes. Aesoth's passive reaches further if a friendly Custodes uses an
-active. Thaumachus shields the closest ally and prefers Thousand Sons. Those are
-awkward and situational in a mixed team, and in a mono faction five they're just
-permanently on, for free, forever.
+## Part 3 - The sixth character
 
-So when you're working out which factions actually gain from being run pure, don't
-count the ones with a nice trait. Count the ones with clauses. It's a much shorter
-list than you'd hope.
+For the nine factions with six characters, somebody sits on the bench, and on the
+chart that shows up as a bar hanging off the badge that runs from their best five
+to their worst five. So the length of that bar is exactly what it costs you to
+bench the wrong person, and a faction with no bar at all has no decision to make.
 
-## Part 3 - The sixth character, and the Space Wolves problem
+And oh boy, the Space Wolves. Their bar is enormous and it's nothing like anybody
+else's. Their best five comes in at nought point seven one attacks, which is
+second best in the game, and their worst five is three point five nine, so getting
+it wrong makes them more than five times worse. The next biggest swing belongs to
+the Tau and it's a bit over double.
 
-Twelve factions have exactly five characters, so there's no decision to make. You
-field them, that's the team, off you go. Nine have six, so somebody sits out.
-Adeptus Astartes have three and can't field a team at all, so they're in the table
-with a dash next to them and that's the whole entry.
+What's happening there is that the Space Wolves are really a two man act. Baldr
+heals somebody and that heal hands them a big pile of crit chance and crit damage,
+and Ragnar is the character in this game who does the most horrible things with
+it, so the whole faction rides on that pair being together. Bench Ragnar and you
+fall to three point five nine, bench Baldr and you're at one point nought two,
+which is still alright but it isn't near the top any more. So for the Space Wolves
+the question was never who the sixth best Space Wolf is, it's just don't split
+those two up.
 
-On the chart, each faction sits on its best five and there's a bar hanging off it
-that runs to its worst five. So the length of that bar is literally what it costs
-you to bench the wrong person. No bar at all means no decision.
+One more thing on benching that I think is genuinely useful. The character you
+leave out to attack is usually not the character you leave out to defend. For the
+Ultramarines you bench Bellator if you want damage and Certus if you want to
+survive, for the Necrons it's Makhotep or Thutmose, and seven of the nine change
+their mind depending on the job. Only the Aeldari and the Dark Angels bench the
+same person either way. So if you've got one fixed faction team that you use for
+everything, there's a decent chance it's the wrong one about half the time.
 
-And oh boy, the Space Wolves. Their bar is enormous, it's nothing like anybody
-else's. Their best five is nought point seven one attacks, which is second best in
-the game, and their worst five is three point five nine. That's more than five
-times worse for swapping one character. The next biggest swing in the game is the
-Tau at a bit over double.
+## Part 4 - The Machines of War
 
-What's going on is that the Space Wolves are really a two man act. Baldr heals
-somebody, and that heal hands them a big pile of crit chance and crit damage, and
-Ragnar is the character in the game who does the most horrible things with it. The
-whole faction rides on that pair. Bench Ragnar and you fall to three point five
-nine. Bench Baldr and you're at one point nought two, which is still decent but
-it's nowhere near the top. So for the Space Wolves the question isn't who the
-sixth best Space Wolf is, it's don't you dare split those two up.
-
-One more thing on benching, and I think this is genuinely useful. The character
-you leave out to attack is usually not the character you leave out to defend. For
-the Ultramarines you bench Bellator for damage and Certus for survival. For the
-Necrons it's Makhotep or Thutmose. Seven of the nine change their mind depending
-on the job, and only the Aeldari and the Dark Angels bench the same person either
-way. So if you've been running one fixed faction team for both, you've probably
-been running the wrong one about half the time.
-
-## Part 4 - The machines, and one of them is doing nearly half the work
-
-Eleven of the twenty one factions get a Machine of War, and there's a toggle for
-it on the page because it matters more than I expected.
+Eleven of the twenty one factions get a Machine of War and ten of them don't, and
+that on its own is a real gap, because the machine turns out to matter more than I
+expected.
 
 The Malleus Rocket Launcher is doing thirty nine percent of the Astra Militarum's
-killing. Thirty nine percent, from the sixth slot. The Galatian is doing twenty
-four percent for the Ultramarines, and its Mythic ability takes twenty percent off
-everything the team takes, which turns them into the single hardest faction in the
-game to kill at four point five one attacks. The Biovore does twenty three percent
-for the Tyranids.
+killing. Thirty nine percent, out of the sixth slot. The Galatian is doing twenty
+four percent for the Ultramarines, and on top of that its Mythic ability takes
+twenty percent off everything the team takes, which turns the Ultramarines into
+the single hardest faction in the game to kill at four point five one attacks. The
+Biovore does twenty three percent for the Tyranids.
 
-And at the other end the Reanimator is doing about one percent, because it has no
-attack at all. It repairs, it revives, and it permanently raises a Necron's
-maximum health, which is really useful and is not damage.
+At the other end the Reanimator is doing about one percent, and that's not a bug,
+it's that the Reanimator has no attack at all. It repairs, it revives, and it
+permanently raises a Necron's maximum health, which is really useful and is not
+damage.
 
-Worth saying, because a few of you will check. The Sisters have the Exorcist and
-they're still last for damage, and the Ultramarines have the Galatian and they're
-still seventeenth. That's not the machine failing, it's that the five themselves
-aren't putting much out. The panel shows you the split now, so you can see exactly
-how much is the team and how much is the tank.
+Worth saying because a few of you will go and check. The Sisters have the Exorcist
+and they're still last for damage, and the Ultramarines have the Galatian and
+they're still seventeenth. That isn't the machine failing, it's that the five
+themselves aren't putting very much out, and the panel now splits it for you so
+you can see how much is the team and how much is the tank.
 
-## Part 5 - What this doesn't know, and you should hear it from me
+## Part 5 - The best factions in the game
 
-I want to be really straight about this, because Arena is its own thing.
+Right, let's get into it.
 
-The model has no idea about turn order. None. It doesn't know who moves first, and
-it doesn't know that going first lets you take somebody off the board before they
-ever answer, and in Arena that's frequently the whole game. So this is a ranking of
-what a faction can do, not a prediction of who wins.
+Two factions come out on top and they get there in completely different ways. The
+Adeptus Custodes are sixth for damage and third for toughness, and nobody else is
+that close to the top of both. They're also a five character faction, so there's
+no way to get the team wrong, and honestly that's worth something on its own.
 
-Both axes assume focus fire. Damage has all five hitting one enemy, toughness has a
-full enemy team of five hitting one of yours. That's deliberate, it's the same
-fight from both ends, and it's what Arena actually looks like when it's going well.
-Killing five enemies that way just takes five times as long, so it makes no
-difference to the order. What would change it is if your five split up and took an
-enemy each, because then your slowest character sets the pace instead of your
-fastest. The Leagues of Votann are seventh here and they'd be nineteenth, and
-that's Uthar doing all the work on his own.
+The Space Wolves tie them on the combined ranking, second for damage and seventh
+for toughness, but they get there by being brilliant when you build them properly
+and genuinely bad when you don't, and I've already told you why.
 
-There's one more I should mention because it changed the answer. You can't heal and
-attack. A heal is an action, like a repeatable active, so a healer either heals or
-swings and the model picks whichever is better. That single rule cost the Space
-Wolves first place, because Baldr feeding Ragnar means Baldr isn't hitting
-anything.
+Then the Tau, who are first in the game for damage at nought point five seven, and
+tenth for toughness, which is the shape you'd expect from them. Behind those three
+you've got the Black Templars and the Leagues of Votann sat together, both solidly
+good at both jobs without being frightening at either.
 
-## Part 6 - What I found out on the way
+## Part 6 - The specialists
 
-A few things fell out of this that I wasn't looking for.
+Then there's a group who are near the top of one axis and nowhere on the other, and
+I think these are the interesting ones to actually play.
 
-The Aeldari and the Emperor's Children have no defensive support at all. Nothing.
-Not a heal, not a shield, not one point of damage reduction handed to anybody.
-Every other faction in the game gains something on the defending side by grouping
-up, and those two gain exactly nought percent. You can see it on the chart because
-the Aeldari are third best in the game at killing things and dead last of twenty
-one at not dying, which is about as pure a glass cannon as you'll ever see.
+The Ultramarines are first in the game for toughness at four point five one and
+seventeenth for damage, so they're a wall that can't finish anything. The Death
+Guard are second for toughness and thirteenth for damage, which is very on brand.
+The Aeldari are the exact mirror, third in the game for damage and twenty first of
+twenty one for toughness, which is about as pure a glass cannon as you'll ever see
+on a chart.
 
-Then there's how completely unrelated the two kinds of synergy are. The Tau gain
-more than three times over on attack and they're tenth for toughness. The
-Ultramarines gain a quarter on attack and they more than double on defence. The
-Sisters gain nought point one percent attacking and forty seven percent defending.
-Factions are built for one job or the other almost across the board, and I really
-didn't expect it to be that clean.
+The Sisters are a strange one. They're dead last for damage at three point one six
+and ninth for toughness, and their defensive gain from grouping up is forty seven
+percent, which is one of the best in the game. So they will absolutely not kill
+you, but they are not going anywhere either.
 
-And here's one that's a bit uncomfortable. Under focused fire at this level, a
-hundred and twelve of the hundred and seventeen characters die inside a single
-enemy turn. So a heal that arrives once a turn very often arrives too late, which
-is why so few of these teams choose to heal at all.
+And then the middle. The Blood Angels, the Necrons, the Dark Angels, the Black
+Legion, the Mechanicus, the Orks and the Tyranids all sit in a fairly tight bunch
+around the centre of the chart. Personally I'd back a couple of these higher than
+the chart does, and I'll tell you which and why.
 
-## Part 7 - So who is the best faction in Tacticus
+*[Owner: your call here. The Necrons are ninth combined with the Reanimator, the
+Dark Angels tenth, the Black Legion eleventh. The Dark Angels are the faction the
+model most under-rated before the locked clauses went in.]*
 
-Right, the actual answer.
+## Part 7 - The bottom
 
-For pure damage it's the Tau at nought point five seven with the Tson'ji, then the
-Space Wolves at nought point seven one, and those two are clear of everybody. Third
-is the Aeldari at one point nought five.
+The Emperor's Children come last, nineteenth for damage and twentieth for
+toughness, and it's the defensive side that really does them in. They've got no
+defensive support at all, and I want to be precise about that, because Hascule has
+damage reduction on his active and he's got Parry, so it isn't that they can't
+protect themselves. It's that not one of the five gives anything to anybody else on
+that side, so unlike almost every other faction in the game they gain nothing at all
+by grouping up. And they haven't got a Machine of War to cover for it either.
 
-For toughness it's the Ultramarines at four point five one, then the Death Guard at
-three point six one, then the Custodes at three point four five. None of those three
-are near the top for damage.
+The Genestealer Cults are next, twentieth for damage and eighteenth for toughness,
+and again no machine. And then the Astra Militarum, and they're the interesting
+case of the three, because with the Malleus doing nearly forty percent of the work
+they're actually mid table for damage. It's the defending that sinks them, at
+nineteenth.
 
-So if you want one answer, it's the Adeptus Custodes. They're sixth for damage and
-third for toughness and nobody else manages to be that close to the top of both.
-They're also five characters, so there's no way to get the team wrong, which is
-worth something all on its own. The Space Wolves are the other end of that, second
-for damage and seventh for toughness, brilliant if you build them right and
-genuinely terrible if you don't.
-
-And at the bottom, it's the Emperor's Children. Nineteenth for damage, twentieth for
-toughness, no defensive support, and no machine to bail them out.
-
-One small thing I have to mention. The Astra Militarum are mid table now that the
-Malleus is counted properly, but their best five is still the one where you leave
-Castellan Creed at home. My own sparring partner, the character I've used to test
-every single model in this whole project, and the maths says bench him. I'm not
-doing it, and I want that on record, but the maths says it.
+Oh, and their best five is the one where you leave Castellan Creed at home. My own
+sparring partner, the character I've used to test every single model in this
+project, and the maths says bench him. I'm not doing it, and I want that on record,
+but the maths says it.
 
 ## Outro
 
-So that's the Faction Battle Map. Link's below, same deal as last time, one file,
-nothing to install, open it and click about. Machine of War on and off, pick the
-five for attacking or for defending, and there's a second page that walks through
-exactly how the five turn into the two numbers, if you want to see the working.
+So that's the Faction Battle Map. Link's down below, same as last time, it's one
+file with nothing to install, so open it and click about. You can switch the
+Machine of War on and off, you can pick the five for attacking or for defending,
+and there's a second page that walks through exactly how five characters turn into
+those two numbers if you want to see the working.
 
-If you take one thing away, make it this. A signature trait is not a reason to go
-pure, and a locked clause is. And if you play Space Wolves, keep Baldr and Ragnar
-next to each other and don't let anybody tell you different.
-
-Let me know which faction you run and whether the chart matches what you're seeing
-in Arena, because turn order is the one thing I can't put in there and you lot
-absolutely can. Cheers for watching.
+What I really want from you on this one is whether it matches your Arena. Turn
+order is the one thing I can't put in there and you lot absolutely can, so if the
+chart says a faction is good and it isn't, or the other way round, tell me
+underneath and I'll have a proper look at it. Cheers for watching.
