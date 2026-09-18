@@ -727,28 +727,96 @@ Overwatching, so it falls out under the rule.
 **+Movement buffs are never counted.** The model has no board, so movement does
 nothing. Corrodius's Chaos aura is the case that raised it.
 
-## Summons: the open one
+## Summons: the assessment, and how they get counted (owner, September 2026)
 
-Five characters' value is largely their spawns, and the Roster Battle Map counts
-none of it, because the map is a duel and a summon needs a board and a team. The
-Guild Raid model does count them (`summon_damage`), on the assumption that they
-arrive and then attack every round for the rest of the fight - reasonable against a
-boss that cannot kill them quickly, generous in Arena where they will be focused
-down.
+**31 characters summon something; 26 of those summons deal damage.** Five were
+false positives of a text search - Isabella resurrects allies, Adamatar damages
+enemies, and Thothmek, Ulf and Thaumachus all act *against* enemy summons.
 
-The owner wants this explored rather than guessed. The questions it turns on:
+For many characters the summon is worth **more than their own attack**:
 
-- **How long does a summon live?** The Guild Raid model assumes the whole fight.
-  In a five-on-five that is clearly too generous.
-- **Does it attack every round?** Most do, but some need a trigger: Winged Prime's
-  Hormagaunts need an attack that does not kill, Vynn's E-COGs need a repair,
-  Tan Gi'da's need his Imperative to be in the right stance.
-- **The caps matter** (`maxSummons`), and some replace rather than stack.
-- **Where do they count?** Proposal: fully on the faction page, where five-on-five
-  is the actual situation; not on the Roster Battle Map, whose axis is literally
-  "how many of *their attacks*" and which a summon's damage is not. Instead, mark
-  summoners on the map so they are not silently undersold - a visible note rather
-  than a wrong number.
+| Character | Own attack | Summons a round | Share |
+|---|---:|---:|---:|
+| Ammuk | 1,224 | 2,350 | **192%** |
+| Abraxas | 3,737 | 5,168 | **138%** |
+| Winged Prime | 2,945 | 3,582 | **122%** |
+| Archimatos | 6,180 | 5,770 | 93% |
+| Castellan Creed | 3,979 | 3,133 | 79% |
+| ... | | | |
+| Commander Shadowsun | 7,148 | 18 | 0% |
+
+**None of it counts on the Roster Battle Map today**, and the result is exactly
+what you would expect:
+
+    Ammuk         rank 117 of 117 for Damage   his active IS "summon a Steeljack"
+    Gibbascrapz   rank 114
+    Winged Prime  rank 112
+    Aleph-Null    rank 111
+    Bellator      rank 110
+    Abraxas       rank 103
+
+Ammuk is last in the game for Damage while having no personal damage in his kit
+at all - his passive buffs allies, his active summons. The map was scoring the
+half of the roster that kills things directly and ignoring the half that sends
+something to do it.
+
+### Four summons the model cannot see at all
+
+Two data-shape quirks, not modelling questions:
+
+- **`unitId_2` - a second summon in the same ability.** Abraxas's Screamers,
+  Archimatos's Blue Horrors and **Isaak's Neophyte Hybrids** all sit in slot two.
+  That is why Isaak read as "not counted": slot one is his weaponless *decoy*.
+- **`unitToSpawn` instead of `unitId`.** **Bellator** - an Ultramarine whose whole
+  kit is Inceptors - scores zero for all of it. Worth remembering that Ultramarines
+  were listed as a faction with neither a trait nor an ability synergy; that may
+  simply be because Bellator's kit is invisible.
+
+### The model
+
+**Summons count towards Damage. They do not count towards Toughness.**
+
+*Why Damage is clean.* The Damage axis asks how many of **their** attacks it takes
+to kill a typical character, and in that measure nobody attacks back - the defender
+is a punchbag. So there is nothing to kill the summons, the question of how long
+they live does not arise, and there is no circularity. The summon simply lives as
+long as the kill takes. `kill_count` already walks attack by attack at five
+attacks a turn, so summon damage lands at each turn boundary and the character
+reaches the kill in fewer of its own attacks. **The axis keeps its exact meaning**,
+which matters because the last video explained it.
+
+*Why Toughness is out of scope.* There the enemy is attacking, and whether your
+summons absorb attacks depends on what the enemy chooses to target - which the
+data cannot tell us. Counting summons for what they deal but not for what they
+soak is a statable limitation; inventing a targeting rule is not. Say it on the
+page.
+
+### The owner's rulings
+
+- **Triggers are treated like any other skill.** They either work, or they sit
+  behind the **All triggered** or **Actives on** switches, exactly as every other
+  conditional effect in the project does. No special machinery.
+- **Bellator gets one spawn**, fired in the first round he attacks. His "one
+  Inceptor for each round that has started" does not get to scale in a measure
+  this short.
+- **Six is the ceiling.** A character has at most six adjacent hexes, so at most
+  six units can attack it at once - which caps how many summons can be hitting the
+  same target regardless of what `maxSummons` says. (A Guild Raid boss is a Big
+  Target and occupies more hexes, so it can be surrounded by more - relevant there,
+  not here.)
+
+### Order of work
+
+All three of these change the Roster Battle Map, so they land before it is rebuilt
+and before the faction page is built on top of it:
+
+1. **The summon data fixes and the Damage axis** - `unitId_2`, `unitToSpawn`, and
+   summon damage into `kill_count`.
+2. **The five ally clauses** - Ramus, Asmodai, Baraqiel, Winged Prime's Synapse
+   multiplier, Isaak.
+3. **Forcas** - the one character who Overwatches *as well as* attacking.
+
+Then the faction page, then the script.
 
 ## The page
 
