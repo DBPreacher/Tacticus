@@ -683,6 +683,73 @@ ranking published before these are reviewed would be unfair to them specifically
 Some may be rightly uncounted (Isaak's decoys and Vynn's summon-repair are board
 effects, not damage) - that is an owner review, not a bug list.
 
+## The ally-clause review (owner, September 2026)
+
+58 clauses across 51 characters depend on what an ally is. 48 were already counted
+somewhere. The ten that were not have now been ruled on:
+
+| Character | Ruling |
+|---|---|
+| **Ramus** | **Count.** "It can be used again in his next turn without cooldown" is read literally, so next to another Dark Angel each use buys the next one: he fires his active **every round instead of twice**. The biggest of the ten. |
+| **Asmodai** | **Count.** +Damage against an enemy adjacent to a friendly Dark Angel, which in a Dark Angels five is permanently true. |
+| **Baraqiel** | **Count, literally.** His block bonus doubles next to another Dark Angel. It still needs him to block first, which follows the usual conditional convention: on under All triggered. |
+| **Winged Prime** | **Count the multiplier.** His Hormagaunts are already counted, but they trigger off "the Winged Prime **or another friendly unit with Synapse**" - and a Tyranid five has three (him, Neurothrope, Parasite of Mortrex), so it should fire three times as often. |
+| **Isaak** | **Count.** The only summoner the model cannot see: his Neophyte Hybrids arrive through decoys, a different data shape from `summonDmg`. |
+| **Sarquael** | **Do not count** - see the Overwatch rule below. |
+| **Corrodius** | **Do not count.** The ally clause is +Movement, and movement does nothing in this model. |
+| **Castellan Creed** | **Do not count the clause.** It needs Colour Sergeant Kell, who is not in the game. His summons are already counted. |
+| **Tan Gi'da** | **Nothing to do.** Already counted as summons, and the "ally" is his own summons, not a faction-mate. |
+| **Vynn** | **Nothing to do.** Already counted as summons; the ally is whoever he repairs. No faction angle. |
+
+**The Genestealer interaction, found by two pieces of work colliding.** Ambush
+resurrects a character "if there is still a friendly decoy on the battlefield" -
+and Isaak is the character who puts decoys on the battlefield. In a Genestealer
+five he is what makes the other three characters' second lives reliable. Neither
+half was counted before September 2026.
+
+## Overwatch (owner, September 2026)
+
+**The rule: a character Overwatches only if it would beat attacking, and it almost
+never does.** Overwatch triggers when you have not attacked that round, so it is an
+alternative to attacking, not an addition - take whichever is larger. Measured on
+Sarquael, the character it was raised for: his Overwatch shot does **2,800**
+against the median character where his normal attack does **6,459**. So he attacks,
+and Grim Retribution is correctly worth nothing.
+
+Eleven characters mention Overwatch and the rule disposes of ten. **Forcas is the
+exception**: "Strike Stance: at the end of his turn, Forcas starts Overwatching,
+**even if he attacked in his turn**." For him it is damage *on top of* attacking
+and should be counted. Imospekh's "+Damage while Overwatching" needs him to be
+Overwatching, so it falls out under the rule.
+
+## Movement (owner, September 2026)
+
+**+Movement buffs are never counted.** The model has no board, so movement does
+nothing. Corrodius's Chaos aura is the case that raised it.
+
+## Summons: the open one
+
+Five characters' value is largely their spawns, and the Roster Battle Map counts
+none of it, because the map is a duel and a summon needs a board and a team. The
+Guild Raid model does count them (`summon_damage`), on the assumption that they
+arrive and then attack every round for the rest of the fight - reasonable against a
+boss that cannot kill them quickly, generous in Arena where they will be focused
+down.
+
+The owner wants this explored rather than guessed. The questions it turns on:
+
+- **How long does a summon live?** The Guild Raid model assumes the whole fight.
+  In a five-on-five that is clearly too generous.
+- **Does it attack every round?** Most do, but some need a trigger: Winged Prime's
+  Hormagaunts need an attack that does not kill, Vynn's E-COGs need a repair,
+  Tan Gi'da's need his Imperative to be in the right stance.
+- **The caps matter** (`maxSummons`), and some replace rather than stack.
+- **Where do they count?** Proposal: fully on the faction page, where five-on-five
+  is the actual situation; not on the Roster Battle Map, whose axis is literally
+  "how many of *their attacks*" and which a summon's damage is not. Instead, mark
+  summoners on the map so they are not silently undersold - a visible note rather
+  than a wrong number.
+
 ## The page
 
 A **new page**, not a toggle on the Roster Battle Map. The map's unit of analysis
