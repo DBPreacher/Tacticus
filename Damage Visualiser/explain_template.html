@@ -113,7 +113,8 @@ function five(){
   const ts = F[S.who].teams.map(t => ({...t, d: (S.mow && t.dmg_mow) ? t.dmg_mow : t.dmg,
                                               tg: (S.mow && t.tough_mow) ? t.tough_mow : t.tough}));
   const t = ts.reduce((a, b) => b.d < a.d ? b : a);
-  return {t, members: t.names.map(n => ({n, ...t.per[n]}))};
+  const per = (S.mow && t.per_mow) ? t.per_mow : t.per;
+  return {t, members: t.names.map(n => ({n, ...per[n]}))};
 }
 
 function caption(big, small){
@@ -179,38 +180,44 @@ function step1(f, t, members, col){
 
 // 2. damage is a rate, so it adds up
 function step2(f, t, members, col){
-  const out = new Set(t.heal_d || []);
+  const out = new Set(((S.mow && t.heal_d_mow) ? t.heal_d_mow : t.heal_d) || []);
   const hitters = members.filter(m => !out.has(m.n));
-  const total = hitters.reduce((s, m) => s + 1 / m.d, 0);
+  const rate = (S.mow && t.mow_solo) ? 1 / t.mow_solo : 0;
+  const total = hitters.reduce((s, m) => s + 1 / m.d, 0) + rate;
   caption('Damage adds up as rates, not as attacks.',
     'You cannot average "attacks to kill", because two characters attacking together do not each take as '
     + 'long. Turn each one upside down and you get a rate, the share of a kill they land with one attack. '
-    + 'Those do add up. Add the five rates, and the five between them kill a typical character in '
+    + 'Those do add up. Add them together, and the team between them kills a typical character in '
     + `<em>1 &divide; ${total.toFixed(3)} = ${(1 / total).toFixed(3)}</em> attacks. Multiply by five to put it `
     + 'back on the same scale as the Roster Battle Map, and that is the faction’s Damage number.'
-    + (out.size ? ` <em>${[...out].join(' and ')}</em> spent the turn healing, so that one is not in the sum.` : ''));
+    + (out.size ? ` <em>${[...out].join(' and ')}</em> spent the turn healing, so that one is not in the sum.` : '')
+    + (rate ? ` The <em>${F[S.who].mow.name}</em> is the grey bar, and it is doing `
+              + `<em>${(t.mow_share * 100).toFixed(0)}%</em> of the killing on its own.` : ''));
   const max = nice(total * 1.08);            // the stack is the point, so the scale has to hold it
   const Y = axis(max, 'Kills per attack');
-  const slot = (W - M.l - M.r - 470) / members.length, bw = 66;
-  members.forEach((m, i) => {
+  const shown = rate ? members.concat([{n:F[S.who].mow.name, d:t.mow_solo, machine:true}]) : members;
+  const slot = (W - M.l - M.r - 470) / shown.length, bw = 66;
+  shown.forEach((m, i) => {
     const x = M.l + slot * (i + .5), r = 1 / m.d, y = Y(r);
     const g = el('g', {class:'bar' + (out.has(m.n) ? ' out' : '')});
-    el('rect', {x:x - bw / 2, y, width:bw, height:M.t + (H - M.t - M.b) - y, rx:3, fill:col}, g);
+    el('rect', {x:x - bw / 2, y, width:bw, height:M.t + (H - M.t - M.b) - y, rx:3,
+                fill:m.machine ? '#3b4450' : col}, g);
     el('text', {class:'val', x, y:y - 10, 'text-anchor':'middle'}, g).textContent = r.toFixed(3);
     el('text', {class:'sum', x, y:y - 30, 'text-anchor':'middle'}, g).textContent = `1 ÷ ${fmt(m.d)}`;
     el('text', {class:'name' + (out.has(m.n) ? ' out' : ''), x, y:H - M.b + 26, 'text-anchor':'middle'}, g)
       .textContent = out.has(m.n) ? m.n + ' (healing)' : m.n;
   });
   // the stack: every rate on top of the last, so the total is a height you can see
-  const sx = M.l + slot * members.length + 56;
+  const sx = M.l + slot * shown.length + 56;
   let run = 0;
-  for(const m of hitters){
+  for(const m of (rate ? hitters.concat([{n:'machine', d:t.mow_solo, machine:true}]) : hitters)){
     const y0 = Y(run), y1 = Y(run + 1 / m.d);
-    el('rect', {x:sx, y:y1, width:110, height:Math.max(y0 - y1, 1), rx:2, fill:col, stroke:'#0f1318',
-                'stroke-width':1.5});
+    el('rect', {x:sx, y:y1, width:110, height:Math.max(y0 - y1, 1), rx:2,
+                fill:m.machine ? '#3b4450' : col, stroke:'#0f1318', 'stroke-width':1.5});
     run += 1 / m.d;
   }
-  el('text', {class:'name', x:sx + 55, y:H - M.b + 26, 'text-anchor':'middle'}).textContent = 'All five';
+  el('text', {class:'name', x:sx + 55, y:H - M.b + 26, 'text-anchor':'middle'}).textContent =
+    rate ? 'All five + machine' : 'All five';
   el('text', {class:'brace-t', x:sx + 55, y:Y(total) - 12, 'text-anchor':'middle'}).textContent = total.toFixed(3);
   answer(sx + 160, t.d, 'Damage', `5 ÷ ${total.toFixed(3)}`);
 }
@@ -245,7 +252,8 @@ function step3(f, t, members, col){
 
 // 4. the same five with the buffs switched off
 function step4(f, t, members, col){
-  const gd = t.dmg_alone / t.d - 1, gt = t.tg / t.tough_alone - 1;
+  // the machine is not the five buffing each other, so the synergy step always leaves it out
+  const gd = t.dmg_alone / t.dmg - 1, gt = t.tough / t.tough_alone - 1;
   caption('What playing together is actually worth.',
     'The same five, measured against the same yardstick, with every buff they hand each other switched off '
     + 'and then switched back on. That gap is the only honest answer to "is this faction worth running '

@@ -6,6 +6,476 @@
   "adjacent": 3,
   "cap": 50
  },
+ "duel": {
+  "Abaddon The Despoiler": {
+   "d": 1.072,
+   "t": 3.304
+  },
+  "Abraxas": {
+   "d": 3.146,
+   "t": 1.566
+  },
+  "Actus": {
+   "d": 6.002,
+   "t": 3.817
+  },
+  "Adamatar": {
+   "d": 2.081,
+   "t": 2.386
+  },
+  "Aesoth": {
+   "d": 2.925,
+   "t": 7.362
+  },
+  "Aethana": {
+   "d": 3.123,
+   "t": 2.806
+  },
+  "Ahriman": {
+   "d": 1.761,
+   "t": 1.708
+  },
+  "Aleph-Null": {
+   "d": 4.598,
+   "t": 2.208
+  },
+  "Ammuk": {
+   "d": 8.267,
+   "t": 2.705
+  },
+  "Ancient Thoread": {
+   "d": 3.609,
+   "t": 4.24
+  },
+  "Angrax": {
+   "d": 3.043,
+   "t": 3.771
+  },
+  "Anuphet": {
+   "d": 3.032,
+   "t": 2.192
+  },
+  "Archimatos": {
+   "d": 1.887,
+   "t": 1.708
+  },
+  "Arjac": {
+   "d": 3.986,
+   "t": 3.845
+  },
+  "Asmodai": {
+   "d": 3.288,
+   "t": 2.706
+  },
+  "Atlacoya": {
+   "d": 2.864,
+   "t": 2.848
+  },
+  "Aun'Shi": {
+   "d": 3.836,
+   "t": 1.743
+  },
+  "Azkor": {
+   "d": 3.638,
+   "t": 4.44
+  },
+  "Azrael": {
+   "d": 2.326,
+   "t": 2.752
+  },
+  "Baldr": {
+   "d": 3.449,
+   "t": 5
+  },
+  "Baraqiel": {
+   "d": 2.777,
+   "t": 3.756
+  },
+  "Bellator": {
+   "d": 4.528,
+   "t": 2.393
+  },
+  "Boss Gulgortz": {
+   "d": 1.321,
+   "t": 2.659
+  },
+  "Brother Burchard": {
+   "d": 2.665,
+   "t": 3.987
+  },
+  "Brother Jaeger": {
+   "d": 2.627,
+   "t": 3.72
+  },
+  "Calandis": {
+   "d": 2.143,
+   "t": 1.504
+  },
+  "Castellan Creed": {
+   "d": 3.163,
+   "t": 4.003
+  },
+  "Celestine": {
+   "d": 2.245,
+   "t": 3.589
+  },
+  "Certus": {
+   "d": 2.203,
+   "t": 1.303
+  },
+  "Cezare": {
+   "d": 1.782,
+   "t": 3.551
+  },
+  "Commander Farsight": {
+   "d": 1.745,
+   "t": 2.392
+  },
+  "Commander Shadowsun": {
+   "d": 1.518,
+   "t": 1.789
+  },
+  "Commissar Yarrick": {
+   "d": 3.123,
+   "t": 1.69
+  },
+  "Corrodius": {
+   "d": 2.485,
+   "t": 3.101
+  },
+  "Cyrus": {
+   "d": 2.931,
+   "t": 1.935
+  },
+  "Dante": {
+   "d": 2.277,
+   "t": 3.576
+  },
+  "Darkstrider": {
+   "d": 2.711,
+   "t": 2.127
+  },
+  "Deathleaper": {
+   "d": 2.739,
+   "t": 5
+  },
+  "Eldryon": {
+   "d": 2.798,
+   "t": 1.596
+  },
+  "Exitor-Rho": {
+   "d": 2.706,
+   "t": 1.777
+  },
+  "Forcas": {
+   "d": 2.831,
+   "t": 2.606
+  },
+  "Gibbascrapz": {
+   "d": 5.492,
+   "t": 2.249
+  },
+  "Haarken Worldclaimer": {
+   "d": 2.409,
+   "t": 2.61
+  },
+  "Hascule": {
+   "d": 2.316,
+   "t": 3.65
+  },
+  "Havyr": {
+   "d": 0.899,
+   "t": 2.316
+  },
+  "High Marshal Helbrecht": {
+   "d": 2.989,
+   "t": 2.776
+  },
+  "Hollan": {
+   "d": 4.054,
+   "t": 2.333
+  },
+  "Imospekh": {
+   "d": 1.948,
+   "t": 1.925
+  },
+  "Incisus": {
+   "d": 2.793,
+   "t": 4.164
+  },
+  "Isaak": {
+   "d": 3.298,
+   "t": 3.073
+  },
+  "Isabella": {
+   "d": 6.733,
+   "t": 2.691
+  },
+  "Jain Zar": {
+   "d": 2.38,
+   "t": 2.245
+  },
+  "Judh": {
+   "d": 2.213,
+   "t": 2.158
+  },
+  "Kariyan": {
+   "d": 1.819,
+   "t": 3.549
+  },
+  "Kharn": {
+   "d": 0.813,
+   "t": 2.103
+  },
+  "Kimm": {
+   "d": 2.122,
+   "t": 5
+  },
+  "Kut Skoden": {
+   "d": 2.129,
+   "t": 2.572
+  },
+  "Laviscus": {
+   "d": 1.632,
+   "t": 2.135
+  },
+  "Lhykhis": {
+   "d": 2.004,
+   "t": 1.793
+  },
+  "Lucien": {
+   "d": 0.975,
+   "t": 1.037
+  },
+  "Lucius": {
+   "d": 2.732,
+   "t": 2.382
+  },
+  "Lysander": {
+   "d": 1.856,
+   "t": 6.626
+  },
+  "Macer": {
+   "d": 2.281,
+   "t": 1.401
+  },
+  "Makhotep": {
+   "d": 4.434,
+   "t": 2.059
+  },
+  "Maladus": {
+   "d": 1.895,
+   "t": 4.07
+  },
+  "Marneus Calgar": {
+   "d": 3.289,
+   "t": 3.099
+  },
+  "Marshal Dreir": {
+   "d": 3.008,
+   "t": 3.024
+  },
+  "Mataneo": {
+   "d": 2.647,
+   "t": 2.13
+  },
+  "Maugan Ra": {
+   "d": 1.729,
+   "t": 2.008
+  },
+  "Mephiston": {
+   "d": 1.086,
+   "t": 2.61
+  },
+  "Morvenn Vahl": {
+   "d": 2.687,
+   "t": 2.449
+  },
+  "Nauseous Rotbone": {
+   "d": 2.703,
+   "t": 4.811
+  },
+  "Neurothrope": {
+   "d": 2.255,
+   "t": 2.21
+  },
+  "Nicodemus": {
+   "d": 4.507,
+   "t": 2.15
+  },
+  "Njal": {
+   "d": 3.664,
+   "t": 2.737
+  },
+  "Nubari": {
+   "d": 1.178,
+   "t": 2.814
+  },
+  "Parasite of Mortrex": {
+   "d": 3.217,
+   "t": 2.378
+  },
+  "Pestillian": {
+   "d": 2.016,
+   "t": 3.009
+  },
+  "Ragnar": {
+   "d": 0.623,
+   "t": 2.615
+  },
+  "Ramus": {
+   "d": 0.961,
+   "t": 1.957
+  },
+  "Re'vas": {
+   "d": 1.542,
+   "t": 2.788
+  },
+  "Roswitha": {
+   "d": 3.342,
+   "t": 1.927
+  },
+  "Sarquael": {
+   "d": 2.098,
+   "t": 1.555
+  },
+  "Sekhetar": {
+   "d": 2.423,
+   "t": 2.267
+  },
+  "Shiron": {
+   "d": 2.612,
+   "t": 2.182
+  },
+  "Sho'syl": {
+   "d": 1.727,
+   "t": 1.443
+  },
+  "Sibyll Devine": {
+   "d": 2.748,
+   "t": 1.326
+  },
+  "Snappawrecka": {
+   "d": 3.749,
+   "t": 1.661
+  },
+  "Snotflogga": {
+   "d": 2.03,
+   "t": 3.004
+  },
+  "Sword Brother Godswyl": {
+   "d": 1.473,
+   "t": 3.211
+  },
+  "Sy-Gex": {
+   "d": 1.43,
+   "t": 2.363
+  },
+  "Tan Gi'da": {
+   "d": 2.955,
+   "t": 1.818
+  },
+  "Tanksmasha": {
+   "d": 2.129,
+   "t": 3.985
+  },
+  "Tarvakh": {
+   "d": 1.561,
+   "t": 2.565
+  },
+  "Thaddeus Noble": {
+   "d": 2.148,
+   "t": 1.428
+  },
+  "Thaumachus": {
+   "d": 2.62,
+   "t": 1.601
+  },
+  "The Patermine": {
+   "d": 1.68,
+   "t": 2.665
+  },
+  "Thothmek": {
+   "d": 3.562,
+   "t": 3.316
+  },
+  "Thutmose": {
+   "d": 1.283,
+   "t": 1.76
+  },
+  "Titus": {
+   "d": 2.384,
+   "t": 2.387
+  },
+  "Tjark": {
+   "d": 2.598,
+   "t": 2.637
+  },
+  "Toth": {
+   "d": 5.296,
+   "t": 4.073
+  },
+  "Trajann": {
+   "d": 2.637,
+   "t": 5.958
+  },
+  "Typhus": {
+   "d": 3.282,
+   "t": 3.793
+  },
+  "Tyrant Guard": {
+   "d": 2.746,
+   "t": 5.194
+  },
+  "Tyrith": {
+   "d": 1.399,
+   "t": 2.837
+  },
+  "Ulf": {
+   "d": 1.612,
+   "t": 2.056
+  },
+  "Uthar": {
+   "d": 1.875,
+   "t": 6.151
+  },
+  "Varro Tigurius": {
+   "d": 2.773,
+   "t": 1.268
+  },
+  "Vindicta": {
+   "d": 1.875,
+   "t": 1.629
+  },
+  "Vitruvius": {
+   "d": 2.039,
+   "t": 2.313
+  },
+  "Volk": {
+   "d": 1.452,
+   "t": 2.483
+  },
+  "Vynn": {
+   "d": 2.55,
+   "t": 2.718
+  },
+  "Winged Prime": {
+   "d": 4.445,
+   "t": 2.354
+  },
+  "Wrask": {
+   "d": 3.791,
+   "t": 4.537
+  },
+  "Xybia": {
+   "d": 2.688,
+   "t": 1.941
+  },
+  "Yazaghor": {
+   "d": 1.986,
+   "t": 1.291
+  }
+ },
  "factions": {
   "Adepta Sororitas": {
    "n": 5,
@@ -55,7 +525,32 @@
      "dmg_alone": 3.975704123265237,
      "tough_alone": 1.5752211812078099,
      "dmg_mow": 3.158867488555327,
-     "tough_mow": 2.993937175720053
+     "tough_mow": 2.993937175720053,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Celestine": {
+       "d": 3.299,
+       "t": 4.627
+      },
+      "Isabella": {
+       "d": 9.078,
+       "t": 2.282
+      },
+      "Morvenn Vahl": {
+       "d": 3.44,
+       "t": 2.437
+      },
+      "Roswitha": {
+       "d": 4.577,
+       "t": 2.874
+      },
+      "Vindicta": {
+       "d": 2.481,
+       "t": 2.75
+      }
+     },
+     "mow_share": 0.16256362905151897,
+     "mow_solo": 3.886
     }
    ],
    "alliance": "Imperial",
@@ -136,7 +631,11 @@
      "dmg_alone": 2.9182186913084873,
      "tough_alone": 3.182328655593237,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Imperial",
@@ -195,7 +694,11 @@
      "dmg_alone": 3.525613055593701,
      "tough_alone": 1.5426771759581366,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Imperial",
@@ -257,7 +760,11 @@
      "dmg_alone": 3.2258715596504355,
      "tough_alone": 1.2319610150988882,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -297,7 +804,11 @@
      "dmg_alone": 3.1771232586440465,
      "tough_alone": 1.2385672388463946,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -337,7 +848,11 @@
      "dmg_alone": 3.0195553641562833,
      "tough_alone": 1.202173093227971,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -377,7 +892,11 @@
      "dmg_alone": 2.9403538246640024,
      "tough_alone": 1.2859574896754444,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -417,7 +936,11 @@
      "dmg_alone": 3.083257272195837,
      "tough_alone": 1.287720244654514,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -457,7 +980,11 @@
      "dmg_alone": 2.9006727549420734,
      "tough_alone": 1.1433820895491946,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Xenos",
@@ -515,7 +1042,32 @@
      "dmg_alone": 3.8419927855226486,
      "tough_alone": 1.5965777798754246,
      "dmg_mow": 2.0903550580784547,
-     "tough_mow": 1.8041461067383904
+     "tough_mow": 1.8041461067383904,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Commissar Yarrick": {
+       "d": 4.081,
+       "t": 1.257
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 2.133
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 2.199
+      },
+      "Sibyll Devine": {
+       "d": 2.83,
+       "t": 0.899
+      }
+     },
+     "mow_share": 0.43058383265362216,
+     "mow_solo": 0.971
     },
     {
      "names": [
@@ -555,7 +1107,32 @@
      "dmg_alone": 3.8040549110094894,
      "tough_alone": 1.6008552961997304,
      "dmg_mow": 2.0660273592569105,
-     "tough_mow": 1.6092521804872915
+     "tough_mow": 1.6092521804872915,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Commissar Yarrick": {
+       "d": 3.877,
+       "t": 1.015
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 1.832
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 1.756
+      },
+      "Thaddeus Noble": {
+       "d": 2.712,
+       "t": 0.911
+      }
+     },
+     "mow_share": 0.4255726678001964,
+     "mow_solo": 0.971
     },
     {
      "names": [
@@ -595,7 +1172,32 @@
      "dmg_alone": 3.6538015358325793,
      "tough_alone": 1.4274214789013233,
      "dmg_mow": 1.9367636375587245,
-     "tough_mow": 1.590667835703512
+     "tough_mow": 1.590667835703512,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Commissar Yarrick": {
+       "d": 3.877,
+       "t": 1.257
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 2.133
+      },
+      "Sibyll Devine": {
+       "d": 2.468,
+       "t": 0.899
+      },
+      "Thaddeus Noble": {
+       "d": 2.712,
+       "t": 1.132
+      }
+     },
+     "mow_share": 0.3989461535643612,
+     "mow_solo": 0.971
     },
     {
      "names": [
@@ -635,7 +1237,32 @@
      "dmg_alone": 3.8421725307292123,
      "tough_alone": 1.4112319868704992,
      "dmg_mow": 1.9884387042069016,
-     "tough_mow": 1.5983788243829704
+     "tough_mow": 1.5983788243829704,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Commissar Yarrick": {
+       "d": 3.877,
+       "t": 1.257
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 2.199
+      },
+      "Sibyll Devine": {
+       "d": 2.468,
+       "t": 0.884
+      },
+      "Thaddeus Noble": {
+       "d": 2.712,
+       "t": 1.12
+      }
+     },
+     "mow_share": 0.409590492746843,
+     "mow_solo": 0.971
     },
     {
      "names": [
@@ -675,7 +1302,32 @@
      "dmg_alone": 3.6445494537871945,
      "tough_alone": 1.5806844875179797,
      "dmg_mow": 1.9475586078662872,
-     "tough_mow": 1.7791661237875125
+     "tough_mow": 1.7791661237875125,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Castellan Creed": {
+       "d": 4.781,
+       "t": 2.532
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 2.133
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 2.199
+      },
+      "Sibyll Devine": {
+       "d": 2.468,
+       "t": 0.899
+      },
+      "Thaddeus Noble": {
+       "d": 2.712,
+       "t": 1.132
+      }
+     },
+     "mow_share": 0.4011697660891565,
+     "mow_solo": 0.971
     },
     {
      "names": [
@@ -715,7 +1367,32 @@
      "dmg_alone": 3.563996596578314,
      "tough_alone": 1.2711618674588363,
      "dmg_mow": 1.9112360984020829,
-     "tough_mow": 1.434408224261025
+     "tough_mow": 1.434408224261025,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Commissar Yarrick": {
+       "d": 3.877,
+       "t": 1.257
+      },
+      "Kut Skoden": {
+       "d": 3.218,
+       "t": 2.133
+      },
+      "Marshal Dreir": {
+       "d": 4.104,
+       "t": 1.751
+      },
+      "Sibyll Devine": {
+       "d": 2.468,
+       "t": 0.899
+      },
+      "Thaddeus Noble": {
+       "d": 2.712,
+       "t": 1.132
+      }
+     },
+     "mow_share": 0.39368783842512056,
+     "mow_solo": 0.971
     }
    ],
    "alliance": "Imperial",
@@ -778,7 +1455,32 @@
      "dmg_alone": 2.4071041149322334,
      "tough_alone": 1.73741807844713,
      "dmg_mow": 1.067613599006976,
-     "tough_mow": 2.1996839983232848
+     "tough_mow": 2.1996839983232848,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Abaddon The Despoiler": {
+       "d": 0.617,
+       "t": 2.664
+      },
+      "Angrax": {
+       "d": 2.258,
+       "t": 3.134
+      },
+      "Archimatos": {
+       "d": 1.492,
+       "t": 1.259
+      },
+      "Haarken Worldclaimer": {
+       "d": 1.522,
+       "t": 2.193
+      },
+      "Volk": {
+       "d": 1.057,
+       "t": 1.748
+      }
+     },
+     "mow_share": 0.07389343085588171,
+     "mow_solo": 2.89
     }
    ],
    "alliance": "Chaos",
@@ -843,7 +1545,11 @@
      "dmg_alone": 3.2873644934920994,
      "tough_alone": 2.4390376818812105,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Imperial",
@@ -901,7 +1607,11 @@
      "dmg_alone": 2.1378321490597223,
      "tough_alone": 1.6432998331311977,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -941,7 +1651,11 @@
      "dmg_alone": 2.7566969355662603,
      "tough_alone": 1.6208397619089967,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -981,7 +1695,11 @@
      "dmg_alone": 2.2472757383869695,
      "tough_alone": 1.6505834932242156,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -1021,7 +1739,11 @@
      "dmg_alone": 2.7018970336513233,
      "tough_alone": 1.8115503523024967,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -1061,7 +1783,11 @@
      "dmg_alone": 2.2953859153251077,
      "tough_alone": 1.5323370661188895,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -1101,7 +1827,11 @@
      "dmg_alone": 2.4007603633320973,
      "tough_alone": 1.4734071735622791,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Imperial",
@@ -1163,7 +1893,32 @@
      "dmg_alone": 2.847909256214005,
      "tough_alone": 1.8745547020111446,
      "dmg_mow": 1.3021135628877805,
-     "tough_mow": 2.6071672415471308
+     "tough_mow": 2.6071672415471308,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 2.511
+      },
+      "Azrael": {
+       "d": 2.249,
+       "t": 2.378
+      },
+      "Baraqiel": {
+       "d": 2.05,
+       "t": 3.761
+      },
+      "Forcas": {
+       "d": 0.971,
+       "t": 2.569
+      },
+      "Ramus": {
+       "d": 0.792,
+       "t": 1.817
+      }
+     },
+     "mow_share": 0.07023442526559272,
+     "mow_solo": 3.708
     },
     {
      "names": [
@@ -1203,7 +1958,32 @@
      "dmg_alone": 3.475223361531336,
      "tough_alone": 1.8122790413056367,
      "dmg_mow": 1.5694492110498375,
-     "tough_mow": 2.5439985407423573
+     "tough_mow": 2.5439985407423573,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 2.511
+      },
+      "Azrael": {
+       "d": 2.249,
+       "t": 2.378
+      },
+      "Baraqiel": {
+       "d": 2.05,
+       "t": 3.761
+      },
+      "Forcas": {
+       "d": 0.971,
+       "t": 2.569
+      },
+      "Sarquael": {
+       "d": 1.645,
+       "t": 1.501
+      }
+     },
+     "mow_share": 0.08465418567422074,
+     "mow_solo": 3.708
     },
     {
      "names": [
@@ -1243,7 +2023,32 @@
      "dmg_alone": 2.691139409795549,
      "tough_alone": 1.734920013851284,
      "dmg_mow": 1.556623304062538,
-     "tough_mow": 2.3936604143616718
+     "tough_mow": 2.3936604143616718,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 2.511
+      },
+      "Azrael": {
+       "d": 2.249,
+       "t": 2.378
+      },
+      "Baraqiel": {
+       "d": 2.05,
+       "t": 3.761
+      },
+      "Ramus": {
+       "d": 0.792,
+       "t": 1.817
+      },
+      "Sarquael": {
+       "d": 2.489,
+       "t": 1.501
+      }
+     },
+     "mow_share": 0.08396237181755133,
+     "mow_solo": 3.708
     },
     {
      "names": [
@@ -1283,7 +2088,32 @@
      "dmg_alone": 2.6995973654524055,
      "tough_alone": 1.561275660716084,
      "dmg_mow": 1.3320017996279871,
-     "tough_mow": 2.155190450284083
+     "tough_mow": 2.155190450284083,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 2.511
+      },
+      "Azrael": {
+       "d": 2.249,
+       "t": 2.378
+      },
+      "Forcas": {
+       "d": 0.971,
+       "t": 2.569
+      },
+      "Ramus": {
+       "d": 0.792,
+       "t": 1.817
+      },
+      "Sarquael": {
+       "d": 2.489,
+       "t": 1.501
+      }
+     },
+     "mow_share": 0.07184656048135292,
+     "mow_solo": 3.708
     },
     {
      "names": [
@@ -1323,7 +2153,32 @@
      "dmg_alone": 2.7882342031787273,
      "tough_alone": 1.7027707231392244,
      "dmg_mow": 1.3168072777090858,
-     "tough_mow": 2.200322978967389
+     "tough_mow": 2.200322978967389,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Asmodai": {
+       "d": 2.887,
+       "t": 2.279
+      },
+      "Baraqiel": {
+       "d": 2.05,
+       "t": 3.21
+      },
+      "Forcas": {
+       "d": 0.971,
+       "t": 2.296
+      },
+      "Ramus": {
+       "d": 0.792,
+       "t": 1.763
+      },
+      "Sarquael": {
+       "d": 2.489,
+       "t": 1.452
+      }
+     },
+     "mow_share": 0.07102698640995417,
+     "mow_solo": 3.708
     },
     {
      "names": [
@@ -1363,7 +2218,32 @@
      "dmg_alone": 2.6510102074886444,
      "tough_alone": 1.7525175061398395,
      "dmg_mow": 1.6481223154214546,
-     "tough_mow": 2.3490885766889713
+     "tough_mow": 2.3490885766889713,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Azrael": {
+       "d": 3.091,
+       "t": 2.331
+      },
+      "Baraqiel": {
+       "d": 3.253,
+       "t": 3.706
+      },
+      "Forcas": {
+       "d": 1.466,
+       "t": 2.499
+      },
+      "Ramus": {
+       "d": 0.918,
+       "t": 1.777
+      },
+      "Sarquael": {
+       "d": 2.769,
+       "t": 1.432
+      }
+     },
+     "mow_share": 0.08889771744202302,
+     "mow_solo": 3.708
     }
    ],
    "alliance": "Imperial",
@@ -1426,7 +2306,32 @@
      "dmg_alone": 3.1915112075314234,
      "tough_alone": 2.4989812733299064,
      "dmg_mow": 1.8169817409742344,
-     "tough_mow": 3.6064239455818705
+     "tough_mow": 3.6064239455818705,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Corrodius": {
+       "d": 1.69,
+       "t": 3.862
+      },
+      "Maladus": {
+       "d": 1.799,
+       "t": 2.83
+      },
+      "Nauseous Rotbone": {
+       "d": 1.805,
+       "t": 3.173
+      },
+      "Pestillian": {
+       "d": 2.325,
+       "t": 3.778
+      },
+      "Typhus": {
+       "d": 2.356,
+       "t": 4.389
+      }
+     },
+     "mow_share": 0.07102058190330982,
+     "mow_solo": 5.117
     }
    ],
    "alliance": "Chaos",
@@ -1494,7 +2399,11 @@
      "dmg_alone": 3.0859748198243193,
      "tough_alone": 1.6209550738572607,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Chaos",
@@ -1555,7 +2464,11 @@
      "dmg_alone": 3.539458555239575,
      "tough_alone": 1.5867073367425741,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Xenos",
@@ -1614,7 +2527,11 @@
      "dmg_alone": 2.4759072443390515,
      "tough_alone": 2.281489250969844,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Xenos",
@@ -1676,7 +2593,32 @@
      "dmg_alone": 4.498260732606792,
      "tough_alone": 1.567215435423193,
      "dmg_mow": 2.238934578045811,
-     "tough_mow": 3.4316744176109912
+     "tough_mow": 3.4316744176109912,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aleph-Null": {
+       "d": 5,
+       "t": 2.858
+      },
+      "Anuphet": {
+       "d": 3.43,
+       "t": 3.459
+      },
+      "Imospekh": {
+       "d": 0.767,
+       "t": 4.773
+      },
+      "Makhotep": {
+       "d": 5.296,
+       "t": 3.288
+      },
+      "Thothmek": {
+       "d": 4.377,
+       "t": 2.781
+      }
+     },
+     "mow_share": 0.008955738312183246,
+     "mow_solo": 50.0
     },
     {
      "names": [
@@ -1716,7 +2658,32 @@
      "dmg_alone": 3.3045227856839237,
      "tough_alone": 1.3664174482619116,
      "dmg_mow": 2.290245392605987,
-     "tough_mow": 2.0107793849016176
+     "tough_mow": 2.0107793849016176,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aleph-Null": {
+       "d": 5,
+       "t": 2.001
+      },
+      "Anuphet": {
+       "d": 3.43,
+       "t": 2.001
+      },
+      "Imospekh": {
+       "d": 2.493,
+       "t": 1.748
+      },
+      "Makhotep": {
+       "d": 5.296,
+       "t": 1.823
+      },
+      "Thutmose": {
+       "d": 0.925,
+       "t": 2.481
+      }
+     },
+     "mow_share": 0.009160981570423948,
+     "mow_solo": 50.0
     },
     {
      "names": [
@@ -1756,7 +2723,32 @@
      "dmg_alone": 3.2238656657887352,
      "tough_alone": 1.5297963775799432,
      "dmg_mow": 1.9237819426339409,
-     "tough_mow": 3.303225226127335
+     "tough_mow": 3.303225226127335,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aleph-Null": {
+       "d": 5,
+       "t": 2.858
+      },
+      "Anuphet": {
+       "d": 3.43,
+       "t": 3.459
+      },
+      "Imospekh": {
+       "d": 2.493,
+       "t": 3.176
+      },
+      "Thothmek": {
+       "d": 4.377,
+       "t": 2.781
+      },
+      "Thutmose": {
+       "d": 0.686,
+       "t": 4.242
+      }
+     },
+     "mow_share": 0.007695127770535763,
+     "mow_solo": 50.0
     },
     {
      "names": [
@@ -1796,7 +2788,32 @@
      "dmg_alone": 3.7175987019226606,
      "tough_alone": 1.541713469837648,
      "dmg_mow": 2.0949484381459222,
-     "tough_mow": 3.3254808215672162
+     "tough_mow": 3.3254808215672162,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aleph-Null": {
+       "d": 5,
+       "t": 2.858
+      },
+      "Anuphet": {
+       "d": 3.43,
+       "t": 3.459
+      },
+      "Makhotep": {
+       "d": 5.296,
+       "t": 3.288
+      },
+      "Thothmek": {
+       "d": 4.377,
+       "t": 2.781
+      },
+      "Thutmose": {
+       "d": 0.686,
+       "t": 4.242
+      }
+     },
+     "mow_share": 0.00837979375258369,
+     "mow_solo": 50.0
     },
     {
      "names": [
@@ -1836,7 +2853,32 @@
      "dmg_alone": 3.4291214052646177,
      "tough_alone": 1.490029604406583,
      "dmg_mow": 2.5417813212676252,
-     "tough_mow": 3.0173264449777104
+     "tough_mow": 3.0173264449777104,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aleph-Null": {
+       "d": 5,
+       "t": 2.858
+      },
+      "Imospekh": {
+       "d": 2.493,
+       "t": 3.205
+      },
+      "Makhotep": {
+       "d": 5.296,
+       "t": 3.288
+      },
+      "Thothmek": {
+       "d": 4.377,
+       "t": 2.781
+      },
+      "Thutmose": {
+       "d": 1.077,
+       "t": 2.955
+      }
+     },
+     "mow_share": 0.010167125285070501,
+     "mow_solo": 50.0
     },
     {
      "names": [
@@ -1876,7 +2918,32 @@
      "dmg_alone": 3.251914492733867,
      "tough_alone": 1.490029604406583,
      "dmg_mow": 1.9320834441016106,
-     "tough_mow": 3.2746852031772296
+     "tough_mow": 3.2746852031772296,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Anuphet": {
+       "d": 3.43,
+       "t": 2.858
+      },
+      "Imospekh": {
+       "d": 2.493,
+       "t": 3.205
+      },
+      "Makhotep": {
+       "d": 5.296,
+       "t": 3.288
+      },
+      "Thothmek": {
+       "d": 4.377,
+       "t": 2.781
+      },
+      "Thutmose": {
+       "d": 0.686,
+       "t": 4.242
+      }
+     },
+     "mow_share": 0.007728333776406443,
+     "mow_solo": 50.0
     }
    ],
    "alliance": "Xenos",
@@ -1946,7 +3013,32 @@
      "dmg_alone": 3.4137564904808997,
      "tough_alone": 1.7310872397230266,
      "dmg_mow": 1.3747400307496558,
-     "tough_mow": 2.2141845131864457
+     "tough_mow": 2.2141845131864457,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Boss Gulgortz": {
+       "d": 1.494,
+       "t": 2.428
+      },
+      "Gibbascrapz": {
+       "d": 3.788,
+       "t": 1.844
+      },
+      "Snappawrecka": {
+       "d": 2.246,
+       "t": 1.672
+      },
+      "Snotflogga": {
+       "d": 1.055,
+       "t": 2.76
+      },
+      "Tanksmasha": {
+       "d": 1.343,
+       "t": 2.367
+      }
+     },
+     "mow_share": 0.15566187015440486,
+     "mow_solo": 1.766
     }
    ],
    "alliance": "Xenos",
@@ -2016,7 +3108,11 @@
      "dmg_alone": 2.7307734183611436,
      "tough_alone": 2.2444380479920647,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -2058,7 +3154,11 @@
      "dmg_alone": 2.5049706828010088,
      "tough_alone": 2.1744788835180513,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -2098,7 +3198,11 @@
      "dmg_alone": 3.807622909223259,
      "tough_alone": 2.1850930302074545,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -2140,7 +3244,11 @@
      "dmg_alone": 2.4237799884011855,
      "tough_alone": 2.144705484672305,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -2180,7 +3288,11 @@
      "dmg_alone": 2.440325757359208,
      "tough_alone": 1.8896385572798369,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     },
     {
      "names": [
@@ -2222,7 +3334,11 @@
      "dmg_alone": 2.3952832342165657,
      "tough_alone": 1.970919714708439,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Imperial",
@@ -2282,7 +3398,32 @@
      "dmg_alone": 3.1587091413282744,
      "tough_alone": 1.3652434919150085,
      "dmg_mow": 0.5866431380050283,
-     "tough_mow": 2.6479497055333727
+     "tough_mow": 2.6479497055333727,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 2.022
+      },
+      "Commander Farsight": {
+       "d": 1.298,
+       "t": 3.055
+      },
+      "Commander Shadowsun": {
+       "d": 0.881,
+       "t": 3.155
+      },
+      "Darkstrider": {
+       "d": 0.736,
+       "t": 2.092
+      },
+      "Re'vas": {
+       "d": 0.235,
+       "t": 2.916
+      }
+     },
+     "mow_share": 0.09466189534144652,
+     "mow_solo": 1.239
     },
     {
      "names": [
@@ -2322,7 +3463,32 @@
      "dmg_alone": 2.9562843568656048,
      "tough_alone": 1.2021227142502187,
      "dmg_mow": 0.854779559380714,
-     "tough_mow": 2.3240756115675527
+     "tough_mow": 2.3240756115675527,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 2.0
+      },
+      "Commander Farsight": {
+       "d": 1.298,
+       "t": 2.546
+      },
+      "Commander Shadowsun": {
+       "d": 0.881,
+       "t": 2.444
+      },
+      "Darkstrider": {
+       "d": 0.736,
+       "t": 1.997
+      },
+      "Sho'syl": {
+       "d": 0.629,
+       "t": 2.633
+      }
+     },
+     "mow_share": 0.13792891785160774,
+     "mow_solo": 1.239
     },
     {
      "names": [
@@ -2362,7 +3528,32 @@
      "dmg_alone": 2.8525652422878487,
      "tough_alone": 1.3001687369781543,
      "dmg_mow": 0.6998014552718177,
-     "tough_mow": 1.8302205900702615
+     "tough_mow": 1.8302205900702615,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 1.35
+      },
+      "Commander Farsight": {
+       "d": 1.773,
+       "t": 2.164
+      },
+      "Commander Shadowsun": {
+       "d": 1.04,
+       "t": 1.681
+      },
+      "Re'vas": {
+       "d": 0.308,
+       "t": 2.244
+      },
+      "Sho'syl": {
+       "d": 0.725,
+       "t": 1.712
+      }
+     },
+     "mow_share": 0.11292134489803744,
+     "mow_solo": 1.239
     },
     {
      "names": [
@@ -2402,7 +3593,32 @@
      "dmg_alone": 3.1375885654592808,
      "tough_alone": 1.3282395764790778,
      "dmg_mow": 0.7501606239920593,
-     "tough_mow": 2.5445935556356463
+     "tough_mow": 2.5445935556356463,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 2.022
+      },
+      "Commander Farsight": {
+       "d": 1.84,
+       "t": 3.055
+      },
+      "Darkstrider": {
+       "d": 1.117,
+       "t": 2.092
+      },
+      "Re'vas": {
+       "d": 0.3,
+       "t": 2.916
+      },
+      "Sho'syl": {
+       "d": 1.112,
+       "t": 2.638
+      }
+     },
+     "mow_share": 0.12104739981975528,
+     "mow_solo": 1.239
     },
     {
      "names": [
@@ -2442,7 +3658,32 @@
      "dmg_alone": 3.1477758070389656,
      "tough_alone": 1.2606046074742046,
      "dmg_mow": 1.1266069439292064,
-     "tough_mow": 2.3980084436491005
+     "tough_mow": 2.3980084436491005,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Aun'Shi": {
+       "d": 5.299,
+       "t": 2.0
+      },
+      "Commander Shadowsun": {
+       "d": 1.724,
+       "t": 2.444
+      },
+      "Darkstrider": {
+       "d": 2.39,
+       "t": 1.997
+      },
+      "Re'vas": {
+       "d": 0.618,
+       "t": 2.916
+      },
+      "Sho'syl": {
+       "d": 1.21,
+       "t": 2.633
+      }
+     },
+     "mow_share": 0.18179152146881386,
+     "mow_solo": 1.239
     },
     {
      "names": [
@@ -2482,7 +3723,32 @@
      "dmg_alone": 2.7527387294515364,
      "tough_alone": 1.3495976244381147,
      "dmg_mow": 0.5707238182014543,
-     "tough_mow": 2.209898817400071
+     "tough_mow": 2.209898817400071,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Commander Farsight": {
+       "d": 1.773,
+       "t": 2.546
+      },
+      "Commander Shadowsun": {
+       "d": 0.924,
+       "t": 2.076
+      },
+      "Darkstrider": {
+       "d": 1.117,
+       "t": 1.744
+      },
+      "Re'vas": {
+       "d": 0.257,
+       "t": 2.916
+      },
+      "Sho'syl": {
+       "d": 0.661,
+       "t": 1.769
+      }
+     },
+     "mow_share": 0.09209312245802447,
+     "mow_solo": 1.239
     }
    ],
    "alliance": "Xenos",
@@ -2546,7 +3812,32 @@
      "dmg_alone": 3.455432273318444,
      "tough_alone": 1.4068809515415377,
      "dmg_mow": 1.657697715964686,
-     "tough_mow": 1.93630544109709
+     "tough_mow": 1.93630544109709,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Abraxas": {
+       "d": 2.278,
+       "t": 2.522
+      },
+      "Ahriman": {
+       "d": 1.442,
+       "t": 1.556
+      },
+      "Sekhetar": {
+       "d": 2.435,
+       "t": 1.485
+      },
+      "Thaumachus": {
+       "d": 1.294,
+       "t": 1.427
+      },
+      "Toth": {
+       "d": 4.618,
+       "t": 2.69
+      }
+     },
+     "mow_share": 0.16033719278834258,
+     "mow_solo": 2.068
     },
     {
      "names": [
@@ -2586,7 +3877,32 @@
      "dmg_alone": 2.954968933896868,
      "tough_alone": 1.0262113831449122,
      "dmg_mow": 1.494719864813977,
-     "tough_mow": 1.4328019680174569
+     "tough_mow": 1.4328019680174569,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Abraxas": {
+       "d": 2.278,
+       "t": 1.36
+      },
+      "Ahriman": {
+       "d": 1.188,
+       "t": 1.006
+      },
+      "Sekhetar": {
+       "d": 2.435,
+       "t": 1.485
+      },
+      "Thaumachus": {
+       "d": 1.754,
+       "t": 1.427
+      },
+      "Yazaghor": {
+       "d": 1.667,
+       "t": 1.886
+      }
+     },
+     "mow_share": 0.14457351591980444,
+     "mow_solo": 2.068
     },
     {
      "names": [
@@ -2626,7 +3942,32 @@
      "dmg_alone": 3.2893791451557273,
      "tough_alone": 1.3757065224466327,
      "dmg_mow": 1.671369978250102,
-     "tough_mow": 1.622392431570987
+     "tough_mow": 1.622392431570987,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Abraxas": {
+       "d": 2.278,
+       "t": 1.36
+      },
+      "Ahriman": {
+       "d": 1.188,
+       "t": 1.556
+      },
+      "Sekhetar": {
+       "d": 2.435,
+       "t": 1.485
+      },
+      "Toth": {
+       "d": 4.618,
+       "t": 2.69
+      },
+      "Yazaghor": {
+       "d": 1.667,
+       "t": 1.021
+      }
+     },
+     "mow_share": 0.16165961251106856,
+     "mow_solo": 2.068
     },
     {
      "names": [
@@ -2666,7 +4007,32 @@
      "dmg_alone": 3.229187057200531,
      "tough_alone": 1.2672267830706876,
      "dmg_mow": 1.490890147394181,
-     "tough_mow": 1.4012866574186411
+     "tough_mow": 1.4012866574186411,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Abraxas": {
+       "d": 2.278,
+       "t": 0.91
+      },
+      "Ahriman": {
+       "d": 1.188,
+       "t": 1.006
+      },
+      "Thaumachus": {
+       "d": 1.294,
+       "t": 0.943
+      },
+      "Toth": {
+       "d": 4.618,
+       "t": 2.69
+      },
+      "Yazaghor": {
+       "d": 1.667,
+       "t": 1.457
+      }
+     },
+     "mow_share": 0.14420309486272684,
+     "mow_solo": 2.068
     },
     {
      "names": [
@@ -2706,7 +4072,32 @@
      "dmg_alone": 3.6734714436276628,
      "tough_alone": 1.3630945264720744,
      "dmg_mow": 1.8737913549022396,
-     "tough_mow": 1.769685111344619
+     "tough_mow": 1.769685111344619,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Abraxas": {
+       "d": 3.521,
+       "t": 1.36
+      },
+      "Sekhetar": {
+       "d": 2.435,
+       "t": 1.485
+      },
+      "Thaumachus": {
+       "d": 1.33,
+       "t": 1.427
+      },
+      "Toth": {
+       "d": 7.23,
+       "t": 2.69
+      },
+      "Yazaghor": {
+       "d": 1.667,
+       "t": 1.886
+      }
+     },
+     "mow_share": 0.18123837827770178,
+     "mow_solo": 2.068
     },
     {
      "names": [
@@ -2746,7 +4137,32 @@
      "dmg_alone": 3.1579535675845194,
      "tough_alone": 1.382373865017124,
      "dmg_mow": 1.9016281359716045,
-     "tough_mow": 1.8089514531118136
+     "tough_mow": 1.8089514531118136,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Ahriman": {
+       "d": 1.442,
+       "t": 1.556
+      },
+      "Sekhetar": {
+       "d": 3.546,
+       "t": 1.485
+      },
+      "Thaumachus": {
+       "d": 1.754,
+       "t": 1.427
+      },
+      "Toth": {
+       "d": 4.618,
+       "t": 2.69
+      },
+      "Yazaghor": {
+       "d": 2.608,
+       "t": 1.886
+      }
+     },
+     "mow_share": 0.18393083015836828,
+     "mow_solo": 2.068
     }
    ],
    "alliance": "Chaos",
@@ -2811,7 +4227,32 @@
      "dmg_alone": 3.696948793718391,
      "tough_alone": 2.230690496905885,
      "dmg_mow": 2.2380672136275863,
-     "tough_mow": 2.9960823563240893
+     "tough_mow": 2.9960823563240893,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Deathleaper": {
+       "d": 3.259,
+       "t": 3.849
+      },
+      "Neurothrope": {
+       "d": 2.332,
+       "t": 1.89
+      },
+      "Parasite of Mortrex": {
+       "d": 3.404,
+       "t": 2.675
+      },
+      "Tyrant Guard": {
+       "d": 3.102,
+       "t": 3.703
+      },
+      "Winged Prime": {
+       "d": 2.777,
+       "t": 2.863
+      }
+     },
+     "mow_share": 0.23368752861904005,
+     "mow_solo": 1.915
     }
    ],
    "alliance": "Xenos",
@@ -2875,7 +4316,32 @@
      "dmg_alone": 3.793866984352762,
      "tough_alone": 1.7527321014253516,
      "dmg_mow": 2.252069044592659,
-     "tough_mow": 3.9685485624270784
+     "tough_mow": 3.9685485624270784,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 5.059
+      },
+      "Certus": {
+       "d": 2.23,
+       "t": 3.581
+      },
+      "Incisus": {
+       "d": 2.829,
+       "t": 3.648
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 2.505
+      },
+      "Titus": {
+       "d": 2.149,
+       "t": 5.05
+      }
+     },
+     "mow_share": 0.2535081418101478,
+     "mow_solo": 1.777
     },
     {
      "names": [
@@ -2915,7 +4381,32 @@
      "dmg_alone": 3.843119731646069,
      "tough_alone": 1.5903846267234352,
      "dmg_mow": 2.3185383626327773,
-     "tough_mow": 4.129052051553467
+     "tough_mow": 4.129052051553467,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 6.015
+      },
+      "Certus": {
+       "d": 2.23,
+       "t": 3.911
+      },
+      "Incisus": {
+       "d": 2.829,
+       "t": 3.648
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 3.829
+      },
+      "Varro Tigurius": {
+       "d": 2.49,
+       "t": 3.242
+      }
+     },
+     "mow_share": 0.26099037835355976,
+     "mow_solo": 1.777
     },
     {
      "names": [
@@ -2955,7 +4446,32 @@
      "dmg_alone": 3.606599320669061,
      "tough_alone": 1.5233280347864537,
      "dmg_mow": 2.5651794508013634,
-     "tough_mow": 3.7665043597004755
+     "tough_mow": 3.7665043597004755,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 2.23
+      },
+      "Certus": {
+       "d": 2.977,
+       "t": 3.911
+      },
+      "Incisus": {
+       "d": 3.567,
+       "t": 3.648
+      },
+      "Titus": {
+       "d": 3.211,
+       "t": 5.801
+      },
+      "Varro Tigurius": {
+       "d": 3.395,
+       "t": 3.242
+      }
+     },
+     "mow_share": 0.28875396939699527,
+     "mow_solo": 1.777
     },
     {
      "names": [
@@ -2995,7 +4511,32 @@
      "dmg_alone": 3.753537095003955,
      "tough_alone": 1.3391560299261358,
      "dmg_mow": 2.2043364894851982,
-     "tough_mow": 1.8587903360722475
+     "tough_mow": 1.8587903360722475,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 2.23
+      },
+      "Certus": {
+       "d": 2.23,
+       "t": 1.222
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 2.505
+      },
+      "Titus": {
+       "d": 2.149,
+       "t": 2.352
+      },
+      "Varro Tigurius": {
+       "d": 2.49,
+       "t": 0.985
+      }
+     },
+     "mow_share": 0.24813504218063284,
+     "mow_solo": 1.777
     },
     {
      "names": [
@@ -3035,7 +4576,32 @@
      "dmg_alone": 3.9170073909499346,
      "tough_alone": 1.7376489531116115,
      "dmg_mow": 2.3005080842321814,
-     "tough_mow": 4.507043373874525
+     "tough_mow": 4.507043373874525,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Bellator": {
+       "d": 6.092,
+       "t": 6.015
+      },
+      "Incisus": {
+       "d": 2.829,
+       "t": 3.648
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 3.829
+      },
+      "Titus": {
+       "d": 2.149,
+       "t": 5.801
+      },
+      "Varro Tigurius": {
+       "d": 2.49,
+       "t": 3.242
+      }
+     },
+     "mow_share": 0.2589607681226348,
+     "mow_solo": 1.777
     },
     {
      "names": [
@@ -3075,7 +4641,32 @@
      "dmg_alone": 3.4523827047605558,
      "tough_alone": 1.6083369286106706,
      "dmg_mow": 2.096915682236198,
-     "tough_mow": 4.086314053479123
+     "tough_mow": 4.086314053479123,
+     "heal_d_mow": [],
+     "per_mow": {
+      "Certus": {
+       "d": 2.23,
+       "t": 3.911
+      },
+      "Incisus": {
+       "d": 3.567,
+       "t": 3.648
+      },
+      "Marneus Calgar": {
+       "d": 4.423,
+       "t": 3.829
+      },
+      "Titus": {
+       "d": 2.149,
+       "t": 5.801
+      },
+      "Varro Tigurius": {
+       "d": 2.49,
+       "t": 3.242
+      }
+     },
+     "mow_share": 0.2360430287040364,
+     "mow_solo": 1.777
     }
    ],
    "alliance": "Imperial",
@@ -3140,7 +4731,11 @@
      "dmg_alone": 2.3379580804621463,
      "tough_alone": 1.9219103008392548,
      "dmg_mow": null,
-     "tough_mow": null
+     "tough_mow": null,
+     "mow_share": null,
+     "mow_solo": null,
+     "per_mow": null,
+     "heal_d_mow": null
     }
    ],
    "alliance": "Chaos",

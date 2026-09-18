@@ -102,6 +102,8 @@ svg{display:block;width:100%;height:auto;font-family:var(--data)}
 .five td{padding:3px 0;font-size:13px;text-align:right;color:var(--ink-2)}
 .five td:first-child{text-align:left;color:var(--ink)}
 .five tr.bench td{color:var(--ink-3);font-style:italic}
+.five i{color:var(--ink-3);font-style:normal;font-size:11.5px;margin-left:5px}
+.fine{font-size:11.5px;color:var(--ink-3);margin:-4px 0 10px;line-height:1.45}
 .notes{font-size:12.5px;color:var(--ink-2);margin:0}
 .notes b{color:var(--ink);font-weight:600}
 .notes p{margin:0 0 7px}
@@ -238,6 +240,23 @@ footer em{color:var(--ink-2);font-style:normal}
         benching the wrong character costs. Twelve factions have five characters and no bar at all, which
         is its own answer: there is no decision to make. The one left out is named in the panel, and for
         seven of the nine it is <em>not</em> the same character for attacking as for defending.</dd>
+      <dt>Why these are not the Roster Battle Map's numbers</dt>
+      <dd>They should not be. On the map every character fights a <em>plain</em> roster, nobody buffed. Here
+        every one of the 117 has its own faction standing round it, so the enemies hit much harder and are
+        much harder to kill. Toughness drops by about 18% across the roster as a result, and where a faction
+        has no defensive support of its own it drops a great deal more: Hascule is 3.65 attacks on the map
+        and 2.28 here, because the Emperor's Children give each other nothing on that side while everyone
+        they face is being shielded and healed. Where the support is strong it goes the other way, and
+        Imospekh more than doubles. The grey figure beside each character in the panel is their map number,
+        so the gap is always in front of you.</dd>
+      <dt>Both axes assume focus fire</dt>
+      <dd>Damage has the five all hitting one enemy, and Toughness has a full enemy team of five hitting one
+        of yours. It is deliberately the same fight from both ends, and it is what Arena actually is: you
+        remove a threat before it gets to act. Killing five enemies that way simply takes five times as
+        long, so counting one or counting five gives exactly the same ranking. It would only change if the
+        five <em>split up</em> and took an enemy each, because then the slowest member sets the pace rather
+        than the fastest &mdash; and a faction carried by one monster would look far worse. That is a real
+        difference: the Leagues of Votann are 7th here and would be 19th, which is Uthar doing the work.</dd>
       <dt>A healer does not attack</dt>
       <dd>You cannot heal and attack, so a heal is treated as a repeatable active: the eleven characters
         with a heal or repair action either spend the turn on it or spend it swinging, and the model keeps
@@ -291,7 +310,7 @@ footer em{color:var(--ink-2);font-style:normal}
 <script>
 const DATA = /*DATA*/;
 const BADGES = /*BADGES*/;
-const F = DATA.factions;
+const F = DATA.factions, DUEL = DATA.duel;
 const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
 const NS = 'http://www.w3.org/2000/svg';
 const S = {view:'map', mow:0, pick:'dmg', names:true, sel:'Dark Angels', q:'',
@@ -305,7 +324,9 @@ const pretty = t => PRETTY[t] || t.replace(/(?!^)([A-Z])/g, ' $1');
 
 // the fives a faction can field, with the numbers the current settings ask for
 function teams(name){
-  return (F[name].teams || []).map(t => ({...t, d: (S.mow && t.dmg_mow) ? t.dmg_mow : t.dmg}));
+  return (F[name].teams || []).map(t => ({...t, dmg0: t.dmg, tough0: t.tough,
+    d: (S.mow && t.dmg_mow) ? t.dmg_mow : t.dmg,
+    tough: (S.mow && t.tough_mow) ? t.tough_mow : t.tough}));
 }
 // the five a faction would field for one job. `best` follows the Pick control; `bestOn` is told which.
 function bestOn(name, key){
@@ -458,7 +479,7 @@ function hover(e, n, t){
   tip.innerHTML = `<b>${n}</b>`
     + `<div class="row">Damage <b>${t.d.toFixed(2)}</b></div>`
     + `<div class="row">Toughness <b>${t.tough.toFixed(2)}</b></div>`
-    + `<div class="row">Together they gain <b>${pct(t.dmg_alone / t.dmg - 1)}</b></div>`
+    + `<div class="row">Together they gain <b>${pct(t.dmg_alone / t.dmg0 - 1)}</b></div>`
     + (t.benched ? `<div class="row">Left out <b>${t.benched}</b></div>` : '')
     + (f.mow ? `<div class="row">Machine <b>${f.mow.name}</b></div>` : '');
   tip.style.opacity = 1;
@@ -488,10 +509,13 @@ function detail(){
   }
   const n = S.sel, f = F[n];
   const t = best(n);
-  const gd = t.dmg_alone / t.dmg - 1, gt = t.tough / t.tough_alone - 1;
+  // synergy is what the five do for each other, so it is measured without the machine either way
+  const gd = t.dmg_alone / t.dmg0 - 1, gt = t.tough0 / t.tough_alone - 1;
+  const was = (v, k) => `<i>${DUEL[k] ? DUEL[k].toFixed(2) : ''}</i>`;
   const rows = f.roster.map(m => {
-    const p = t.per[m];
-    return p ? `<tr><td>${m}</td><td>${p.d.toFixed(2)}</td><td>${p.t.toFixed(2)}</td></tr>`
+    const p = t.per[m], q = DUEL[m] || {};
+    return p ? `<tr><td>${m}</td><td>${p.d.toFixed(2)} <i>${q.d.toFixed(2)}</i></td>
+                    <td>${p.t.toFixed(2)} <i>${q.t.toFixed(2)}</i></td></tr>`
              : `<tr class="bench"><td>${m}</td><td colspan="2">left out</td></tr>`;
   }).join('');
   const lacks = [];
@@ -510,14 +534,21 @@ function detail(){
     </div>
     <table class="five"><thead><tr><th>The five</th><th>Damage</th><th>Toughness</th></tr></thead>
       <tbody>${rows}</tbody></table>
+    <p class="fine">The grey figure is what that character scores on the Roster Battle Map, alone in a
+      duel. Everyone here is fighting buffed enemies, so almost every number moves.</p>
     <div class="notes">
       <p><b>All five together</b> take ${(t.tough * 5).toFixed(1)} attacks to wipe out, and kill a typical
         character in ${(t.d / 5).toFixed(2)} attacks between them.</p>
       ${f.signature.length ? `<p><b>Signature trait</b> ${f.signature.map(pretty).join(', ')} &mdash; carried
         everywhere they fight, so it is no reward for going pure.</p>` : '<p><b>No signature trait.</b></p>'}
-      ${f.mow ? `<p><b>${f.mow.name}</b> &mdash; ${f.mow.buff
-        ? f.mow.buff + (f.mow.note ? ', ' + f.mow.note : '')
-        : (f.mow.defence || 'its Mythic ability is not read yet')}.</p>` : '<p><b>No Machine of War.</b></p>'}
+      ${f.mow ? `<p><b>${f.mow.name}</b> &mdash; ${[f.mow.buff && f.mow.buff + (f.mow.note ? ', ' + f.mow.note : ''),
+        f.mow.defence].filter(Boolean).join('; ') || 'its Mythic ability is not read yet'}.
+        ${t.mow_share != null ? `With it on, the five go from <b>${t.dmg0.toFixed(2)}</b> to
+        <b>${t.dmg_mow.toFixed(2)}</b> on Damage and <b>${t.tough0.toFixed(2)}</b> to
+        <b>${t.tough_mow.toFixed(2)}</b> on Toughness, and the machine itself is doing
+        <b>${(t.mow_share * 100).toFixed(0)}%</b> of the killing &mdash; on its own it would need
+        ${t.mow_solo.toFixed(1)} turns to put down a typical character.` : ''}</p>`
+        : '<p><b>No Machine of War.</b></p>'}
       ${lacks.length ? `<p><b>Worth knowing</b> &mdash; ${lacks.join('; ')}.</p>` : ''}
       ${f.teams.length > 1 ? `<p><b>The sixth character</b> costs them ${((worst(n) / t.d - 1) * 100).toFixed(0)}% of their damage
         at worst. Left out here: ${t.benched}.</p>` : '<p>Five characters, so there is no choice to make.</p>'}
@@ -532,8 +563,8 @@ function table(){
     const f = F[n], t = best(n);
     return {n, f, t, faction:n, bench:(t && t.benched) || '', size:f.n,
             dmg:t ? t.d : Infinity, tough:t ? t.tough : -Infinity,
-            dgain:t ? t.dmg_alone / t.dmg - 1 : -Infinity,
-            tgain:t ? t.tough / t.tough_alone - 1 : -Infinity,
+            dgain:t ? t.dmg_alone / t.dmg0 - 1 : -Infinity,
+            tgain:t ? t.tough0 / t.tough_alone - 1 : -Infinity,
             mow:(f.mow || {}).name || ''};
   });
   const k = S.sort.k, dir = S.sort.dir;

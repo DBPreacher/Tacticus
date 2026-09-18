@@ -42,12 +42,12 @@ def badges(factions):
 
 
 def main():
-    data, version = fd.build()
+    data, version, duel = fd.build()
     fd.report(data)
     payload = dict(version=version,
                    setting=dict(tier='mythic', level=fd.bm.ABILITY_LEVELS[1], adjacent=fd.gr.ADJACENT_ALLIES,
                                 cap=fd.CAP),
-                   factions=data)
+                   duel=duel, factions=data)
     with open(fd.OUT_JSON, 'w', encoding='utf-8') as f:
         json.dump(payload, f, indent=1)
     art = badges(sorted(data))

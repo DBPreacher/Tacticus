@@ -532,10 +532,20 @@ def build(tier=2, verbose=True):
             row['tough_alone'] = st.mean(p[1] for p in alone)
             if mow:
                 withm = [axes(combo, h, buff, rate, mow_ds, shield, gifts) for h in branches]
-                row['dmg_mow'] = min(x[0] for x in withm)
-                row['tough_mow'] = max(x[1] for x in withm)
+                bdm = min(withm, key=lambda x: x[0])
+                btm = max(withm, key=lambda x: x[1])
+                row['dmg_mow'], row['tough_mow'] = bdm[0], btm[1]
+                # the per-member numbers with the machine on as well, so the explainer page's sum still
+                # lands on the figure printed beside it
+                row['heal_d_mow'] = sorted(branches[withm.index(bdm)])
+                row['per_mow'] = {n: dict(d=round(bdm[2][n][0], 3), t=round(btm[2][n][1], 3)) for n in bdm[2]}
+                # what the machine itself is doing, as its share of the five-plus-machine kill rate
+                own = sum(1 / bdm[2][n][0] for n in bdm[2] if n not in row['heal_d_mow']) + rate
+                row['mow_share'] = rate / own if own else 0.0
+                row['mow_solo'] = round(1 / rate, 3) if rate else None
             else:
-                row['dmg_mow'] = row['tough_mow'] = None
+                row['dmg_mow'] = row['tough_mow'] = row['mow_share'] = row['mow_solo'] = None
+                row['per_mow'] = row['heal_d_mow'] = None
             teams.append(row)
         # A signature trait is one every member carries. It falls out of the data rather than being
         # listed by hand, so whatever the game adds next is picked up - and it is worth saying on the
@@ -551,7 +561,7 @@ def build(tier=2, verbose=True):
         if verbose and teams:
             best = min(teams, key=lambda t: t['dmg'])
             print(f'  {faction:22} {len(teams)} five(s): best damage {best["dmg"]:.2f}')
-    return out, g['version']
+    return out, g['version'], {n: dict(d=round(v[0], 3), t=round(v[1], 3)) for n, v in duel.items()}
 
 
 def report(data):
@@ -579,14 +589,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--json', action='store_true', help='write faction_data.json as well')
     args = ap.parse_args()
-    data, version = build()
+    data, version, duel = build()
     report(data)
     if args.json:
         with open(OUT_JSON, 'w', encoding='utf-8') as f:
             json.dump(dict(version=version,
                            setting=dict(tier='mythic', level=bm.ABILITY_LEVELS[1], trig=TRIG, act=ACT,
                                         gear=GEAR, adjacent=gr.ADJACENT_ALLIES, cap=CAP),
-                           factions=data), f, indent=1)
+                           duel=duel, factions=data), f, indent=1)
         print(f'\nWrote {os.path.basename(OUT_JSON)}.')
 
 
