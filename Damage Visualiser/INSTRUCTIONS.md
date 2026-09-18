@@ -53,6 +53,13 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `best_fives.json` | **The answers.** The proven best five for each fight, the Machine of War it brings, and for all 111 characters the best team containing them - plus a fingerprint of everything that decided them | **Never.** `brute_all.js` writes it |
 | `guild-raid.html` | The built Guild Raid page | **Never.** It's overwritten |
 | `support-map.html` | The built Support Map | **Never.** It's overwritten |
+| `faction_data.py` | The model behind the Faction Battle Map: every faction as a five that plays together, with its mates' buffs and its faction-locked clauses. `python -X utf8 faction_data.py [--json]` prints the table in about eight seconds. See "Faction Battle Map" | Only to change the rules |
+| `build_faction.py` | Builds `faction-battle-map.html`: runs `faction_data.py`, inlines the badges, fills the template | No |
+| `faction_template.html` | The Faction Battle Map's design. `/*DATA*/` takes the model output, `/*BADGES*/` the inlined badges | Yes, for design changes |
+| `faction-battle-map.html` | The built page | **Never.** It's overwritten |
+| `faction_data.json` | The same numbers as a file, for anything else that wants them | **Never.** `build_faction.py` writes it |
+| `faction_badges.py` | Trims the owner's faction icons to 64px transparent squares in `faction_badges/`. Re-run it when a faction is added | No |
+| `faction_badges/` | Those badges, 22 of them, about 57 KB in total | **Never.** It's overwritten |
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
 | `map_template.html` | The page design and code. `/*DATA*/` is replaced with the model output | Yes, for design changes |
 | `roster-battle-map.html` | The built page that gets published | **Never.** It's overwritten on every build |
@@ -327,8 +334,6 @@ to be thorough. See PLAN.md, "How good is the search?".
 
 ---
 
-## Recording it for a video---
-
 ## Recording it for a video
 
 Record the page itself with screen capture, pressing the buttons on camera
@@ -529,6 +534,42 @@ game-data variable names, so they follow the ability level and rarity.
   weaker enemy attacks (a Suppressed enemy deals 30% less, Stunned 50% less,
   as on the roster map); area effects cover the enemy turn, single-target
   ones one attack.
+
+---
+
+## Faction Battle Map
+
+`faction-battle-map.html`, built by `build_faction.py`. The Roster Battle Map asks what one
+character does in a duel; this asks what a whole faction does together, which is the Arena and
+Tournament Arena question - five of one faction plus a Machine of War.
+
+    python -X utf8 build_faction.py        # about eight seconds
+
+**One setting, the same one the Guild Raid page uses**: maxed Mythic, level 60 abilities, standard
+gear with the relic, actives on, everything triggered. There is nothing to toggle except the
+Machine of War and which five you want to see.
+
+**What it counts that the map does not.** The mates' support, both sides of it, straight out of
+`support_abilities.csv` through `support_model.buffed()` and `support_model.defence_for()`. And the
+faction-locked clauses that are worth exactly nothing in a duel - Asmodai's and Baraqiel's +Damage
+beside a Dark Angel, Forcas counting who is next to him, the Winged Prime's Hormagaunts arriving
+once for every Synapse ally, the Norn Crown naming Summons. Those four rules live in
+`guild_raid.py` and are imported from there, so there is one definition of each and not two. **If
+you add a fifth, add it to `guild_raid.py` and both pages get it.**
+
+**The two axes.** Damage adds up as rates and Toughness adds up as time, so a faction's Damage is
+`5 / sum(1/k)` and its Toughness is the mean of the five. Both stay in "attacks to kill", so they
+read against the Roster Battle Map's numbers directly. The yardstick is every one of the 117 given
+its own faction's buffs and then measured against the others doing the same.
+
+**What it does not know**, and the page says all of this out loud: turn order, which in Arena is
+frequently the whole game; focus fire, because underneath it is still one attacker against one
+defender; and six of the eleven Machines of War, which are defensive and whose Mythic abilities
+nothing reads yet - so a machine never moves the Toughness axis.
+
+Two open questions are in PLAN.md rather than here, because they are rulings and not bugs: whether
+a healer who heals *as its action* should also be attacking that turn, and Pestillian's Chaos
+clause.
 
 ---
 
