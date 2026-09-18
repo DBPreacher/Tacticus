@@ -58,6 +58,8 @@ https://claude.ai/code/artifact/56e1db91-e3a8-45aa-ba58-0d2c9a8b84f8
 | `faction_template.html` | The Faction Battle Map's design. `/*DATA*/` takes the model output, `/*BADGES*/` the inlined badges | Yes, for design changes |
 | `faction-battle-map.html` | The built page | **Never.** It's overwritten |
 | `faction_data.json` | The same numbers as a file, for anything else that wants them | **Never.** `build_faction.py` writes it |
+| `explain_template.html` | The "how a faction gets its two numbers" graphic's design, a sibling of `typical_template.html` | Yes, for design changes |
+| `faction-explained.html` | That graphic, built | **Never.** It's overwritten |
 | `faction_badges.py` | Trims the owner's faction icons to 64px transparent squares in `faction_badges/`. Re-run it when a faction is added | No |
 | `faction_badges/` | Those badges, 22 of them, about 57 KB in total | **Never.** It's overwritten |
 | `relic_owners.csv` | Which characters can equip each relic, read from the wiki by `update_game_data.py` | Only to fix a wiki mistake |
@@ -562,14 +564,27 @@ you add a fifth, add it to `guild_raid.py` and both pages get it.**
 read against the Roster Battle Map's numbers directly. The yardstick is every one of the 117 given
 its own faction's buffs and then measured against the others doing the same.
 
-**What it does not know**, and the page says all of this out loud: turn order, which in Arena is
-frequently the whole game; focus fire, because underneath it is still one attacker against one
-defender; and six of the eleven Machines of War, which are defensive and whose Mythic abilities
-nothing reads yet - so a machine never moves the Toughness axis.
+**What it does not know**, and the page says both out loud: turn order, which in Arena is frequently
+the whole game, and focus fire, because underneath it is still one attacker against one defender.
 
-Two open questions are in PLAN.md rather than here, because they are rulings and not bugs: whether
-a healer who heals *as its action* should also be attacking that turn, and Pestillian's Chaos
-clause.
+**A healer does not attack.** You cannot heal and attack, and a heal is a repeatable active (owner,
+September 2026), so the eleven characters with a heal or repair action either spend the turn on it or
+spend it swinging, and the model keeps whichever is better for the axis being asked about. Baldr is
+the one it really matters for. Worth knowing when reading the output: under focused fire at this level
+112 of the 117 die inside one enemy turn, and `regen` only ticks at a turn boundary, so a once-a-turn
+heal usually arrives too late and most fives choose to attack.
+
+**Machines of War** are read for Arena, not for a raid: one action a turn so the machine fires its best
+available ability, marked hexes land, the summoning actives count, the rail rifle counts at full, and
+the buffs buried inside those attacks count. A machine spends its first turn on whatever it sets up - a
+summon or a buff - and attacks every round after. All eleven Mythic abilities count, including the five
+defensive ones the Guild Raid model had no use for. The tables are at the top of `faction_data.py` and
+the full audit of all 22 actives is in PLAN.md.
+
+`faction-explained.html` is the graphic for the video: four steps showing the five turning into the two
+numbers. It is built by the same script, so it can never drift from the page.
+
+One open ruling is left in PLAN.md: Pestillian's Chaos clause.
 
 ---
 
