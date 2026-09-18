@@ -1,22 +1,24 @@
 # DB Preacher — Voice Guide
 
-**Status: third draft (September 2026).** Written from the scripts in
-`Examples/`, corrected by the owner, and checked against his edit of a
-Claude draft (see "What his edit of a draft changed"):
-- **Space Hulk** and **Top 10 Xenos** are entirely his own writing. **They
-  are the voice reference.**
-- The **Genestealer Cults** lore was written with a tool, and parts of
-  **Laviscus** read the same way (short sentences, em dashes). Use those two
-  for structure only, not for sentence style.
-- **No lore section by default.** Include lore only when the video needs
-  it (e.g. a faction guide).
+**Status: fourth draft (September 2026).** Written from the fifteen scripts in
+`Examples/`, corrected by the owner, and checked against his edit of a Claude
+draft (see "What his edit of a draft changed").
 
-The five scripts:
-- Does Laviscus Do Anything?
-- Plan NOW to get Uthar for FREE!
-- How to ace the Space Hulk Event
-- Top 10 Xenos in Tacticus (2025)
-- Beginners Guide to Genestealers Cult
+**Which ones are the voice reference.** The owner added nine more in September
+2026, including four from 2024 written before he used any tool. Those, plus Space
+Hulk, are the purest sample:
+
+- **Entirely his own writing:** the six Top 10s (Chaos, Imperial and Xenos, 2024
+  and 2025), Space Hulk, and Does Judh Do Anything. Zero em dashes in all of them.
+- **His framing with a tool-written lore section dropped in:** Laviscus, Lucius,
+  the Genestealer Cults guide. Use them for structure, never for sentence style -
+  the lore in Lucius ends paragraphs like *"Death is not an end for Lucius. It is
+  a door."*, which is the tool talking.
+- **No lore section by default.** Include it only when the video needs it.
+
+The fifteen cover four formats, and the format matters more than I first thought:
+countdowns, character reviews ("Does X do anything?"), event guides, and planning
+guides.
 
 Short quotes from them are used below as examples. Quote the *style*; don't
 reuse whole lines in new scripts.
@@ -48,15 +50,30 @@ reuse whole lines in new scripts.
 
 ## How it sounds
 
-**Measured on his own scripts** (Space Hulk, Top 10) compared with the
-tool-assisted ones (Genestealers, Laviscus):
+**Measured across all fifteen example scripts.** The single most useful finding
+is that **the format sets the rhythm**, not just the man: his countdowns breathe
+much longer than his character reviews, and both are his.
 
-| | His own | Tool-assisted |
-|---|---|---|
-| Words per sentence (median) | **23–26** | 13–16 |
-| Longest 10% of sentences | **43–46 words or more** | about 25 |
-| Em dashes | **none** | up to 16 per script |
-| "really" / "just" | **constantly** | rarely |
+| Format | Words per sentence (median) | Longest 10% | Em dashes |
+|---|---|---|---|
+| **Top 10 countdowns** (six of them, 2024 and 2025) | **25–27** | **39–49** | **zero, in every one** |
+| **"Does X do anything?" character reviews** | **17–19** | **33–38** | 0–6 |
+| Event and planning guides (Space Hulk, Uthar) | 23–31 | 43–58 | 0 unless tool-assisted |
+| Tool-assisted passages (the Laviscus and Lucius lore) | 13 | 25 | **18 and 6** |
+
+Two things follow:
+
+- **The voice has not drifted.** The 2024 and 2025 Top 10s measure almost
+  identically - median 25 against 26, longest 10% at 41 against 45 - so the older
+  pre-AI scripts confirm the newer ones rather than correcting them. Write to
+  these numbers with confidence.
+- **Match the rhythm to the format.** A character review at 26 words a sentence
+  will feel ponderous; a countdown at 17 will feel clipped. Aim for the row you
+  are writing.
+
+**Em dashes remain the tell.** Zero across all six Top 10s in both years, and zero
+in Space Hulk and Judh. Where they appear in numbers - Laviscus at 18, Uthar at
+33 - the surrounding prose is the tool's, not his.
 
 So:
 - **Long, flowing, spoken sentences** joined with "and", "but", "so",
@@ -72,8 +89,13 @@ So:
   once in a while.
 - **Short sentences are rare and saved for a punch** (*"He is just a
   brute."*, *"Really awesome stuff."*).
-- **Softeners and intensifiers everywhere:** really, just, pretty, a bit,
-  absolutely, honestly, definitely, incredibly, "oh boy", "as heck".
+- **"Really" is everywhere** - thirteen to twenty-five times a script in the
+  recent ones. Along with: just, pretty, a bit, absolutely, honestly,
+  definitely, incredibly, "oh boy", "as heck".
+- **He calls characters "they"** as often as he/she, and slips between them
+  inside a paragraph (*"She has the ambush trait... He also has the Beast Slayer
+  trait... and she has an extra 10% chance to block"*). Follow the habit of using
+  "they"; don't imitate the slipping.
 - **Talks the viewer through it** with direct instructions:
   - *"you want to be completing older waves as quickly as possible"*
   - *"Just note that…"*
@@ -185,17 +207,55 @@ and these are the changes, so do them in the first draft next time:
 
 ## The Creed sketch
 
-A running bit in character reviews: Castellan Creed is the sparring partner.
+A running bit in the character reviews: Castellan Creed is the sparring partner,
+and he is also the punching bag the Damage and Defence numbers are measured
+against, so the joke and the methodology are the same thing.
 
-- **Format:** `ME:` / `CREED:` dialogue lines inside the script.
-- **Creed** is a gruff, sardonic Cadian commander who insults the new
-  character: *"look at this Fancy Dan… lighting some candles and asking him
-  for a slow dance"*, *"Get over here freak"*.
-- **ME** is the long-suffering straight man: *"Creed, please don't. Just
-  hit him."*
-- **Keep it short:** 4–6 lines, then straight back to the numbers.
+- **Format:** `ME:` / `CREED:` dialogue lines inside the script, 4-6 lines, then
+  straight back to the numbers.
+- **Creed insults the new character on sight**, and the insults are specific and
+  a bit surreal rather than generic:
+  - *"Oh good. A walking arts-and-crafts project with a god complex. Just what
+    this war needed."* (Lucius)
+  - *"Well, come on then, Slashy McWailpants. Let's see if Slaanesh hands out
+    refunds."*
+  - *"Let me guess... if I kill you, you turn into me? Terrifying. The galaxy's
+    barely handling me as it is, if I become you then do I become invincible?"*
+  - *"Oh come on, another custodes character? Aren't you bored of this? Give me a
+    real challenge, I'm fed up of seeing these stuck up golden rods."* (Kariyan)
+- **Creed complains about the treadmill**, and ME promises better - a small
+  running gag across videos: *"Alright, we will definitely be getting some new
+  targets soon!"* / *"We better. Right, let's get on with it."*
+- **ME is the long-suffering straight man**, and occasionally the one making the
+  cheap joke: *"Hey Judh, is that a gun between your legs or are you just pleased
+  to see me?"*
+- **The invented nickname is the reliable laugh.** Slashy McWailpants, the
+  clobster, bellababies. Build one from what the character looks like or does.
 
-## Script document conventions
+## The character review structure
+
+The "Does X do anything?" videos follow a fixed run of parts, and the format is
+punchier than the countdowns (median 17-19 words a sentence):
+
+1. **Hook** - the character number ("becomes the 95th character overall"), and the
+   question the video answers: *"Today, we'll see if this arrogant slaughterer is
+   as good as he thinks he is."*
+2. **Part 1 - The Problem** - why this release matters, and what he personally
+   hopes for from it.
+3. **Lore** - written with a tool in the recent ones, and it shows. Keep it short
+   or leave it out.
+4. **Unlocking** - battle pass, campaign, what it costs.
+5. **Levelling** - days to Diamond III, their rank, and the stage-by-stage
+   breakdown, always with the caveat that the sheets miss free energy and gifts.
+6. **Abilities** - traits first, then the **Damage and Defence** block, which
+   recaps the method every time: *"Levelling the character up to be winged diamond
+   3, with lvl 30 skills and no weapons or equipment. Then Castellan Creed, the
+   character with the most average armour and traits in the game, becomes a
+   punching bag... And finally, Creed will punch them back."*
+7. **Struggles**, **Which modes does he fit into?**, **Legendary Events**.
+8. **Final Word** - the verdict, split by type of player.
+
+## Script document conventions## Script document conventions
 
 - **Header:** `# Title:`, then `# Youtube Details:`, which holds:
   - **Description:** third person ("DB Preacher looks at… in Warhammer
@@ -223,9 +283,10 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
 - So a script needs **at least 1,550 spoken words**. Count only what he
   reads out: leave out the YouTube details, `[On screen…]` cues and
   on-screen-only lists, but include the Creed sketch lines.
-- The example scripts run longer than that (about 2,700 to 3,800 spoken
-  words, so 14 to 20 minutes), so 8 minutes is a floor, not a target to
-  trim down to.
+- The example scripts run longer than that, and by format:
+  **character reviews 2,600-3,300 spoken words (13-17 minutes)**, **countdowns
+  2,600-4,400 (13-23 minutes)**. So 8 minutes is a floor, not a target to trim
+  down to.
 - **Don't use the Genestealer Cults guide as a length example.** It ran to
   37 minutes (about 7,000 words), and the owner says it isn't typical.
 - Put an estimate at the top of each draft: *spoken words ÷ 193 = minutes*.
@@ -255,3 +316,4 @@ A running bit in character reviews: Castellan Creed is the sparring partner.
 | September 2026 | Owner: Space Hulk and Top 10 are his own writing, the Genestealer lore was tool-written, and no lore by default. Added measured sentence rhythm; the tool rhythm moved to "doesn't sound like him" |
 | September 2026 | Owner: reads at about 193 words per minute and aims for 8+ minute videos. Added the Length section. The 37-minute Genestealer guide is not a length example |
 | September 2026 | Third draft: added "What his edit of a draft changed" from his edit of the Roster Battle Map explainer; spaced hyphens are fine |
+| September 2026 | Fourth draft from nine more scripts, including four from 2024 written with no tool. The voice has not drifted: the 2024 and 2025 Top 10s measure almost identically. Added rhythm by format (countdowns run 25-27 words a sentence, character reviews 17-19), the character review structure, and a much richer Creed section |

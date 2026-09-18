@@ -881,37 +881,11 @@ def team_turns(team, surv, lv, trig, act, gear, tier_key):
 # that friendly Summons hit an infected enemy harder, which is why they belong in a Neurothrope team.
 # They are not characters, so they do not feed Laviscus's Outrage and a Machine of War's Mythic ability
 # does not reach them. The team's own debuffs on the boss are not counted for them either - conservative.
-_NPC = {}
-
-
-def npc_of(g, unit_id):
-    """the stat block of a summoned unit. An ability calls it 'astraSmnGuardsman' and the npc table calls
-    it 'astraNpc1Guardsman', so match on what is left after the Smn/Npc part."""
-    if not _NPC:
-        npcs = g.get('npcs') or {}
-        items = npcs.items() if isinstance(npcs, dict) else [(x.get('id'), x) for x in npcs]
-        for k, v in items:
-            _NPC[re.sub(r'[^a-z]', '', re.sub(r'npc\d*|smn', '', str(k).lower()))] = v
-    key = re.sub(r'[^a-z]', '', re.sub(r'npc\d*|smn', '', str(unit_id).lower()))
-    if key in _NPC:
-        return _NPC[key]
-    return next((v for k, v in _NPC.items() if k.startswith(key[:10]) or key.startswith(k[:10])), None)
-
-
-def summons_of(g, member, lv):
-    """[(how many, stat block, their Damage, the ability it came from)] for one character"""
-    out = []
-    for kind in ('ability', 'passive'):
-        ab = member.get(kind) or {}
-        c = ab.get('constants') or {}
-        if 'summonDmg' not in (ab.get('variables') or {}) or not c.get('unitId'):
-            continue
-        npc = npc_of(g, c['unitId'])
-        if not npc or not (npc.get('meleeWeapon') or npc.get('rangeWeapon')):
-            continue
-        n = float(c.get('nrOfSummons') or c.get('nrOfUnits') or 1)
-        out.append((n, npc, bm.ability_value(ab, 'summonDmg', lv) or 0.0, kind))
-    return out
+# Reading summons lives in build_map.py now, so the Roster Battle Map can count them too. That move also
+# fixed two data shapes this copy never handled: a second summon under `unitId_2` (Abraxas's Screamers,
+# Archimatos's Blue Horrors, Isaak's Neophyte Hybrids) and Bellator's Inceptors under `unitToSpawn`.
+npc_of = bm.npc_of
+summons_of = bm.summons_of
 
 
 def summon_damage(g, member, team, boss, ds, lv, trig, act, gear, tier_key, turns=None):

@@ -81,6 +81,46 @@ PASSIVE_COLS = ['Name', 'Passive', 'Attack', 'Defence', 'Gear', 'Needs_Review', 
 RELIC_COLS = ['Relic', 'Owners', 'Attack', 'Defence', 'Gear', 'Needs_Review', 'Notes', 'Ability_Text']
 SUPPRESSED, STUNNED = 0.7, 0.5      # damage multipliers of a Suppressed / Stunned enemy (wiki)
 ATTACKS_PER_TURN = 5                # one enemy turn = a full team of 5 attacking (owner, September 2026)
+MAX_ADJACENT = 6                    # a character has six hexes around it, so at most six things can hit it
+
+
+_NPC = {}
+
+
+def npc_of(g, unit_id):
+    """the stat block of a summoned unit. An ability calls it 'astraSmnGuardsman' and the npc table calls
+    it 'astraNpc1Guardsman', so match on what is left after the Smn/Npc part."""
+    if not _NPC:
+        npcs = g.get('npcs') or {}
+        items = npcs.items() if isinstance(npcs, dict) else [(x.get('id'), x) for x in npcs]
+        for k, v in items:
+            _NPC[re.sub(r'[^a-z]', '', re.sub(r'npc\d*|smn', '', str(k).lower()))] = v
+    return _NPC.get(re.sub(r'[^a-z]', '', re.sub(r'npc\d*|smn', '', str(unit_id).lower())))
+
+
+def summons_of(g, unit, lv):
+    """[(how many, stat block, their Damage, which ability made them)] for one character.
+
+    Two shapes in the data caught us out. An ability can summon a *second* kind of unit under `unitId_2`
+    with its own `summonDmg_2` - that is where Abraxas's Screamers, Archimatos's Blue Horrors and Isaak's
+    Neophyte Hybrids live, and reading only the first slot meant Isaak scored nothing at all, his first
+    slot being a decoy with no weapon. And Bellator's Inceptors sit under `unitToSpawn` rather than
+    `unitId`, so his whole kit was invisible."""
+    out = []
+    for kind in ('ability', 'passive'):
+        ab = unit.get(kind) or {}
+        c, v = ab.get('constants') or {}, ab.get('variables') or {}
+        for keys, dmg_key in ((('unitId', 'unitToSpawn'), 'summonDmg'), (('unitId_2',), 'summonDmg_2')):
+            uid = next((c[k] for k in keys if c.get(k)), None)
+            if not uid or dmg_key not in v:
+                continue
+            npc = npc_of(g, uid)
+            if not npc or not (npc.get('meleeWeapon') or npc.get('rangeWeapon')):
+                continue        # decoys and the like: they hold a hex, they do not attack
+            n = float(c.get('nrOfSummons') or c.get('nrOfUnits') or 1) if dmg_key == 'summonDmg' else 1.0
+            out.append((n, npc, ability_value(ab, dmg_key, lv) or 0.0, kind))
+    return out
+
 
 
 def norm(s):
