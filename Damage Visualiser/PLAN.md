@@ -863,6 +863,46 @@ and before the faction page is built on top of it:
 
 Then the faction page, then the script.
 
+## What faction_data.py does, and what it decides (September 2026)
+
+`faction_data.py` builds the five-that-plays-together numbers in about eight seconds. The decisions it
+makes, so they can be argued with rather than discovered:
+
+- **The yardstick is every one of the 117 buffed by its own faction**, then measured against each other.
+  That is the map's "typical character" moved up a level, and it is computed once so every faction is
+  scored against the same thing.
+- **Damage adds up as rates, Toughness adds up as time.** Five attacking together kill a target in
+  `1 / sum(1/k)` team-attacks, so the faction's Damage is `5 / sum(1/k)` - still "attacks to kill", read
+  as what an average member needs when all five are swinging. Focus fire kills a team one at a time, so
+  Toughness is the mean. In practice the Damage figure sits within about 10% of the plain median of the
+  five, so it tells the same story while still moving when you swap a character - which is what the
+  5-or-6 whisker needs.
+- **A buff that cannot reach the whole team goes to the members who use it best**: the hitters for an
+  Attack row, the fragile for a Defence row. `adjacent` is `guild_raid.ADJACENT_ALLIES`, so it is three.
+- **Everything stops at the 10-turn horizon** (50 attacks), as the Support Map does.
+
+### Open ruling: a healer's action is not free
+
+Baldr's Healing Balms gives the unit he heals +Crit Chance and +Crit Damage, and on Ragnar the Support
+Map already reads that as **+140%**. The model lets Baldr hand that out *and* attack at full rate in the
+same turn, but the trait says "can heal a friendly unit **as its action**" - so in game he does one or
+the other, exactly the way Forcas was ruled on.
+
+Left as it is for now because it is how the Support Map has always read it, and because the harmonic mean
+is dominated by the best attacker anyway - taking Baldr's own damage out of the Space Wolves five moves
+them from 0.62 to 0.72, not from first to fifth. But it flatters every faction with a healer in it
+(Space Wolves, Blood Angels, Sororitas, Ultramarines) and it wants an owner ruling before the video.
+
+### What the first run says
+
+Two findings worth the camera before anything is drawn:
+
+- **The Aeldari and the Emperor's Children have no defensive support at all** - zero Defence rows between
+  them - so their toughness synergy is exactly 0.0%. Every other faction gains something.
+- **Damage synergy and Toughness synergy are almost unrelated.** Tau gain +338% attacking and +53%
+  defending; the Ultramarines gain +26% attacking and +102% defending; the Sororitas gain +0.1% and +47%.
+  A faction is built for one or the other, and the chart should let that show rather than adding them up.
+
 ## The page
 
 A **new page**, not a toggle on the Roster Battle Map. The map's unit of analysis
