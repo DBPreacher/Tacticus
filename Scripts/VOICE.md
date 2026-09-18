@@ -54,11 +54,10 @@ reuse whole lines in new scripts.
 is that **the format sets the rhythm**, not just the man: his countdowns breathe
 much longer than his character reviews, and both are his.
 
-| Format | Words per sentence (median) | Longest 10% | Em dashes |
+| Kind of video | Words per sentence (median) | Longest 10% | Em dashes |
 |---|---|---|---|
-| **Top 10 countdowns** (six of them, 2024 and 2025) | **25–27** | **39–49** | **zero, in every one** |
-| **"Does X do anything?" character reviews** | **17–19** | **33–38** | 0–6 |
-| Event and planning guides (Space Hulk, Uthar) | 23–31 | 43–58 | 0 unless tool-assisted |
+| **Discursive** - Top 10 countdowns, "get X for free" planning guides | **24–27** | **39–58** | **zero** |
+| **Explanatory** - character reviews, beginner guides, levelling analysis | **15–19** | **33–42** | **zero** |
 | Tool-assisted passages (the Laviscus and Lucius lore) | 13 | 25 | **18 and 6** |
 
 Two things follow:
@@ -67,9 +66,16 @@ Two things follow:
   identically - median 25 against 26, longest 10% at 41 against 45 - so the older
   pre-AI scripts confirm the newer ones rather than correcting them. Write to
   these numbers with confidence.
-- **Match the rhythm to the format.** A character review at 26 words a sentence
-  will feel ponderous; a countdown at 17 will feel clipped. Aim for the row you
-  are writing.
+- **The split is not really format, it is job.** When he is *ranging over a lot of
+  things* - counting down ten characters, walking through a plan to earn someone
+  free - the sentences pile up and run long. When he is *explaining one thing* -
+  a single character, a single system, a single number - they get shorter and more
+  stepwise. Pick the row by what the video is doing, not by its title.
+- **This was checked, not assumed.** The shorter rhythm was first measured on
+  three character reviews, two of which had tool fingerprints, so it might have
+  been the tool compressing him rather than his own habit. *Does Wrask Do
+  Anything* settles it: entirely his, zero em dashes, and it lands at 17 and 33 -
+  exactly where the others sat.
 
 **Em dashes remain the tell.** Zero across all six Top 10s in both years, and zero
 in Space Hulk and Judh. Where they appear in numbers - Laviscus at 18, Uthar at
@@ -232,6 +238,32 @@ against, so the joke and the methodology are the same thing.
 - **The invented nickname is the reliable laugh.** Slashy McWailpants, the
   clobster, bellababies. Build one from what the character looks like or does.
 
+## The skeleton, whatever the video is
+
+Every script in `Examples/` - countdown, character review, beginner guide,
+levelling analysis, planning guide - is built the same way:
+
+    Hook:  ->  Part 1 - The Problem  ->  Part 2..N  ->  Final Word / Outro
+
+**"Part 1 - The Problem" is universal.** Before any numbers, he says why the
+video exists: what has just happened, what players are confused about, or what he
+personally wants to find out.
+
+**The hook is a formula**: say what has happened, then say what today's video will
+settle, usually in two sentences.
+
+- *"A new faction, the World Eaters has joined Tacticus and their first new
+  character, Wrask, has been introduced. Today we'll look at whether they should
+  be joining your team or Blood for the blood god."*
+- *"The latest patch notes have been released and characters can now level up to
+  Diamond 3. Today we will look at how long it takes to get there and also take a
+  little peak at Silver I, Gold I and Diamond I levelling."*
+- Beginner guides name the confusion with real examples first: *"Are you confused
+  about which skills to level? Not sure if you should be levelling Bellator's
+  Shock Assault skill, Makhoteps Adaptive Strategy Skill or Vindicta's Fire of
+  Absolution Skill? Today we will go over some easy guidelines that will help you
+  decide."*
+
 ## The character review structure
 
 The "Does X do anything?" videos follow a fixed run of parts, and the format is
@@ -283,10 +315,12 @@ punchier than the countdowns (median 17-19 words a sentence):
 - So a script needs **at least 1,550 spoken words**. Count only what he
   reads out: leave out the YouTube details, `[On screen…]` cues and
   on-screen-only lists, but include the Creed sketch lines.
-- The example scripts run longer than that, and by format:
-  **character reviews 2,600-3,300 spoken words (13-17 minutes)**, **countdowns
-  2,600-4,400 (13-23 minutes)**. So 8 minutes is a floor, not a target to trim
-  down to.
+- Most examples run longer: **countdowns 2,600-4,400 spoken words (13-23
+  minutes)**, **character reviews and guides 1,600-3,300 (8-17 minutes)**.
+- **The floor is real and he uses it.** *Does Wrask Do Anything* is 1,598 spoken
+  words, 8.3 minutes - a complete video with eight sections at the shortest length
+  he publishes. A tight 8 minutes is a finished script, not a draft that needs
+  padding.
 - **Don't use the Genestealer Cults guide as a length example.** It ran to
   37 minutes (about 7,000 words), and the owner says it isn't typical.
 - Put an estimate at the top of each draft: *spoken words ÷ 193 = minutes*.
@@ -316,4 +350,5 @@ punchier than the countdowns (median 17-19 words a sentence):
 | September 2026 | Owner: Space Hulk and Top 10 are his own writing, the Genestealer lore was tool-written, and no lore by default. Added measured sentence rhythm; the tool rhythm moved to "doesn't sound like him" |
 | September 2026 | Owner: reads at about 193 words per minute and aims for 8+ minute videos. Added the Length section. The 37-minute Genestealer guide is not a length example |
 | September 2026 | Third draft: added "What his edit of a draft changed" from his edit of the Roster Battle Map explainer; spaced hyphens are fine |
+| September 2026 | Six more scripts, including a clean 2024 character review. It confirms the rhythm rule rather than overturning it: *Does Wrask* is entirely his, has no em dashes, and measures 17 and 33. Reframed the split as discursive against explanatory, added the universal Hook / Part 1 - The Problem skeleton and the hook formula, and corrected the length floor - Wrask is a complete video at 1,598 words |
 | September 2026 | Fourth draft from nine more scripts, including four from 2024 written with no tool. The voice has not drifted: the 2024 and 2025 Top 10s measure almost identically. Added rhythm by format (countdowns run 25-27 words a sentence, character reviews 17-19), the character review structure, and a much richer Creed section |
