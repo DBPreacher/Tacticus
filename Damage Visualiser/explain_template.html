@@ -1,0 +1,306 @@
+<meta charset="utf-8">
+<title>How a Faction Gets Its Numbers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<!-- Built by build_faction.py: edit this template, never faction-explained.html.
+     /*DATA*/ takes faction_data.json and /*BADGES*/ the inlined faction badges. -->
+<style>
+:root{
+  --ground:#0a0a0a; --panel:#0f1318; --panel-2:#141a21; --rule:#232b35; --rule-soft:#1a2029;
+  --ink:#e8eaf0; --ink-2:#a3aab8; --ink-3:#6e7686; --guide:#4a5363;
+  --imperial:#d9ad3f; --chaos:#dc4638; --xenos:#5cbfe0;
+  --display:'Cinzel',Georgia,'Times New Roman',serif;
+  --data:'Rajdhani','Arial Narrow',Arial,sans-serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);margin:0;overflow:hidden;display:grid;place-items:center}
+/* a fixed 1600x900 stage, zoomed to fit the window by fit(), the same as the typical-character graphic */
+.stage{width:1600px;height:900px;padding:34px 44px 30px;display:flex;flex-direction:column;gap:16px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;border-bottom:1px solid var(--rule);padding-bottom:16px}
+.eyebrow{font-family:var(--data);font-weight:600;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--display);font-weight:700;font-size:40px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em}
+.setting{font-family:var(--data);font-weight:600;font-size:16px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:4px 12px;border-radius:3px;white-space:nowrap}
+.who{display:flex;align-items:center;gap:14px}
+.who img{width:56px;height:56px}
+.who h2{font-family:var(--display);font-size:30px;margin:0;letter-spacing:.02em}
+.who .five{font-family:var(--data);font-size:17px;color:var(--ink-2);letter-spacing:.03em}
+.caption{min-height:92px}
+.caption b{display:block;font-family:var(--data);font-weight:700;font-size:34px;line-height:1.15;letter-spacing:.01em}
+.caption span{display:block;font-size:19px;color:var(--ink-2);margin-top:6px;max-width:112ch}
+.caption em{font-style:normal;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.chart{position:relative;flex:1;min-height:0}
+svg{display:block;width:100%;height:100%;font-family:var(--data)}
+.grid line{stroke:var(--rule-soft)}
+.tick{fill:var(--ink-3);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.axis-title{fill:var(--ink-2);font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.name{fill:var(--ink-2);font-size:17px;font-weight:600}
+.name.out{fill:var(--ink-3);font-style:italic}
+.val{fill:var(--ink);font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.val.small{font-size:16px;fill:var(--ink-2)}
+.bar{transition:transform .6s cubic-bezier(.22,.9,.32,1),opacity .4s}
+.bar rect{transition:height .6s cubic-bezier(.22,.9,.32,1),y .6s cubic-bezier(.22,.9,.32,1),
+          width .6s cubic-bezier(.22,.9,.32,1),x .6s cubic-bezier(.22,.9,.32,1),opacity .4s}
+.bar.out rect{opacity:.22}
+.brace{stroke:#fff;stroke-width:1.5;fill:none}
+.brace-t{fill:#fff;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.answer rect{fill:#06080b;stroke:#fff;stroke-width:1.5}
+.answer .big{fill:#fff;font-size:44px;font-weight:700;font-variant-numeric:tabular-nums}
+.answer .lbl{fill:var(--ink-2);font-size:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.sum{fill:var(--ink-3);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.controls{display:flex;align-items:center;gap:14px 26px;flex-wrap:wrap}
+.label{font-family:var(--data);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-right:8px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden;vertical-align:middle}
+.seg button{font-family:var(--data);font-weight:600;font-size:16px;letter-spacing:.04em;background:none;border:0;border-right:1px solid var(--rule);color:var(--ink-3);padding:7px 14px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--panel-2);color:var(--ink)}
+select{font:600 17px var(--data);color:var(--ink);background:var(--panel-2);border:1px solid var(--rule);border-radius:4px;padding:7px 12px}
+@media (prefers-reduced-motion:reduce){.bar,.bar rect{transition:none}}
+</style>
+
+<div class="stage" id="stage">
+  <header>
+    <div>
+      <div class="eyebrow">DB Preacher Plays &middot; Faction Battle Map</div>
+      <h1>How a faction gets its two numbers</h1>
+    </div>
+    <div class="who" id="who"></div>
+    <div class="setting" id="setting"></div>
+  </header>
+
+  <div class="caption" aria-live="polite"><b id="capBig"></b><span id="capSmall"></span></div>
+
+  <div class="chart"><svg id="svg" viewBox="0 0 1512 470" role="img"
+       aria-label="How a faction's five characters turn into its two numbers"></svg></div>
+
+  <div class="controls">
+    <div><span class="label">Step</span><span class="seg" id="segStep">
+      <button data-v="1" aria-pressed="true">1 &middot; Five characters</button>
+      <button data-v="2" aria-pressed="false">2 &middot; Damage adds up as rates</button>
+      <button data-v="3" aria-pressed="false">3 &middot; Toughness adds up as time</button>
+      <button data-v="4" aria-pressed="false">4 &middot; What together is worth</button>
+    </span></div>
+    <div><span class="label">Faction</span><select id="pick" aria-label="Faction"></select></div>
+    <div><span class="label">Machine of War</span><span class="seg" id="segMow">
+      <button data-v="0" aria-pressed="true">Off</button><button data-v="1" aria-pressed="false">On</button>
+    </span></div>
+  </div>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+const BADGES = /*BADGES*/;
+const F = DATA.factions;
+const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
+const NS = 'http://www.w3.org/2000/svg';
+const W = 1512, H = 470, M = {l:96, r:96, t:34, b:56};
+const playable = Object.keys(F).filter(n => F[n].teams.length).sort();
+const S = {step:1, who:'Space Wolves', mow:0};
+
+function el(tag, attrs, parent){
+  const n = document.createElementNS(NS, tag);
+  for(const k in attrs) n.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(n);
+  return n;
+}
+const svg = document.getElementById('svg');
+const fmt = v => v.toFixed(2);
+
+// the five a faction would field for attacking, which is the one this page walks through
+function five(){
+  const ts = F[S.who].teams.map(t => ({...t, d: (S.mow && t.dmg_mow) ? t.dmg_mow : t.dmg,
+                                              tg: (S.mow && t.tough_mow) ? t.tough_mow : t.tough}));
+  const t = ts.reduce((a, b) => b.d < a.d ? b : a);
+  return {t, members: t.names.map(n => ({n, ...t.per[n]}))};
+}
+
+function caption(big, small){
+  document.getElementById('capBig').textContent = big;
+  document.getElementById('capSmall').innerHTML = small;
+}
+
+/* ---------------------------------------------------------------- the four steps */
+function render(){
+  svg.textContent = '';
+  const f = F[S.who], {t, members} = five();
+  const col = ALLY[f.alliance] || '#a3aab8';
+  document.getElementById('who').innerHTML =
+    `<img src="${BADGES[S.who] || ''}" alt=""><div><h2>${S.who}</h2>
+     <div class="five">${members.map(m => m.n).join(' &middot; ')}</div></div>`;
+  ({1:step1, 2:step2, 3:step3, 4:step4})[S.step](f, t, members, col);
+}
+
+function axis(max, label, ticks = 5){
+  const Y = v => M.t + (H - M.t - M.b) * (1 - Math.min(v, max) / max);
+  const g = el('g', {class:'grid'});
+  for(let i = 0; i <= ticks; i++){
+    const v = max * i / ticks;
+    el('line', {x1:M.l, x2:W - M.r, y1:Y(v), y2:Y(v)}, g);
+    el('text', {class:'tick', x:M.l - 12, y:Y(v) + 5, 'text-anchor':'end'}).textContent =
+      v >= 10 ? v.toFixed(0) : v.toFixed(2).replace(/0$/, '');
+  }
+  el('text', {class:'axis-title', x:0, y:0, 'text-anchor':'middle',
+              transform:`translate(26,${(M.t + H - M.b) / 2}) rotate(-90)`}).textContent = label;
+  return Y;
+}
+
+function nice(v){ const p = Math.pow(10, Math.floor(Math.log10(v)));
+  for(const s of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if(s * p >= v) return s * p; return 10 * p; }
+
+// 1. the five, each with the answer the Roster Battle Map would give for them in this team
+function step1(f, t, members, col){
+  caption('Five characters, five answers each.',
+    'Every one of the five is scored exactly the way the Roster Battle Map scores a character: how many of '
+    + 'their attacks it takes to kill a typical character, and how many attacks a typical character needs to '
+    + 'kill them. The difference is that here they are standing in their own faction, so every buff their '
+    + 'team-mates hand out is already in these numbers.');
+  const max = nice(Math.max(...members.map(m => Math.max(m.d, m.t))) * 1.15);
+  const Y = axis(max, 'Attacks');
+  const slot = (W - M.l - M.r) / members.length, bw = 54;
+  members.forEach((m, i) => {
+    const x = M.l + slot * (i + .5);
+    const g = el('g', {class:'bar'});
+    for(const [key, dx, fill] of [['d', -bw - 5, col], ['t', 5, '#3b4450']]){
+      const y = Y(m[key]);
+      el('rect', {x:x + dx, y, width:bw, height:M.t + (H - M.t - M.b) - y, rx:3, fill}, g);
+      el('text', {class:'val small', x:x + dx + bw / 2, y:y - 9, 'text-anchor':'middle'}, g)
+        .textContent = fmt(m[key]);
+    }
+    el('text', {class:'name', x, y:H - M.b + 26, 'text-anchor':'middle'}, g).textContent = m.n;
+  });
+  const key = el('g', {});
+  el('rect', {x:M.l, y:M.t - 24, width:13, height:13, rx:2, fill:col}, key);
+  el('text', {class:'name', x:M.l + 20, y:M.t - 13}, key).textContent = 'Damage';
+  el('rect', {x:M.l + 110, y:M.t - 24, width:13, height:13, rx:2, fill:'#3b4450'}, key);
+  el('text', {class:'name', x:M.l + 130, y:M.t - 13}, key).textContent = 'Toughness';
+}
+
+// 2. damage is a rate, so it adds up
+function step2(f, t, members, col){
+  const out = new Set(t.heal_d || []);
+  const hitters = members.filter(m => !out.has(m.n));
+  const total = hitters.reduce((s, m) => s + 1 / m.d, 0);
+  caption('Damage adds up as rates, not as attacks.',
+    'You cannot average "attacks to kill", because two characters attacking together do not each take as '
+    + 'long. Turn each one upside down and you get a rate, the share of a kill they land with one attack. '
+    + 'Those do add up. Add the five rates, and the five between them kill a typical character in '
+    + `<em>1 &divide; ${total.toFixed(3)} = ${(1 / total).toFixed(3)}</em> attacks. Multiply by five to put it `
+    + 'back on the same scale as the Roster Battle Map, and that is the faction’s Damage number.'
+    + (out.size ? ` <em>${[...out].join(' and ')}</em> spent the turn healing, so that one is not in the sum.` : ''));
+  const max = nice(total * 1.08);            // the stack is the point, so the scale has to hold it
+  const Y = axis(max, 'Kills per attack');
+  const slot = (W - M.l - M.r - 470) / members.length, bw = 66;
+  members.forEach((m, i) => {
+    const x = M.l + slot * (i + .5), r = 1 / m.d, y = Y(r);
+    const g = el('g', {class:'bar' + (out.has(m.n) ? ' out' : '')});
+    el('rect', {x:x - bw / 2, y, width:bw, height:M.t + (H - M.t - M.b) - y, rx:3, fill:col}, g);
+    el('text', {class:'val', x, y:y - 10, 'text-anchor':'middle'}, g).textContent = r.toFixed(3);
+    el('text', {class:'sum', x, y:y - 30, 'text-anchor':'middle'}, g).textContent = `1 ÷ ${fmt(m.d)}`;
+    el('text', {class:'name' + (out.has(m.n) ? ' out' : ''), x, y:H - M.b + 26, 'text-anchor':'middle'}, g)
+      .textContent = out.has(m.n) ? m.n + ' (healing)' : m.n;
+  });
+  // the stack: every rate on top of the last, so the total is a height you can see
+  const sx = M.l + slot * members.length + 56;
+  let run = 0;
+  for(const m of hitters){
+    const y0 = Y(run), y1 = Y(run + 1 / m.d);
+    el('rect', {x:sx, y:y1, width:110, height:Math.max(y0 - y1, 1), rx:2, fill:col, stroke:'#0f1318',
+                'stroke-width':1.5});
+    run += 1 / m.d;
+  }
+  el('text', {class:'name', x:sx + 55, y:H - M.b + 26, 'text-anchor':'middle'}).textContent = 'All five';
+  el('text', {class:'brace-t', x:sx + 55, y:Y(total) - 12, 'text-anchor':'middle'}).textContent = total.toFixed(3);
+  answer(sx + 160, t.d, 'Damage', `5 ÷ ${total.toFixed(3)}`);
+}
+
+// 3. toughness is a time, so it adds up the other way
+function step3(f, t, members, col){
+  const total = members.reduce((s, m) => s + m.t, 0);
+  caption('Toughness adds up as time.',
+    'Focus fire takes a team apart one at a time, so the attacks needed to wipe all five is just the five '
+    + 'numbers laid end to end, and it comes to the same total whatever order they die in. This faction '
+    + `soaks <em>${total.toFixed(1)} attacks</em> before the last one falls. Divide by five and you have the `
+    + 'typical member, which is the Toughness axis, on the same scale as the Roster Battle Map.');
+  const span = W - M.l - M.r - 290;
+  const X = v => M.l + span * v / total;
+  const y = M.t + 96, bh = 86;
+  let run = 0;
+  members.forEach((m, i) => {
+    const g = el('g', {class:'bar'});
+    const x0 = X(run), x1 = X(run + m.t);
+    el('rect', {x:x0, y, width:Math.max(x1 - x0, 1), height:bh, rx:3,
+                fill:i % 2 ? col : '#3b4450', stroke:'#0f1318', 'stroke-width':1.5}, g);
+    el('text', {class:'val', x:(x0 + x1) / 2, y:y - 12, 'text-anchor':'middle'}, g)
+      .textContent = fmt(m.t);
+    el('text', {class:'name', x:(x0 + x1) / 2, y:y + bh + 26, 'text-anchor':'middle'}, g).textContent = m.n;
+    run += m.t;
+  });
+  el('path', {class:'brace', d:`M${M.l},${y - 18}L${M.l},${y - 30}L${X(total)},${y - 30}L${X(total)},${y - 18}`});
+  el('text', {class:'brace-t', x:(M.l + X(total)) / 2, y:y - 40, 'text-anchor':'middle'})
+    .textContent = `${total.toFixed(1)} attacks to wipe the five`;
+  answer(W - M.r - 230, t.tg, 'Toughness', `${total.toFixed(1)} ÷ 5`);
+}
+
+// 4. the same five with the buffs switched off
+function step4(f, t, members, col){
+  const gd = t.dmg_alone / t.d - 1, gt = t.tg / t.tough_alone - 1;
+  caption('What playing together is actually worth.',
+    'The same five, measured against the same yardstick, with every buff they hand each other switched off '
+    + 'and then switched back on. That gap is the only honest answer to "is this faction worth running '
+    + 'pure?", and it counts the clauses that only fire next to one of their own kind, which are worth '
+    + 'nothing at all on the Roster Battle Map.'
+    + (f.signature.length ? ` Their signature trait is carried everywhere they fight, so none of this gap is that.` : ''));
+  const rows = [['Damage', t.dmg_alone, t.d, gd, 'fewer attacks to kill'],
+                ['Toughness', t.tough_alone, t.tg, gt, 'more attacks to survive']];
+  rows.forEach(([label, alone, together, gain, note], i) => {
+    const y = M.t + 40 + i * 190;
+    el('text', {class:'axis-title', x:M.l, y:y - 16}).textContent = label;
+    big(M.l, y, fmt(alone), 'On their own');
+    el('text', {class:'brace-t', x:M.l + 330, y:y + 66, 'text-anchor':'middle', 'font-size':40}).textContent = '→';
+    big(M.l + 400, y, fmt(together), 'Together', col);
+    el('text', {class:'val', x:M.l + 740, y:y + 56}).textContent =
+      (gain >= 0 ? '+' : '') + (gain * 100).toFixed(0) + '%';
+    el('text', {class:'name', x:M.l + 740, y:y + 82}).textContent = note;
+  });
+}
+
+function big(x, y, value, label, fill){
+  el('rect', {x, y, width:260, height:110, rx:5, fill:'#06080b', stroke:fill || 'var(--rule)', 'stroke-width':1.5});
+  const t1 = el('text', {x:x + 130, y:y + 62, 'text-anchor':'middle', fill:'#fff',
+                         'font-size':44, 'font-weight':700}); t1.textContent = value;
+  const t2 = el('text', {class:'lbl', x:x + 130, y:y + 90, 'text-anchor':'middle', fill:'#a3aab8',
+                         'font-size':16, 'font-weight':600}); t2.textContent = label;
+}
+
+function answer(x, value, label, sum){
+  const g = el('g', {class:'answer'});
+  el('rect', {x, y:M.t + 110, width:230, height:130, rx:5}, g);
+  el('text', {class:'sum', x:x + 115, y:M.t + 146, 'text-anchor':'middle'}, g).textContent = sum;
+  el('text', {class:'big', x:x + 115, y:M.t + 196, 'text-anchor':'middle'}, g).textContent = fmt(value);
+  el('text', {class:'lbl', x:x + 115, y:M.t + 224, 'text-anchor':'middle'}, g).textContent = label;
+}
+
+/* ---------------------------------------------------------------- chrome */
+const pick = document.getElementById('pick');
+playable.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; pick.appendChild(o); });
+pick.value = S.who;
+pick.addEventListener('change', () => { S.who = pick.value; render(); });
+for(const [id, key] of [['segStep', 'step'], ['segMow', 'mow']])
+  for(const b of document.querySelectorAll('#' + id + ' button'))
+    b.addEventListener('click', () => {
+      S[key] = +b.dataset.v;
+      for(const o of document.querySelectorAll('#' + id + ' button'))
+        o.setAttribute('aria-pressed', String(o === b));
+      render();
+    });
+document.getElementById('setting').textContent =
+  `Mythic · abilities ${DATA.setting.level} · standard gear · actives on · all triggered`;
+function fit(){
+  const z = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+  document.getElementById('stage').style.zoom = z;
+}
+window.addEventListener('resize', fit);
+fit(); render();
+</script>

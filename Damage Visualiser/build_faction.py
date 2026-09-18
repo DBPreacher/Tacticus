@@ -21,6 +21,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BADGES = os.path.join(HERE, 'faction_badges')
 TEMPLATE = os.path.join(HERE, 'faction_template.html')
 OUT = os.path.join(HERE, 'faction-battle-map.html')
+EXPLAIN = os.path.join(HERE, 'explain_template.html')
+OUT_EXPLAIN = os.path.join(HERE, 'faction-explained.html')
 
 
 def badges(factions):
@@ -48,16 +50,19 @@ def main():
                    factions=data)
     with open(fd.OUT_JSON, 'w', encoding='utf-8') as f:
         json.dump(payload, f, indent=1)
-    with open(TEMPLATE, encoding='utf-8') as f:
-        html = f.read()
-    html = html.replace('/*DATA*/', json.dumps(payload, separators=(',', ':')))
-    html = html.replace('/*BADGES*/', json.dumps(badges(sorted(data)), separators=(',', ':')))
-    with open(OUT, 'w', encoding='utf-8') as f:
-        f.write(html)
+    art = badges(sorted(data))
+    for src, out in ((TEMPLATE, OUT), (EXPLAIN, OUT_EXPLAIN)):
+        with open(src, encoding='utf-8') as f:
+            html = f.read()
+        html = html.replace('/*DATA*/', json.dumps(payload, separators=(',', ':')))
+        html = html.replace('/*BADGES*/', json.dumps(art, separators=(',', ':')))
+        with open(out, 'w', encoding='utf-8') as f:
+            f.write(html)
     playable = sum(1 for d in data.values() if d['teams'])
     fives = sum(len(d['teams']) for d in data.values())
-    print(f'\nBuilt faction-battle-map.html: {playable} factions, {fives} fives, game version {version}. '
-          f'{os.path.getsize(OUT) / 1024:.0f} KB.')
+    print(f'\nBuilt faction-battle-map.html and faction-explained.html: {playable} factions, {fives} fives, '
+          f'game version {version}. {os.path.getsize(OUT) / 1024:.0f} KB and '
+          f'{os.path.getsize(OUT_EXPLAIN) / 1024:.0f} KB.')
 
 
 if __name__ == '__main__':

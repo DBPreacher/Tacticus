@@ -519,10 +519,13 @@ def build(tier=2, verbose=True):
             branches = [frozenset(c) for k in range(len(who) + 1) for c in itertools.combinations(who, k)]
             plain = [axes(combo, h) for h in branches]
             bd, bt = min(plain, key=lambda x: x[0]), max(plain, key=lambda x: x[1])
+            # who spent the turn healing is kept for each axis, so the explainer page's arithmetic
+            # adds up on screen: the damage total only counts the members who actually swung
             row = dict(names=[m['name'] for m in combo],
                        benched=next((m['name'] for m in members if m not in combo), None),
                        dmg=bd[0], tough=bt[1],
-                       healing=sorted(branches[plain.index(bt)]),
+                       heal_d=sorted(branches[plain.index(bd)]),
+                       heal_t=sorted(branches[plain.index(bt)]),
                        per={n: dict(d=round(bd[2][n][0], 3), t=round(bt[2][n][1], 3)) for n in bd[2]})
             alone = [solo[m['name']] for m in combo]
             row['dmg_alone'] = TEAM / sum(1 / p[0] for p in alone)

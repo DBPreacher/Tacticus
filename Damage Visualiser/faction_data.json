@@ -28,7 +28,8 @@
      "benched": null,
      "dmg": 3.973463551497889,
      "tough": 2.3160871554274434,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Celestine": {
        "d": 3.299,
@@ -108,7 +109,8 @@
      "benched": null,
      "dmg": 1.1726910130100723,
      "tough": 3.4497865211140493,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aesoth": {
        "d": 1.571,
@@ -164,7 +166,8 @@
      "benched": null,
      "dmg": 1.5078543597670904,
      "tough": 2.4759939635435657,
-     "healing": [
+     "heal_d": [],
+     "heal_t": [
       "Actus"
      ],
      "per": {
@@ -227,7 +230,8 @@
      "benched": "Maugan Ra",
      "dmg": 1.5095774134377888,
      "tough": 1.2319610150988882,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aethana": {
        "d": 1.803,
@@ -266,7 +270,8 @@
      "benched": "Lhykhis",
      "dmg": 1.653490395435633,
      "tough": 1.2385672388463946,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aethana": {
        "d": 2.458,
@@ -305,7 +310,8 @@
      "benched": "Jain Zar",
      "dmg": 1.0759066625419569,
      "tough": 1.202173093227971,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aethana": {
        "d": 1.803,
@@ -344,7 +350,8 @@
      "benched": "Eldryon",
      "dmg": 1.3230473406402194,
      "tough": 1.2859574896754444,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aethana": {
        "d": 2.547,
@@ -383,7 +390,8 @@
      "benched": "Calandis",
      "dmg": 1.0523861110148887,
      "tough": 1.287720244654514,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aethana": {
        "d": 1.803,
@@ -422,7 +430,8 @@
      "benched": "Aethana",
      "dmg": 1.4033232847443458,
      "tough": 1.1433820895491946,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Calandis": {
        "d": 1.703,
@@ -479,7 +488,8 @@
      "benched": "Thaddeus Noble",
      "dmg": 3.8419927855226486,
      "tough": 1.8041461067383904,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Castellan Creed": {
        "d": 4.781,
@@ -518,7 +528,8 @@
      "benched": "Sibyll Devine",
      "dmg": 3.7762697647596593,
      "tough": 1.6092521804872915,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Castellan Creed": {
        "d": 4.781,
@@ -557,7 +568,8 @@
      "benched": "Marshal Dreir",
      "dmg": 3.5259614893551676,
      "tough": 1.590667835703512,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Castellan Creed": {
        "d": 4.781,
@@ -596,7 +608,8 @@
      "benched": "Kut Skoden",
      "dmg": 3.7010656934619752,
      "tough": 1.5983788243829704,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Castellan Creed": {
        "d": 4.781,
@@ -635,7 +648,8 @@
      "benched": "Commissar Yarrick",
      "dmg": 3.5414381124415355,
      "tough": 1.7791661237875125,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Castellan Creed": {
        "d": 4.781,
@@ -674,7 +688,8 @@
      "benched": "Castellan Creed",
      "dmg": 3.442258863929862,
      "tough": 1.434408224261025,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Commissar Yarrick": {
        "d": 4.003,
@@ -736,7 +751,8 @@
      "benched": null,
      "dmg": 1.1527977822181248,
      "tough": 1.7683013209401954,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Abaddon The Despoiler": {
        "d": 0.617,
@@ -800,7 +816,8 @@
      "benched": null,
      "dmg": 1.2772513442340103,
      "tough": 3.2843049867337286,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Ancient Thoread": {
        "d": 2.265,
@@ -857,7 +874,8 @@
      "benched": "Nicodemus",
      "dmg": 1.2090500266514597,
      "tough": 1.8816732818948967,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Cezare": {
        "d": 1.652,
@@ -896,7 +914,8 @@
      "benched": "Mephiston",
      "dmg": 1.3358787955123104,
      "tough": 2.288336958186136,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Cezare": {
        "d": 1.05,
@@ -935,7 +954,8 @@
      "benched": "Mataneo",
      "dmg": 1.06512029810644,
      "tough": 2.3236856692917605,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Cezare": {
        "d": 1.05,
@@ -974,7 +994,8 @@
      "benched": "Lucien",
      "dmg": 1.2530757907122452,
      "tough": 2.4291047726763324,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Cezare": {
        "d": 0.799,
@@ -1013,7 +1034,8 @@
      "benched": "Dante",
      "dmg": 1.5428351833590817,
      "tough": 1.870295313797833,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Cezare": {
        "d": 1.594,
@@ -1052,7 +1074,8 @@
      "benched": "Cezare",
      "dmg": 1.1082265381528118,
      "tough": 2.0966830305351145,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Dante": {
        "d": 1.84,
@@ -1113,7 +1136,8 @@
      "benched": "Sarquael",
      "dmg": 1.5595928621054815,
      "tough": 2.0760885249515355,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Asmodai": {
        "d": 2.887,
@@ -1152,7 +1176,8 @@
      "benched": "Ramus",
      "dmg": 1.844948270202625,
      "tough": 2.014255603631893,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Asmodai": {
        "d": 2.887,
@@ -1191,7 +1216,8 @@
      "benched": "Forcas",
      "dmg": 1.939386435225481,
      "tough": 1.901547913478354,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Asmodai": {
        "d": 2.887,
@@ -1230,7 +1256,8 @@
      "benched": "Baraqiel",
      "dmg": 1.602665426347026,
      "tough": 1.701339042810915,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Asmodai": {
        "d": 2.887,
@@ -1269,7 +1296,8 @@
      "benched": "Azrael",
      "dmg": 1.580719312004153,
      "tough": 1.7451776137594708,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Asmodai": {
        "d": 2.887,
@@ -1308,7 +1336,8 @@
      "benched": "Asmodai",
      "dmg": 2.125608842718661,
      "tough": 1.875153107217307,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Azrael": {
        "d": 3.091,
@@ -1370,7 +1399,8 @@
      "benched": null,
      "dmg": 2.2465496408025696,
      "tough": 3.6064239455818705,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Corrodius": {
        "d": 1.966,
@@ -1437,7 +1467,8 @@
      "benched": null,
      "dmg": 2.2633109465969117,
      "tough": 1.6209550738572607,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Adamatar": {
        "d": 2.935,
@@ -1495,7 +1526,8 @@
      "benched": null,
      "dmg": 2.729471760301465,
      "tough": 1.8609077139914272,
-     "healing": [
+     "heal_d": [],
+     "heal_t": [
       "Hollan"
      ],
      "per": {
@@ -1555,7 +1587,8 @@
      "benched": null,
      "dmg": 1.1777744603675624,
      "tough": 3.2331948425986896,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Ammuk": {
        "d": 5,
@@ -1616,7 +1649,8 @@
      "benched": "Thutmose",
      "dmg": 2.7170343539712776,
      "tough": 2.7759177140955953,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aleph-Null": {
        "d": 6.036,
@@ -1655,7 +1689,8 @@
      "benched": "Thothmek",
      "dmg": 2.72076382372071,
      "tough": 1.5561761591429313,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aleph-Null": {
        "d": 6.036,
@@ -1694,7 +1729,8 @@
      "benched": "Makhotep",
      "dmg": 2.299772861533606,
      "tough": 2.657799245888308,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aleph-Null": {
        "d": 6.036,
@@ -1733,7 +1769,8 @@
      "benched": "Imospekh",
      "dmg": 2.5404582642799602,
      "tough": 2.6820758558152105,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aleph-Null": {
        "d": 6.036,
@@ -1772,7 +1809,8 @@
      "benched": "Anuphet",
      "dmg": 3.0194164426819343,
      "tough": 2.3713071188975294,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aleph-Null": {
        "d": 6.036,
@@ -1811,7 +1849,8 @@
      "benched": "Aleph-Null",
      "dmg": 2.3140108614568664,
      "tough": 2.632472524454383,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Anuphet": {
        "d": 4.079,
@@ -1878,7 +1917,8 @@
      "benched": null,
      "dmg": 1.92706903845349,
      "tough": 2.2141845131864457,
-     "healing": [
+     "heal_d": [],
+     "heal_t": [
       "Gibbascrapz"
      ],
      "per": {
@@ -1947,7 +1987,10 @@
      "benched": "Ulf",
      "dmg": 0.8619286449802044,
      "tough": 3.0933441230043095,
-     "healing": [],
+     "heal_d": [
+      "Baldr"
+     ],
+     "heal_t": [],
      "per": {
       "Arjac": {
        "d": 1.183,
@@ -1986,7 +2029,10 @@
      "benched": "Tjark",
      "dmg": 0.8386614919405065,
      "tough": 2.9369237193722033,
-     "healing": [],
+     "heal_d": [
+      "Baldr"
+     ],
+     "heal_t": [],
      "per": {
       "Arjac": {
        "d": 1.183,
@@ -2025,7 +2071,8 @@
      "benched": "Ragnar",
      "dmg": 3.5877017454467235,
      "tough": 3.0282813610358295,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Arjac": {
        "d": 5.542,
@@ -2064,7 +2111,10 @@
      "benched": "Njal",
      "dmg": 0.7091327960789044,
      "tough": 2.960389075527934,
-     "healing": [],
+     "heal_d": [
+      "Baldr"
+     ],
+     "heal_t": [],
      "per": {
       "Arjac": {
        "d": 1.183,
@@ -2103,7 +2153,8 @@
      "benched": "Baldr",
      "dmg": 1.0170320279571803,
      "tough": 1.8896385572798369,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Arjac": {
        "d": 1.183,
@@ -2142,7 +2193,10 @@
      "benched": "Arjac",
      "dmg": 0.7614731571815097,
      "tough": 2.7866033055640678,
-     "healing": [],
+     "heal_d": [
+      "Baldr"
+     ],
+     "heal_t": [],
      "per": {
       "Baldr": {
        "d": 0.981,
@@ -2201,7 +2255,8 @@
      "benched": "Sho'syl",
      "dmg": 0.6479823780600504,
      "tough": 2.09046050401195,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aun'Shi": {
        "d": 5.299,
@@ -2240,7 +2295,8 @@
      "benched": "Re'vas",
      "dmg": 0.9915418543567118,
      "tough": 1.8042042990636087,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aun'Shi": {
        "d": 5.299,
@@ -2279,7 +2335,8 @@
      "benched": "Darkstrider",
      "dmg": 0.7888832080976869,
      "tough": 1.4714190754165584,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aun'Shi": {
        "d": 5.299,
@@ -2318,7 +2375,8 @@
      "benched": "Commander Shadowsun",
      "dmg": 0.8534710789162302,
      "tough": 2.0268096249774765,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aun'Shi": {
        "d": 5.299,
@@ -2357,7 +2415,8 @@
      "benched": "Commander Farsight",
      "dmg": 1.3769191758457995,
      "tough": 1.8950942978724992,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Aun'Shi": {
        "d": 5.299,
@@ -2396,7 +2455,8 @@
      "benched": "Aun'Shi",
      "dmg": 0.6286149299216734,
      "tough": 1.6941443516234116,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Commander Farsight": {
        "d": 1.773,
@@ -2459,7 +2519,8 @@
      "benched": "Yazaghor",
      "dmg": 2.221423035822247,
      "tough": 1.93630544109709,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Abraxas": {
        "d": 2.668,
@@ -2498,7 +2559,8 @@
      "benched": "Toth",
      "dmg": 1.9180139276604475,
      "tough": 1.4328019680174569,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Abraxas": {
        "d": 2.668,
@@ -2537,7 +2599,8 @@
      "benched": "Thaumachus",
      "dmg": 2.1291708801993687,
      "tough": 1.622392431570987,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Abraxas": {
        "d": 2.668,
@@ -2576,7 +2639,8 @@
      "benched": "Sekhetar",
      "dmg": 1.9367215012043844,
      "tough": 1.4012866574186411,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Abraxas": {
        "d": 2.668,
@@ -2615,7 +2679,8 @@
      "benched": "Ahriman",
      "dmg": 2.4680372972256306,
      "tough": 1.769685111344619,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Abraxas": {
        "d": 4.047,
@@ -2654,7 +2719,8 @@
      "benched": "Abraxas",
      "dmg": 2.5486040757567516,
      "tough": 1.8089514531118136,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Ahriman": {
        "d": 1.653,
@@ -2718,7 +2784,8 @@
      "benched": null,
      "dmg": 3.387756814279064,
      "tough": 2.9960823563240893,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Deathleaper": {
        "d": 3.808,
@@ -2781,7 +2848,8 @@
      "benched": "Varro Tigurius",
      "dmg": 3.0168702041220388,
      "tough": 3.123922545738166,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Bellator": {
        "d": 6.092,
@@ -2820,7 +2888,8 @@
      "benched": "Titus",
      "dmg": 3.137358830954465,
      "tough": 3.2200881152321936,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Bellator": {
        "d": 6.092,
@@ -2859,7 +2928,8 @@
      "benched": "Marneus Calgar",
      "dmg": 3.606599320669061,
      "tough": 2.9476340782841333,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Bellator": {
        "d": 6.092,
@@ -2898,7 +2968,8 @@
      "benched": "Incisus",
      "dmg": 2.9318250126704033,
      "tough": 1.4569418753319254,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Bellator": {
        "d": 6.092,
@@ -2937,7 +3008,8 @@
      "benched": "Certus",
      "dmg": 3.104434941189312,
      "tough": 3.504271246438933,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Bellator": {
        "d": 6.092,
@@ -2976,7 +3048,8 @@
      "benched": "Bellator",
      "dmg": 2.744808622767099,
      "tough": 3.197232510552624,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Certus": {
        "d": 2.23,
@@ -3040,7 +3113,8 @@
      "benched": null,
      "dmg": 1.9650913970442865,
      "tough": 2.318760135500387,
-     "healing": [],
+     "heal_d": [],
+     "heal_t": [],
      "per": {
       "Azkor": {
        "d": 4.865,
