@@ -3,9 +3,6 @@
  "setting": {
   "tier": "mythic",
   "level": 60,
-  "trig": true,
-  "act": true,
-  "gear": true,
   "adjacent": 3,
   "cap": 50
  },
@@ -58,6 +55,14 @@
      }
     }
    ],
+   "alliance": "Imperial",
+   "signature": [
+    "ActOfFaith"
+   ],
+   "ranged": 3,
+   "healer": [
+    "Healer"
+   ],
    "mow": {
     "name": "Exorcist",
     "buff": null,
@@ -73,6 +78,10 @@
     "Nubari"
    ],
    "teams": [],
+   "alliance": "Imperial",
+   "signature": [],
+   "ranged": 2,
+   "healer": [],
    "mow": null
   },
   "Adeptus Custodes": {
@@ -123,6 +132,10 @@
      }
     }
    ],
+   "alliance": "Imperial",
+   "signature": [],
+   "ranged": 1,
+   "healer": [],
    "mow": null
   },
   "Adeptus Mechanicus": {
@@ -172,6 +185,14 @@
       }
      }
     }
+   ],
+   "alliance": "Imperial",
+   "signature": [
+    "Mechanical"
+   ],
+   "ranged": 4,
+   "healer": [
+    "Mechanic"
    ],
    "mow": null
   },
@@ -409,6 +430,10 @@
      }
     }
    ],
+   "alliance": "Xenos",
+   "signature": [],
+   "ranged": 4,
+   "healer": [],
    "mow": null
   },
   "Astra Militarum": {
@@ -645,6 +670,10 @@
      }
     }
    ],
+   "alliance": "Imperial",
+   "signature": [],
+   "ranged": 3,
+   "healer": [],
    "mow": {
     "name": "Malleus Rocket Launcher",
     "buff": "On my Position!",
@@ -700,6 +729,12 @@
      }
     }
    ],
+   "alliance": "Chaos",
+   "signature": [
+    "LetTheGalaxyBurn"
+   ],
+   "ranged": 3,
+   "healer": [],
    "mow": {
     "name": "Forgefiend",
     "buff": null,
@@ -755,6 +790,10 @@
      }
     }
    ],
+   "alliance": "Imperial",
+   "signature": [],
+   "ranged": 2,
+   "healer": [],
    "mow": null
   },
   "Blood Angels": {
@@ -990,6 +1029,14 @@
       }
      }
     }
+   ],
+   "alliance": "Imperial",
+   "signature": [
+    "RapidAssault"
+   ],
+   "ranged": 2,
+   "healer": [
+    "Healer"
    ],
    "mow": null
   },
@@ -1227,6 +1274,10 @@
      }
     }
    ],
+   "alliance": "Imperial",
+   "signature": [],
+   "ranged": 3,
+   "healer": [],
    "mow": {
     "name": "Storm Speeder",
     "buff": null,
@@ -1281,6 +1332,15 @@
       }
      }
     }
+   ],
+   "alliance": "Chaos",
+   "signature": [
+    "ContagionsOfNurgle",
+    "Resilient"
+   ],
+   "ranged": 1,
+   "healer": [
+    "Healer"
    ],
    "mow": {
     "name": "Plagueburst Crawler",
@@ -1337,6 +1397,12 @@
      }
     }
    ],
+   "alliance": "Chaos",
+   "signature": [
+    "ThrillSeekers"
+   ],
+   "ranged": 1,
+   "healer": [],
    "mow": null
   },
   "Genestealer Cults": {
@@ -1387,6 +1453,12 @@
      }
     }
    ],
+   "alliance": "Xenos",
+   "signature": [],
+   "ranged": 3,
+   "healer": [
+    "Healer"
+   ],
    "mow": null
   },
   "Leagues of Votann": {
@@ -1436,6 +1508,14 @@
       }
      }
     }
+   ],
+   "alliance": "Xenos",
+   "signature": [
+    "PrioritisedEfficiency"
+   ],
+   "ranged": 2,
+   "healer": [
+    "Mechanic"
    ],
    "mow": null
   },
@@ -1673,6 +1753,15 @@
      }
     }
    ],
+   "alliance": "Xenos",
+   "signature": [
+    "LivingMetal",
+    "Mechanical"
+   ],
+   "ranged": 5,
+   "healer": [
+    "Mechanic"
+   ],
    "mow": {
     "name": "Reanimator",
     "buff": "Guardian Construct",
@@ -1727,6 +1816,14 @@
       }
      }
     }
+   ],
+   "alliance": "Xenos",
+   "signature": [
+    "GetStuckIn"
+   ],
+   "ranged": 2,
+   "healer": [
+    "Mechanic"
    ],
    "mow": {
     "name": "Rukkatrukk",
@@ -1969,6 +2066,12 @@
      }
     }
    ],
+   "alliance": "Imperial",
+   "signature": [],
+   "ranged": 1,
+   "healer": [
+    "Healer"
+   ],
    "mow": null
   },
   "Tau Empire": {
@@ -2205,6 +2308,10 @@
      }
     }
    ],
+   "alliance": "Xenos",
+   "signature": [],
+   "ranged": 5,
+   "healer": [],
    "mow": {
     "name": "Tson'ji",
     "buff": null,
@@ -2446,6 +2553,12 @@
      }
     }
    ],
+   "alliance": "Chaos",
+   "signature": [
+    "WeaverOfFate"
+   ],
+   "ranged": 6,
+   "healer": [],
    "mow": {
     "name": "Z'Kar",
     "buff": "Cabal of Sorcerers",
@@ -2501,6 +2614,10 @@
      }
     }
    ],
+   "alliance": "Xenos",
+   "signature": [],
+   "ranged": 1,
+   "healer": [],
    "mow": {
     "name": "Biovore",
     "buff": "Hyper Corrosive Acid",
@@ -2742,6 +2859,12 @@
      }
     }
    ],
+   "alliance": "Imperial",
+   "signature": [],
+   "ranged": 2,
+   "healer": [
+    "Healer"
+   ],
    "mow": {
     "name": "Galatian",
     "buff": null,
@@ -2797,6 +2920,12 @@
      }
     }
    ],
+   "alliance": "Chaos",
+   "signature": [
+    "BlessingsOfKhorne"
+   ],
+   "ranged": 0,
+   "healer": [],
    "mow": null
   }
  }

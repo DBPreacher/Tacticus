@@ -361,7 +361,14 @@ def build(tier=2, verbose=True):
                 dmg_alone=TEAM / sum(1 / p[0] for p in alone),
                 tough_alone=st.mean(p[1] for p in alone),
                 per={m['name']: dict(d=round(p[0], 3), t=round(p[1], 3)) for m, p in zip(combo, per)}))
+        # A signature trait is one every member carries. It falls out of the data rather than being
+        # listed by hand, so whatever the game adds next is picked up - and it is worth saying on the
+        # page that carrying one is not a reward for going pure: you get it in any team.
+        common = sorted(set.intersection(*[set(m['traits']) for m in members]))
         out[faction] = dict(n=len(members), roster=[m['name'] for m in members], teams=teams,
+                            alliance=members[0]['alliance'], signature=common,
+                            ranged=sum(1 for m in members if any(w['kind'] == 'ranged' for w in m['weapons'])),
+                            healer=sorted({t for m in members for t in m['traits'] if t in ('Healer', 'Mechanic')}),
                             mow=dict(name=mow['name'], buff=(buff or {}).get('name'),
                                      note=(buff or {}).get('note', ''),
                                      solo=round(1 / rate, 3) if rate else None) if mow else None)

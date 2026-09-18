@@ -1,0 +1,541 @@
+<meta charset="utf-8">
+<title>Faction Battle Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<!-- Built by build_faction.py: edit this template, never faction-battle-map.html.
+     /*DATA*/ is replaced with faction_data.json and /*BADGES*/ with the inlined faction badges. -->
+<style>
+:root{
+  --ground:#0a0a0a; --panel:#0f1318; --panel-2:#141a21; --rule:#232b35; --rule-soft:#1a2029;
+  --ink:#e8eaf0; --ink-2:#a3aab8; --ink-3:#6e7686; --guide:#4a5363;
+  --imperial:#d9ad3f; --chaos:#dc4638; --xenos:#5cbfe0;
+  --display:'Cinzel',Georgia,'Times New Roman',serif;
+  --data:'Rajdhani','Arial Narrow',Arial,sans-serif;
+  --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;margin:0}
+.wrap{max-width:1440px;margin:0 auto;padding:28px 28px 48px;display:flex;flex-direction:column;gap:22px}
+.wrap.fit{width:1440px;max-width:none}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 32px;border-bottom:1px solid var(--rule);padding-bottom:18px}
+.eyebrow{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1.1;margin:4px 0 0;letter-spacing:.02em;text-wrap:balance}
+.sub{color:var(--ink-2);margin:8px 0 0;max-width:62ch}
+.setup{display:flex;flex-wrap:wrap;gap:6px}
+.setup span{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.04em;color:var(--ink-2);border:1px solid var(--rule);padding:3px 9px;border-radius:3px;font-variant-numeric:tabular-nums}
+
+.main{display:grid;grid-template-columns:minmax(0,1fr) 330px 214px;gap:16px;align-items:stretch}
+.main>.controls,.main>.detail{contain:size;overflow:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+@media (max-width:1280px){.main{grid-template-columns:1fr 1fr}.main>.chart-card{grid-column:1/-1}.main>.controls,.main>.detail{contain:none;overflow:visible}}
+@media (max-width:760px){.main{grid-template-columns:1fr}}
+.chart-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px 14px 10px;position:relative}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 6px 6px;flex-wrap:wrap}
+.chart-head h2{font-family:var(--display);font-size:16px;font-weight:600;margin:0;letter-spacing:.03em;flex:1 1 100%}
+.hint{font-size:12.5px;color:var(--ink-3)}
+.chart-head .hint{flex:1 1 100%}
+svg{display:block;width:100%;height:auto;font-family:var(--data)}
+.grid line{stroke:var(--rule-soft);stroke-width:1}
+.tick{fill:var(--ink-3);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.axis-title{fill:var(--ink-2);font-size:13.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.median{stroke:var(--guide);stroke-width:1;stroke-dasharray:4 5}
+.median-label{paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round;fill:var(--ink-3);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.quad{fill:#343b47;font-size:15px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+
+/* a faction is a badge at its best five, with its other fives as small dots joined by a thin line:
+   a long reach means the sixth character is the whole story, no reach at all means there is no choice */
+.fac{cursor:pointer;transition:opacity .25s}
+.fac.dim{opacity:.13}
+.fac.dim .hit{pointer-events:none}
+.reach{stroke:var(--ink-3);stroke-width:1.4;opacity:.5;fill:none}
+.fac.sel .reach{stroke:var(--ink);opacity:1;stroke-width:2}
+.alt{stroke:var(--panel);stroke-width:1.2}
+.badge{image-rendering:auto}
+.ring{fill:none;stroke-width:2.5}
+.fac.sel .ring{stroke:#fff}
+.hit{fill:transparent}
+.lbl{paint-order:stroke;stroke:var(--panel);stroke-width:3.5px;stroke-linejoin:round;fill:var(--ink-2);font-size:12.5px;font-weight:600;pointer-events:none}
+.lbl.sel{fill:var(--ink);font-size:14px;font-weight:700}
+.tip{position:absolute;pointer-events:none;background:#06080b;border:1px solid var(--rule);border-radius:4px;padding:9px 12px;font-size:12.5px;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,.5);opacity:0;transition:opacity .12s;z-index:5}
+.tip b{font-family:var(--display);font-size:13.5px;letter-spacing:.02em}
+.tip .row{display:flex;justify-content:space-between;gap:16px;color:var(--ink-2);margin-top:3px}
+.tip .row b{font-family:var(--data);font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+
+.chart-key{display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:space-between;padding:8px 6px 0;border-top:1px solid var(--rule-soft);margin-top:6px}
+.legend{display:flex;gap:8px;flex-wrap:wrap}
+.legend button{font-family:var(--data);font-weight:600;font-size:13px;letter-spacing:.04em;background:none;border:1px solid var(--rule);color:var(--ink-2);padding:3px 9px;border-radius:3px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.legend button[aria-pressed=false]{opacity:.4}
+.legend i{width:9px;height:9px;border-radius:50%;display:block}
+.shapes{display:flex;gap:18px;color:var(--ink-3);font-size:12.5px;align-items:center}
+.shapes span{display:flex;align-items:center;gap:6px}
+.shapes svg{width:15px;height:15px}
+
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px}
+.controls{display:flex;flex-direction:column;gap:16px}
+.label{font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0 0 7px}
+.seg{display:flex;border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+.seg button{flex:1;font-family:var(--data);font-weight:600;font-size:13.5px;letter-spacing:.04em;background:none;border:0;border-right:1px solid var(--rule);color:var(--ink-3);padding:6px 4px;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--panel-2);color:var(--ink)}
+.check{display:flex;align-items:center;gap:8px;color:var(--ink-2);cursor:pointer;font-size:13px}
+.check input{position:absolute;opacity:0;width:0}
+.check .box{width:14px;height:14px;border:1px solid var(--rule);border-radius:2px;flex:none}
+.check input:checked+.box{background:var(--ink-2);border-color:var(--ink-2)}
+.check input:focus-visible+.box{outline:2px solid var(--ink);outline-offset:2px}
+.search{width:100%;background:var(--panel-2);border:1px solid var(--rule);border-radius:3px;color:var(--ink);padding:6px 9px;font-family:var(--body);font-size:13px}
+
+/* the pinned faction */
+.detail h3{font-family:var(--display);font-size:19px;margin:0;letter-spacing:.02em;line-height:1.2}
+.detail .top{display:flex;gap:11px;align-items:center;margin-bottom:10px}
+.detail .top img{width:44px;height:44px;flex:none}
+.detail .ally{font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase}
+.big{display:flex;gap:18px;margin:12px 0;padding:10px 0;border-top:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
+.big div{flex:1}
+.big .n{font-family:var(--data);font-weight:700;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.big .c{font-size:12px;color:var(--ink-3);margin-top:3px}
+.gain{font-family:var(--data);font-weight:600;font-size:13px;color:#6fbf73;font-variant-numeric:tabular-nums}
+.gain.none{color:var(--ink-3)}
+.five{width:100%;border-collapse:collapse;margin:4px 0 10px;font-variant-numeric:tabular-nums}
+.five th{text-align:right;font-family:var(--data);font-weight:600;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 0 4px;border-bottom:1px solid var(--rule-soft)}
+.five th:first-child{text-align:left}
+.five td{padding:3px 0;font-size:13px;text-align:right;color:var(--ink-2)}
+.five td:first-child{text-align:left;color:var(--ink)}
+.five tr.bench td{color:var(--ink-3);font-style:italic}
+.notes{font-size:12.5px;color:var(--ink-2);margin:0}
+.notes b{color:var(--ink);font-weight:600}
+.notes p{margin:0 0 7px}
+.tag{display:inline-block;font-family:var(--data);font-weight:600;font-size:12px;letter-spacing:.05em;border:1px solid var(--rule);border-radius:3px;padding:1px 7px;margin:0 4px 4px 0;color:var(--ink-2)}
+
+.reading .defs{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:4px 28px}
+.reading dt{font-family:var(--data);font-weight:700;font-size:13.5px;letter-spacing:.05em;color:var(--ink);margin-top:10px}
+.reading dd{margin:2px 0 0;color:var(--ink-2);font-size:13px}
+.reading ul{margin:4px 0 0;padding-left:16px}
+
+.table-card{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:14px}
+.table-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.table-head h2{font-family:var(--display);font-size:16px;font-weight:600;margin:0;letter-spacing:.03em}
+.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tbl th{text-align:right;padding:0;border-bottom:1px solid var(--rule)}
+.tbl th:first-child,.tbl th:nth-child(2){text-align:left}
+.tbl th button{width:100%;text-align:inherit;font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);background:none;border:0;padding:6px 8px;cursor:pointer}
+.tbl th button[aria-sort]{color:var(--ink)}
+.tbl td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--rule-soft);font-size:13px;color:var(--ink-2)}
+.tbl td:first-child,.tbl td:nth-child(2){text-align:left}
+.tbl tr{cursor:pointer}
+.tbl tr:hover td{background:var(--panel-2)}
+.tbl tr.sel td{background:var(--panel-2);color:var(--ink)}
+.tbl tr.out td{color:var(--ink-3);font-style:italic}
+.tbl .fname{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.tbl .fname img{width:22px;height:22px;flex:none}
+footer{color:var(--ink-3);font-size:12.5px;border-top:1px solid var(--rule);padding-top:14px}
+footer em{color:var(--ink-2);font-style:normal}
+</style>
+
+<div class="wrap" id="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">Tacticus &middot; Arena and Tournament Arena</p>
+      <h1>Faction Battle Map</h1>
+      <p class="sub">The Roster Battle Map asked what one character does on its own. This asks what a whole
+        faction does together, where the buffs are the point &mdash; five of one faction, and the Machine of War
+        that comes with them.</p>
+    </div>
+    <div class="setup" id="setup"></div>
+  </header>
+
+  <div class="main">
+    <section class="chart-card" aria-label="Faction damage and toughness chart">
+      <div class="chart-head">
+        <h2 id="chartTitle">Every faction that can field a five</h2>
+        <span class="hint">Hover a badge for numbers &middot; click to pin it &middot; the line behind a badge is
+          how far the sixth character moves it</span>
+      </div>
+      <svg id="map" viewBox="0 0 1000 670" role="img" aria-label="Chart of every faction by damage and toughness"></svg>
+      <div class="chart-key">
+        <div class="legend" id="legend" role="group" aria-label="Alliances (click to hide or show)"></div>
+        <div class="shapes">
+          <span><svg viewBox="-8 -8 16 16"><circle r="3" fill="#6e7686"/><path d="M-7,0L7,0" stroke="#6e7686" stroke-width="1.4"/></svg>Another five from the same six</span>
+        </div>
+      </div>
+      <div class="tip" id="tip" role="status"></div>
+    </section>
+
+    <div class="panel detail" id="detail" aria-live="polite"></div>
+
+    <div class="panel controls">
+      <div>
+        <p class="label">Machine of War</p>
+        <div class="seg" role="group" aria-label="Machine of War" id="segMow">
+          <button data-v="0" aria-pressed="true">Off</button>
+          <button data-v="1" aria-pressed="false">On</button>
+        </div>
+      </div>
+      <div>
+        <p class="label">Pick the five for</p>
+        <div class="seg" role="group" aria-label="Which five to show" id="segPick">
+          <button data-v="dmg" aria-pressed="true">Damage</button>
+          <button data-v="tough" aria-pressed="false">Toughness</button>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" id="names" checked><span class="box"></span>Show faction names</label>
+      <label class="check"><input type="checkbox" id="alts" checked><span class="box"></span>Show the other fives</label>
+      <div>
+        <p class="label">Find</p>
+        <input class="search" id="q" type="search" placeholder="Faction or character" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <section class="panel reading" aria-label="Reading the chart">
+    <p class="label">Reading the chart</p>
+    <dl class="defs">
+      <dt>Damage: higher is better</dt>
+      <dd>How many attacks the five need to kill a typical character, counted per member. Five attacking
+        together kill something in <em>1 &divide; the sum of their rates</em>, so this is that total put back
+        on the same scale as the Roster Battle Map. Lower on the number, higher on the chart.</dd>
+      <dt>Toughness: further right is better</dt>
+      <dd>How many attacks it takes to kill the typical member of the five. Focus fire kills a team one at a
+        time, so wiping the five takes the sum &mdash; this is that divided by five.</dd>
+      <dt>What "typical character" means here</dt>
+      <dd>Not a loose character. Every one of the 117 is first given its <em>own</em> faction's buffs, and
+        then they are measured against each other. So a faction is being judged against other factions
+        playing together, which is the fight it will actually have. It is the Roster Battle Map's typical
+        character moved up a level.</dd>
+      <dt>The line behind a badge</dt>
+      <dd>Nine factions have six characters and must bench one, so they have six possible fives. The badge
+        sits on the best of them and the other five are the small dots. A long line means the sixth
+        character is the whole story; twelve factions have exactly five and no line at all, which is its own
+        answer &mdash; there is no decision to make. The character left out is named in the panel, and it is
+        often <em>not</em> the same one for attacking as for defending.</dd>
+      <dt>Synergy: what going pure is worth</dt>
+      <dd>The same five measured against the same yardstick with their buffs on and with them off. It counts
+        the mates' buffs on both sides, and the faction-locked clauses that only work next to one of their
+        own &mdash; Asmodai and Baraqiel beside a Dark Angel, Forcas counting who is next to him, the Winged
+        Prime's Hormagaunts arriving once for every Synapse ally. On the Roster Battle Map every one of those
+        is worth exactly nothing, because there is nobody standing beside them.</dd>
+      <dt>A signature trait is not a synergy</dt>
+      <dd>Get Stuck In, Blessings of Khorne, Act of Faith and the rest are carried by each character wherever
+        it fights, so they are already in that character's own numbers and they are no reward for going pure.
+        Ten factions have one, eleven do not, and it makes no difference to the gain shown here. The reward
+        for going pure is the locked clause, and it is much rarer.</dd>
+      <dt>Machine of War</dt>
+      <dd>Eleven of the 21 have one. With it on, its Mythic ability lands on the five and the attack it fires
+        every round is counted as a sixth attacker. Two things it does not do: six of the eleven machines are
+        defensive &mdash; the Galatian, the Exorcist, the Forgefiend, the Tson'ji and the Storm Speeder shield
+        rather than hit &mdash; and nothing reads those abilities yet, so a machine never moves the Toughness
+        axis. And a machine is counted as a sixth attacker, never as a sixth body for the enemy to kill.</dd>
+      <dt>Turn order is not modelled at all</dt>
+      <dd>In Arena it is frequently the whole game: who moves first, who gets to focus somebody down before
+        they answer. None of that is here. This page ranks what a faction <em>can do</em>, not who goes first.</dd>
+      <dt>"Attacks to kill" is still a one-on-one measure</dt>
+      <dd>The buffs are a team, but the fight underneath is still one attacker against one defender. There is
+        no focus fire, nobody dies mid-fight and stops answering, and nothing is reinforced. The
+        simplification is kept on purpose, because it is what makes these numbers comparable to the Roster
+        Battle Map &mdash; but it is why the chart should be read as a ranking and not as a prediction.</dd>
+      <dt>Where a buff lands</dt>
+      <dd>A buff that cannot reach everyone goes to the members who use it best: the hitters for an attack
+        buff, the fragile for a shield. Three team-mates count as adjacent, the same number every adjacency
+        question in this project answers to.</dd>
+      <dt>Adeptus Astartes</dt>
+      <dd>Three characters. They cannot field a five at all, so they are in the table and not on the chart.</dd>
+    </dl>
+  </section>
+
+  <section class="table-card" aria-label="Ranked list">
+    <div class="table-head">
+      <h2>Every faction</h2>
+      <span class="hint" id="tableHint"></span>
+    </div>
+    <table class="tbl" id="tbl">
+      <thead><tr>
+        <th><button data-k="faction">Faction</button></th>
+        <th><button data-k="bench">Left out</button></th>
+        <th><button data-k="n">Size</button></th>
+        <th><button data-k="dmg">Damage &middot; attacks</button></th>
+        <th><button data-k="tough">Toughness &middot; attacks</button></th>
+        <th><button data-k="dgain">Attack synergy</button></th>
+        <th><button data-k="tgain">Defence synergy</button></th>
+        <th><button data-k="mow">Machine of War</button></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <footer>Built from the tacticustable.com game data at version <span id="ver"></span>, with the same damage
+    model as the <em>Roster Battle Map</em> &mdash; the rules are in <em>Damage Visualiser/DAMAGE_MODEL.md</em>
+    and every ability's handling is in the <em>*_abilities.csv</em> files. Faction badges are the game's own.
+    The numbers are for comparing factions, not predicting an exact fight.</footer>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+const BADGES = /*BADGES*/;
+const F = DATA.factions;
+const ALLY = {Imperial:'#d9ad3f', Chaos:'#dc4638', Xenos:'#5cbfe0'};
+const NS = 'http://www.w3.org/2000/svg';
+const S = {mow:0, pick:'dmg', names:true, alts:true, sel:'Dark Angels', q:'',
+           hidden:new Set(), sort:{k:'dmg', dir:1}};
+
+const PRETTY = {ActOfFaith:'Act of Faith', GetStuckIn:'Get Stuck In', BlessingsOfKhorne:'Blessings of Khorne',
+  LetTheGalaxyBurn:'Let the Galaxy Burn', WeaverOfFate:'Weaver of Fates', RapidAssault:'Rapid Assault',
+  ContagionsOfNurgle:'Contagions of Nurgle', ThrillSeekers:'Thrill Seekers', LivingMetal:'Living Metal',
+  PrioritisedEfficiency:'Prioritised Efficiency'};
+const pretty = t => PRETTY[t] || t.replace(/(?!^)([A-Z])/g, ' $1');
+
+// the fives a faction can field, with the numbers the current settings ask for
+function teams(name){
+  return (F[name].teams || []).map(t => ({...t, d: (S.mow && t.dmg_mow) ? t.dmg_mow : t.dmg}));
+}
+function best(name){
+  const ts = teams(name);
+  if(!ts.length) return null;
+  return S.pick === 'tough' ? ts.reduce((a,b) => b.tough > a.tough ? b : a)
+                            : ts.reduce((a,b) => b.d < a.d ? b : a);
+}
+const playable = Object.keys(F).filter(n => F[n].teams.length).sort();
+const shown = () => playable.filter(n => !S.hidden.has(F[n].alliance));
+
+// ---------------------------------------------------------------- the chart
+const svg = document.getElementById('map'), tip = document.getElementById('tip');
+const PAD = {l:74, r:30, t:26, b:56}, W = 1000, H = 670;
+let scale = null;
+
+function nice(lo, hi){
+  const span = hi - lo, step = Math.pow(10, Math.floor(Math.log10(span / 4)));
+  const s = [1,2,2.5,5,10].map(m => m * step).find(m => span / m <= 5) || step * 10;
+  return {lo: Math.floor(lo / s) * s, hi: Math.ceil(hi / s) * s, s};
+}
+function el(tag, attrs, parent){
+  const n = document.createElementNS(NS, tag);
+  for(const k in attrs) n.setAttribute(k, attrs[k]);
+  if(parent) parent.appendChild(n);
+  return n;
+}
+function draw(){
+  svg.textContent = '';
+  const names = shown();
+  const pts = names.map(n => ({n, t: best(n)})).filter(p => p.t);
+  if(!pts.length) return;
+  const all = names.flatMap(n => teams(n));
+  const dx = nice(Math.min(...all.map(t => t.tough)) * .92, Math.max(...all.map(t => t.tough)) * 1.05);
+  const dy = nice(Math.min(...all.map(t => t.d)) * .85, Math.max(...all.map(t => t.d)) * 1.06);
+  // damage is attacks needed, so the axis runs downwards: fewer attacks sits higher up
+  const X = v => PAD.l + (v - dx.lo) / (dx.hi - dx.lo) * (W - PAD.l - PAD.r);
+  const Y = v => PAD.t + (v - dy.lo) / (dy.hi - dy.lo) * (H - PAD.t - PAD.b);
+  scale = {X, Y};
+
+  const grid = el('g', {class:'grid'}, svg);
+  for(let v = dx.lo; v <= dx.hi + 1e-9; v += dx.s){
+    el('line', {x1:X(v), x2:X(v), y1:PAD.t, y2:H - PAD.b}, grid);
+    el('text', {class:'tick', x:X(v), y:H - PAD.b + 20, 'text-anchor':'middle'}, svg).textContent = (+v.toFixed(2));
+  }
+  for(let v = dy.lo; v <= dy.hi + 1e-9; v += dy.s){
+    el('line', {x1:PAD.l, x2:W - PAD.r, y1:Y(v), y2:Y(v)}, grid);
+    el('text', {class:'tick', x:PAD.l - 10, y:Y(v) + 4, 'text-anchor':'end'}, svg).textContent = (+v.toFixed(2));
+  }
+  el('text', {class:'axis-title', x:(PAD.l + W - PAD.r) / 2, y:H - 12, 'text-anchor':'middle'}, svg)
+    .textContent = 'Toughness → attacks to kill one of them';
+  const yt = el('text', {class:'axis-title', x:0, y:0, 'text-anchor':'middle',
+    transform:`translate(20,${(PAD.t + H - PAD.b) / 2}) rotate(-90)`}, svg);
+  yt.textContent = 'Damage → attacks to kill a typical character';
+
+  // the middle of the field, so "better than most" is readable without doing arithmetic
+  const mid = a => { const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; };
+  const mx = mid(pts.map(p => p.t.tough)), my = mid(pts.map(p => p.t.d));
+  el('line', {class:'median', x1:X(mx), x2:X(mx), y1:PAD.t, y2:H - PAD.b}, svg);
+  el('line', {class:'median', x1:PAD.l, x2:W - PAD.r, y1:Y(my), y2:Y(my)}, svg);
+  el('text', {class:'median-label', x:X(mx) + 6, y:PAD.t + 13}, svg).textContent = 'Middle faction';
+  el('text', {class:'quad', x:W - PAD.r - 8, y:PAD.t + 20, 'text-anchor':'end'}, svg).textContent = 'Hits hard, hard to kill';
+  el('text', {class:'quad', x:PAD.l + 8, y:H - PAD.b - 10}, svg).textContent = 'Neither';
+
+  const q = S.q.trim().toLowerCase();
+  const placed = pts.map(p => [X(p.t.tough) - 21, Y(p.t.d) - 21, X(p.t.tough) + 21, Y(p.t.d) + 21]);
+  for(const {n, t} of pts){
+    const f = F[n], col = ALLY[f.alliance] || '#a3aab8';
+    const hit = q && !(n.toLowerCase().includes(q) || f.roster.some(m => m.toLowerCase().includes(q)));
+    const g = el('g', {class:'fac' + (n === S.sel ? ' sel' : '') + (hit ? ' dim' : ''),
+                       transform:`translate(${X(t.tough)},${Y(t.d)})`}, svg);
+    const others = teams(n).filter(o => o !== t);
+    if(S.alts && others.length){
+      for(const o of others){
+        const ox = X(o.tough) - X(t.tough), oy = Y(o.d) - Y(t.d);
+        el('path', {class:'reach', d:`M0,0L${ox},${oy}`}, g);
+        el('circle', {class:'alt', cx:ox, cy:oy, r:3.4, fill:col}, g);
+      }
+    }
+    el('circle', {class:'ring', r:19, stroke:col}, g);
+    const img = el('image', {class:'badge', x:-16, y:-16, width:32, height:32, href:BADGES[n] || ''}, g);
+    img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', BADGES[n] || '');
+    el('circle', {class:'hit', r:21}, g);
+    g.addEventListener('mousemove', e => hover(e, n, t));
+    g.addEventListener('mouseleave', () => { tip.style.opacity = 0; });
+    g.addEventListener('click', () => { S.sel = n; render(); });
+  }
+  // Names last, so they sit over the badges - and only where one fits. The middle of this chart is
+  // crowded enough that laying every name down would bury the marks the names are for.
+  if(S.names) label(pts, el('g', {}, svg), placed, X, Y);
+}
+
+/* the pinned faction first, then anyone whose name finds a clear space: below the badge, above it, or
+   out to either side. A name that cannot go anywhere without covering something is left to the tooltip. */
+function label(pts, box, taken, X, Y){
+  const rank = p => p.n === S.sel ? 0 : 1;
+  for(const p of [...pts].sort((a, b) => rank(a) - rank(b))){
+    const sel = p.n === S.sel, x = X(p.t.tough), y = Y(p.t.d);
+    const w = p.n.length * (sel ? 7.6 : 6.4) + 6, h = sel ? 16 : 14;
+    const cand = [[x, y + 34, 'middle', [x - w / 2, y + 22, x + w / 2, y + 22 + h]],
+                  [x, y - 24, 'middle', [x - w / 2, y - 24 - h + 4, x + w / 2, y - 20]],
+                  [x + 25, y + 5, 'start', [x + 23, y - h / 2, x + 23 + w, y + h / 2]],
+                  [x - 25, y + 5, 'end', [x - 23 - w, y - h / 2, x - 23, y + h / 2]]];
+    let put = null;
+    for(const c of cand){
+      const b = c[3];
+      if(b[0] < PAD.l + 2 || b[2] > W - PAD.r - 2 || b[1] < PAD.t || b[3] > H - PAD.b) continue;
+      if(!taken.some(o => b[0] < o[2] && b[2] > o[0] && b[1] < o[3] && b[3] > o[1])){ put = c; break; }
+    }
+    if(!put && sel) put = cand[0];
+    if(!put) continue;
+    taken.push(put[3]);
+    el('text', {x:put[0], y:put[1], 'text-anchor':put[2], class:'lbl' + (sel ? ' sel' : '')}, box)
+      .textContent = p.n;
+  }
+}
+function hover(e, n, t){
+  const f = F[n], card = svg.parentNode.getBoundingClientRect();
+  tip.innerHTML = `<b>${n}</b>`
+    + `<div class="row">Damage <b>${t.d.toFixed(2)}</b></div>`
+    + `<div class="row">Toughness <b>${t.tough.toFixed(2)}</b></div>`
+    + `<div class="row">Together they gain <b>${pct(t.dmg_alone / t.dmg - 1)}</b></div>`
+    + (t.benched ? `<div class="row">Left out <b>${t.benched}</b></div>` : '')
+    + (f.mow ? `<div class="row">Machine <b>${f.mow.name}</b></div>` : '');
+  tip.style.opacity = 1;
+  const x = e.clientX - card.left + 16, y = e.clientY - card.top + 14;
+  tip.style.left = Math.min(x, card.width - tip.offsetWidth - 8) + 'px';
+  tip.style.top = Math.min(y, card.height - tip.offsetHeight - 8) + 'px';
+}
+const pct = v => (v >= 0 ? '+' : '') + (v * 100).toFixed(0) + '%';
+
+// ---------------------------------------------------------------- the pinned faction
+function detail(){
+  const n = S.sel, f = F[n], box = document.getElementById('detail');
+  const t = best(n);
+  const gd = t.dmg_alone / t.dmg - 1, gt = t.tough / t.tough_alone - 1;
+  const rows = f.roster.map(m => {
+    const p = t.per[m];
+    return p ? `<tr><td>${m}</td><td>${p.d.toFixed(2)}</td><td>${p.t.toFixed(2)}</td></tr>`
+             : `<tr class="bench"><td>${m}</td><td colspan="2">left out</td></tr>`;
+  }).join('');
+  const lacks = [];
+  if(!f.ranged) lacks.push('not one ranged weapon in the faction');
+  else if(f.ranged === f.n) lacks.push('every one of them is a shooter');
+  if(!f.healer.length) lacks.push('nobody who heals or repairs');
+  box.innerHTML = `
+    <div class="top"><img src="${BADGES[n] || ''}" alt="">
+      <div><h3>${n}</h3>
+        <span class="ally" style="color:${ALLY[f.alliance]}">${f.alliance} &middot; ${f.n} characters</span></div></div>
+    <div class="big">
+      <div><div class="n">${t.d.toFixed(2)}</div><div class="c">Damage &middot; attacks to kill</div>
+        <div class="gain">${pct(gd)} together</div></div>
+      <div><div class="n">${t.tough.toFixed(2)}</div><div class="c">Toughness &middot; attacks to die</div>
+        <div class="gain${gt < 0.005 ? ' none' : ''}">${pct(gt)} together</div></div>
+    </div>
+    <table class="five"><thead><tr><th>The five</th><th>Damage</th><th>Toughness</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    <div class="notes">
+      ${f.signature.length ? `<p><b>Signature trait</b> ${f.signature.map(pretty).join(', ')} &mdash; carried
+        everywhere they fight, so it is no reward for going pure.</p>` : '<p><b>No signature trait.</b></p>'}
+      ${f.mow ? `<p><b>${f.mow.name}</b>${f.mow.buff ? ` &mdash; ${f.mow.buff}${f.mow.note ? ', ' + f.mow.note : ''}`
+        : ' &mdash; a defensive machine, and its Mythic ability is not read yet'}.</p>` : '<p><b>No Machine of War.</b></p>'}
+      ${lacks.length ? `<p><b>Worth knowing</b> &mdash; ${lacks.join('; ')}.</p>` : ''}
+      ${f.teams.length > 1 ? `<p><b>The sixth character</b> costs them ${((worst(n) / t.d - 1) * 100).toFixed(0)}% of their damage
+        at worst. Left out here: ${t.benched}.</p>` : '<p>Five characters, so there is no choice to make.</p>'}
+    </div>`;
+}
+const worst = n => Math.max(...teams(n).map(t => t.d));
+
+// ---------------------------------------------------------------- the table
+function table(){
+  const body = document.querySelector('#tbl tbody');
+  const rows = Object.keys(F).sort().map(n => {
+    const f = F[n], t = best(n);
+    return {n, f, t, faction:n, bench:(t && t.benched) || '', size:f.n,
+            dmg:t ? t.d : Infinity, tough:t ? t.tough : -Infinity,
+            dgain:t ? t.dmg_alone / t.dmg - 1 : -Infinity,
+            tgain:t ? t.tough / t.tough_alone - 1 : -Infinity,
+            mow:(f.mow || {}).name || ''};
+  });
+  const k = S.sort.k, dir = S.sort.dir;
+  const num = ['dmg','tough','dgain','tgain','size','n'].includes(k);
+  rows.sort((a, b) => (num ? (a[k] - b[k]) : String(a[k]).localeCompare(String(b[k]))) * dir);
+  body.innerHTML = rows.map(r => `
+    <tr data-n="${r.n}" class="${r.n === S.sel ? 'sel' : ''}${r.t ? '' : ' out'}">
+      <td><span class="fname"><img src="${BADGES[r.n] || ''}" alt="">${r.n}</span></td>
+      <td>${r.bench || (r.t ? '—' : 'cannot field five')}</td>
+      <td>${r.f.n}</td>
+      <td>${r.t ? r.t.d.toFixed(2) : '—'}</td>
+      <td>${r.t ? r.t.tough.toFixed(2) : '—'}</td>
+      <td>${r.t ? pct(r.dgain) : '—'}</td>
+      <td>${r.t ? pct(r.tgain) : '—'}</td>
+      <td>${r.mow || '—'}</td></tr>`).join('');
+  for(const tr of body.querySelectorAll('tr[data-n]')){
+    if(F[tr.dataset.n].teams.length) tr.addEventListener('click', () => { S.sel = tr.dataset.n; render(); });
+  }
+  document.getElementById('tableHint').textContent =
+    `${playable.length} factions can field a five; ${playable.filter(n => F[n].teams.length > 1).length} have a
+     sixth character to choose from.`;
+}
+
+// ---------------------------------------------------------------- chrome
+function legend(){
+  const box = document.getElementById('legend');
+  box.innerHTML = Object.keys(ALLY).map(a =>
+    `<button data-a="${a}" aria-pressed="${!S.hidden.has(a)}"><i style="background:${ALLY[a]}"></i>${a}</button>`).join('');
+  for(const b of box.querySelectorAll('button')) b.addEventListener('click', () => {
+    const a = b.dataset.a;
+    S.hidden.has(a) ? S.hidden.delete(a) : S.hidden.add(a);
+    if(S.hidden.size === Object.keys(ALLY).length) S.hidden.delete(a);
+    render();
+  });
+}
+function seg(id, key){
+  const box = document.getElementById(id);
+  for(const b of box.querySelectorAll('button')) b.addEventListener('click', () => {
+    S[key] = key === 'mow' ? +b.dataset.v : b.dataset.v;
+    render();
+  });
+}
+function setup(){
+  const s = DATA.setting;
+  document.getElementById('setup').innerHTML =
+    [`Mythic, 14 stars`, `Abilities ${s.level}`, `Standard gear &middot; relic ${10}`, `Actives on`,
+     `All triggered`, `Five + Machine of War`].map(x => `<span>${x}</span>`).join('');
+  document.getElementById('ver').textContent = DATA.version;
+}
+function render(){
+  for(const [id, key] of [['segMow','mow'], ['segPick','pick']])
+    for(const b of document.querySelectorAll('#' + id + ' button'))
+      b.setAttribute('aria-pressed', String(b.dataset.v == S[key]));
+  if(!F[S.sel] || !F[S.sel].teams.length) S.sel = playable[0];
+  legend(); draw(); detail(); table();
+}
+seg('segMow', 'mow'); seg('segPick', 'pick');
+document.getElementById('names').addEventListener('change', e => { S.names = e.target.checked; draw(); });
+document.getElementById('alts').addEventListener('change', e => { S.alts = e.target.checked; draw(); });
+document.getElementById('q').addEventListener('input', e => { S.q = e.target.value; draw(); });
+for(const b of document.querySelectorAll('#tbl th button')) b.addEventListener('click', () => {
+  const k = b.dataset.k;
+  S.sort = {k, dir: S.sort.k === k ? -S.sort.dir : 1};
+  for(const o of document.querySelectorAll('#tbl th button')) o.removeAttribute('aria-sort');
+  b.setAttribute('aria-sort', S.sort.dir > 0 ? 'ascending' : 'descending');
+  table();
+});
+// on a window wider than the layout, lay the page out at 1440 and zoom it up rather than leaving a gutter
+function fitPage(){
+  const wrap = document.getElementById('wrap');
+  const z = Math.min(window.innerWidth / 1440, 1.6);
+  wrap.classList.toggle('fit', z > 1.02);
+  wrap.style.zoom = z > 1.02 ? z : '';
+}
+window.addEventListener('resize', fitPage);
+setup(); fitPage(); render();
+</script>
