@@ -12,7 +12,7 @@ everything triggered, and the Machine of War switched on where a faction has one
 Last time out we looked at who were the best characters individually but today we
 want to try and answer the age-old question, who is the best faction? So we'll
 take another mathematical look at this and see where your favourite faction lies
-in attack and in defence.
+in attack and in defence.  Let's dive in. 
 
 ## Introduction
 
@@ -26,23 +26,21 @@ This new one asks exactly the same two questions of a whole faction, five
 characters fielded together with a Machine of War alongside, which is the standard
 Arena, guild war or Tournament Arena setup. Everything is maxed Mythic, level sixty
 abilities, standard gear with the relic on, actives used and everything triggered,
-because there's no point comparing factions at different levels of investment.
+because I'm really looking for the best late game factions this time around.
 
-There are twenty one factions that can field a five. Twelve of them have exactly
+There are twenty one factions that can field the full five characters. Twelve of them have exactly
 five characters so the team picks itself, nine have six so somebody has to sit out,
 and the Adeptus Astartes have three and can't field a team at all, so they're in
-the table with a dash next to them and that's their whole entry until they get a
-full five characters.
+the table with a dash next to them and that's their whole entry today until they get filled up.
 
 ## Part 1 - What's changed on the Roster Battle Map
 
-Before we get into the new one, there's a couple of changes to the old chart that
-I've made since that video went out, because a few of you pointed things out and
-some of it was just wrong.
+Before we get into the new one though, there's a couple of quick changes to the old chart that
+I've made since that video went out based on your feedback.
 
 The big one is for the Genestealers, and it's the Ambush trait. When they're killed
 they leave a decoy behind and come back on it at full health the next turn, which
-means you've genuinely got to kill them twice, and the chart was only counting it
+means you've got to kill them twice, and the chart was only counting it
 once. That is a huge change for those four. Isaak goes from a hundred and eighth
 for toughness up to thirty fifth, Hollan goes from a hundred and fifteenth to
 seventieth, and Xybia was dead last of a hundred and seventeen and is now ninety
@@ -54,7 +52,7 @@ scored on just the half of their kit that swings a weapon. That's now fixed for
 the Damage axis, but I leave it out for toughness because I presume the characters
 are being attacked and not the summons. All this means characters like the
 Patermine climbs from forty ninth to twentieth, Archimatos goes from fifty first to
-thirtieth, and Creed picks up eleven places as well. Ammuk is still a hundred and
+thirtieth, and Creed picks up eleven places as well [Creed: FOR CADIA]. Ammuk is still a hundred and
 seventeenth of a hundred and seventeen even with his summon counted, so that one
 wasn't a scoring problem, he's just crap in attack.
 
@@ -79,9 +77,8 @@ being scored against other factions playing together rather than against a bunch
 characters stood on their own, which is the fight it's actually going to have.
 
 If you want to see exactly how five characters turn into those two numbers, I've
-built a second page that walks you through it in four steps, and I'll put it up on
-screen now. It starts with the five and what each of them scores on their own. Then
-for damage it turns each one upside down into a rate, which is the share of a kill
+built a second page that walks you through it in four steps. It starts with the five 
+and what each of them scores on their own. Then for damage it turns each one upside down into a rate, which is the share of a kill
 they land with one attack, because two characters swinging at the same target
 obviously don't each take as long as they would alone, and those rates add up to
 give you the faction's number. Toughness is the other way round, so it lays the
@@ -160,7 +157,7 @@ being one of the worst factions in the game for attack.
 
 *[Creed joke goes here. One you might use: "So the Guard's best attacking option is
 a tube on wheels with nobody driving it, which honestly does feel about right for
-the Imperial Guard." Swap for your own.]*
+my Imperial Guard." Swap for your own.]*
 
 For the Ultramarines, Galatian is doing twenty four percent, and on top of that its
 Mythic ability takes twenty percent off everything the team takes, which turns the

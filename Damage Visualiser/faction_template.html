@@ -87,26 +87,26 @@ svg{display:block;width:100%;height:auto;font-family:var(--data)}
 
 /* the pinned faction */
 .detail h3{font-family:var(--display);font-size:19px;margin:0;letter-spacing:.02em;line-height:1.2}
-.detail .top{display:flex;gap:11px;align-items:center;margin-bottom:10px}
+.detail .top{display:flex;gap:11px;align-items:center;margin-bottom:8px}
 .detail .top img{width:44px;height:44px;flex:none}
 .detail .ally{font-family:var(--data);font-weight:600;font-size:12.5px;letter-spacing:.1em;text-transform:uppercase}
-.big{display:flex;gap:18px;margin:12px 0;padding:10px 0;border-top:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
+.big{display:flex;gap:18px;margin:10px 0;padding:8px 0;border-top:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
 .big div{flex:1}
 .big .n{font-family:var(--data);font-weight:700;font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
 .big .c{font-size:12px;color:var(--ink-3);margin-top:3px}
 .gain{font-family:var(--data);font-weight:600;font-size:13px;color:#6fbf73;font-variant-numeric:tabular-nums}
 .gain.none{color:var(--ink-3)}
-.five{width:100%;border-collapse:collapse;margin:4px 0 10px;font-variant-numeric:tabular-nums}
+.five{width:100%;border-collapse:collapse;margin:2px 0 8px;font-variant-numeric:tabular-nums}
 .five th{text-align:right;font-family:var(--data);font-weight:600;font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:0 0 4px;border-bottom:1px solid var(--rule-soft)}
 .five th:first-child{text-align:left}
-.five td{padding:3px 0;font-size:13px;text-align:right;color:var(--ink-2)}
+.five td{padding:2px 0;font-size:13px;text-align:right;color:var(--ink-2)}
 .five td:first-child{text-align:left;color:var(--ink)}
 .five tr.bench td{color:var(--ink-3);font-style:italic}
 .five i{color:var(--ink-3);font-style:normal;font-size:11.5px;margin-left:5px}
-.fine{font-size:11.5px;color:var(--ink-3);margin:-4px 0 10px;line-height:1.45}
+.fine{font-size:11.5px;color:var(--ink-3);margin:-6px 0 8px;line-height:1.4}
 .notes{font-size:12.5px;color:var(--ink-2);margin:0}
 .notes b{color:var(--ink);font-weight:600}
-.notes p{margin:0 0 7px}
+.notes p{margin:0 0 6px}
 .tag{display:inline-block;font-family:var(--data);font-weight:600;font-size:12px;letter-spacing:.05em;border:1px solid var(--rule);border-radius:3px;padding:1px 7px;margin:0 4px 4px 0;color:var(--ink-2)}
 
 .reading .defs{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:4px 28px}
@@ -534,24 +534,23 @@ function detail(){
     </div>
     <table class="five"><thead><tr><th>The five</th><th>Damage</th><th>Toughness</th></tr></thead>
       <tbody>${rows}</tbody></table>
-    <p class="fine">The grey figure is what that character scores on the Roster Battle Map, alone in a
-      duel. Everyone here is fighting buffed enemies, so almost every number moves.</p>
+    <p class="fine">Grey is their Roster Battle Map score.</p>
     <div class="notes">
-      <p><b>All five together</b> take ${(t.tough * 5).toFixed(1)} attacks to wipe out, and kill a typical
-        character in ${(t.d / 5).toFixed(2)} attacks between them.</p>
-      ${f.signature.length ? `<p><b>Signature trait</b> ${f.signature.map(pretty).join(', ')} &mdash; carried
+      <p><b>All five together</b> soak ${(t.tough * 5).toFixed(1)} attacks and kill a typical character in
+        ${(t.d / 5).toFixed(2)}.</p>
+      ${f.signature.length ? `<p><b>Signature trait</b> ${f.signature.map(pretty).join(', ')}, carried
         everywhere they fight, so it is no reward for going pure.</p>` : '<p><b>No signature trait.</b></p>'}
-      ${f.mow ? `<p><b>${f.mow.name}</b> &mdash; ${[f.mow.buff && f.mow.buff + (f.mow.note ? ', ' + f.mow.note : ''),
-        f.mow.defence].filter(Boolean).join('; ') || 'its Mythic ability is not read yet'}.
-        ${t.mow_share != null ? `With it on, the five go from <b>${t.dmg0.toFixed(2)}</b> to
-        <b>${t.dmg_mow.toFixed(2)}</b> on Damage and <b>${t.tough0.toFixed(2)}</b> to
-        <b>${t.tough_mow.toFixed(2)}</b> on Toughness, and the machine itself is doing
-        <b>${(t.mow_share * 100).toFixed(0)}%</b> of the killing &mdash; on its own it would need
-        ${t.mow_solo.toFixed(1)} turns to put down a typical character.` : ''}</p>`
+      ${f.mow ? `<p><b>${f.mow.name}</b>: ${[f.mow.buff && f.mow.buff + (f.mow.note ? ', ' + f.mow.note : ''),
+        f.mow.defence].filter(Boolean).join('; ') || 'Mythic ability not read yet'}.
+        ${t.mow_share != null ? `Switching it on: <b>${t.dmg0.toFixed(2)}</b> to
+        <b>${t.dmg_mow.toFixed(2)}</b> Damage, <b>${t.tough0.toFixed(2)}</b> to
+        <b>${t.tough_mow.toFixed(2)}</b> Toughness. It does <b>${(t.mow_share * 100).toFixed(0)}%</b> of
+        the killing.` : ''}</p>`
         : '<p><b>No Machine of War.</b></p>'}
       ${lacks.length ? `<p><b>Worth knowing</b> &mdash; ${lacks.join('; ')}.</p>` : ''}
-      ${f.teams.length > 1 ? `<p><b>The sixth character</b> costs them ${((worst(n) / t.d - 1) * 100).toFixed(0)}% of their damage
-        at worst. Left out here: ${t.benched}.</p>` : '<p>Five characters, so there is no choice to make.</p>'}
+      ${f.teams.length > 1 ? `<p><b>${t.benched} is left out.</b> Benching the wrong one costs up to
+        ${((worst(n) / t.d - 1) * 100).toFixed(0)}% of their damage.</p>`
+        : '<p>Five characters, so there is no choice to make.</p>'}
     </div>`;
 }
 const worst = n => Math.max(...teams(n).map(t => t.d));
