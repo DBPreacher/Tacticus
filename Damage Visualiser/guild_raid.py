@@ -31,7 +31,11 @@ TEAM = 5
 TEAM_REACH = {'team': 4, 'target': 4, 'one': 1, 'next attack': 1, 'adjacent': 2, '2 hexes': 3}   # of the 4 team-mates
 FACTION_ID = {'AdeptusMechanicus': 'Adeptus Mechanicus', 'Orks': 'Orks', 'Tyranids': 'Tyranids', 'Aeldari': 'Aeldari',
               'AstraMilitarum': 'Astra Militarum', 'Tau': 'Tau Empire', 'ThousandSons': 'Thousand Sons',
-              'DeathGuard': 'Death Guard', 'DarkAngels': 'Dark Angels', 'Necrons': 'Necrons'}
+              'DeathGuard': 'Death Guard', 'DarkAngels': 'Dark Angels', 'Necrons': 'Necrons',
+              # the Machines of War carry two ids no character does, so they were resolving to
+              # themselves and never matching the faction that owns them
+              'Sisterhood': 'Adepta Sororitas', 'BlackLegion': 'Black Legion',
+              'Ultramarines': 'Ultramarines'}
 
 
 GAME = None               # set by game(), so the summon helpers can reach the npc table
