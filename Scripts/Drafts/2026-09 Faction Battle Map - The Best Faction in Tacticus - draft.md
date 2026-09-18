@@ -180,28 +180,48 @@ you can see how much is the team and how much is the tank.
 Right, let's get into it. Who actually kills things.
 
 The Tau are first at nought point five seven attacks and it isn't particularly
-close. Second are the Space Wolves at nought point seven one, and you already know
-why, and third are the Aeldari at one point nought five, so there's a proper gap
-between those three and everybody else.
+close, so nandi crying non-stop about tau certainly made a difference.  Maybe I need to do this with the Astra Militarum. 
+Second are the Space Wolves at nought point seven one, and you already know why, and then there is a proper gap to the third Aeldari at one point nought five.
 
 Behind them you've got the Blood Angels and the Black Legion level at one point
 nought seven, then the Custodes, the Votann and the Black Templars all bunched up
 between one point one seven and one point two eight.
 
-## Part 6 - The best in defence
+## Part 6 - The worst in attack
+
+Now looking at the worst team in attack, the Sisters are last at three point one six even with the
+Exorcist helping out. Second last are the Genestealer Cults at two point seven
+three, and third last the Emperor's Children at two point two six.
+
+The Tyranids are just above them at two point two four, and that's with the Biovore
+doing twenty three percent of their work, so without it they'd be down there too.
+
+
+## Part 7 - The best in defence
 
 Completely different list, and that's the whole point of having two axes.
 
-The Ultramarines are first at four point five one attacks to kill a typical member
-of the team, and as I said, a big chunk of that is the Galatian. Second are the
-Death Guard at three point six one, which is about as on brand as a number can get.
+The first big shock has to be the Ultramarines being first at four point five one attacks to kill a typical member
+of the team, and as I said, a big chunk of that is the Galatian, but even if you ignore Galatian
+completely they would only drop to second. 
+However, with machines of war on, second are the Death Guard at three point six one, which won't surprise anyone.
 Third are the Custodes at three point four five, then the Necrons at three point
 four three, and then the Black Templars and the Votann again.
 
 Notice that the Custodes, the Black Templars and the Votann have now turned up on
 both lists, which brings us neatly on to the next bit.
 
-## Part 7 - The best overall
+## Part 8 - The worst in defence
+
+look at the other end of the defensive teams, the Aeldari are last at one point two nine, The Emperor's Children are twentieth at one point six two, and the Astra Militarum
+are nineteenth at one point eight.
+
+They've all got some damage reduction knocking about, so Jain Zar shrugs off melee, Hascule has it on
+his active and both him and Lucius have Parry, but the thing all three share is that none of it goes to
+anybody else. It's every character for themselves, so grouping them up doesn't make a single one of them
+harder to kill, and you really need to be careful picking them in a Tournament Arena.
+
+## Part 9 - The best overall
 
 To get an overall, I've just added a faction's two places together, so first for
 attack and third for defence gives you four. It's crude, but it's honest, and it
@@ -221,57 +241,13 @@ Baldr and Ragnar you fall off a cliff.
 If you want a third, the Tau are on eleven, and then the Black Templars and the
 Leagues of Votann are tied on thirteen.
 
-## Part 8 - The specialists
-
-Then there's a group who are near the top of one axis and nowhere on the other, and
-I think these are the interesting ones to actually play.
-
-The Aeldari are third in the game for damage and twenty first of twenty one for
-toughness, which is about as pure a glass cannon as you'll ever see on a chart. The
-Ultramarines are the exact mirror, first for toughness and seventeenth for damage,
-so they're a wall that can't really finish anything. The Death Guard are second for
-toughness and thirteenth for damage, which is very on brand.
-
-The Sisters are a strange one. They're dead last for damage at three point one six
-and ninth for toughness, and their defensive gain from grouping up is forty seven
-percent, which is one of the best in the game. So they will absolutely not kill
-you, but they are middle for diddle in defence.
-
-Some of the surprises for you might be teams like the Orks, who sit right in the
-middle and are not quite the powerhouses you may have expected considering how
-often we were seeing them in Tournament Arena for a while.
-
 The Black Templars and Leagues of Votann are again the ones that we really should
 be paying more attention to. I've faced both of these at D3 level and honestly,
 they are a right pain to take down and I think it's the two factions I want to
 spend some time improving after I'm finished with my Lysander Deep Strike team that
 I'm building just now.
 
-## Part 9 - The worst in attack
-
-Now the other end, and the Sisters are last at three point one six even with the
-Exorcist helping out. Second last are the Genestealer Cults at two point seven
-three, and third last the Emperor's Children at two point two six.
-
-The Tyranids are just above them at two point two four, and that's with the Biovore
-doing twenty three percent of their work, so without it they'd be down there too.
-
-## Part 10 - The worst in defence
-
-The Aeldari are last at one point two nine, and we've already covered why, so that
-one is at least a deliberate trade. The other two aren't.
-
-The Emperor's Children are twentieth at one point six two, and the Astra Militarum
-are nineteenth at one point eight.
-
-For the Emperor's Children it's the defensive side that really does them in, and I
-want to be precise about this because Hascule has damage reduction on his active
-and he's got Parry, so it isn't that they can't protect themselves. It's that not
-one of the five gives anything to anybody else on that side, so unlike almost every
-other faction in the game they gain nothing at all by grouping up, and they haven't
-got a Machine of War to cover for it either.
-
-## Part 11 - The worst overall
+## Part 10 - The worst overall
 
 Same sum as before, and the Emperor's Children come last on thirty nine, nineteenth
 for attack and twentieth for defence, with no machine.
@@ -289,6 +265,21 @@ Oh, and their best five is the one where you leave Castellan Creed at home. My o
 sparring partner, the character I've used to test every single model in this
 project, and the maths says bench him. I'm not doing it, and I want that on record,
 but the maths says it.
+
+## Part 11 - The specialists
+
+Then there's a group who are near the top of one axis and nowhere on the other, and
+I think these are the interesting ones to actually play.
+
+The Aeldari are third in the game for damage and twenty first of twenty one for
+toughness, which is about as pure a glass cannon as you'll ever see on a chart. The
+Ultramarines are the exact mirror, first for toughness and seventeenth for damage,
+so they're a wall that can't really finish anything. The Death Guard are second for
+toughness and thirteenth for damage, which is very on brand for them.
+
+One surprise for you though might be the Orks, who sit right in the
+middle and are not quite the powerhouses you may have expected considering how
+often we were seeing them in Tournament Arena for a while.
 
 ## Part 12 - Every faction, one at a time
 
