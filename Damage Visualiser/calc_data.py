@@ -118,6 +118,10 @@ def characters(U, sp, g, lv, trig=True):
             base = bm.ability_value(ab2, var, lv) or 0.0
             if not (needs_trig and not trig):
                 c['facFlat'] = [faction, scope, round(base * alone, 1), round(base * allied, 1)]
+        if u['name'] in gr.PER_ADJACENT:
+            faction, kind, var, scope = gr.PER_ADJACENT[u['name']]
+            ab2 = u.get(kind) or {}
+            c['perAdj'] = [faction, scope, round(bm.ability_value(ab2, var, lv) or 0.0, 1)]
         if u['name'] in gr.SUMMON_PER_ALLY:
             trait, capvar = gr.SUMMON_PER_ALLY[u['name']]
             c['smnAlly'] = [trait, bm.ability_value(u['passive'] or {}, capvar, lv) or 1]
@@ -232,7 +236,7 @@ def build(g, fights):
         machines.append(dict(n=m['name'], f=m['factionId'],
                              b=(dict(k=b['kind'], pct=b['pct'], only=b['only'] or '', who=b['who']) if b else None)))
     return dict(version=g['version'], fingerprint=fingerprint(g), setting=dict(tier=tier_key, lv=lv, trig=trig, act=act, gear=gear),
-                turns=gr.FIGHTING, high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
+                turns=gr.FIGHTING, adjacent=gr.ADJACENT_ALLIES, high=dict(n=gr.HIGH_GROUND, pct=gr.HIGH_GROUND_PCT),
                 chars=characters(U, sp, g, lv, trig), rows=support_rows(U, lv, trig), mows=machines,
                 bosses=bosses(g, fights, lv),
                 vec=vectors(g, fights, U, sp, rows, lv, trig, act, gear, tier_key))

@@ -367,6 +367,28 @@ FACTION_FLAT = {
 # own cap.
 SUMMON_PER_ALLY = {'Winged Prime': ('Synapse', 'maxSummons')}
 
+# How many team-mates a character is touching. Six hexes is the hard ceiling and a five can only ever put
+# four of them next to you, but a real formation has three (owner, September 2026). Kept as one number so
+# every "for each adjacent friendly ..." clause is counted the same way, whatever faction adds one next.
+ADJACENT_ALLIES = 3
+
+# +Damage for each adjacent ally of a kind: (faction, ability, variable, scope). Forcas is the only one
+# in the game today - the other "for each" clauses count free hexes, adjacent enemies, kills or rounds.
+PER_ADJACENT = {'Forcas': ('Dark Angels', 'passive', 'extraDmg', 'all')}
+
+
+def per_adjacent_flat(member, team, lv):
+    """the +Damage a character gets for the allies standing next to it"""
+    got = PER_ADJACENT.get(member['name'])
+    if not got:
+        return 0.0, 'all'
+    faction, kind, var, scope = got
+    ab = member.get(kind) or {}
+    if var not in (ab.get('variables') or {}):
+        return 0.0, scope
+    n = min(faction_allies(member, team, faction), ADJACENT_ALLIES)
+    return (bm.ability_value(ab, var, lv) or 0.0) * n, scope
+
 
 def faction_allies(member, team, faction):
     """how many others in the five are of that faction"""
@@ -450,12 +472,12 @@ MODEL_OWN = {'Neurothrope': ('flat',)}
 def with_faction_flat(member, team, lv, trig):
     """a faction ally's +Damage that only applies to some attacks, added as one of the character's own
     effects so the scope is respected (Baraqiel's is melee and Plasma Cannon only)"""
-    ally_flat, scope = faction_flat(member, team, lv, trig)
-    if not ally_flat or scope == 'all':
-        return member
     eff, desc = member.get('ps') or ([], [])
-    add = dict(kind='flat', scope=scope, vs=None, vsnot=None, value=ally_flat)
-    return dict(member, ps=(list(eff) + [add], desc))
+    add = []
+    for ally_flat, scope in (faction_flat(member, team, lv, trig), per_adjacent_flat(member, team, lv)):
+        if ally_flat and scope != 'all':
+            add.append(dict(kind='flat', scope=scope, vs=None, vsnot=None, value=ally_flat))
+    return dict(member, ps=(list(eff) + add, desc)) if add else member
 
 
 def guild_unit(member, immune):
@@ -991,9 +1013,9 @@ def member_extra(m, team, boss, ds, rows, sp, lv, trig, act, gear, tier_key, buf
     extra = (outrage(m, team, boss, ds, rows, sp, lv, trig, act, gear, high) if m['name'] == 'Laviscus'
              else [0.0] * FIGHTING)
     flat = parasite(m, team, boss, lv, gear, tier_key)
-    ally_flat, ally_scope = faction_flat(m, team, lv, trig)
-    if ally_flat and ally_scope == 'all':
-        flat += ally_flat          # scoped ones go on as an effect below, not onto the Damage stat
+    for ally_flat, ally_scope in (faction_flat(m, team, lv, trig), per_adjacent_flat(m, team, lv)):
+        if ally_flat and ally_scope == 'all':
+            flat += ally_flat      # scoped ones go on as an effect below, not onto the Damage stat
     if buff and buff['kind'] == 'dmg' and sm.matches(m, buff['who']):
         flat += m['dmg'] * buff['pct'] / 100
     out = [x + flat for x in extra]

@@ -350,6 +350,14 @@ function factionFlat(m, team) {
   return [factionAllies(m, team, f[0]) ? f[3] : f[2], f[1]];
 }
 
+/* +Damage for each ally standing next to it, capped at what a formation can actually manage
+   (guild_raid.per_adjacent_flat) */
+function perAdjacentFlat(m, team, D) {
+  if (!m.perAdj) return [0, 'all'];
+  const n = Math.min(factionAllies(m, team, m.perAdj[0]), D.adjacent === undefined ? 3 : D.adjacent);
+  return [m.perAdj[2] * n, m.perAdj[1]];
+}
+
 /* the turns a character gets its active off; one that grows is held back as late as it can be.
    team: for the abilities whose cooldown a faction ally removes (Ramus next to another Dark Angel) */
 function activeTurns(c, turns, team) {
@@ -406,10 +414,10 @@ function guildUnit(member, immune) {
 function memberDamage(D, member, mates, boss, extra, buff, teamUses, high) {
   const turns = D.turns, trig = D.setting.trig, immune = boss.tr.includes('Immune');
   let m = guildUnit(member, immune);
-  const scoped = factionFlat(m, [m].concat(mates));
-  if (scoped[0] && scoped[1] !== 'all')
-    m = Object.assign({}, m, {ps: (m.ps || []).concat(
-      [mkEff('flat', scoped[1], null, null, scoped[0])])});
+  const own = [m].concat(mates);
+  for (const s of [factionFlat(m, own), perAdjacentFlat(m, own, D)])
+    if (s[0] && s[1] !== 'all')
+      m = Object.assign({}, m, {ps: (m.ps || []).concat([mkEff('flat', s[1], null, null, s[0])])});
   const toks = buffsFor(m, mates, D, immune);
   const spec0 = m.sp || null, all = [m].concat(mates);
   const chaos = m.n === 'Laviscus' ? mates.filter(x => x.a === 'Chaos').length : 0;
@@ -478,11 +486,12 @@ function biggestHit(D, member, mates, boss, opener, turn, high) {
 function _biggestHit(D, member0, mates, boss, opener, turn, high) {
   const trig = D.setting.trig, immune = boss.tr.includes('Immune');
   let member = guildUnit(member0, immune);
-  const scoped = factionFlat(member, [member].concat(mates));
-  if (scoped[0] && scoped[1] !== 'all')       /* what a faction ally unlocks counts here too, because
-                                                 Laviscus's Outrage feeds on this number */
-    member = Object.assign({}, member, {ps: (member.ps || []).concat(
-      [mkEff('flat', scoped[1], null, null, scoped[0])])});
+  const own = [member].concat(mates);      /* what a faction ally unlocks counts here too, because
+                                             Laviscus's Outrage feeds on this number */
+  for (const s of [factionFlat(member, own), perAdjacentFlat(member, own, D)])
+    if (s[0] && s[1] !== 'all')
+      member = Object.assign({}, member, {ps: (member.ps || []).concat(
+        [mkEff('flat', s[1], null, null, s[0])])});
   const toks = buffsFor(member, mates, D, immune).map(x => x.t);
   let spec = opener ? (member.sp || null) : null;
   if (spec) spec = tweakSpec(member, spec, [member].concat(mates), boss, turn, mates.length);
@@ -555,8 +564,8 @@ function memberExtra(D, m, team, boss, buff, high, teamUses) {
   const neuro = team.find(x => x.n === 'Neurothrope');
   if (neuro && m.n === 'Neurothrope') flat += neuro.parasite[0] * neuro.parasite[1];
   if (buff && buff.k === 'dmg' && matches(m, buff.who)) flat += m.dmg * buff.pct / 100;
-  const ally = factionFlat(m, team);
-  if (ally[0] && ally[1] === 'all') flat += ally[0];       /* scoped ones go on as an effect instead */
+  for (const ally of [factionFlat(m, team), perAdjacentFlat(m, team, D)])
+    if (ally[0] && ally[1] === 'all') flat += ally[0];     /* scoped ones go on as an effect instead */
   const res = out.map(x => x + flat);
   if (m.rampTeam !== undefined)                      /* a stack for every active the team has used */
     for (let i = 0; i < res.length; i++) res[i] += m.rampTeam * teamUses.filter(u => u < i + 1).length;

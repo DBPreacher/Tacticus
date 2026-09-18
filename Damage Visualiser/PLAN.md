@@ -939,6 +939,31 @@ and VOICE.md). What it should cover:
    ones the model was under-selling until the sweep.
 6. **Who is the best faction in Tacticus** - the question people came for.
 
+## Adjacency: three allies (owner, September 2026)
+
+Six hexes is the hard ceiling and a five can only ever put four team-mates next to
+you, but a real formation has **three**. `guild_raid.ADJACENT_ALLIES = 3`, kept as
+one number so every "for each adjacent friendly ..." clause is counted the same
+way whatever faction adds one next.
+
+**Forcas is the only ally-adjacency clause in the game today.** The other "for
+each" abilities count free hexes (Cezare, Volk), adjacent *enemies* (Hascule), or
+kills and rounds, which are handled elsewhere. His is worth +522 Damage an ally,
+so +1,566 on a 1,603 Damage character - he nearly doubles in a Dark Angels five,
+and gains **+73.7%** there.
+
+**His Overwatch is deliberately not counted.** Strike Stance has him Overwatching
+even after attacking, which would be extra damage - but he carries no ranged
+weapon, so it is a melee reaction to something walking into him, and the model has
+no movement. "An enemy moves next to him every turn" is a bigger assumption than
+the trait itself, so it stays out and gets said on the page.
+
+**Still open on Forcas:** his other clause, "+20% Damage for each adjacent unit",
+is counted for the melee target only (`pct:extraDmgPct:melee`, the owner's note
+says so). Read with the adjacency convention it would be the target plus three
+allies, so +80% rather than +20%. That reverses an existing owner decision, so it
+is left alone until asked.
+
 ## Open questions
 
 ### How far do these buffs actually reach? (owner testing in game, September 2026)
