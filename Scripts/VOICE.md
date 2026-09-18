@@ -238,36 +238,62 @@ against, so the joke and the methodology are the same thing.
 - **The invented nickname is the reliable laugh.** Slashy McWailpants, the
   clobster, bellababies. Build one from what the character looks like or does.
 
-## The skeleton, whatever the video is
+## The skeleton (current, September 2026)
 
-Every script in `Examples/` - countdown, character review, beginner guide,
-levelling analysis, planning guide - is built the same way:
+    Hook  ->  Introduction  ->  parts  ->  Outro
 
-    Hook:  ->  Part 1 - The Problem  ->  Part 2..N  ->  Final Word / Outro
+**This changed, and almost every example still shows the old way.** Until 2025 he
+opened `Hook:` then `Part 1 - The Problem`; twelve of the scripts in `Examples/`
+do that, and **none of them should be copied for structure**. He has deliberately
+moved to a more distinctive **Introduction**, and the only example of it is the
+newest script, *New charts showing the best characters* (September 2026).
 
-**"Part 1 - The Problem" is universal.** Before any numbers, he says why the
-video exists: what has just happened, what players are confused about, or what he
-personally wants to find out.
+**Treat the old scripts as the reference for voice and humour, and the newest one
+as the reference for structure.**
 
-**The hook is a formula**: say what has happened, then say what today's video will
-settle, usually in two sentences.
+### What makes the Introduction distinctive
 
-- *"A new faction, the World Eaters has joined Tacticus and their first new
-  character, Wrask, has been introduced. Today we'll look at whether they should
-  be joining your team or Blood for the blood god."*
-- *"The latest patch notes have been released and characters can now level up to
-  Diamond 3. Today we will look at how long it takes to get there and also take a
-  little peak at Silver I, Gold I and Diamond I levelling."*
-- Beginner guides name the confusion with real examples first: *"Are you confused
-  about which skills to level? Not sure if you should be levelling Bellator's
-  Shock Assault skill, Makhoteps Adaptive Strategy Skill or Vindicta's Fire of
-  Absolution Skill? Today we will go over some easy guidelines that will help you
-  decide."*
+It is not a problem statement. In the one example it does three things in order:
 
-## The character review structure
+1. **A cold open sketch**, before any explanation - Creed arriving expecting a
+   fight and being told he is being retired.
+2. **Then the reasoning, told through a concrete failure** rather than announced:
+   *"his Las pistol only has a 10% pierce ratio. And that means anyone with a lot
+   of armour looked like an absolute fortress just because Creed personally
+   couldn't scratch them. Kut Skoden came out as one of the toughest characters in
+   the whole game but when against everyone else he's pretty much middle of the
+   pack, and that's not really fair on anyone."*
+3. **Then what he did about it**, in one plain sentence: *"So rather than testing
+   everyone against one man, I now test every character against every other
+   character in the game, and that gives us two really simple numbers."*
+
+The hook stays separate and is about **him and the viewer** - why he is making
+this, what he has been unable to do until now, and a request for feedback - not
+about the feature.
+
+### Continuity: Creed has been retired
+
+In that script Creed is **retired on screen** as the punching bag, because the
+method that needed him was replaced. *"You're retiring. No more sparring."* /
+*"Can your map smoke a cigar?" "No." "Then it'll never be me."*
+
+So a new script cannot casually use Creed as the measuring stick again. He can
+come back as a character, but the sparring bit has had its ending, and bringing it
+back without acknowledging that would undo a good payoff.
+
+### Other things the newest script does
+
+- **An `Info:` block at the top** - loose facts and numbers to work in, written
+  before the prose.
+- **Timestamps at the top**, filled in after the edit.
+- **Bold speaker labels** in sketches: `**CREED:**` / `**ME:**`.
+
+## The character review structure## The character review structure
 
 The "Does X do anything?" videos follow a fixed run of parts, and the format is
-punchier than the countdowns (median 17-19 words a sentence):
+punchier than the countdowns (median 17-19 words a sentence). **The part names
+below are from the older scripts** - keep the running order, but open with an
+Introduction rather than "The Problem":
 
 1. **Hook** - the character number ("becomes the 95th character overall"), and the
    question the video answers: *"Today, we'll see if this arrogant slaughterer is
@@ -350,5 +376,6 @@ punchier than the countdowns (median 17-19 words a sentence):
 | September 2026 | Owner: Space Hulk and Top 10 are his own writing, the Genestealer lore was tool-written, and no lore by default. Added measured sentence rhythm; the tool rhythm moved to "doesn't sound like him" |
 | September 2026 | Owner: reads at about 193 words per minute and aims for 8+ minute videos. Added the Length section. The 37-minute Genestealer guide is not a length example |
 | September 2026 | Third draft: added "What his edit of a draft changed" from his edit of the Roster Battle Map explainer; spaced hyphens are fine |
+| September 2026 | Owner: the examples are up to two years old and the structure has moved on. Hook / **Introduction** / parts / Outro now, not Hook / Part 1 - The Problem, which twelve of the examples still show. The old scripts are the reference for voice and humour; the newest one is the reference for structure. Recorded what makes the Introduction distinctive, and that **Creed has been retired on screen** as the punching bag |
 | September 2026 | Six more scripts, including a clean 2024 character review. It confirms the rhythm rule rather than overturning it: *Does Wrask* is entirely his, has no em dashes, and measures 17 and 33. Reframed the split as discursive against explanatory, added the universal Hook / Part 1 - The Problem skeleton and the hook formula, and corrected the length floor - Wrask is a complete video at 1,598 words |
 | September 2026 | Fourth draft from nine more scripts, including four from 2024 written with no tool. The voice has not drifted: the 2024 and 2025 Top 10s measure almost identically. Added rhythm by format (countdowns run 25-27 words a sentence, character reviews 17-19), the character review structure, and a much richer Creed section |
