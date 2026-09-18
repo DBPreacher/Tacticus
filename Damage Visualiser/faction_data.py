@@ -177,32 +177,47 @@ def team_summons(member, five, lv, tier_key):
 
 # ---------------------------------------------------------------- the Machine of War slot
 # Arena and Tournament Arena field five characters plus a Machine of War, and eleven of the 21 factions
-# have one. What it brings is read from guild_raid.py so there is one definition: its Mythic ability, and
-# the attack it fires every round.
+# have one. No machine has a passive: each has exactly two active abilities and one Mythic ability.
 #
-# Two honest limits, both stated on the page. **Six of the eleven machines are defensive** - the Galatian,
-# the Exorcist, the Forgefiend, the Tson'ji and the Storm Speeder shield or heal rather than hit, and
-# nothing reads those Mythic abilities yet - so a machine never moves the Toughness axis and those
-# factions' machine column is a floor, not a figure. And the machine is a sixth attacker, not a sixth
-# body: it is never counted as something the enemy has to kill.
-def mow_of(g, faction):
-    return next((m for m in gr.machines(g)
-                 if gr.FACTION_ID.get(m['factionId'], m['factionId']) == faction), None)
+# The Guild Raid model reads them for a boss fight, where the boss is a Big Target that never walks onto a
+# marked hex and runs away from a rail rifle. An Arena enemy does both, so the owner re-decided them for
+# this page (September 2026):
+#
+#   1. One action a turn, so the machine fires its best available ability every round.
+#   2. Marked hexes land. Every "wait for an enemy to stand there" ability counts at face value.
+#   3. The summoning actives count. A machine summons on its first turn and attacks from then on, so it
+#      gets both - except the Galatian, whose Duty Eternal ends its own career as a machine, so there it
+#      is one or the other.
+#   4. The Heavy Rail Rifle counts at full, with no discount for a target that moved.
+#   5. Hailstrike counts: the Storm Speeder fires whenever the friendly it buffed attacks.
+#   6. The buffs buried inside those attacks count too, and three of them are faction-locked.
+MOW_SKIP = {'Hades Autocannons'}          # the only one that genuinely cannot hit a character
 
+# Duty Eternal puts the Galatian on the board as a unit and it "can no longer be used as a Machine of War",
+# so its summon and its attacks are alternatives rather than a sequence.
+MOW_EITHER_OR = {'Galatian'}
 
-def mow_effect(buff, member):
-    """the Mythic ability as a +% on this member's attacks, or None. 'taken' puts the percentage on the
-    enemy and 'dmg' puts it on your own character; against one target both come to the same multiplier,
-    so both are read the same way, on the attacks the ability names."""
-    if not buff or (buff['who'] != 'all' and buff['who'] not in member['traits']):
-        return None
-    return dict(kind='pct', scope=buff['only'] or 'all', vs=None, value=buff['pct'])
+# The data says one missile; the text says three impacts on the target hex out of twelve.
+MOW_HITS = {'Malleus Rocket Barrage': 3}
 
+# Damage a machine's own attack gains from a condition a mono-faction five always meets.
+MOW_PART_BONUS = {'Malleus Rocket Barrage': 'extraDmg'}      # near a friendly Astra Militarum unit
 
-# The Mythic ability every machine has. Six of the eleven put a percentage on your damage or on what the
-# enemy takes, and those are in guild_raid.MOW_BUFF. The other five are defensive, and the Guild Raid model
-# had no use for them because it is a damage run - so they are read here. All five are the Mythic ability
-# at its top level, like the offensive ones.
+# What a machine's active hands one of your characters: (kind, variable, scope, the faction it is locked
+# to). Two of the three only work for the machine's own faction, which is the whole point of this page.
+MOW_GIVES = {
+    'Thrice-Blessed Conflagration': ('pct', 'extraDmgPct', 'all', 'Adepta Sororitas'),
+    'Death on the Wind': ('pct', 'extraDmgPct', 'all', 'Dark Angels'),
+    'Hailstrike': ('pierce', 'extraPierceRatio', 'ranged', None),
+}
+
+# The Reanimator is the one machine with no attack at all: it repairs, revives, and permanently raises a
+# friendly Mechanical unit's maximum Health. It can do that to a different ally every turn and it lasts
+# the whole battle, so in a Necron five - where everybody is Mechanical - all five end up carrying it.
+MOW_TEAM_HP = {'Reanimator': ('NanoscarabRepairProtocols', 'hp')}
+
+# The Mythic ability. Six put a percentage on damage and live in guild_raid.MOW_BUFF; these five are
+# defensive and the Guild Raid model had no use for them.
 MOW_DEF = {
     'Galatian': ('WisdomOfTheAncients', 'dmgReductionPct'),
     'Forgefiend': ('ContemptuousDisregard', 'dmgReductionPct'),
@@ -215,22 +230,84 @@ MOW_DEF = {
 }
 
 
-def mow_defence(g, mow):
-    """(a defence spec every member gets, a share of max Health shielded each turn) from the machine's
-    Mythic ability"""
-    got = MOW_DEF.get(mow['name']) if mow else None
-    if not got:
+def mow_of(g, faction):
+    return next((m for m in gr.machines(g)
+                 if gr.FACTION_ID.get(m['factionId'], m['factionId']) == faction), None)
+
+
+def mow_abilities(g, mow, lv):
+    """(attacks, summons, buffs) - everything a machine's two actives do.
+
+    attacks: [(name, part)], one fired a round. summons: [(how many, stat block, Damage)], on the board
+    from the first turn. buffs: [(kind, value, scope, faction)] for one of your own characters."""
+    lv = min(lv, gr.MOW_LEVELS)
+    attacks, summons, buffs = [], [], []
+    for aid in (mow.get('mowActiveAbility') or []):
+        ab = gr._ability(g, aid)
+        if not ab:
+            continue
+        name = ab.get('name') or aid
+        if name in MOW_SKIP:
+            continue
+        c, v = ab.get('constants') or {}, ab.get('variables') or {}
+        uid = c.get('unitId') or c.get('unitToSpawn')
+        if uid and 'summonDmg' in v:
+            npc = gr.npc_of(g, uid)
+            if npc and (npc.get('meleeWeapon') or npc.get('rangeWeapon')):
+                summons.append((float(c.get('nrOfSummons') or c.get('nrOfUnits') or 1), npc,
+                                sm.value(ab, 'summonDmg', lv)))
+        if 'minDmg' in v:
+            part = gr._part(ab, lv, '', None, rarity=True)
+            part['hits'] = MOW_HITS.get(name, part['hits'])
+            if name in MOW_PART_BONUS:
+                part['dmg'] += sm.value(ab, MOW_PART_BONUS[name], lv)
+            attacks.append((name, part))
+        if name in MOW_GIVES:
+            kind, var, scope, faction = MOW_GIVES[name]
+            buffs.append((kind, sm.value(ab, var, lv), scope, faction))
+    return attacks, summons, buffs
+
+
+def mow_effect(buff, member):
+    """the Mythic ability as a +% on this member's attacks, or None. 'taken' puts the percentage on the
+    enemy and 'dmg' puts it on your own character; against one target both come to the same multiplier,
+    so both are read the same way, on the attacks the ability names."""
+    if not buff or (buff['who'] != 'all' and buff['who'] not in member['traits']):
+        return None
+    return dict(kind='pct', scope=buff['only'] or 'all', vs=None, value=buff['pct'])
+
+
+def mow_gift(buffs, member):
+    """what a machine's active hands this one character. It targets a friendly, so it reaches one of
+    them, and the caller has already chosen which."""
+    return [dict(kind=kind, scope=scope, vs=None, value=v) for kind, v, scope, faction in buffs
+            if v and (faction is None or member['faction'] == faction)]
+
+
+def mow_defence(g, mow, lv=60):
+    """(a defence spec every member gets, a share of max Health shielded each turn, what to call it)"""
+    if not mow:
         return None, 0.0, None
-    ab = gr._ability(g, got[0])
-    v = (gr.bossval(ab, got[1], gr.MYTHIC_ABILITY_LEVEL) or 0.0) if ab else 0.0
-    if not v:
-        return None, 0.0, None
-    name = (ab.get('name') or got[0])
-    if got[1] == 'shieldPct':
-        return None, v / 100, f'{name}: a shield worth {v:.0f}% of Health every turn'
-    ds = bm.new_ds()
-    ds['pct'].append((1 - v / 100, 'all', None))
-    return ds, 0.0, f'{name}: the five take {v:.0f}% less damage'
+    ds, shield, notes = None, 0.0, []
+    if (got := MOW_TEAM_HP.get(mow['name'])):
+        ab = gr._ability(g, got[0])
+        v = sm.value(ab, got[1], min(lv, gr.MOW_LEVELS)) if ab else 0.0
+        if v:
+            ds = bm.new_ds()
+            ds['heal'] += v
+            notes.append(f'{ab.get("name") or got[0]}: +{v:,.0f} maximum Health each')
+    if (got := MOW_DEF.get(mow['name'])):
+        ab = gr._ability(g, got[0])
+        v = (gr.bossval(ab, got[1], gr.MYTHIC_ABILITY_LEVEL) or 0.0) if ab else 0.0
+        name = ab.get('name') or got[0]
+        if v and got[1] == 'shieldPct':
+            shield = v / 100
+            notes.append(f'{name}: a shield worth {v:.0f}% of Health every turn')
+        elif v:
+            ds = ds or bm.new_ds()
+            ds['pct'].append((1 - v / 100, 'all', None))
+            notes.append(f'{name}: the five take {v:.0f}% less damage')
+    return ds, shield, '; '.join(notes) or None
 
 
 def mow_attacker(mow, alliance):
@@ -240,29 +317,27 @@ def mow_attacker(mow, alliance):
 
 
 def mow_round(g, mow, d, ds, lv):
-    """what the machine puts into this defender in one round. The round or two a machine waits for its
-    cooldown is not counted: over a kill that takes several turns it is worth less than it costs to say."""
-    out = 0.0
-    for shot in gr.MOW_EVERY_ROUND.get(mow['name'], []):
-        part = _mow_part(g, shot, lv)
-        if part:
-            out = max(out, bm.part_vs_defence(part, d, ds, False)[0])        # the best one, every round
-    for shot in gr.MOW_SHOTS.get(mow['name'], []):
-        part = _mow_part(g, shot, lv)
-        if part:
-            out += bm.part_vs_defence(part, d, ds, False)[0] * shot[1]       # a rate, not a round number
-    return out
-
-
-def _mow_part(g, shot, lv):
-    ab_id, _, dt, hits = (list(shot) + [None, None])[:4]
-    ab = gr._ability(g, ab_id)
-    if not ab or 'minDmg' not in (ab.get('variables') or {}):
-        return None
-    part = gr._part(ab, min(lv, gr.MOW_LEVELS), '', dt, rarity=True)
-    if hits:
-        part['hits'] = hits
-    return part
+    """what the machine puts into this defender in one round: its best attack, plus whatever it has
+    already put on the board. The round or two of initial cooldown is not counted - over a kill that takes
+    several turns it is worth less than it costs to explain."""
+    if mow['name'] in gr.MOW_SHOTS:
+        # the Biovore's Spore Mines are bombs with no weapon of their own, and the owner's video pinned
+        # down how many are in the air at once, so that one keeps guild_raid's rates
+        out = 0.0
+        for shot in gr.MOW_SHOTS[mow['name']]:
+            ab_id, rate, dt, hits = (list(shot) + [None, None])[:4]
+            ab = gr._ability(g, ab_id)
+            if not ab or 'minDmg' not in (ab.get('variables') or {}):
+                continue
+            part = gr._part(ab, min(lv, gr.MOW_LEVELS), '', dt, rarity=True)
+            if hits:
+                part['hits'] = hits
+            out += bm.part_vs_defence(part, d, ds, False)[0] * rate
+        return out
+    attacks, summons, _ = mow_abilities(g, mow, lv)
+    shot = max((bm.part_vs_defence(part, d, ds, False)[0] for _, part in attacks), default=0.0)
+    smn = bm.summon_turn([(n, npc, dmg, 'ability') for n, npc, dmg in summons], d, ds) if summons else 0.0
+    return max(shot, smn) if mow['name'] in MOW_EITHER_OR else shot + smn
 
 
 # ---------------------------------------------------------------- a member, ready to fight
@@ -308,7 +383,8 @@ class Fighter:
         return got
 
 
-def make(member, five, toks, drows, sp, rnd, rest, lv, tier_key, buff=None, mow_ds=None, shield=0.0):
+def make(member, five, toks, drows, sp, rnd, rest, lv, tier_key, buff=None, mow_ds=None, shield=0.0,
+         gift=()):
     """a Fighter: the member with its five's buffs, its own faction clauses, its team summons, and its
     Machine of War's Mythic ability if the faction has one and this call is counting it"""
     u = dict(member)
@@ -316,6 +392,7 @@ def make(member, five, toks, drows, sp, rnd, rest, lv, tier_key, buff=None, mow_
     extra = own_clauses(member, five, lv)
     if (e := mow_effect(buff, member)):
         extra.append(e)
+    extra += list(gift)
     if extra:
         eff, desc = (list(u['ps'][0]), list(u['ps'][1])) if u.get('ps') else ([], [])
         u['ps'] = (eff + extra, desc)
@@ -391,13 +468,20 @@ def build(tier=2, verbose=True):
     action_heals = {r['Name'] for r in arows + drows_all if 'healaction' in r['Effect']}
     acost, dcost = costs_the_turn(arows, action_heals), costs_the_turn(drows_all, action_heals)
 
-    def five_of(members, buff=None, healing=(), mow_ds=None, shield=0.0):
+    def five_of(members, buff=None, healing=(), mow_ds=None, shield=0.0, gifts=()):
+        # a machine's active "targets a friendly unit", so its buff lands on one of them: the best hitter
+        # it is allowed to reach, which for two of the three is a character of the machine's own faction
+        lucky = None
+        if gifts:
+            can = [m for m in members if mow_gift(gifts, m)]
+            lucky = min(can, key=lambda m: hit_order[m['name']])['name'] if can else None
         adrop = {i for i in acost if arows[i]['Name'] not in healing}
         ddrop = {i for i in dcost if drows_all[i]['Name'] not in healing}
         toks = attack_tokens(members, arows, UA, lv, tier_key, hit_order, adrop)
         drows = defence_rows(members, drows_all, UA, SU, lv, tier_key, frail_order, ddrop)
         return [make(m, members, toks[m['name']], drows[m['name']], sp, rnd, rest, lv, tier_key, buff,
-                     mow_ds, shield) for m in members]
+                     mow_ds, shield, mow_gift(gifts, m) if m['name'] == lucky else ())
+                for m in members]
 
     # The yardstick: every character standing among its own faction, measured against the others doing
     # the same. This is the map's "typical character" moved up a level, and it is computed once. Its
@@ -413,10 +497,10 @@ def build(tier=2, verbose=True):
     # every one of the five attacks.
     solo = {n: scores(f, pool) for n, f in bare.items()}
 
-    def axes(members, healing, buff=None, rate=0.0, mow_ds=None, shield=0.0):
+    def axes(members, healing, buff=None, rate=0.0, mow_ds=None, shield=0.0, gifts=()):
         """(damage, toughness, per-member scores) for one five with one choice of who is healing"""
         per = {m['name']: scores(f, pool)
-               for m, f in zip(members, five_of(members, buff, healing, mow_ds, shield))}
+               for m, f in zip(members, five_of(members, buff, healing, mow_ds, shield, gifts))}
         hit = [p for n, p in per.items() if n not in healing]
         dmg = TEAM / (sum(1 / p[0] for p in hit) + rate) if (hit or rate) else CAP
         return dmg, st.mean(p[1] for p in per.values()), per
@@ -425,7 +509,8 @@ def build(tier=2, verbose=True):
     for faction, members in sorted(roster.items()):
         mow = mow_of(g, faction)
         buff = gr.mow_buff(g, mow, lv, tier_key, TRIG) if mow else None
-        mow_ds, shield, mow_note = mow_defence(g, mow)
+        mow_ds, shield, mow_note = mow_defence(g, mow, lv)
+        gifts = mow_abilities(g, mow, lv)[2] if mow else ()
         rate = mow_rate(g, mow, pool, members[0]['alliance'], lv) if mow else 0.0
         teams = []
         for combo in (itertools.combinations(members, TEAM) if len(members) >= TEAM else ()):
@@ -443,7 +528,7 @@ def build(tier=2, verbose=True):
             row['dmg_alone'] = TEAM / sum(1 / p[0] for p in alone)
             row['tough_alone'] = st.mean(p[1] for p in alone)
             if mow:
-                withm = [axes(combo, h, buff, rate, mow_ds, shield) for h in branches]
+                withm = [axes(combo, h, buff, rate, mow_ds, shield, gifts) for h in branches]
                 row['dmg_mow'] = min(x[0] for x in withm)
                 row['tough_mow'] = max(x[1] for x in withm)
             else:
