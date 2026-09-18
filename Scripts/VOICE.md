@@ -4,20 +4,25 @@
 `Examples/`, corrected by the owner, and checked against his edit of a Claude
 draft (see "What his edit of a draft changed").
 
-**Which ones are the voice reference.** The owner added nine more in September
-2026, including four from 2024 written before he used any tool. Those, plus Space
-Hulk, are the purest sample:
+**Which ones are the voice reference.** `Examples/` is split in two, and the
+split matters - mixing them is how the tool's style gets written into this guide
+by mistake, which has already happened twice:
 
-- **Entirely his own writing:** the six Top 10s (Chaos, Imperial and Xenos, 2024
-  and 2025), Space Hulk, and Does Judh Do Anything. Zero em dashes in all of them.
-- **His framing with a tool-written lore section dropped in:** Laviscus, Lucius,
-  the Genestealer Cults guide. Use them for structure, never for sentence style -
-  the lore in Lucius ends paragraphs like *"Death is not an end for Lucius. It is
-  a door."*, which is the tool talking.
-- **No lore section by default.** Include it only when the video needs it.
+- **`Examples/His own writing/`** - fifteen scripts he wrote himself, including
+  four Top 10s from 2024 written before he used any tool. **Quote the style from
+  these only.** Zero em dashes in every one of them, across both years.
+- **`Examples/Tool assisted/`** - nine written with a tool's help. **The voice is
+  not his.** Kept for their running order, and as the contrast that makes the
+  tool's habits obvious: em dashes (33 in each `Plan NOW to get...`), medians of
+  13-14 against his 15-27, and paragraphs that end *"Death is not an end for
+  Lucius. It is a door."*
+- **No lore section by default.** Include it only when the video needs it. Where
+  lore appears in the recent scripts it is usually the tool's writing.
 
-The fifteen cover four formats, and the format matters more than I first thought:
-countdowns, character reviews ("Does X do anything?"), event guides, and planning
+See `Examples/README.md` for the split in detail and which scripts to reach for.
+
+Between them they cover countdowns, character reviews ("Does X do anything?"),
+beginner guides, levelling analysis, patch reactions, event guides and planning
 guides.
 
 Short quotes from them are used below as examples. Quote the *style*; don't
