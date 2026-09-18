@@ -961,6 +961,10 @@ def attacks_to_kill(a, d, trig, spec=None, ds_round=None, ds_rest=None, regen=No
     ds_rest = the defender's defence after that (passive only): active effects last one round."""
     d1, d2 = _with_defence(d, ds_round), _with_defence(d, ds_rest)
     hp = d['hp'] * (ds_round['hpmult'] if ds_round else 1) + (ds_round['heal'] if ds_round else 0)
+    if trig and 'Ambush' in d['traits']:
+        # Ambush: the first time it dies it leaves a decoy and comes back on it at full Health next turn,
+        # so it has to be killed twice. Conditional on a decoy still being there, hence All triggered only.
+        hp *= 2
     cap = next((x['cap_first'] for x in (ds_rest, ds_round) if x and x['cap_first'] is not None), None)
     a1 = best_attack(a, d1, trig, ds_round, True, True)
     early = best_attack(a, d1, trig, ds_round, False, False)[0]

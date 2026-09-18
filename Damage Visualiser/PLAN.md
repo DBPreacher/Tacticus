@@ -620,9 +620,16 @@ rules in both, and there is a Faction + MoW Tournament Arena.
 **Do not rebuild the Guild Raid page.** A full `brute_all.js` run is two hours and
 the owner is testing the new teams in game. Any Guild Raid bug found while the
 faction work is on gets **written down here** and fixed in one batch later, with a
-single run to clear them all. Bugs parked so far:
+single run to clear them all. Parked so far:
 
-- (none yet)
+- **The Ambush trait now counts** (September 2026). A character with Ambush has to
+  be killed twice, so `attacks_to_kill` doubles its health when triggers are on.
+  It changes no Guild Raid number - deaths are not modelled there - but it edits
+  `build_map.py`, so the fingerprint no longer matches `best_fives.json` and the
+  Guild Raid build will refuse until `brute_all.js` is re-run. That is the guard
+  working, not a fault.
+- **The Roster Battle Map is stale** until `build_map.py` is re-run: Xybia, Judh,
+  Hollan and Isaak are still published at their old Toughness.
 
 ## What the data says before anything is built
 
