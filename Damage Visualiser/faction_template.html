@@ -148,8 +148,8 @@ footer em{color:var(--ink-2);font-style:normal}
     <section class="chart-card" aria-label="Faction damage and toughness chart">
       <div class="chart-head">
         <h2 id="chartTitle">Every faction that can field a five</h2>
-        <span class="hint">Hover a badge for numbers &middot; click to pin it &middot; the bar behind a badge runs
-          from the faction's best five to its worst</span>
+        <span class="hint">Hover a badge for numbers &middot; click to pin it, click again to let it go
+          &middot; the bar behind a badge runs from the faction's best five to its worst</span>
       </div>
       <svg id="map" viewBox="0 0 1000 670" role="img" aria-label="Chart of every faction by damage and toughness"></svg>
       <div class="chart-key">
@@ -194,6 +194,26 @@ footer em{color:var(--ink-2);font-style:normal}
     </div>
   </div>
 
+  <section class="table-card" aria-label="Ranked list">
+    <div class="table-head">
+      <h2>Every faction</h2>
+      <span class="hint" id="tableHint"></span>
+    </div>
+    <table class="tbl" id="tbl">
+      <thead><tr>
+        <th><button data-k="faction">Faction</button></th>
+        <th><button data-k="bench">Left out</button></th>
+        <th><button data-k="n">Size</button></th>
+        <th><button data-k="dmg">Damage &middot; attacks</button></th>
+        <th><button data-k="tough">Toughness &middot; attacks</button></th>
+        <th><button data-k="dgain">Attack synergy</button></th>
+        <th><button data-k="tgain">Defence synergy</button></th>
+        <th><button data-k="mow">Machine of War</button></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
   <section class="panel reading" aria-label="Reading the chart">
     <p class="label">Reading the chart</p>
     <dl class="defs">
@@ -202,8 +222,11 @@ footer em{color:var(--ink-2);font-style:normal}
         together kill something in <em>1 &divide; the sum of their rates</em>, so this is that total put back
         on the same scale as the Roster Battle Map. Lower on the number, higher on the chart.</dd>
       <dt>Toughness: further right is better</dt>
-      <dd>How many attacks it takes to kill the typical member of the five. Focus fire kills a team one at a
-        time, so wiping the five takes the sum &mdash; this is that divided by five.</dd>
+      <dd>How many attacks it takes to kill the typical member of the five, which is <em>not</em> the
+        easiest one to kill. Focus fire takes a team apart one at a time, so the attacks needed to wipe all
+        five is simply the five numbers added up, whatever order they die in &mdash; and this axis is that
+        total divided by five, to keep it on the same scale as the Roster Battle Map. The panel gives the
+        whole-team figure as well.</dd>
       <dt>What "typical character" means here</dt>
       <dd>Not a loose character. Every one of the 117 is first given its <em>own</em> faction's buffs, and
         then they are measured against each other. So a faction is being judged against other factions
@@ -259,26 +282,6 @@ footer em{color:var(--ink-2);font-style:normal}
     </dl>
   </section>
 
-  <section class="table-card" aria-label="Ranked list">
-    <div class="table-head">
-      <h2>Every faction</h2>
-      <span class="hint" id="tableHint"></span>
-    </div>
-    <table class="tbl" id="tbl">
-      <thead><tr>
-        <th><button data-k="faction">Faction</button></th>
-        <th><button data-k="bench">Left out</button></th>
-        <th><button data-k="n">Size</button></th>
-        <th><button data-k="dmg">Damage &middot; attacks</button></th>
-        <th><button data-k="tough">Toughness &middot; attacks</button></th>
-        <th><button data-k="dgain">Attack synergy</button></th>
-        <th><button data-k="tgain">Defence synergy</button></th>
-        <th><button data-k="mow">Machine of War</button></th>
-      </tr></thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
   <footer>Built from the tacticustable.com game data at version <span id="ver"></span>, with the same damage
     model as the <em>Roster Battle Map</em> &mdash; the rules are in <em>Damage Visualiser/DAMAGE_MODEL.md</em>
     and every ability's handling is in the <em>*_abilities.csv</em> files. Faction badges are the game's own.
@@ -304,12 +307,14 @@ const pretty = t => PRETTY[t] || t.replace(/(?!^)([A-Z])/g, ' $1');
 function teams(name){
   return (F[name].teams || []).map(t => ({...t, d: (S.mow && t.dmg_mow) ? t.dmg_mow : t.dmg}));
 }
-function best(name){
+// the five a faction would field for one job. `best` follows the Pick control; `bestOn` is told which.
+function bestOn(name, key){
   const ts = teams(name);
   if(!ts.length) return null;
-  return S.pick === 'tough' ? ts.reduce((a,b) => b.tough > a.tough ? b : a)
-                            : ts.reduce((a,b) => b.d < a.d ? b : a);
+  return key === 't' ? ts.reduce((a,b) => b.tough > a.tough ? b : a)
+                     : ts.reduce((a,b) => b.d < a.d ? b : a);
 }
+function best(name){ return bestOn(name, S.pick === 'tough' ? 't' : 'd'); }
 const playable = Object.keys(F).filter(n => F[n].teams.length).sort();
 const shown = () => playable.filter(n => !S.hidden.has(F[n].alliance));
 
@@ -359,7 +364,7 @@ function draw(){
       el('text', {class:'tick', x:X(v), y:H - PAD.b + 20, 'text-anchor':'middle'}, svg).textContent = (+v.toFixed(2));
     }
     el('text', {class:'axis-title', x:(PAD.l + W - PAD.r) / 2, y:H - 12, 'text-anchor':'middle'}, svg)
-      .textContent = 'Toughness → attacks to kill one of them';
+      .textContent = 'Toughness → attacks to kill the typical member of the five';
   }
   if(S.view !== 'defence'){
     for(let v = dy.lo; v <= dy.hi + 1e-9; v += dy.s){
@@ -418,7 +423,7 @@ function draw(){
     el('circle', {class:'hit', r:21}, g);
     g.addEventListener('mousemove', e => hover(e, n, t));
     g.addEventListener('mouseleave', () => { tip.style.opacity = 0; });
-    g.addEventListener('click', () => { S.sel = n; render(); });
+    g.addEventListener('click', () => { S.sel = S.sel === n ? null : n; render(); });
   }
   // Names last, so they sit over the badges - and only where one fits.
   if(S.names) label(pts, el('g', {}, svg), placed, px, py);
@@ -465,7 +470,23 @@ const pct = v => (v >= 0 ? '+' : '') + (v * 100).toFixed(0) + '%';
 
 // ---------------------------------------------------------------- the pinned faction
 function detail(){
-  const n = S.sel, f = F[n], box = document.getElementById('detail');
+  const box = document.getElementById('detail');
+  if(!S.sel){
+    // nothing pinned: the leaders on each axis, so the panel still earns its space
+    const lead = key => [...playable].map(n => ({n, t: bestOn(n, key)}))
+      .sort((a, b) => key === 'd' ? a.t.d - b.t.d : b.t.tough - a.t.tough).slice(0, 3);
+    box.innerHTML = `<p class="label">Nothing pinned</p>
+      <p class="notes">Click a badge, or a row in the table, to pin a faction here. Click it again to let
+      it go.</p>
+      <table class="five"><thead><tr><th>Best attacking</th><th>Damage</th></tr></thead><tbody>
+      ${lead('d').map(({n, t}) => `<tr><td>${n}</td><td>${t.d.toFixed(2)}</td></tr>`).join('')}
+      </tbody></table>
+      <table class="five"><thead><tr><th>Best defending</th><th>Toughness</th></tr></thead><tbody>
+      ${lead('t').map(({n, t}) => `<tr><td>${n}</td><td>${t.tough.toFixed(2)}</td></tr>`).join('')}
+      </tbody></table>`;
+    return;
+  }
+  const n = S.sel, f = F[n];
   const t = best(n);
   const gd = t.dmg_alone / t.dmg - 1, gt = t.tough / t.tough_alone - 1;
   const rows = f.roster.map(m => {
@@ -490,6 +511,8 @@ function detail(){
     <table class="five"><thead><tr><th>The five</th><th>Damage</th><th>Toughness</th></tr></thead>
       <tbody>${rows}</tbody></table>
     <div class="notes">
+      <p><b>All five together</b> take ${(t.tough * 5).toFixed(1)} attacks to wipe out, and kill a typical
+        character in ${(t.d / 5).toFixed(2)} attacks between them.</p>
       ${f.signature.length ? `<p><b>Signature trait</b> ${f.signature.map(pretty).join(', ')} &mdash; carried
         everywhere they fight, so it is no reward for going pure.</p>` : '<p><b>No signature trait.</b></p>'}
       ${f.mow ? `<p><b>${f.mow.name}</b> &mdash; ${f.mow.buff
@@ -527,11 +550,13 @@ function table(){
       <td>${r.t ? pct(r.tgain) : '—'}</td>
       <td>${r.mow || '—'}</td></tr>`).join('');
   for(const tr of body.querySelectorAll('tr[data-n]')){
-    if(F[tr.dataset.n].teams.length) tr.addEventListener('click', () => { S.sel = tr.dataset.n; render(); });
+    if(F[tr.dataset.n].teams.length)
+      tr.addEventListener('click', () => { S.sel = S.sel === tr.dataset.n ? null : tr.dataset.n; render(); });
   }
   document.getElementById('tableHint').textContent =
-    `${playable.length} factions can field a five; ${playable.filter(n => F[n].teams.length > 1).length} have a
-     sixth character to choose from.`;
+    `Each row is one five: the one this faction would field for ${S.pick === 'tough' ? 'defending' : 'attacking'}, `
+    + `with both of its numbers. ${playable.filter(n => F[n].teams.length > 1).length} of the `
+    + `${playable.length} have a sixth character to choose from.`;
 }
 
 // ---------------------------------------------------------------- chrome
@@ -567,7 +592,7 @@ function render(){
   for(const [id, key] of [['segView','view'], ['segMow','mow'], ['segPick','pick']])
     for(const b of document.querySelectorAll('#' + id + ' button'))
       b.setAttribute('aria-pressed', String(b.dataset.v == S[key]));
-  if(!F[S.sel] || !F[S.sel].teams.length) S.sel = playable[0];
+  if(S.sel && (!F[S.sel] || !F[S.sel].teams.length)) S.sel = null;
   legend(); draw(); detail(); table();
 }
 seg('segView', 'view'); seg('segMow', 'mow'); seg('segPick', 'pick');
