@@ -946,6 +946,80 @@ playing together, where the buffs are the whole point.
   game. This page ranks what a faction *can do*, not who moves first. Say it on the
   page and say it in the video.
 
+## The Machine of War audit (September 2026) - needs owner rulings
+
+The owner asked whether the machines are going in correctly. They are not, yet. Three facts first:
+
+1. **No Machine of War has a passive ability.** All eleven have `passiveAbility: null`. Each has exactly
+   **two actives** and **one Mythic ability**, so "passive, active and mythic" is really two and one.
+2. **All eleven Mythic abilities are now counted.** Six put a percentage on damage (`guild_raid.MOW_BUFF`)
+   and the five defensive ones were added to `faction_data.MOW_DEF`: four are a flat 20% off everything
+   the five takes, and the Exorcist shields half a character's Health every turn.
+3. **Only one active per machine is counted, and the choice was made for a Guild Raid boss.** A boss is a
+   Big Target that does not walk onto marked hexes and runs away from the rail rifle. An Arena enemy does
+   both. So the lists in `guild_raid.MOW_EVERY_ROUND` need re-deciding for this page.
+
+### What each machine's actives do, and whether they count
+
+Damage is one round at ability level 65 with the Mythic rarity bonus, before the target's Armour.
+
+| Machine | Active | Counted | A round | What it is |
+|---|---|---|---:|---|
+| Galatian | Duty Eternal | no | - | summons Galatian as a unit, **and it stops being your Machine of War** |
+| Galatian | Macro Plasma Incinerator | no | 14,406 | marks 3 hexes, fires when an enemy ends its move there |
+| Exorcist | Thrice-Blessed Conflagration | **no** | 6,402 | a plain attack in a line, **and +20% Damage to a friendly, on all attacks if they are Sororitas** |
+| Exorcist | Devastating Refrain | yes | 7,857 | marks 4 hexes, **and a 75% chance of a Crit stack for Act of Faith allies** |
+| Reanimator | Reanimation Beam | no | 4,365 | a plain attack, and repairs |
+| Reanimator | Nanoscarab Repair Protocols | no | - | repairs only |
+| Malleus | Malleus Rocket Barrage | yes | 6,402 | marks a hex, 3 + 9 missiles, **+extraDmg near an Astra Militarum unit** |
+| Malleus | Forward Spotter | no | - | summons a Guardsman |
+| Forgefiend | Hades Autocannons | no | 36,666 | **only hits enemy summons** - rightly excluded |
+| Forgefiend | Daemonic Ordnance | yes | 9,168 | a plain attack |
+| Plagueburst | Entropy Cannons | yes | 9,166 | a plain attack |
+| Plagueburst | Plagueburst Mortar | yes | 4,584 | a plain attack |
+| Rukkatrukk | Squig Launchas | yes | 17,025 | attack plus Squigs |
+| Rukkatrukk | Squig Mine | no | 19,206 | marks free hexes, fires when an enemy stands on one |
+| Tson'ji | Heavy Rail Rifle | no | 16,006 | **-30% for every hex the target moved**, and shuts down an enemy machine |
+| Tson'ji | Twin Smart Missile System | yes | 8,733 | a plain attack |
+| Z'Kar | Aether Stride | no | - | summons Z'Kar as a unit; he comes back as the machine when killed |
+| Z'Kar | Infernal Cannon | yes | 13,095 | a plain attack |
+| Storm Speeder | Death on the Wind | yes | 7,860 | a plain attack |
+| Storm Speeder | Hailstrike | no | 10,476 | **the Speeder attacks whenever the friendly it buffed attacks** |
+| Biovore | Bio-Minefield | yes | 8,803 | Spore Mines |
+| Biovore | Spore Mine Launcher | yes | 8,803 | Spore Mines |
+
+### The rulings needed
+
+1. **One action a turn, or can the numbers stack?** The model fires one ability every round. If that is
+   right, it should pick **the best available one** rather than a hard-coded choice - which would already
+   change the Forgefiend (36,666 is summons-only, so 9,168 stands) and the Tson'ji (16,006 against 8,733).
+2. **Do marked hexes land in Arena?** Four abilities wait for an enemy to stand somewhere. In a raid the
+   answer was no. If the answer here is yes, the Galatian goes from nothing at all to 14,406 a round and
+   the Rukkatrukk nearly doubles.
+3. **Do the summoning actives count?** Duty Eternal costs you the machine, so it is a real trade; Forward
+   Spotter and Aether Stride are much cheaper.
+4. **The Heavy Rail Rifle**, at full or discounted for movement.
+5. **Hailstrike**, which is an extra attack every time the buffed ally swings - potentially every turn.
+6. **The buffs inside the attacks.** Thrice-Blessed Conflagration, Devastating Refrain and the Malleus
+   barrage all buff your own characters, and none of that is counted anywhere. Two of the three are
+   **faction-locked**, which makes them exactly the kind of thing this page exists to show.
+
+### Worked example: the Exorcist
+
+Five distinct things it does. Before today one was counted; now three are; two are not:
+
+- **Devastating Refrain**, 1x 6,984-8,730 Blast, 7,857 a round. *Counted, and it is the only one that was.*
+- **Shield of Faith**, a shield worth 50% of a character's Health every turn. *Counted from today*, and it
+  moves the Sororitas from 2.32 to 2.99 on Toughness.
+- **Thrice-Blessed Conflagration**, 1x 5,820-6,984 Flame, 6,402 a round. **Not counted**, and it is a plain
+  attack with no hex condition, so it is arguably the one that should be firing.
+- **+20% Damage to a friendly for 5 rounds**, on ranged attacks against enemies on Fire - **or on all
+  attacks if they are Adepta Sororitas**. **Not counted.**
+- **A 75% chance per enemy hit** of a Crit stack for every Act of Faith ally. **Not counted.**
+
+That is why the Sisters read as 3.97 for damage with +0.1% synergy: two of the three things their machine
+does for their attacks are invisible to the model, and both of them are Sororitas-only.
+
 ## Built, September 2026
 
 The badges, `faction_data.py`, `build_faction.py`, `faction_template.html` and the first draft of the
