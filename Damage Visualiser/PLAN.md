@@ -946,6 +946,26 @@ playing together, where the buffs are the whole point.
   game. This page ranks what a faction *can do*, not who moves first. Say it on the
   page and say it in the video.
 
+## Built, September 2026
+
+The badges, `faction_data.py`, `build_faction.py`, `faction_template.html` and the first draft of the
+script are all in. What is left on this piece of work:
+
+- **The healer's action ruling** above, and Pestillian's Chaos clause.
+- **The six defensive Machines of War.** Their Mythic abilities are not read anywhere, so a machine
+  currently moves the Damage axis and never the Toughness axis. The page says so, but it is a real gap
+  for the Galatian, the Exorcist, the Forgefiend, the Tson'ji and the Storm Speeder.
+- **The stretch goals**, unchanged and still explicitly not the first cut: the 21x21 matchup matrix as a
+  page of its own, a per-enemy-faction sheet, and how far behind an unrestricted five the best faction
+  five is.
+
+### Then, in one batch: the Guild Raid
+
+Everything parked above is now due. `build_map.py` and `guild_raid.py` have both changed since
+`best_fives.json` was written, so the fingerprint guard will refuse the Guild Raid build until
+`brute_all.js` has been re-run, which is about two hours. That run clears the Ambush change, the summon
+damage, the five ally clauses and Forcas all at once.
+
 ## Faction badges
 
 19 of 22 are at `E:\Video Production\Assets\Images\Game Renders\Faction badges\Factions`
